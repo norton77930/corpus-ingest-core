@@ -1,0 +1,66 @@
+version: 1
+industry_nodes:
+  semiconductor:
+    label: 半導體
+    aliases:
+      - 半導體
+      - 晶片
+      - GPU
+    candidates:
+      - company_name: 台積電
+        tickers:
+          - 2330.TW
+          - TSM
+        relation: foundry
+      - company_name: NVIDIA
+        tickers:
+          - NVDA
+        relation: accelerator_design
+  ai_infrastructure:
+    label: AI infrastructure
+    aliases:
+      - AI
+      - 人工智慧
+      - 資料中心
+      - 雲端
+    candidates:
+      - company_name: NVIDIA
+        tickers:
+          - NVDA
+        relation: accelerator_design
+      - company_name: 台積電
+        tickers:
+          - 2330.TW
+          - TSM
+        relation: semiconductor_supply_chain
+company_aliases:
+  台積電:
+    company_name: 台積電
+    tickers:
+      - 2330.TW
+      - TSM
+    industry_node_ids:
+      - semiconductor
+      - ai_infrastructure
+  TSMC:
+    company_name: 台積電
+    tickers:
+      - 2330.TW
+      - TSM
+    industry_node_ids:
+      - semiconductor
+      - ai_infrastructure
+  NVIDIA:
+    company_name: NVIDIA
+    tickers:
+      - NVDA
+    industry_node_ids:
+      - semiconductor
+      - ai_infrastructure
+  NVDA:
+    company_name: NVIDIA
+    tickers:
+      - NVDA
+    industry_node_ids:
+      - semiconductor
+      - ai_infrastructure

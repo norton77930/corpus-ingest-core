@@ -1,0 +1,55 @@
+{
+  "review_mode": "semantic-summary-smoke-review-v1",
+  "review_status": "failed",
+  "podcast_id": "gooaye",
+  "episode_ref": "EP672",
+  "semantic_summary_path": "data\\summaries\\gooaye\\EP672__EP672.semantic.md",
+  "workflow_stdout_path": null,
+  "check_count": 8,
+  "failed_check_count": 1,
+  "warning_count": 0,
+  "blocked_check_count": 0,
+  "checks": [
+    {
+      "name": "semantic_summary_exists",
+      "status": "pass",
+      "message": "data\\summaries\\gooaye\\EP672__EP672.semantic.md"
+    },
+    {
+      "name": "secret_leak",
+      "status": "pass",
+      "message": "API key-like value scan"
+    },
+    {
+      "name": "traceback_leak",
+      "status": "pass",
+      "message": "traceback scan"
+    },
+    {
+      "name": "raw_transcript_dump",
+      "status": "pass",
+      "message": "raw transcript dump marker scan"
+    },
+    {
+      "name": "timestamp_evidence",
+      "status": "pass",
+      "message": "timestamp evidence scan"
+    },
+    {
+      "name": "chunk_summaries",
+      "status": "pass",
+      "message": "chunk summaries section scan"
+    },
+    {
+      "name": "metadata",
+      "status": "pass",
+      "message": "metadata/provider/model/status scan"
+    },
+    {
+      "name": "prohibited_advice",
+      "status": "fail",
+      "message": "matched_guard=trade_action"
+    }
+  ],
+  "not_investment_advice_notice": true
+}

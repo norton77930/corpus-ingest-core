@@ -1,0 +1,12 @@
+# LLM provider profiles hold provider metadata only: provider, model, base URL,
+# and the API key environment variable NAME. Never store API key, token, or
+# secret values here.
+#
+# base_url is intentionally not committed for gb10. Provide the endpoint locally
+# via BASE_URL in your local .env (gitignored), or keep a local-only profile in
+# config/llm_profiles.local.yaml (gitignored).
+profiles:
+  gb10:
+    provider: openai-compatible
+    model: GB10
+    api_key_env: API_KEY

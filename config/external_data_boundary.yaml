@@ -1,0 +1,14 @@
+version: 1
+external_data_checks:
+  - data_type: company_identity
+    label: Company identity and legal entity
+  - data_type: ticker_listing
+    label: Ticker listing and exchange
+  - data_type: sector_industry
+    label: Sector and industry classification
+  - data_type: market_snapshot
+    label: Price, market cap, and liquidity snapshot
+  - data_type: financial_snapshot
+    label: Revenue, margin, and balance sheet snapshot
+  - data_type: news_events
+    label: Recent news and event verification

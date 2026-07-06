@@ -1,0 +1,6 @@
+podcasts:
+  gooaye:
+    display_name: Gooaye 股癌
+    rss_url: https://feeds.soundon.fm/podcasts/954689a5-3096-43a4-a80b-7810b219cef3.xml
+    language: zh
+    default_episode_prefix: EP

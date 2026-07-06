@@ -1,0 +1,71 @@
+version: 1
+name: Gooaye Lens
+description: Deterministic reusable framework for Gooaye-style research.
+dimensions:
+  - id: industry_chain_position
+    label: 產業鏈位置
+    description: Locate the company, product, or topic inside the supply chain.
+    analysis_questions:
+      - What upstream, midstream, downstream, platform, or customer role is implied?
+      - Is the relation explicit in podcast evidence or inferred from mapping?
+    expected_evidence_sources:
+      - podcast_evidence
+      - industry_mapping
+      - external_data_boundary
+    output_guidance: Separate explicit podcast evidence from inferred chain position.
+  - id: supply_demand_inventory
+    label: 供需與庫存
+    description: Frame demand, supply, backlog, utilization, and inventory pressure.
+    analysis_questions:
+      - Is the evidence pointing to tight supply, weak demand, or inventory correction?
+      - Which parts of the supply chain need external verification?
+    expected_evidence_sources:
+      - podcast_evidence
+      - external_data_boundary
+    output_guidance: Mark missing external data instead of filling gaps.
+  - id: cycle
+    label: 景氣循環
+    description: Place the topic in a cyclical, structural, or mixed phase.
+    analysis_questions:
+      - Is the issue cyclical, structural, or mixed?
+      - Which macro variables could change the phase assessment?
+    expected_evidence_sources:
+      - podcast_evidence
+      - macro_variables
+    output_guidance: Avoid treating one episode as a full cycle diagnosis.
+  - id: rates_valuation_sensitivity
+    label: 利率與估值敏感度
+    description: Identify rate, inflation, duration, and valuation sensitivity.
+    analysis_questions:
+      - Which rate or inflation variables could affect valuation sensitivity?
+      - Is valuation sensitivity podcast evidence, inference, or external-data dependent?
+    expected_evidence_sources:
+      - macro_variables
+      - external_data_boundary
+    output_guidance: Do not produce target prices or valuation calls.
+  - id: capex_capacity
+    label: 資本支出與產能
+    description: Track capital expenditure, capacity, and production bottlenecks.
+    analysis_questions:
+      - Is future supply constrained by capex, equipment, or capacity timing?
+      - What external data would be needed before treating capacity as fact?
+    expected_evidence_sources:
+      - industry_mapping
+      - external_data_boundary
+    output_guidance: Keep capex facts unverified unless external data is fetched.
+  - id: geopolitics_uncertainty
+    label: 地緣政治與不確定性
+    description: Preserve geopolitical, policy, concentration, and uncertainty signals.
+    analysis_questions:
+      - Which uncertainty should remain explicit instead of resolved?
+      - Could podcast evidence and external data disagree?
+    expected_evidence_sources:
+      - podcast_evidence
+      - external_data_boundary
+    output_guidance: State uncertainty plainly and avoid overconfident conclusions.
+safety_rules:
+  - Do not provide buy/sell/hold advice.
+  - Do not provide target price.
+  - Do not promise or imply guaranteed returns.
+  - Separate podcast evidence, inference, and external-data status.
+  - Do not fabricate podcast evidence.

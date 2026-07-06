@@ -1,0 +1,82 @@
+{
+  "review_mode": "research-llm-smoke-review-v1",
+  "review_status": "passed",
+  "podcast_id": "gooaye",
+  "episode_ref": "EP672",
+  "stock_query": "台積電",
+  "synthesis_json_path": "data\\stock-lens\\gooaye\\台積電.stock-lens-synthesis.json",
+  "synthesis_markdown_path": "data\\stock-lens\\gooaye\\台積電.stock-lens-synthesis.md",
+  "workflow_stdout_path": null,
+  "raw_output_path": null,
+  "provider": "openai-compatible",
+  "model": "GB10",
+  "llm_input_boundary": "phase-6f-stock-lens-json-only",
+  "not_investment_advice": true,
+  "check_count": 12,
+  "failed_check_count": 0,
+  "warning_count": 1,
+  "blocked_check_count": 0,
+  "checks": [
+    {
+      "name": "synthesis_json_exists",
+      "status": "pass",
+      "message": "data\\stock-lens\\gooaye\\台積電.stock-lens-synthesis.json"
+    },
+    {
+      "name": "synthesis_markdown_exists",
+      "status": "pass",
+      "message": "data\\stock-lens\\gooaye\\台積電.stock-lens-synthesis.md"
+    },
+    {
+      "name": "input_boundary",
+      "status": "pass",
+      "message": "phase-6f-stock-lens-json-only"
+    },
+    {
+      "name": "not_investment_advice_flag",
+      "status": "pass",
+      "message": "True"
+    },
+    {
+      "name": "evidence_separation_payload",
+      "status": "pass",
+      "message": "source evidence fields present"
+    },
+    {
+      "name": "secret_leak",
+      "status": "pass",
+      "message": "API key-like value scan"
+    },
+    {
+      "name": "traceback_leak",
+      "status": "pass",
+      "message": "traceback scan"
+    },
+    {
+      "name": "raw_transcript_leak",
+      "status": "pass",
+      "message": "raw transcript dump scan"
+    },
+    {
+      "name": "prohibited_advice",
+      "status": "pass",
+      "message": "no prohibited advice"
+    },
+    {
+      "name": "external_status_boundary",
+      "status": "warn",
+      "message": "external status token appears without unavailable-data context"
+    },
+    {
+      "name": "evidence_separation_markdown",
+      "status": "pass",
+      "message": "direct podcast evidence / inferred / external wording scan"
+    },
+    {
+      "name": "gooaye_lens_coverage",
+      "status": "pass",
+      "message": "Gooaye Lens dimension wording scan"
+    }
+  ],
+  "not_investment_advice_notice": true
+}
