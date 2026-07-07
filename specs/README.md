@@ -99,6 +99,15 @@ make one package look like the only active feature.
 - MCP exposed side-effect tools warn about manual cache rebuild and do not rebuild automatically.
 - no investment advice: no buy/sell/hold, target price, guaranteed return, or personalized recommendation.
 
+## Batch Guard Tests（audit hardening）
+
+除了上方 capability packages 各自的 tests，另有一層 cross-cutting 的安全/契約守衛測試，來自 audit-remediation 的 Batch 2 / 2.5 / 3A / 3B（非編號功能階段）。它們正式追蹤於 `docs/agent-handoff.md` 與 `docs/verification-matrix.md`，並 cross-cut packages `003` / `005` / `006` / `007`：
+
+- **Batch 2**（安全/契約守衛）：`test_repository_secret_boundary.py`、`test_repository_gitignore_policy.py`、`test_mcp_tool_registry_contract.py`、`test_llm_ack_guard_contracts.py`、`test_llm_cli_no_leak.py`、`test_cache_rebuild_guard.py`。
+- **Batch 2.5**（AI handoff governance docs 守衛）：`test_ai_governance_docs.py`。
+- **Batch 3A**（exact `api_cost_ack` 下沉 core，provider 建構前先驗證）：`test_llm_ack_guard_contracts.py`。
+- **Batch 3B**（provider factory boundary：`OpenAICompatibleProvider` 只能於 `llm_provider.py` 內建構）：`test_llm_provider_factory_boundary.py`。
+
 ## When a New Spec Package Is Required
 
 - 新功能性工作（runtime / MCP / LLM / side-effect behavior）必須走 full Spec Kit flow 並建立新的 `specs/<feature>` package（用下一個未佔用編號）。

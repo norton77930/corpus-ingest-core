@@ -1,5 +1,9 @@
 # MVP 需求
 
+> **狀態：Phase 1–4A 歷史快照（historical snapshot）。** 本文件記錄 MVP 初期（Phase 0 → 4A）的需求與邊界，**不是** current scope 的權威來源。目前的產品範圍與安全邊界以 `.specify/memory/constitution.md`、`docs/architecture.md`、`docs/agent-handoff.md` 為準；current status 見 `docs/roadmap.md` 的「目前狀態與下一步」。
+>
+> 後續 Phase 6x 研究層（episode intelligence、industry mapping、Gooaye/stock lens、stock lens synthesis、research workflow，以及 `download_audio` / `transcribe_episode` / `run_research_workflow` 等 dry-run-first side-effect MCP tools）**刻意超出本快照**。下方「明確不做」是 Phase 1–4A 當時的邊界；其中「不做股票分析或投資建議」已由 constitution 原則 VI 細化為：**允許** evidence-based 研究整理，**仍禁止** buy/sell/hold、目標價、保證報酬等 investment *advice*。
+
 ## 目前已完成
 
 - 建立 Python `src` layout 專案、繁體中文 README 與設計文件。

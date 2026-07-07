@@ -178,3 +178,26 @@
 ## Phase 7D.1：Spec Kit Active Feature Guidance
 
 補齊 official Spec Kit command usability 文件，說明 feature packages 的正確位置是 `specs/<feature>`，`.specify/` 是 scaffold / memory / templates / scripts / workflow metadata，不是 feature spec 目錄。多個 backfilled packages 不預設 pin 單一 active feature；要對特定 package 跑 official scripts 或 skills，先設定 `SPECIFY_FEATURE_DIRECTORY`，例如 `$env:SPECIFY_FEATURE_DIRECTORY="specs/003-metadata-search-mcp-core"`。官方 script 可能保存 `.specify/feature.json`；切換 package 時重新設定 env var 即可。Phase 7D.1 是 docs/spec/tests only：Spec Kit command usability / active feature documentation，no runtime behavior change、no MCP behavior change、no LLM call、no `.env` read、no live market API、no investment advice。完成後 Phase 6U semantic summary smoke 仍是下一個可能功能階段。
+
+## 目前狀態與下一步
+
+本節是 roadmap 的權威「current status」指標，補在歷史 phase log 之後，供接手的 AI agent 判斷「已完成到哪、下一步是什麼」，不重寫上方任何歷史 phase 段落。
+
+### 已完成到哪
+
+- 最高完成功能階段為 **Phase 6V.1（Review Gate Boundary Alignment）**；上方 Phase 0 → 6V.1 的功能階段皆已落地，並由 `tests/` 對應守衛測試鎖定。
+- 其後為 audit-remediation 硬化（**非編號功能階段，不進 Phase 序列**），對應目前 HEAD：
+  - **Batch 2**：安全/契約守衛測試（secret boundary、gitignore policy、MCP tool registry、LLM ack 契約、LLM CLI no-leak、manual cache rebuild）。
+  - **Batch 2.5**：AI handoff governance docs 守衛。
+  - **Batch 3A**：把 exact `api_cost_ack` 守衛下沉到 core（`create_provider` / `semantic_summarize_episode`），provider 建構前先驗證。
+  - **Batch 3B**：storage / `rebuild_cache` dead-code 清理，以及 provider factory boundary（`OpenAICompatibleProvider` 只能於 `llm_provider.py` 內建構）。
+- Batch 2/2.5/3A/3B 的正式追蹤在 `docs/agent-handoff.md` 與 `docs/verification-matrix.md`；其 guard-test 對應見 `specs/README.md` 的「Batch Guard Tests」。
+
+### 關於「下一步」的澄清
+
+- 上方 **Phase 7A / 7C / 7D.1** 段落收尾提到「Phase 6U semantic summary smoke 仍是下一個可能功能階段」等文字，是**撰寫當時的歷史規劃註記**。**6U/6U.1 已完成**（見上方 Phase 6U、6U.1、6V、6V.1 段落），因此那些指標**不再代表目前的下一步**，僅保留為歷史紀錄。
+- 本 repo 已是多個 as-built backfilled package 的狀態，**目前不預設單一 active 的 next feature**。下一個功能性工作由使用者指定，並依 constitution 走 full Spec Kit flow、於下一個未佔用編號建立新的 `specs/<feature>` package。
+
+### 編號註記
+
+- Phase 編號 **6P、6S 未使用**（跳號，非遺漏）。
