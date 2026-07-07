@@ -444,6 +444,7 @@ def semantic_summarize_episode(
         lambda: semantic_summarizer.semantic_summarize_episode(
             podcast_id=podcast_id,
             episode_ref=episode_ref,
+            api_cost_ack=api_cost_ack,
             provider=provider,
             model=model,
             base_url=base_url,

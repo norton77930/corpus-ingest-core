@@ -715,6 +715,7 @@ def test_semantic_summarize_episode_confirm_calls_core_with_clamped_values(monke
     )
 
     assert response["ok"] is True
+    assert captured["api_cost_ack"] == mcp_server.SEMANTIC_API_COST_ACK
     assert captured["chunk_seconds"] == 300
     assert captured["max_segments_per_chunk"] == 300
     assert captured["base_url"] == "https://api.example.test/v1?token=secret"

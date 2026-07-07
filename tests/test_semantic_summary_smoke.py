@@ -203,6 +203,7 @@ profiles:
     kwargs_without_callback = dict(kwargs)
     kwargs_without_callback.pop("progress_callback")
     assert kwargs_without_callback == {
+        "api_cost_ack": ACK,
         "provider": "openai-compatible",
         "model": "GB10",
         "base_url": "https://api.example.com/v1",

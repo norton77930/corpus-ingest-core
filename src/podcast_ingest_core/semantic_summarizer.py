@@ -14,17 +14,18 @@ from .errors import (
     TranscriptMissingError,
     TranscriptParseError,
 )
-from .llm_provider import SemanticSummaryProvider, create_provider
+from .llm_provider import (
+    SEMANTIC_API_COST_ACK,
+    SemanticSummaryProvider,
+    create_provider,
+    require_exact_api_cost_ack,
+)
 from .models import SummaryAsset
 from .storage import find_transcript_asset_paths, semantic_summary_asset_path
 from .validator import validate_transcript
 
 
 SUMMARY_MODE = "semantic-llm"
-SEMANTIC_API_COST_ACK = (
-    "I understand this may call an external LLM API, send transcript text outside this machine, "
-    "and incur costs."
-)
 _TIMESTAMP_EVIDENCE_PATTERN = re.compile(r"\[\d{2}:\d{2}:\d{2}\s*-\s*\d{2}:\d{2}:\d{2}\]")
 
 
@@ -32,6 +33,7 @@ def semantic_summarize_episode(
     podcast_id: str,
     episode_ref: str,
     *,
+    api_cost_ack: str = "",
     provider: str = "openai-compatible",
     model: str | None = None,
     base_url: str | None = None,
@@ -42,12 +44,17 @@ def semantic_summarize_episode(
     allow_partial: bool = False,
     progress_callback: Callable[..., None] | None = None,
 ) -> SummaryAsset:
-    """從已驗證逐字稿產生 LLM 語意 Markdown 摘要。"""
+    """從已驗證逐字稿產生 LLM 語意 Markdown 摘要。
+
+    需要 exact ``api_cost_ack``（audit F-03）：guard 在所有 early return 與
+    provider construction 之前執行；dry-run 仍由 CLI/MCP/workflow 包裝層負責。
+    """
 
     if chunk_seconds < 1:
         raise ValueError("chunk_seconds 必須大於 0。")
     if max_segments_per_chunk < 1:
         raise ValueError("max_segments_per_chunk 必須大於 0。")
+    require_exact_api_cost_ack(api_cost_ack)
 
     profile = load_podcast_profile(podcast_id)
     validation = validate_transcript(podcast_id, episode_ref)
@@ -127,6 +134,7 @@ def semantic_summarize_episode(
         model=model,
         base_url=base_url,
         api_key_env=api_key_env,
+        api_cost_ack=api_cost_ack,
     )
     try:
         if progress_callback is not None:
@@ -194,12 +202,14 @@ def _build_provider(
     model: str | None,
     base_url: str | None,
     api_key_env: str,
+    api_cost_ack: str,
 ) -> SemanticSummaryProvider:
     return create_provider(
         provider,
         model=model,
         base_url=base_url,
         api_key_env=api_key_env,
+        api_cost_ack=api_cost_ack,
     )
 
 

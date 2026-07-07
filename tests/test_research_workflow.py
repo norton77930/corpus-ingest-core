@@ -643,6 +643,7 @@ def test_run_research_workflow_semantic_confirm_runs_semantic_first(
         {
             "podcast_id": "gooaye",
             "episode_ref": "EP672",
+            "api_cost_ack": SEMANTIC_API_COST_ACK,
             "provider": "openai-compatible",
             "model": "test-model",
             "base_url": "https://example.test/v1",

@@ -60,6 +60,7 @@ def main() -> None:
             result = semantic_summarize_episode(
                 podcast_id,
                 episode_ref,
+                api_cost_ack=args.api_cost_ack,
                 provider=args.provider,
                 model=args.model,
                 base_url=args.base_url,

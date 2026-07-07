@@ -44,7 +44,7 @@ README.md 是 quick orientation 與 CLI 範例，不是 governance source。
 | --- | --- | --- |
 | `.env` / secret policy | `.env` 是 local-only：不得讀取、列印、grep、摘要或提交。API key、token、provider secret 不得出現在 committed 檔案、stdout、MCP responses 或 review reports | `tests/test_repository_secret_boundary.py`、`tests/test_repository_gitignore_policy.py` |
 | No raw transcript stdout | LLM-facing CLI 的 stdout/stderr 不得含 transcript 原文、prompt 內容或 API key 值；semantic CLI stdout 是鎖定的 metadata-only JSON | `tests/test_llm_cli_no_leak.py` |
-| Exact `api_cost_ack` | Confirmed LLM 執行前必須提供 exact ack 字串；單一來源是 `semantic_summarizer.SEMANTIC_API_COST_ACK`，不得複製散落 | `tests/test_llm_ack_guard_contracts.py` |
+| Exact `api_cost_ack` | Confirmed LLM 執行前必須提供 exact ack 字串；guard 在 core-level 強制（`llm_provider.create_provider` 建 provider 前與 `semantic_summarize_episode` 進入點），wrappers 為第一線。常數定義於 `llm_provider`，經 `semantic_summarizer.SEMANTIC_API_COST_ACK` re-export，不得複製散落 | `tests/test_llm_ack_guard_contracts.py` |
 | Dry-run first | Side-effect workflows/tools 預設 dry-run（`confirm=False`）；confirmed 執行必須顯式 `confirm=True` 或 CLI `--confirm` | `tests/test_mcp_tool_registry_contract.py`、`tests/test_research_workflow.py` |
 | No live market API | External market data 只用 boundary scaffold / local fixture；不讀 API key、不打 HTTP provider、不捏造市場事實 | `tests/test_external_data_boundary.py`、`tests/test_external_data_verification.py` |
 | No investment advice | 不得產生 buy/sell/hold、target price、guaranteed returns 或個人化投資建議；review gate 會拒絕 prohibited advice 輸出 | `tests/test_research_llm_smoke_review.py`、`tests/test_gooaye_lens.py` |
@@ -86,7 +86,7 @@ git diff --check
 
 ## Known Risks / Batch 3 Candidates
 
-- **F-03**：ack guard 位於 CLI/MCP 包裝層，semantic core function 本身沒有 ack 參數（`tests/test_llm_ack_guard_contracts.py` 已 characterize）。core-level 設計未解決，不得在未批准下改動。
+- **F-03**（resolved, Batch 3A）：exact `api_cost_ack` guard 已下沉至 core-level — `semantic_summarize_episode` 進入點驗證、`llm_provider.create_provider` 建 provider 前驗證；CLI/MCP/workflow 包裝層 guard 保留為第一線（`tests/test_llm_ack_guard_contracts.py` 已更新為新 invariant）。
 - **F-14**：storage dead stubs 尚未移除。
 - **F-18**：unused import 尚未清理（僅 docs 記錄，未處理）。
 - **README cleanup**：README 很長且含大量 phase history，完整重整尚未進行；大量 exact-substring docs tests 使搬移成本高。

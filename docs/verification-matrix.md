@@ -19,7 +19,7 @@ pytest 已在 `pyproject.toml` 設定 repo-local basetemp（`--basetemp=.pytest-
 | Secret / private endpoint boundary | `tests/test_repository_secret_boundary.py` | committable 檔案不得含真實樣態 API key（`sk-…`）或內網 endpoint（10.x / 192.168.x / 172.16-31.x URL）；`.env` 永不被讀取 |
 | Gitignore / local-only policy | `tests/test_repository_gitignore_policy.py` | `.env`、`.env.*`、local LLM profiles、raw LLM debug output、pytest temp、data/ 生成 artifacts 永不入庫；`.env.example` 保持 committable placeholder template |
 | MCP tool registry / docs 對齊 | `tests/test_mcp_tool_registry_contract.py` | MCP 恰好暴露 12 個 reviewed tools；side-effect tools 預設 `confirm=False`；JSON envelope shape；README 與 `docs/mcp-usage.md` 列出全部 tools；MCP workflow wrapper 維持刻意的參數子集（audit F-08） |
-| LLM ack guard 一致性 | `tests/test_llm_ack_guard_contracts.py` | CLI/MCP wrappers 在 confirmed LLM 執行前要求 exact `api_cost_ack`；ack 常數單一來源（`semantic_summarizer.SEMANTIC_API_COST_ACK`）；characterize audit F-03（semantic core 無 ack 參數，guard 在包裝層） |
+| LLM ack guard 一致性 | `tests/test_llm_ack_guard_contracts.py` | CLI/MCP wrappers 在 confirmed LLM 執行前要求 exact `api_cost_ack`；ack 常數單一來源（定義於 `llm_provider`，經 `semantic_summarizer.SEMANTIC_API_COST_ACK` re-export）；core-level guard 已強制（audit F-03 resolved：`semantic_summarize_episode` 進入點與 `create_provider` 建 provider 前驗證） |
 | No raw transcript / no secret stdout | `tests/test_llm_cli_no_leak.py` | LLM-facing CLI 的 dry-run stdout/stderr 不含 transcript 原文、API key 值或 prompt 內容；semantic CLI stdout 為鎖定的 metadata-only JSON schema |
 | Cache 手動 rebuild | `tests/test_cache_rebuild_guard.py` | confirmed workflow 與 MCP side-effect tools 不自動 rebuild SQLite cache，只回 cache stale warning；`rebuild_cache` 引用僅限 reviewed modules（constitution 原則 VIII） |
 

@@ -9,6 +9,19 @@ from .errors import LLMProviderConfigError, LLMProviderRequestError
 
 
 DEFAULT_OPENAI_COMPATIBLE_BASE_URL = "https://api.openai.com/v1"
+SEMANTIC_API_COST_ACK = (
+    "I understand this may call an external LLM API, send transcript text outside this machine, "
+    "and incur costs."
+)
+
+
+def require_exact_api_cost_ack(api_cost_ack: str) -> None:
+    """在 provider construction 前強制 exact acknowledgement（audit F-03）。"""
+
+    if api_cost_ack != SEMANTIC_API_COST_ACK:
+        raise LLMProviderConfigError(
+            f"LLM provider requires exact api_cost_ack: {SEMANTIC_API_COST_ACK}"
+        )
 
 
 class SemanticSummaryProvider(Protocol):
@@ -149,9 +162,11 @@ def create_provider(
     model: str | None = None,
     base_url: str | None = None,
     api_key_env: str = "OPENAI_API_KEY",
+    api_cost_ack: str = "",
 ) -> SemanticSummaryProvider:
     """依 provider 名稱建立語意摘要 provider。"""
 
+    require_exact_api_cost_ack(api_cost_ack)
     if provider != "openai-compatible":
         raise LLMProviderConfigError(f"不支援的 LLM provider：{provider}")
     return OpenAICompatibleProvider(

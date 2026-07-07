@@ -3,17 +3,19 @@
 Invariants protected:
 - Every wrapper that can reach a confirmed LLM call (CLI / MCP / workflow)
   requires the exact acknowledgement text before provider construction.
-- The acknowledgement text has a single source of truth
-  (``semantic_summarizer.SEMANTIC_API_COST_ACK``); wrappers must reuse that
+- The acknowledgement text has a single source of truth (defined in
+  ``llm_provider.SEMANTIC_API_COST_ACK``, re-exported as
+  ``semantic_summarizer.SEMANTIC_API_COST_ACK``); wrappers must reuse that
   constant instead of pasting their own copy.
+- F-03 resolved (Batch 3A): the exact ack is also enforced at the core LLM
+  execution boundary — ``semantic_summarize_episode`` validates it at entry,
+  and ``llm_provider.create_provider`` refuses to construct any provider
+  without it. Wrappers stay as the first line of defense, but are no longer
+  the only one.
+- Dry-run remains a wrapper concern: the semantic core deliberately has no
+  ``confirm`` parameter. If a future change alters these signatures, these
+  tests must fail so the change is reviewed.
 - Dry-run / rejected paths never expose API key values.
-
-Characterized known gap (do NOT "fix" silently):
-- ``semantic_summarize_episode`` core itself has no ``confirm``/``api_cost_ack``
-  parameter; the guard lives only in the CLI/MCP/workflow wrappers. This is
-  audit finding F-03 and stays a Batch 3 design decision (e.g. moving the ack
-  check into ``llm_provider.create_provider``). If a future change adds or
-  removes these parameters, this test must fail so the change is reviewed.
 """
 
 from __future__ import annotations
@@ -25,15 +27,84 @@ import sys
 import pytest
 
 
-def test_semantic_core_signature_has_no_ack_guard_known_gap_f03():
+def test_semantic_core_signature_requires_ack_no_confirm_f03_resolved():
     from podcast_ingest_core.semantic_summarizer import semantic_summarize_episode
 
     parameters = inspect.signature(semantic_summarize_episode).parameters
-    # Known architectural gap (audit F-03): the core function relies on its
-    # wrappers for the confirm + exact-ack gate. Changing this signature is a
-    # public-API and safety-boundary change that needs explicit approval.
-    assert "api_cost_ack" not in parameters
+    # Audit F-03 resolved in Batch 3A: the core function now enforces the
+    # exact-ack gate itself (keyword-only ``api_cost_ack``). ``confirm`` stays
+    # out on purpose — dry-run planning remains a wrapper responsibility.
+    # Changing this signature is a public-API and safety-boundary change that
+    # needs explicit approval.
+    assert "api_cost_ack" in parameters
+    assert parameters["api_cost_ack"].kind is inspect.Parameter.KEYWORD_ONLY
     assert "confirm" not in parameters
+
+
+@pytest.mark.parametrize("bad_ack", ["", "wrong ack text"])
+def test_create_provider_requires_exact_ack_before_provider_construction(
+    monkeypatch, bad_ack
+):
+    from podcast_ingest_core import llm_provider
+    from podcast_ingest_core.errors import LLMProviderConfigError
+
+    monkeypatch.setattr(
+        llm_provider,
+        "OpenAICompatibleProvider",
+        lambda **kwargs: pytest.fail(
+            "provider must not be constructed without the exact api_cost_ack"
+        ),
+    )
+
+    with pytest.raises(LLMProviderConfigError, match="api_cost_ack"):
+        llm_provider.create_provider("openai-compatible", api_cost_ack=bad_ack)
+
+
+def test_create_provider_with_exact_ack_constructs_provider(monkeypatch):
+    from podcast_ingest_core import llm_provider
+
+    sentinel = object()
+    monkeypatch.setattr(
+        llm_provider, "OpenAICompatibleProvider", lambda **kwargs: sentinel
+    )
+
+    provider = llm_provider.create_provider(
+        "openai-compatible",
+        api_cost_ack=llm_provider.SEMANTIC_API_COST_ACK,
+    )
+
+    assert provider is sentinel
+
+
+@pytest.mark.parametrize("bad_ack_kwargs", [{}, {"api_cost_ack": "wrong ack text"}])
+def test_semantic_core_rejects_wrong_ack_before_any_work(
+    monkeypatch, bad_ack_kwargs
+):
+    from podcast_ingest_core import semantic_summarizer
+    from podcast_ingest_core.errors import LLMProviderConfigError
+
+    # The entry-level guard must fire before profile loading, transcript
+    # access, or provider construction — no fixtures are needed because none
+    # of those collaborators may run.
+    monkeypatch.setattr(
+        semantic_summarizer,
+        "load_podcast_profile",
+        lambda *args, **kwargs: pytest.fail(
+            "profile must not load without the exact api_cost_ack"
+        ),
+    )
+    monkeypatch.setattr(
+        semantic_summarizer,
+        "_build_provider",
+        lambda **kwargs: pytest.fail(
+            "provider must not be built without the exact api_cost_ack"
+        ),
+    )
+
+    with pytest.raises(LLMProviderConfigError, match="api_cost_ack"):
+        semantic_summarizer.semantic_summarize_episode(
+            "gooaye", "EP672", **bad_ack_kwargs
+        )
 
 
 def test_synthesis_core_signature_keeps_ack_guard():
@@ -48,6 +119,7 @@ def test_synthesis_core_signature_keeps_ack_guard():
 
 def test_ack_constant_has_single_source_of_truth():
     from podcast_ingest_core import (
+        llm_provider,
         mcp_server,
         research_workflow,
         semantic_summarizer,
@@ -60,6 +132,7 @@ def test_ack_constant_has_single_source_of_truth():
     )
 
     canonical = semantic_summarizer.SEMANTIC_API_COST_ACK
+    assert llm_provider.SEMANTIC_API_COST_ACK is canonical
     assert mcp_server.SEMANTIC_API_COST_ACK is canonical
     assert research_workflow.SEMANTIC_API_COST_ACK is canonical
     assert stock_lens_synthesis.SEMANTIC_API_COST_ACK is canonical

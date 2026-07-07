@@ -50,6 +50,7 @@ def test_package_exports_required_core_functions():
         "semantic_summarize_episode": [
             "podcast_id",
             "episode_ref",
+            "api_cost_ack",
             "provider",
             "model",
             "base_url",

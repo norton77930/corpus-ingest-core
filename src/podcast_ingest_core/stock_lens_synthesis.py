@@ -210,6 +210,7 @@ def generate_stock_lens_synthesis_report(
         model=model,
         base_url=base_url,
         api_key_env=api_key_env,
+        api_cost_ack=api_cost_ack,
     )
     try:
         synthesis_text = llm_provider.complete(messages)
@@ -279,12 +280,14 @@ def _build_provider(
     model: str | None,
     base_url: str | None,
     api_key_env: str,
+    api_cost_ack: str,
 ) -> SemanticSummaryProvider:
     return create_provider(
         provider,
         model=model,
         base_url=base_url,
         api_key_env=api_key_env,
+        api_cost_ack=api_cost_ack,
     )
 
 

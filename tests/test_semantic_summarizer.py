@@ -100,7 +100,10 @@ def test_semantic_summarizer_calls_validation_before_provider(monkeypatch, tmp_p
     monkeypatch.setattr(semantic_summarizer, "_build_provider", lambda **kwargs: provider)
 
     semantic_summarizer.semantic_summarize_episode(
-        "gooaye", "EP672", model="test-model"
+        "gooaye",
+        "EP672",
+        api_cost_ack=semantic_summarizer.SEMANTIC_API_COST_ACK,
+        model="test-model",
     )
 
     assert called == ["validate"]
@@ -117,6 +120,7 @@ def test_semantic_summarizer_chunks_segments_by_time(monkeypatch, tmp_path):
     asset = semantic_summarizer.semantic_summarize_episode(
         "gooaye",
         "EP672",
+        api_cost_ack=semantic_summarizer.SEMANTIC_API_COST_ACK,
         model="test-model",
         chunk_seconds=600,
     )
@@ -144,6 +148,7 @@ def test_semantic_summarizer_chunks_segments_by_max_segments(monkeypatch, tmp_pa
     asset = semantic_summarizer.semantic_summarize_episode(
         "gooaye",
         "EP672",
+        api_cost_ack=semantic_summarizer.SEMANTIC_API_COST_ACK,
         model="test-model",
         chunk_seconds=600,
         max_segments_per_chunk=2,
@@ -162,7 +167,10 @@ def test_semantic_summarizer_writes_semantic_markdown(monkeypatch, tmp_path):
     monkeypatch.setattr(semantic_summarizer, "_build_provider", lambda **kwargs: provider)
 
     asset = semantic_summarizer.semantic_summarize_episode(
-        "gooaye", "EP672", model="test-model"
+        "gooaye",
+        "EP672",
+        api_cost_ack=semantic_summarizer.SEMANTIC_API_COST_ACK,
+        model="test-model",
     )
 
     content = asset.summary_path.read_text(encoding="utf-8")
@@ -195,7 +203,10 @@ def test_semantic_summarizer_generates_empty_summary_without_provider(monkeypatc
     )
 
     asset = semantic_summarizer.semantic_summarize_episode(
-        "gooaye", "smoke-test", model="test-model"
+        "gooaye",
+        "smoke-test",
+        api_cost_ack=semantic_summarizer.SEMANTIC_API_COST_ACK,
+        model="test-model",
     )
 
     content = asset.summary_path.read_text(encoding="utf-8")
@@ -218,7 +229,10 @@ def test_semantic_summarizer_rejects_partial_by_default(monkeypatch, tmp_path):
 
     with pytest.raises(TranscriptParseError, match="partial"):
         semantic_summarizer.semantic_summarize_episode(
-            "gooaye", "EP672", model="test-model"
+            "gooaye",
+            "EP672",
+            api_cost_ack=semantic_summarizer.SEMANTIC_API_COST_ACK,
+            model="test-model",
         )
 
 
@@ -231,6 +245,7 @@ def test_semantic_summarizer_allows_partial_when_requested(monkeypatch, tmp_path
     asset = semantic_summarizer.semantic_summarize_episode(
         "gooaye",
         "EP672",
+        api_cost_ack=semantic_summarizer.SEMANTIC_API_COST_ACK,
         model="test-model",
         allow_partial=True,
     )
@@ -248,7 +263,11 @@ def test_semantic_summarizer_missing_api_key_raises_config_error(monkeypatch, tm
     monkeypatch.setenv("OPENAI_MODEL", "test-model")
 
     with pytest.raises(LLMProviderConfigError, match="OPENAI_API_KEY"):
-        semantic_summarizer.semantic_summarize_episode("gooaye", "EP672")
+        semantic_summarizer.semantic_summarize_episode(
+            "gooaye",
+            "EP672",
+            api_cost_ack=semantic_summarizer.SEMANTIC_API_COST_ACK,
+        )
 
 
 def test_openai_provider_request_failure_raises_request_error(monkeypatch):
@@ -371,6 +390,7 @@ def test_summarize_cli_parses_semantic_options(monkeypatch, capsys, tmp_path):
     assert payload["provider"] == "openai-compatible"
     assert captured["args"] == ("gooaye", "EP672")
     assert captured["kwargs"] == {
+        "api_cost_ack": summarize_episode.SEMANTIC_API_COST_ACK,
         "provider": "openai-compatible",
         "model": "test-model",
         "base_url": "https://example.test/v1",

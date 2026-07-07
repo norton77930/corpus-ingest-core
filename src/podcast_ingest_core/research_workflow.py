@@ -296,6 +296,7 @@ def _step_specs(
         specs[operation_index]["operation"] = lambda: semantic_summarize_episode(
             podcast_id=podcast_id,
             episode_ref=episode_ref,
+            api_cost_ack=SEMANTIC_API_COST_ACK,
             provider=semantic_provider,
             model=semantic_model,
             base_url=semantic_base_url,
