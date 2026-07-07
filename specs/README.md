@@ -98,3 +98,10 @@ make one package look like the only active feature.
 - Research artifacts preserve evidence separation across podcast evidence, inference, external status, and LLM synthesis.
 - MCP exposed side-effect tools warn about manual cache rebuild and do not rebuild automatically.
 - no investment advice: no buy/sell/hold, target price, guaranteed return, or personalized recommendation.
+
+## When a New Spec Package Is Required
+
+- 新功能性工作（runtime / MCP / LLM / side-effect behavior）必須走 full Spec Kit flow 並建立新的 `specs/<feature>` package（用下一個未佔用編號）。
+- `001-gooaye-research-system` 是 umbrella product spec；`002`–`007` 是 backfilled as-built capability packages，記錄既有能力，不驅動新開發。
+- 小型 docs / spec / governance / test 修正若由 user 提供 concrete plan，可直接處理而不開新 package，但必須遵守 constitution，且 docs-only phase 必須有 docs tests 鎖定指引（constitution 原則 IX）。決策細節見 `docs/architecture-decision-records/ADR-0006-spec-kit-governance.md`。
+- 對某個 package 執行 official scripts / skills 前，先依上方「Official Spec Kit Layout and Active Feature Selection」設定 `SPECIFY_FEATURE_DIRECTORY`。

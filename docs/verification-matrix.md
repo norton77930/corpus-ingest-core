@@ -1,12 +1,13 @@
 # Verification Matrix
 
-本文件列出 repo 的 safety / contract guard tests 與各類變更應執行的驗證指令。新的 AI agent 或開發者在宣稱完成前，先跑對應的 targeted tests，再跑 full checks。
+本文件列出 repo 的 safety / contract guard tests 與各類變更應執行的驗證指令。新的 AI agent 或開發者在宣稱完成前，先跑對應的 targeted tests，再跑 full checks。變更分類定義與完成報告格式見 [`docs/ai-development-framework.md`](ai-development-framework.md)；邊界總覽見 [`docs/agent-handoff.md`](agent-handoff.md)；決策背景見 [ADR index](architecture-decision-records/README.md)。
 
 ## Standard full checks
 
 ```powershell
 python -m pytest
 python -m compileall src scripts
+git diff --check
 ```
 
 pytest 已在 `pyproject.toml` 設定 repo-local basetemp（`--basetemp=.pytest-tmp/run`），請從 repo root 執行。原因：此機器的 `%TEMP%\pytest-of-*` 有損壞的 ACL，且過長的 basetemp 會讓 artifact 路徑超過 Windows 260 字元 MAX_PATH。`.pytest-tmp/` 已被 `.gitignore` 忽略。執行時若出現 `.pytest_cache` 的 `PytestCacheWarning`（本機 ACL 問題），屬無害警告。
@@ -32,7 +33,7 @@ python -m pytest tests/test_repository_secret_boundary.py tests/test_repository_
 
 | 變更類型 | 先跑的 targeted tests |
 | --- | --- |
-| docs-only | `tests/test_architecture_spec_docs.py`、`tests/test_docs_mcp_eval.py`、`tests/test_research_safety_eval_docs.py`、`tests/test_spec_kit_*.py`、`tests/test_mcp_tool_registry_contract.py`（docs 對齊） |
+| docs-only | `tests/test_ai_governance_docs.py`、`tests/test_architecture_spec_docs.py`、`tests/test_docs_mcp_eval.py`、`tests/test_research_safety_eval_docs.py`、`tests/test_spec_kit_*.py`、`tests/test_mcp_tool_registry_contract.py`（docs 對齊） |
 | spec-only | `tests/test_spec_kit_backfill_docs.py`、`tests/test_spec_kit_constitution.py` |
 | deterministic runtime | 對應模組的 targeted tests + `tests/test_contracts.py` |
 | MCP tool 變更 | `tests/test_mcp_server.py`、`tests/test_mcp_setup_validation.py`、`tests/test_mcp_tool_registry_contract.py` + 同步 `docs/mcp-usage.md` |

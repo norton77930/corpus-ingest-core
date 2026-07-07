@@ -1,5 +1,7 @@
 # Repository Agent Instructions
 
+New agents: start with [`docs/agent-handoff.md`](docs/agent-handoff.md) (10-minute repo handoff, boundaries mapped to guard tests) and [`docs/ai-development-framework.md`](docs/ai-development-framework.md) (instruction hierarchy, change classification, completion report format). The Engineering Rules below are hard constraints and remain authoritative.
+
 This repository uses Spec Kit with Codex skills. For new feature work, prefer the Spec Kit flow before implementation:
 
 - `$speckit-constitution` to establish or amend project principles.
@@ -44,3 +46,5 @@ Run the relevant targeted tests first, then the standard full checks before clai
 python -m pytest
 python -m compileall src scripts
 ```
+
+Per-change-type targeted tests are listed in [`docs/verification-matrix.md`](docs/verification-matrix.md).

@@ -4,6 +4,16 @@ Podcast Ingestion Core 是一個通用的 Podcast 擷取核心。目前已完成
 
 第一個 podcast profile 是 Gooaye 股癌，但核心程式不得寫死股癌。所有 podcast-specific 設定都放在 `config/podcasts.yaml`。
 
+## AI Agent Handoff / Where to Start
+
+本 README 是 quick orientation（目錄結構、CLI 範例、phase history），不是完整 governance source。新接手的 AI agent 或開發者請從這裡開始：
+
+- Handoff entrypoint（10 分鐘理解 repo）：[`docs/agent-handoff.md`](docs/agent-handoff.md)
+- AI 開發規範（instruction hierarchy、change classification、DoR/DoD）：[`docs/ai-development-framework.md`](docs/ai-development-framework.md)
+- 驗證矩陣（每種變更該跑什麼 tests）：[`docs/verification-matrix.md`](docs/verification-matrix.md)
+- 架構決策記錄（ADR index）：[`docs/architecture-decision-records/README.md`](docs/architecture-decision-records/README.md)
+- Repo-level agent hard constraints：[`AGENTS.md`](AGENTS.md)
+
 ## 專案目標
 
 - 用同一組 core functions 支援多個 Podcast。
@@ -32,6 +42,10 @@ data/
   stock-lens/
   cache/
 docs/
+  agent-handoff.md
+  ai-development-framework.md
+  verification-matrix.md
+  architecture-decision-records/
   architecture.md
   mvp-requirements.md
   roadmap.md
@@ -563,6 +577,10 @@ Spec-kit 文件：
 - Data model：[`specs/001-gooaye-research-system/data-model.md`](specs/001-gooaye-research-system/data-model.md)
 - Quickstart：[`specs/001-gooaye-research-system/quickstart.md`](specs/001-gooaye-research-system/quickstart.md)
 - Agent rules：[`AGENTS.md`](AGENTS.md)
+- Agent handoff entrypoint：[`docs/agent-handoff.md`](docs/agent-handoff.md)
+- AI development framework：[`docs/ai-development-framework.md`](docs/ai-development-framework.md)
+- Verification matrix：[`docs/verification-matrix.md`](docs/verification-matrix.md)
+- ADR index：[`docs/architecture-decision-records/README.md`](docs/architecture-decision-records/README.md)
 
 ## 開發指令
 
