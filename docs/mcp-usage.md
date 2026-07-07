@@ -63,6 +63,14 @@ Side-effect tools 成功後不會自動 rebuild cache；若要讓新 transcript 
 
 此 tool 預設也是 dry-run，但它會把 transcript text 傳送到外部 LLM provider，可能產生 API 費用，因此除了 `confirm=true`，還需要 exact acknowledgement。
 
+### Workflow Tool
+
+- `run_research_workflow`
+
+Phase 6L consolidated workflow tool，dry-run first：`confirm=false` 只回傳 planned reads/writes、step order、external API / cost risk、cache stale warning 與 required acknowledgement，不寫 artifacts、不呼叫 LLM、不回 raw transcript。`confirm=true` 執行本機 deterministic research steps；若包含 `include_semantic_summary=true` 或 `include_stock_lens_synthesis=true`，仍必須提供 exact `api_cost_ack`。完成後不會自動 rebuild cache；若要讓 search metadata 更新，請手動呼叫 `rebuild_cache`。
+
+MCP 版刻意只暴露 core workflow 參數的子集：不含 fixture external data verification（`include_external_data_verification`）與 reviewed semantic context opt-in（`include_semantic_context_in_synthesis`）。需要完整參數時請使用 CLI `python scripts/run_research_workflow.py`。
+
 ## Safety
 
 MCP tools 不接受任意本機檔案路徑，也不構成投資建議。
