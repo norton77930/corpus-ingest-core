@@ -281,6 +281,16 @@ def test_search_requires_cache_db(tmp_path):
         search_transcripts("台積電", db_path=tmp_path / "missing.sqlite3")
 
 
+def test_public_search_functions_resolve_to_search_module():
+    from podcast_ingest_core import search_mentions, search_transcripts
+
+    # F-14 (Batch 3B): a dead Phase 0 ``search_transcripts`` stub used to live
+    # in storage.py. The public search API must resolve to the real search
+    # module so callers (and future agents) never bind the wrong module.
+    assert search_transcripts.__module__ == "podcast_ingest_core.search"
+    assert search_mentions.__module__ == "podcast_ingest_core.search"
+
+
 def test_search_result_models_include_phase_3b_fields():
     from dataclasses import fields
     from podcast_ingest_core.models import (

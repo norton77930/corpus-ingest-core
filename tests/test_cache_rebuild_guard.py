@@ -34,9 +34,6 @@ def test_confirmed_research_workflow_never_auto_rebuilds_cache(monkeypatch, tmp_
 
     _write_transcript(monkeypatch, tmp_path)
     monkeypatch.setattr(cache, "rebuild_cache", _fail_rebuild)
-    # research_workflow currently holds an (unused) rebuild_cache import
-    # (audit F-18); guard that reference too so it can never become a call.
-    monkeypatch.setattr(research_workflow, "rebuild_cache", _fail_rebuild)
 
     def _fake_step_asset(**paths):
         return SimpleNamespace(generated=True, already_exists=False, **paths)
@@ -133,9 +130,11 @@ def test_mcp_confirmed_side_effect_tools_never_auto_rebuild_cache(monkeypatch):
 
 def test_rebuild_cache_references_stay_in_reviewed_modules():
     # cache.py defines rebuild_cache; __init__.py re-exports it; mcp_server.py
-    # exposes the explicit maintenance tool; research_workflow.py holds a
-    # known UNUSED import (audit F-18, Batch 3 removal candidate). Any other
-    # core module referencing rebuild_cache is an unreviewed auto-rebuild risk.
+    # exposes the explicit maintenance tool; research_workflow.py only mentions
+    # it inside the CACHE_STALE_WARNING message string (the F-18 unused import
+    # was removed in Batch 3B, so the module stays allowlisted for that literal,
+    # not for any callable reference). Any other core module referencing
+    # rebuild_cache is an unreviewed auto-rebuild risk.
     allowed = {"__init__.py", "cache.py", "mcp_server.py", "research_workflow.py"}
     src_dir = ROOT / "src" / "podcast_ingest_core"
     offenders = sorted(

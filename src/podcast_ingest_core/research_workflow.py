@@ -3,7 +3,6 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any, Callable
 
-from .cache import rebuild_cache
 from .entity_extractor import extract_mentions
 from .episode_intelligence import generate_episode_intelligence_report
 from .errors import PodcastIngestCoreError, ResearchWorkflowFailedError, ResearchWorkflowInputError

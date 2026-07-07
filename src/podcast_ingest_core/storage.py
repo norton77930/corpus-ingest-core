@@ -5,8 +5,6 @@ from pathlib import Path
 import unicodedata
 import re
 
-from .models import TranscriptSearchResult
-
 
 DATA_DIR = Path("data")
 AUDIO_DIR = DATA_DIR / "audio"
@@ -359,18 +357,6 @@ def ensure_data_directories() -> None:
         CACHE_DIR,
     ):
         directory.mkdir(parents=True, exist_ok=True)
-
-
-def search_transcripts(
-    query: str, podcast_id: str | None = None
-) -> list[TranscriptSearchResult]:
-    """搜尋逐字稿；Phase 0 尚未建立索引，因此回傳空清單。"""
-
-    if podcast_id is not None:
-        _safe_slug(podcast_id, "podcast_id")
-    if not query.strip():
-        return []
-    return []
 
 
 def _safe_slug(value: str, field_name: str) -> str:

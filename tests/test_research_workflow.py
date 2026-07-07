@@ -935,7 +935,7 @@ def test_run_research_workflow_tracks_reused_synthesis_artifacts(monkeypatch, tm
 def test_run_research_workflow_dry_run_does_not_call_external_or_cache(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import research_workflow
+    from podcast_ingest_core import cache, research_workflow
 
     _write_transcript(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -943,8 +943,11 @@ def test_run_research_workflow_dry_run_does_not_call_external_or_cache(
         "semantic_summarize_episode",
         lambda *args, **kwargs: pytest.fail("semantic summary must not run"),
     )
+    # research_workflow no longer imports rebuild_cache (F-18 resolved,
+    # Batch 3B); patch the real cache.rebuild_cache so any transitive call is
+    # still caught by this dry-run guard.
     monkeypatch.setattr(
-        research_workflow,
+        cache,
         "rebuild_cache",
         lambda *args, **kwargs: pytest.fail("rebuild_cache must not run"),
     )
