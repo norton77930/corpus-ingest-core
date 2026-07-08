@@ -16,6 +16,7 @@ MAPPINGS_DIR = DATA_DIR / "mappings"
 EXTERNAL_DIR = DATA_DIR / "external"
 STOCK_LENS_DIR = DATA_DIR / "stock-lens"
 CACHE_DIR = DATA_DIR / "cache"
+CORPUS_DIR = DATA_DIR / "corpus"
 _SAFE_SLUG_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 _SAFE_EPISODE_REF_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]*$")
 _WINDOWS_ILLEGAL_FILENAME_CHARS = re.compile(r'[<>:"/\\|?*]')
@@ -62,6 +63,12 @@ class StockLensReportAssetPaths:
 
 @dataclass(frozen=True)
 class StockLensSynthesisAssetPaths:
+    json_path: Path
+    markdown_path: Path
+
+
+@dataclass(frozen=True)
+class CorpusIndexAssetPaths:
     json_path: Path
     markdown_path: Path
 
@@ -330,6 +337,16 @@ def stock_lens_synthesis_asset_paths(
     )
 
 
+def corpus_index_asset_paths(podcast_id: str) -> CorpusIndexAssetPaths:
+    """回傳 corpus artifact index 的 JSON 與 Markdown 輸出路徑。"""
+
+    base_dir = CORPUS_DIR / _safe_slug(podcast_id, "podcast_id")
+    return CorpusIndexAssetPaths(
+        json_path=base_dir / "corpus-index.json",
+        markdown_path=base_dir / "corpus-index.md",
+    )
+
+
 def cache_path(podcast_id: str) -> Path:
     """回傳 episode cache 路徑。"""
 
@@ -355,6 +372,7 @@ def ensure_data_directories() -> None:
         EXTERNAL_DIR,
         STOCK_LENS_DIR,
         CACHE_DIR,
+        CORPUS_DIR,
     ):
         directory.mkdir(parents=True, exist_ok=True)
 

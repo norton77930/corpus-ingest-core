@@ -385,6 +385,39 @@ class SemanticSummarySmokeReviewResult:
 
 
 @dataclass(frozen=True)
+class CorpusArtifactFamilyCounts:
+    """Corpus index 中單一 artifact family 的可用性彙總。"""
+
+    available: int
+    missing: int
+    unreadable: int
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeRow:
+    """Corpus index 中單一 episode 的 artifact 狀態列。"""
+
+    podcast_id: str
+    episode_ref: str
+    title: str
+    artifact_status: dict[str, dict]
+    missing_artifacts: list[str]
+    warnings: list[str]
+
+
+@dataclass(frozen=True)
+class CorpusIndexResult:
+    """Corpus artifact index 的輸出位置與彙總 metadata。"""
+
+    podcast_id: str
+    index_json_path: Path
+    index_markdown_path: Path
+    episode_count: int
+    warning_count: int
+    artifact_family_counts: dict[str, CorpusArtifactFamilyCounts]
+
+
+@dataclass(frozen=True)
 class ResearchWorkflowStep:
     """Research workflow 中單一步驟的計畫或執行結果。"""
 

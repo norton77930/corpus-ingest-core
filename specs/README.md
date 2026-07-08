@@ -5,6 +5,8 @@ backfilled as-built Spec Kit packages. `001-gooaye-research-system` remains the
 umbrella product spec. Packages `002` through `007` document implemented
 capability groups and map them to roadmap phase history, core modules,
 CLI/scripts, tests, and safety boundaries.
+Package `008` is the current approved runtime feature for the corpus artifact
+index.
 
 Workflow record: constitution reviewed, no amendment. The backfill follows
 `$speckit-constitution`, `$speckit-specify`, `$speckit-clarify`,
@@ -44,6 +46,7 @@ make one package look like the only active feature.
 - `005-research-workflow-orchestration`: deterministic workflow with optional LLM and MCP exposed workflow wrapper.
 - `006-llm-safety-synthesis-smoke-review`: optional LLM, smoke validation, and eval/review only safety gates.
 - `007-spec-kit-governance`: Spec Kit scaffold, constitution, templates, AGENTS, and docs tests.
+- `008-corpus-artifact-index`: deterministic offline per-episode corpus artifact status index.
 
 ## roadmap phase Mapping
 
@@ -53,6 +56,7 @@ make one package look like the only active feature.
 - Phase 6G, Phase 6I, Phase 6K, Phase 6L, and Phase 6N map to `005-research-workflow-orchestration`.
 - Phase 2A, Phase 6H, Phase 6J, and Phase 6O-6U map to `006-llm-safety-synthesis-smoke-review`.
 - Phase 7A-7D.1 map to `007-spec-kit-governance`.
+- Corpus artifact index runtime work maps to `008-corpus-artifact-index`.
 
 ## core modules Mapping
 
@@ -62,6 +66,7 @@ make one package look like the only active feature.
 - `005`: `research_workflow.py`, `mcp_server.py`, `semantic_summarizer.py`, `stock_lens_synthesis.py`, `external_data_verification.py`.
 - `006`: `semantic_summarizer.py`, `llm_provider.py`, `llm_profiles.py`, `local_env.py`, `stock_lens_synthesis.py`, `research_llm_smoke_review.py`, `semantic_summary_smoke_review.py`.
 - `007`: `.specify/memory/constitution.md`, `.specify/templates/`, `.agents/skills/`, `AGENTS.md`.
+- `008`: `corpus_index.py`, `storage.py`, `models.py`, `errors.py`.
 
 ## CLI/scripts Mapping
 
@@ -71,6 +76,7 @@ make one package look like the only active feature.
 - `005`: `run_research_workflow.py`.
 - `006`: `summarize_episode.py`, `generate_stock_lens_synthesis_report.py`, `run_research_llm_smoke.py`, `review_research_llm_smoke.py`, `run_semantic_summary_smoke.py`, `review_semantic_summary_smoke.py`.
 - `007`: no runtime CLI changes.
+- `008`: `generate_corpus_index.py`.
 
 ## tests Mapping
 
@@ -80,10 +86,12 @@ make one package look like the only active feature.
 - `005`: `test_research_workflow.py`, `test_mcp_server.py`.
 - `006`: `test_semantic_summarizer.py`, `test_llm_profiles.py`, `test_local_env.py`, `test_stock_lens_synthesis.py`, `test_research_llm_smoke.py`, `test_research_llm_smoke_review.py`, `test_semantic_summary_smoke.py`, `test_semantic_summary_smoke_review.py`, `test_research_safety_eval_docs.py`.
 - `007`: `test_architecture_spec_docs.py`, `test_spec_kit_bootstrap.py`, `test_spec_kit_constitution.py`, `test_spec_kit_backfill_docs.py`.
+- `008`: `test_corpus_index.py`.
 
 ## Classification
 
 - deterministic: packages `002`, `003`, `004`, `005`, and `007`.
+- deterministic corpus status: package `008`.
 - optional LLM: packages `005` and `006`.
 - local fixture: package `004` and workflow integration in `005`.
 - MCP exposed: packages `003` and `005`.

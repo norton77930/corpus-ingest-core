@@ -21,8 +21,9 @@ constitution -> specify -> clarify -> plan -> checklist -> tasks -> analyze -> i
 ```
 
 <!-- SPECKIT START -->
-For additional context about technologies to be used, project structure,
-shell commands, and other important information, read the current plan
+For the active Corpus Artifact Index feature, read
+[`specs/008-corpus-artifact-index/plan.md`](specs/008-corpus-artifact-index/plan.md)
+for technologies, project structure, shell commands, and implementation context.
 <!-- SPECKIT END -->
 
 ## Engineering Rules

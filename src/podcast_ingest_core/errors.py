@@ -42,6 +42,10 @@ class SemanticSummaryFailedError(PodcastIngestCoreError):
     """語意摘要產生或輸出寫入失敗。"""
 
 
+class CorpusIndexFailedError(PodcastIngestCoreError):
+    """Corpus artifact index 產生或輸出寫入失敗。"""
+
+
 class LLMProviderConfigError(PodcastIngestCoreError):
     """LLM provider 設定不完整或不合法。"""
 
