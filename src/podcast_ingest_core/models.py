@@ -418,6 +418,82 @@ class CorpusIndexResult:
 
 
 @dataclass(frozen=True)
+class CorpusRemediationActionCounts:
+    """Corpus remediation plan 的 action 彙總。"""
+
+    action_count: int
+    blocked_action_count: int
+    optional_action_count: int
+    gated_action_count: int
+
+
+@dataclass(frozen=True)
+class CorpusRemediationBlocker:
+    """單一 remediation action 的上游阻擋原因。"""
+
+    blocked_artifact: str
+    blocking_artifact: str
+    blocking_status: str
+    message: str
+
+
+@dataclass(frozen=True)
+class CorpusRemediationWarning:
+    """Corpus remediation plan 中可歸屬的警告。"""
+
+    scope: str
+    episode_ref: str | None
+    artifact_family: str | None
+    message: str
+
+
+@dataclass(frozen=True)
+class CorpusRemediationAction:
+    """單一 episode artifact 的建議 remediation action。"""
+
+    action_id: str
+    artifact_family: str
+    action_type: str
+    status: str
+    order: int
+    reason: str
+    blocking_artifacts: list[str]
+    suggested_command: str | None
+    manual_only: bool
+    optional: bool
+    gated: bool
+    requires_api_cost_ack: bool
+
+
+@dataclass(frozen=True)
+class CorpusRemediationEpisodeRow:
+    """Corpus remediation plan 中單一 episode 的 action 與 blocker 狀態列。"""
+
+    podcast_id: str
+    episode_ref: str
+    title: str
+    artifact_status: dict[str, dict]
+    missing_artifacts: list[str]
+    blockers: list[CorpusRemediationBlocker]
+    warnings: list[CorpusRemediationWarning]
+    actions: list[CorpusRemediationAction]
+
+
+@dataclass(frozen=True)
+class CorpusRemediationPlanResult:
+    """Corpus remediation plan 的輸出位置與彙總 metadata。"""
+
+    podcast_id: str
+    plan_json_path: Path
+    plan_markdown_path: Path
+    source_corpus_index_json_path: Path
+    source_corpus_index_markdown_path: Path
+    episode_count: int
+    warning_count: int
+    action_counts: CorpusRemediationActionCounts
+
+
+@dataclass(frozen=True)
 class ResearchWorkflowStep:
     """Research workflow 中單一步驟的計畫或執行結果。"""
 

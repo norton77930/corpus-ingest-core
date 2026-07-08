@@ -26,7 +26,7 @@ This document reflects the Phase 7C system shape. Podcast Ingestion Core is stil
 - mentions and search: `entity_extractor.py`, `cache.py`, and `search.py` create deterministic mentions and index/search transcripts and mentions.
 - research reports: `episode_intelligence.py`, `industry_mapping.py`, `external_data_boundary.py`, `external_data_verification.py`, `gooaye_lens.py`, and `stock_lens.py` build deterministic research artifacts from existing local sources.
 - LLM synthesis and smoke review: `stock_lens_synthesis.py`, `research_workflow.py`, `research_llm_smoke_review.py`, and `semantic_summary_smoke_review.py` support optional LLM synthesis, workflow orchestration, the Phase 6T review gate, and Phase 6U semantic summary smoke review.
-- corpus status: `corpus_index.py` scans local per-episode artifacts and semantic review metadata, then writes deterministic JSON/Markdown under `data/corpus/{podcast_id}/`.
+- corpus status and remediation: `corpus_index.py` scans local per-episode artifacts and semantic review metadata, then writes deterministic JSON/Markdown under `data/corpus/{podcast_id}/`; `corpus_remediation_plan.py` refreshes that index and derives ordered, manual-only remediation actions without executing them.
 - interfaces: scripts under `scripts/` are thin CLIs; `mcp_server.py` wraps selected core functions in stdio MCP tools.
 - shared contracts: `models.py`, `storage.py`, `errors.py`, `llm_provider.py`, `llm_profiles.py`, `local_env.py`, and `serialization.py` hold common data, paths, errors, provider settings, local `.env` loading, and JSON serialization.
 
@@ -45,11 +45,12 @@ This document reflects the Phase 7C system shape. Podcast Ingestion Core is stil
 11. Phase 6T review gate reads existing synthesis artifacts and writes deterministic review reports under `evals/research-llm-smoke/reports/`.
 12. Phase 6U semantic summary smoke review reads existing `.semantic.md` artifacts and writes deterministic review reports under `evals/research-llm-smoke/reports/`.
 13. Corpus artifact index reads only local per-episode artifact paths/metadata and latest semantic review status, then writes `data/corpus/{podcast_id}/corpus-index.json` and `.md` without raw transcript, evidence, semantic body, RSS, SQLite cache, `.env`, network, LLM, or MCP changes.
-14. MCP tools expose read/search, selected side-effect tools, and consolidated research workflow; MCP completion warns about stale cache but does not rebuild automatically.
+14. Corpus remediation plan refreshes the corpus index, derives full-ladder missing artifact actions, blockers, warnings, and optional/gated semantic actions, then writes `data/corpus/{podcast_id}/corpus-remediation-plan.json` and `.md` without executing remediation commands.
+15. MCP tools expose read/search, selected side-effect tools, and consolidated research workflow; MCP completion warns about stale cache but does not rebuild automatically.
 
 ## Execution Modes
 
-- deterministic steps: ingestion after user command, transcript validation, extractive summary, mention extraction, episode intelligence, industry mapping, external boundary, stock lens report, cache indexing, Phase 6T review gate, Phase 6U semantic summary smoke review gate, and corpus artifact index generation.
+- deterministic steps: ingestion after user command, transcript validation, extractive summary, mention extraction, episode intelligence, industry mapping, external boundary, stock lens report, cache indexing, Phase 6T review gate, Phase 6U semantic summary smoke review gate, corpus artifact index generation, and corpus remediation plan generation.
 - optional LLM steps: semantic summary and stock lens synthesis. These require `confirm=True` and the exact API-cost acknowledgement before provider construction; `run_semantic_summary_smoke.py` dry-run keeps no raw transcript stdout. Phase 6V semantic context in synthesis is explicit opt-in and uses only review-passed semantic summary context, not raw transcript or live market data.
 - local fixture step: external data verification currently supports only `provider="fixture"` and reads local YAML fixture data.
 - not implemented: no live market API, no automatic market data provider, no scheduler, no web UI, no embedding/vector search, and no investment advice engine.
@@ -63,3 +64,4 @@ This document reflects the Phase 7C system shape. Podcast Ingestion Core is stil
 - Reports must preserve no investment advice: no buy/sell/hold recommendation, no target price, and no guaranteed return.
 - Phase 6T review gate is heuristic and deterministic. It helps catch obvious boundary violations but does not replace manual review.
 - Corpus artifact index is status metadata only: it may report paths, counts, missing artifacts, unreadable JSON warnings, and latest semantic review status, but must not copy transcript/evidence/semantic body text and must not add MCP tools in v1.
+- Corpus remediation plan is plan-only metadata: it may report missing artifacts, blockers, warnings, ordered manual action text, and optional/gated semantic remediation, but must not execute downloads, transcription, summaries, workflow steps, LLM calls, MCP tools, or cache rebuilds.

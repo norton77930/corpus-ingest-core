@@ -46,6 +46,10 @@ class CorpusIndexFailedError(PodcastIngestCoreError):
     """Corpus artifact index 產生或輸出寫入失敗。"""
 
 
+class CorpusRemediationPlanFailedError(PodcastIngestCoreError):
+    """Corpus remediation plan 產生或輸出寫入失敗。"""
+
+
 class LLMProviderConfigError(PodcastIngestCoreError):
     """LLM provider 設定不完整或不合法。"""
 
