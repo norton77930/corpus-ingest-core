@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from pathlib import Path
 
 
@@ -403,6 +403,7 @@ class CorpusEpisodeRow:
     artifact_status: dict[str, dict]
     missing_artifacts: list[str]
     warnings: list[str]
+    source_metadata: dict[str, dict] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -693,6 +694,92 @@ class CorpusAudioDownloadRunResult:
     counts: CorpusAudioDownloadOutcomeCounts
     rows: list[CorpusAudioDownloadRunRow]
     warnings: list[CorpusAudioDownloadRunWarning]
+    not_investment_advice: bool
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeIntakeFilter:
+    """Corpus episode intake bootstrap 的 selector 篩選條件。"""
+
+    episode_ref: str
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeIntakeOutcomeCounts:
+    """Corpus episode intake bootstrap 的 outcome 彙總。"""
+
+    row_count: int
+    selected_count: int
+    seeded_count: int
+    reused_count: int
+    failed_count: int
+    skipped_count: int
+    rejected_count: int
+    warning_count: int
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeIntakeRunWarning:
+    """Corpus episode intake bootstrap 的非致命警告。"""
+
+    scope: str
+    episode_ref: str | None
+    message: str
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeSeed:
+    """讓 RSS episode 進入離線 corpus 的安全 seed metadata。"""
+
+    podcast_id: str
+    episode_ref: str
+    title: str
+    published_at: str | None
+    duration: str | None
+    guid_status: str
+    has_audio_url: bool
+    seed_source: str
+    selector: str
+    warning_count: int
+    warnings: list[str]
+    not_investment_advice: bool
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeIntakeRunRow:
+    """Corpus episode intake bootstrap 中單一 selector 的 outcome 列。"""
+
+    podcast_id: str
+    selector: str
+    episode_ref: str | None
+    title: str | None
+    published_at: str | None
+    duration: str | None
+    guid_status: str
+    has_audio_url: bool
+    outcome_status: str
+    reason: str
+    planned_reads: list[str]
+    planned_writes: list[str]
+    seed_json_path: str | None
+    warnings: list[str]
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeIntakeRunResult:
+    """Corpus episode intake bootstrap 的 dry-run 或 confirmed 結果。"""
+
+    podcast_id: str
+    run_mode: str
+    confirm: bool
+    selector: str
+    resolved_episode_ref: str | None
+    report_json_path: Path | None
+    report_markdown_path: Path | None
+    filters: CorpusEpisodeIntakeFilter
+    counts: CorpusEpisodeIntakeOutcomeCounts
+    rows: list[CorpusEpisodeIntakeRunRow]
+    warnings: list[CorpusEpisodeIntakeRunWarning]
     not_investment_advice: bool
 
 

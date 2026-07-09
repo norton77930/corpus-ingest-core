@@ -76,6 +76,10 @@ def _discover_episode_refs(podcast_id: str) -> list[str]:
         (storage.REPORTS_DIR / podcast_id, lambda path: path.name.endswith(".intelligence.json")),
         (storage.MAPPINGS_DIR / podcast_id, lambda path: path.name.endswith(".industry-map.json")),
         (storage.EXTERNAL_DIR / podcast_id, lambda path: path.name.endswith(".external-boundary.json")),
+        (
+            storage.CORPUS_DIR / podcast_id / "episode-seeds",
+            lambda path: path.name.endswith(".episode-seed.json"),
+        ),
     ):
         refs.update(_episode_refs_from_directory(directory, predicate))
     refs.update(_episode_refs_from_semantic_reviews(podcast_id))
@@ -113,6 +117,8 @@ def _episode_refs_from_semantic_reviews(podcast_id: str) -> set[str]:
 
 
 def _episode_ref_from_artifact_name(path: Path) -> str:
+    if path.name.endswith(".episode-seed.json"):
+        return path.name.removesuffix(".episode-seed.json")
     if "__" in path.name:
         return path.name.split("__", 1)[0]
     return path.stem.split(".", 1)[0]
@@ -123,6 +129,7 @@ def _is_audio_path(path: Path) -> bool:
 
 
 def _build_episode_row(podcast_id: str, episode_ref: str) -> CorpusEpisodeRow:
+    source_metadata = _source_metadata(podcast_id, episode_ref)
     artifact_status = {
         "audio": _audio_status(podcast_id, episode_ref),
         "transcript": _transcript_status(podcast_id, episode_ref),
@@ -148,10 +155,11 @@ def _build_episode_row(podcast_id: str, episode_ref: str) -> CorpusEpisodeRow:
     return CorpusEpisodeRow(
         podcast_id=podcast_id,
         episode_ref=episode_ref,
-        title=_episode_title(episode_ref, artifact_status),
+        title=_episode_title(episode_ref, artifact_status, source_metadata),
         artifact_status=artifact_status,
         missing_artifacts=missing_artifacts,
         warnings=warnings,
+        source_metadata=source_metadata,
     )
 
 
@@ -169,6 +177,50 @@ def _audio_status(podcast_id: str, episode_ref: str) -> dict[str, Any]:
         "candidate_count": len(candidates),
         "warnings": warnings,
         "warning_count": len(warnings),
+    }
+
+
+def _source_metadata(podcast_id: str, episode_ref: str) -> dict[str, dict[str, Any]]:
+    seed_path = storage.corpus_episode_seed_asset_path(podcast_id, episode_ref)
+    if not seed_path.exists():
+        return {}
+    payload, unreadable_warning = _load_json_metadata(
+        seed_path,
+        fields=(
+            "title",
+            "published_at",
+            "duration",
+            "guid_status",
+            "has_audio_url",
+            "seed_source",
+            "selector",
+            "warning_count",
+        ),
+    )
+    if unreadable_warning is not None:
+        return {
+            "episode_seed": {
+                "status": "unreadable",
+                "path": str(seed_path),
+                "warnings": [unreadable_warning],
+                "warning_count": 1,
+            }
+        }
+    assert payload is not None
+    return {
+        "episode_seed": {
+            "status": "available",
+            "path": str(seed_path),
+            "title": _safe_text(payload.get("title"), episode_ref),
+            "published_at": _optional_text(payload.get("published_at")),
+            "duration": _optional_text(payload.get("duration")),
+            "guid_status": _safe_text(payload.get("guid_status"), "unknown"),
+            "has_audio_url": bool(payload.get("has_audio_url")),
+            "seed_source": _safe_text(payload.get("seed_source"), "unknown"),
+            "selector": _safe_text(payload.get("selector"), "unknown"),
+            "warning_count": _safe_int(payload.get("warning_count")),
+            "warnings": [],
+        }
     }
 
 
@@ -591,7 +643,11 @@ def _transcript_output_problems(json_path: Path) -> list[str]:
     return problems
 
 
-def _episode_title(episode_ref: str, artifact_status: dict[str, dict[str, Any]]) -> str:
+def _episode_title(
+    episode_ref: str,
+    artifact_status: dict[str, dict[str, Any]],
+    source_metadata: dict[str, dict[str, Any]],
+) -> str:
     for family in (
         "transcript",
         "mentions",
@@ -608,6 +664,9 @@ def _episode_title(episode_ref: str, artifact_status: dict[str, dict[str, Any]])
         title = payload.get("title")
         if isinstance(title, str) and title.strip():
             return title
+    seed_title = source_metadata.get("episode_seed", {}).get("title")
+    if isinstance(seed_title, str) and seed_title.strip():
+        return seed_title
     return episode_ref
 
 
@@ -766,6 +825,13 @@ def _safe_float(value: Any) -> float | None:
 
 def _safe_text(value: Any, default: str) -> str:
     return value if isinstance(value, str) and value.strip() else default
+
+
+def _optional_text(value: Any) -> str | None:
+    if value is None:
+        return None
+    text = str(value).strip()
+    return text or None
 
 
 def _array_count(payload: dict[str, Any], key: str, default: int | None = None) -> int | None:

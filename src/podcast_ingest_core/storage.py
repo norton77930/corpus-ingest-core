@@ -97,6 +97,12 @@ class CorpusAudioDownloadRunAssetPaths:
     markdown_path: Path
 
 
+@dataclass(frozen=True)
+class CorpusEpisodeIntakeRunAssetPaths:
+    json_path: Path
+    markdown_path: Path
+
+
 def audio_path(podcast_id: str, episode_ref: str) -> Path:
     """回傳音檔輸出路徑。"""
 
@@ -416,6 +422,29 @@ def corpus_audio_download_run_asset_paths(
     return CorpusAudioDownloadRunAssetPaths(
         json_path=base_dir / "corpus-audio-download-run.json",
         markdown_path=base_dir / "corpus-audio-download-run.md",
+    )
+
+
+def corpus_episode_seed_asset_path(podcast_id: str, episode_ref: str) -> Path:
+    """Return deterministic corpus episode seed metadata path."""
+
+    return (
+        CORPUS_DIR
+        / _safe_slug(podcast_id, "podcast_id")
+        / "episode-seeds"
+        / f"{_safe_episode_ref(episode_ref)}.episode-seed.json"
+    )
+
+
+def corpus_episode_intake_run_asset_paths(
+    podcast_id: str,
+) -> CorpusEpisodeIntakeRunAssetPaths:
+    """Return corpus episode intake latest JSON and Markdown report paths."""
+
+    base_dir = CORPUS_DIR / _safe_slug(podcast_id, "podcast_id")
+    return CorpusEpisodeIntakeRunAssetPaths(
+        json_path=base_dir / "corpus-episode-intake-run.json",
+        markdown_path=base_dir / "corpus-episode-intake-run.md",
     )
 
 

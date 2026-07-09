@@ -33,6 +33,37 @@ def _write_json(path: Path, payload: dict) -> Path:
     return path
 
 
+def _write_episode_seed(
+    monkeypatch,
+    tmp_path: Path,
+    *,
+    podcast_id: str = "gooaye",
+    episode_ref: str = "EP677",
+    title: str = "EP677 Alpha",
+    has_audio_url: bool = True,
+) -> Path:
+    from podcast_ingest_core.storage import corpus_episode_seed_asset_path
+
+    _use_tmp_data_dirs(monkeypatch, tmp_path)
+    return _write_json(
+        corpus_episode_seed_asset_path(podcast_id, episode_ref),
+        {
+            "podcast_id": podcast_id,
+            "episode_ref": episode_ref,
+            "title": title,
+            "published_at": "Thu, 09 Jul 2026 00:00:00 GMT",
+            "duration": "00:42:00",
+            "guid_status": "present",
+            "has_audio_url": has_audio_url,
+            "seed_source": "rss",
+            "selector": "latest",
+            "warning_count": 0,
+            "warnings": [],
+            "not_investment_advice": True,
+        },
+    )
+
+
 def _write_audio(
     monkeypatch,
     tmp_path: Path,
@@ -490,6 +521,38 @@ def test_generate_corpus_remediation_plan_orders_actions_and_counts(
     ]
     assert "| EP001 | Alpha |" in markdown
     assert "corpus-remediation-plan" in markdown
+
+
+def test_generate_corpus_remediation_plan_uses_seed_audio_availability(
+    monkeypatch, tmp_path
+):
+    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+
+    _write_episode_seed(
+        monkeypatch,
+        tmp_path,
+        episode_ref="EP677",
+        title="EP677 Alpha",
+        has_audio_url=True,
+    )
+    _write_episode_seed(
+        monkeypatch,
+        tmp_path,
+        episode_ref="EP678",
+        title="EP678 No Audio",
+        has_audio_url=False,
+    )
+
+    result = generate_corpus_remediation_plan("gooaye")
+    payload = _payload(result)
+
+    ready_audio = _action(_episode(payload, "EP677"), "audio")
+    no_audio = _action(_episode(payload, "EP678"), "audio")
+    assert ready_audio["status"] == "ready"
+    assert ready_audio["reason"] == "audio artifact is missing"
+    assert no_audio["status"] == "blocked"
+    assert no_audio["blocking_artifacts"] == ["feed_audio_url"]
+    assert "feed audio is unavailable" in no_audio["reason"]
 
 
 def test_generate_corpus_remediation_plan_uses_contract_action_types(

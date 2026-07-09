@@ -14,6 +14,12 @@ def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> None:
     import podcast_ingest_core.corpus_index as corpus_index
 
     monkeypatch.setattr(storage, "AUDIO_DIR", tmp_path / "audio")
+    monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
+    monkeypatch.setattr(storage, "SUMMARIES_DIR", tmp_path / "summaries")
+    monkeypatch.setattr(storage, "MENTIONS_DIR", tmp_path / "mentions")
+    monkeypatch.setattr(storage, "REPORTS_DIR", tmp_path / "reports")
+    monkeypatch.setattr(storage, "MAPPINGS_DIR", tmp_path / "mappings")
+    monkeypatch.setattr(storage, "EXTERNAL_DIR", tmp_path / "external")
     monkeypatch.setattr(storage, "CORPUS_DIR", tmp_path / "corpus", raising=False)
     monkeypatch.setattr(
         corpus_index,
@@ -27,6 +33,37 @@ def _write_json(path: Path, payload: dict) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
     return path
+
+
+def _write_episode_seed(
+    monkeypatch,
+    tmp_path: Path,
+    *,
+    podcast_id: str = "gooaye",
+    episode_ref: str = "EP677",
+    title: str = "EP677 Alpha",
+    has_audio_url: bool = True,
+) -> Path:
+    from podcast_ingest_core.storage import corpus_episode_seed_asset_path
+
+    _use_tmp_data_dirs(monkeypatch, tmp_path)
+    return _write_json(
+        corpus_episode_seed_asset_path(podcast_id, episode_ref),
+        {
+            "podcast_id": podcast_id,
+            "episode_ref": episode_ref,
+            "title": title,
+            "published_at": "Thu, 09 Jul 2026 00:00:00 GMT",
+            "duration": "00:42:00",
+            "guid_status": "present",
+            "has_audio_url": has_audio_url,
+            "seed_source": "rss",
+            "selector": "latest",
+            "warning_count": 0,
+            "warnings": [],
+            "not_investment_advice": True,
+        },
+    )
 
 
 def _extra_action(episode_ref: str, family: str, status: str = "ready") -> dict:
@@ -352,6 +389,37 @@ def test_dry_run_selects_only_missing_audio_ready_actions(monkeypatch, tmp_path)
     assert rows["EP005"].outcome_status == "skipped"
     assert result.counts.selected_count == 1
     assert result.counts.skipped_count == 4
+
+
+def test_dry_run_selects_seeded_ready_audio_and_skips_seeded_no_audio(
+    monkeypatch, tmp_path
+):
+    from podcast_ingest_core.corpus_audio_download_runner import (
+        run_corpus_audio_download,
+    )
+
+    _write_episode_seed(
+        monkeypatch,
+        tmp_path,
+        episode_ref="EP677",
+        title="EP677 Alpha",
+        has_audio_url=True,
+    )
+    _write_episode_seed(
+        monkeypatch,
+        tmp_path,
+        episode_ref="EP678",
+        title="EP678 No Audio",
+        has_audio_url=False,
+    )
+
+    result = run_corpus_audio_download("gooaye")
+    rows = {row.action_id: row for row in result.rows}
+
+    assert rows["EP677:audio"].outcome_status == "selected"
+    assert rows["EP678:audio"].outcome_status == "skipped"
+    assert "source action status is blocked" in rows["EP678:audio"].reason
+    assert result.counts.selected_count == 1
 
 
 def test_dry_run_skips_unsafe_states_and_other_families(monkeypatch, tmp_path):

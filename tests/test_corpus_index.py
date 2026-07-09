@@ -30,6 +30,37 @@ def _write_json(path: Path, payload: dict) -> Path:
     return path
 
 
+def _write_episode_seed(
+    monkeypatch,
+    tmp_path: Path,
+    *,
+    podcast_id: str = "gooaye",
+    episode_ref: str = "EP677",
+    title: str = "EP677 Alpha",
+    has_audio_url: bool = True,
+) -> Path:
+    from podcast_ingest_core.storage import corpus_episode_seed_asset_path
+
+    _use_tmp_data_dirs(monkeypatch, tmp_path)
+    return _write_json(
+        corpus_episode_seed_asset_path(podcast_id, episode_ref),
+        {
+            "podcast_id": podcast_id,
+            "episode_ref": episode_ref,
+            "title": title,
+            "published_at": "Thu, 09 Jul 2026 00:00:00 GMT",
+            "duration": "00:42:00",
+            "guid_status": "present",
+            "has_audio_url": has_audio_url,
+            "seed_source": "rss",
+            "selector": "latest",
+            "warning_count": 0,
+            "warnings": [],
+            "not_investment_advice": True,
+        },
+    )
+
+
 def _write_audio(
     monkeypatch,
     tmp_path: Path,
@@ -338,6 +369,22 @@ def test_generate_corpus_index_writes_empty_index(monkeypatch, tmp_path):
     assert payload["not_investment_advice"] is True
     assert "generated_at" not in result.index_json_path.read_text(encoding="utf-8")
     assert "not investment advice" in markdown.lower()
+
+
+def test_generate_corpus_index_discovers_seeded_episode_metadata(monkeypatch, tmp_path):
+    from podcast_ingest_core.corpus_index import generate_corpus_index
+
+    _write_episode_seed(monkeypatch, tmp_path, episode_ref="EP677", title="EP677 Alpha")
+
+    result = generate_corpus_index("gooaye")
+    payload = _payload(result)
+    row = {episode["episode_ref"]: episode for episode in payload["episodes"]}["EP677"]
+
+    assert result.episode_count == 1
+    assert row["title"] == "EP677 Alpha"
+    assert row["artifact_status"]["audio"]["status"] == "missing"
+    assert row["source_metadata"]["episode_seed"]["has_audio_url"] is True
+    assert row["source_metadata"]["episode_seed"]["seed_source"] == "rss"
 
 
 def test_generate_corpus_index_discovers_supported_episode_artifacts(

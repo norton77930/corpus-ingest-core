@@ -62,6 +62,10 @@ class CorpusAudioDownloadRunnerFailedError(PodcastIngestCoreError):
     """Corpus audio download runner 選取、執行或報告寫入失敗。"""
 
 
+class CorpusEpisodeIntakeFailedError(PodcastIngestCoreError):
+    """Corpus episode intake bootstrap selection or report writing failed."""
+
+
 class LLMProviderConfigError(PodcastIngestCoreError):
     """LLM provider 設定不完整或不合法。"""
 

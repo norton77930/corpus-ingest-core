@@ -57,6 +57,7 @@ make one package look like the only active feature.
 - `010-corpus-remediation-runner`: dry-run-first deterministic corpus remediation runner.
 - `011-corpus-local-transcription-runner`: dry-run-first single-episode local transcription runner.
 - `012-corpus-audio-download-runner`: dry-run-first single-episode audio download runner.
+- `013-corpus-episode-intake-bootstrap`: dry-run-first RSS episode seed bootstrap runner.
 
 ## roadmap phase Mapping
 
@@ -71,6 +72,7 @@ make one package look like the only active feature.
 - Corpus remediation runner runtime work maps to `010-corpus-remediation-runner`.
 - Corpus local transcription runner runtime work maps to `011-corpus-local-transcription-runner`.
 - Corpus audio download runner runtime work maps to `012-corpus-audio-download-runner`.
+- Corpus episode intake bootstrap runtime work maps to `013-corpus-episode-intake-bootstrap`.
 
 ## core modules Mapping
 
@@ -85,6 +87,7 @@ make one package look like the only active feature.
 - `010`: `corpus_remediation_runner.py`, `corpus_remediation_plan.py`, `storage.py`, `models.py`, `errors.py`.
 - `011`: `corpus_local_transcription_runner.py`, `corpus_remediation_plan.py`, `transcriber.py`, `storage.py`, `models.py`, `errors.py`.
 - `012`: `corpus_audio_download_runner.py`, `corpus_remediation_plan.py`, `downloader.py`, `storage.py`, `models.py`, `errors.py`.
+- `013`: `corpus_episode_intake.py`, `feed_reader.py`, `corpus_index.py`, `corpus_remediation_plan.py`, `corpus_audio_download_runner.py`, `storage.py`, `models.py`, `errors.py`.
 
 ## CLI/scripts Mapping
 
@@ -99,6 +102,7 @@ make one package look like the only active feature.
 - `010`: `run_corpus_remediation.py`.
 - `011`: `run_corpus_local_transcription.py`.
 - `012`: `run_corpus_audio_download.py`.
+- `013`: `run_corpus_episode_intake.py`.
 
 ## tests Mapping
 
@@ -113,6 +117,7 @@ make one package look like the only active feature.
 - `010`: `test_corpus_remediation_runner.py`.
 - `011`: `test_corpus_local_transcription_runner.py`.
 - `012`: `test_corpus_audio_download_runner.py`.
+- `013`: `test_corpus_episode_intake.py`, plus seed handoff coverage in `test_corpus_index.py`, `test_corpus_remediation_plan.py`, and `test_corpus_audio_download_runner.py`.
 
 ## Classification
 
@@ -122,6 +127,7 @@ make one package look like the only active feature.
 - deterministic corpus remediation runner: package `010`.
 - local transcription runner: package `011`.
 - audio download runner: package `012`.
+- episode intake bootstrap runner: package `013`.
 - optional LLM: packages `005` and `006`.
 - local fixture: package `004` and workflow integration in `005`.
 - MCP exposed: packages `003` and `005`.
@@ -135,6 +141,7 @@ make one package look like the only active feature.
 - Local fixture verification is no live market API.
 - Research artifacts preserve evidence separation across podcast evidence, inference, external status, and LLM synthesis.
 - MCP exposed side-effect tools warn about manual cache rebuild and do not rebuild automatically.
+- corpus episode intake is seed-only: dry-run may read configured RSS but writes nothing, confirmed execution writes only safe seed metadata and a run report, and it does not download, transcribe, call LLM/MCP, run downstream remediation, or rebuild cache automatically.
 - no investment advice: no buy/sell/hold, target price, guaranteed return, or personalized recommendation.
 
 ## Batch Guard Tests（audit hardening）

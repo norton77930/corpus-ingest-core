@@ -61,6 +61,7 @@ scripts/
   transcribe_episode.py
   validate_transcript.py
   summarize_episode.py
+  run_corpus_episode_intake.py
   generate_corpus_index.py
   generate_corpus_remediation_plan.py
   run_corpus_audio_download.py
@@ -210,6 +211,7 @@ index_episode(podcast_id, episode_ref, force=False, db_path=None)
 rebuild_cache(podcast_id=None, force=False, db_path=None)
 search_transcripts(query, podcast_id=None, limit=20, db_path=None, search_mode="auto", context_segments=0, case_sensitive=False)
 search_mentions(query, podcast_id=None, mention_type=None, limit=20, db_path=None, case_sensitive=False)
+run_corpus_episode_intake(podcast_id, episode_ref="latest", confirm=False)
 generate_corpus_index(podcast_id)
 generate_corpus_remediation_plan(podcast_id)
 run_corpus_audio_download(podcast_id, episode_ref=None, confirm=False)
@@ -236,6 +238,8 @@ run_corpus_local_transcription(
 `summarize_episode` 是 deterministic / extractive template，不呼叫外部 LLM API，也不產生語意推論。`semantic_summarize_episode` 會使用 OpenAI-compatible API 產生語意摘要，重要判斷應盡量附 timestamp evidence，且不構成投資建議。`extract_mentions` 使用 deterministic rules 從 transcript segments 擷取 mentions，每筆 mention 都保留 timestamp evidence。`generate_episode_intelligence_report` 使用 deterministic rules 從既有 transcript 與 mentions artifact 產生單集 episode intelligence report，不呼叫 LLM、不查外部市場資料、不產生股票 mapping 或投資建議。`generate_industry_chain_mapping` 使用本機 deterministic mapping config 從既有 episode intelligence report 產生產業鏈節點與股票候選，會明確區分 podcast explicit evidence 與 inferred / needs-verification 研究線索。`generate_external_data_boundary` 使用本機 boundary config 從既有 industry mapping 產生外部資料查證邊界 scaffold，不呼叫外部 provider、不讀 API key、不產生市場現況事實。`verify_external_data_boundary` 是 Phase 6M fixture provider scaffold：dry-run first，`confirm=True` 才會用本機 fixture 嘗試更新既有 external boundary；它有 confirm guard、no live market API、no MCP tool changes，也不提供投資建議。`load_gooaye_lens_model` 只載入與驗證本機 Gooaye Lens 分析框架，不產生股票報告、不呼叫 LLM、不查外部市場資料。`generate_stock_lens_report` 使用 podcast-wide local artifacts 與 Gooaye Lens 產生股票/公司研究框架，不呼叫 LLM、不查外部市場資料、不提供買賣建議、目標價或保證報酬。`generate_stock_lens_synthesis_report` 是 Phase 6J Stock Lens LLM Synthesis：dry-run first，預設 LLM input boundary 是 6F stock lens JSON only，confirmed execution 必須提供 exact api_cost_ack；Phase 6V 可明確 opt in reviewed semantic summary context，但仍不讀 raw transcript、不查外部市場資料、no MCP tool changes，也不提供買賣建議。`run_research_workflow` 是 dry-run first 的本機 research workflow runner，串接 mentions、episode intelligence、industry mapping、external boundary 與可選 stock lens；Phase 6I 支援 optional semantic summary execution inside research workflow，Phase 6K 支援 workflow opt-in synthesis，可用 `include_stock_lens_synthesis=True` 把 Phase 6J synthesis 接在 stock lens report 後面。Phase 6N 支援 optional workflow fixture verification，可用 `include_external_data_verification=True` 在 external boundary 後以本機 fixture provider 更新外部查證狀態；此步驟 no live market API、no API key、no MCP tool changes、no automatic cache rebuild，也不提供投資建議。`generate_corpus_index` 只掃描本機 per-episode artifacts 與 semantic review metadata，寫入 deterministic corpus status JSON/Markdown；它不讀 RSS、不讀 SQLite cache、不呼叫 LLM、不讀 `.env`、不新增 MCP tool，也不輸出 raw transcript/evidence/semantic body。`generate_corpus_remediation_plan` 會先刷新 corpus index，再從本機 status metadata 推導 full-ladder 缺口、blockers、warnings 與 manual-only action text，寫入 deterministic remediation JSON/Markdown；它不執行下載、轉錄、摘要、workflow、LLM、MCP 或 cache rebuild，也不輸出 raw transcript/evidence/semantic body/prompt/raw LLM output。`run_corpus_audio_download` 會先刷新 remediation plan，dry-run 只回傳 audio missing 且 action ready 的候選 metadata，不讀 RSS、不呼叫 network/downloader、不寫 run report；confirmed execution 必須指定單一 episode，才會呼叫既有 `download_audio()`，並寫入 latest deterministic audio download run report，內容不含 source URL、query string、secret 或 traceback。`run_corpus_remediation` 會先刷新 remediation plan，dry-run 只回傳 selected/skipped/blocked/excluded metadata；confirmed execution 必須指定 episode 或 action family，只執行 transcript-ready deterministic families（extractive summary、mentions、episode intelligence、industry mapping、external boundary），並寫入 latest deterministic run report。`run_corpus_local_transcription` 會先刷新 remediation plan，dry-run 只回傳本機 audio available 且 transcript missing 的候選 metadata；confirmed execution 必須指定單一 episode，且只用 explicit local `audio_path` 呼叫既有轉錄 core，不下載音檔、不修 corrupt/partial transcript、不碰 LLM/MCP/cache rebuild，並寫入 latest deterministic local transcription run report。LLM 步驟都必須 `confirm=True` 並提供 exact `api_cost_ack` 才會呼叫外部 LLM。此 workflow 仍不查外部市場資料、no raw transcript for stock lens synthesis、no MCP tool changes，也不自動 rebuild cache。`rebuild_cache` 只索引既有 artifacts，不會自動下載、轉錄、摘要、抽 mentions、產生研究報告、產生 mapping、產生 external boundary 或產生 stock lens report。
 `validate_transcript` 可用來確認逐字稿是完整、空白、部分完成、缺失或損壞。
 
+`run_corpus_episode_intake` 是 dry-run first 的 RSS episode bootstrap runner：dry-run 可解析 `latest` 或單一 explicit episode selector，但不寫檔、不下載、不轉錄、不碰 LLM/MCP/cache；confirmed execution 只寫安全 seed metadata 與 latest deterministic intake report，讓 008/009/012 可以接續發現、規劃與下載 audio。
+
 ## 輸出路徑規則
 
 所有產物都位於 `data/`：
@@ -260,6 +264,9 @@ run_corpus_local_transcription(
 - Stock lens synthesis Markdown：`data/stock-lens/{podcast_id}/{safe_stock_query}.stock-lens-synthesis.md`
 - Corpus index JSON：`data/corpus/{podcast_id}/corpus-index.json`
 - Corpus index Markdown：`data/corpus/{podcast_id}/corpus-index.md`
+- Corpus episode seed JSON：`data/corpus/{podcast_id}/episode-seeds/{episode_ref}.episode-seed.json`
+- Corpus episode intake run JSON：`data/corpus/{podcast_id}/corpus-episode-intake-run.json`
+- Corpus episode intake run Markdown：`data/corpus/{podcast_id}/corpus-episode-intake-run.md`
 - Corpus remediation plan JSON：`data/corpus/{podcast_id}/corpus-remediation-plan.json`
 - Corpus remediation plan Markdown：`data/corpus/{podcast_id}/corpus-remediation-plan.md`
 - Corpus remediation run JSON：`data/corpus/{podcast_id}/corpus-remediation-run.json`

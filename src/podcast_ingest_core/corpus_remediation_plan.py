@@ -120,6 +120,9 @@ def _build_remediation_row(
     artifact_status = row_payload.get("artifact_status")
     if not isinstance(artifact_status, dict):
         artifact_status = {}
+    source_metadata = row_payload.get("source_metadata")
+    if not isinstance(source_metadata, dict):
+        source_metadata = {}
     warnings = [
         _warning_from_index_text(episode_ref, warning)
         for warning in row_payload.get("warnings", [])
@@ -129,7 +132,15 @@ def _build_remediation_row(
         action
         for family in ARTIFACT_LADDER
         if _needs_action(artifact_status.get(family, {}))
-        for action in [_build_action(podcast_id, episode_ref, family, artifact_status)]
+        for action in [
+            _build_action(
+                podcast_id,
+                episode_ref,
+                family,
+                artifact_status,
+                source_metadata,
+            )
+        ]
     ]
     blockers = [
         blocker
@@ -164,10 +175,13 @@ def _build_action(
     episode_ref: str,
     family: str,
     artifact_status: dict[str, Any],
+    source_metadata: dict[str, Any],
 ) -> CorpusRemediationAction:
     blockers = _blocking_dependencies(family, artifact_status)
     status_payload = artifact_status.get(family, {})
     source_status = _status_text(status_payload)
+    if family == "audio" and _seed_audio_unavailable(source_metadata):
+        blockers = ["feed_audio_url"]
     if blockers:
         status = "blocked"
     elif family in _GATED_FAMILIES:
@@ -182,7 +196,7 @@ def _build_action(
         action_type=_ACTION_TYPES[family],
         status=status,
         order=ARTIFACT_LADDER.index(family) + 1,
-        reason=_action_reason(family, source_status),
+        reason=_action_reason(family, source_status, source_metadata),
         blocking_artifacts=blockers,
         suggested_command=_suggested_command(podcast_id, episode_ref, family),
         manual_only=True,
@@ -217,7 +231,22 @@ def _status_text(status_payload: Any) -> str:
     return status if isinstance(status, str) and status else "missing"
 
 
-def _action_reason(family: str, source_status: str) -> str:
+def _seed_audio_unavailable(source_metadata: dict[str, Any]) -> bool:
+    episode_seed = source_metadata.get("episode_seed")
+    if not isinstance(episode_seed, dict):
+        return False
+    if episode_seed.get("status") != "available":
+        return False
+    return episode_seed.get("has_audio_url") is False
+
+
+def _action_reason(
+    family: str,
+    source_status: str,
+    source_metadata: dict[str, Any],
+) -> str:
+    if family == "audio" and _seed_audio_unavailable(source_metadata):
+        return "audio artifact is missing but feed audio is unavailable"
     if source_status == "unreadable":
         return f"{family} artifact is unreadable"
     return f"{family} artifact is missing"

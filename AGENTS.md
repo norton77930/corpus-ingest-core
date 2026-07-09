@@ -21,8 +21,8 @@ constitution -> specify -> clarify -> plan -> checklist -> tasks -> analyze -> i
 ```
 
 <!-- SPECKIT START -->
-For the active Corpus Local Transcription Runner feature, read
-[`specs/011-corpus-local-transcription-runner/plan.md`](specs/011-corpus-local-transcription-runner/plan.md)
+For the active Corpus Episode Intake Bootstrap feature, read
+[`specs/013-corpus-episode-intake-bootstrap/plan.md`](specs/013-corpus-episode-intake-bootstrap/plan.md)
 for technologies, project structure, shell commands, and implementation context.
 <!-- SPECKIT END -->
 
