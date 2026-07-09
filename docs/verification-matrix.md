@@ -40,6 +40,7 @@ python -m pytest tests/test_repository_secret_boundary.py tests/test_repository_
 | corpus artifact index | `tests/test_corpus_index.py`、`tests/test_mcp_tool_registry_contract.py`（確認 v1 不新增 MCP tool） |
 | corpus remediation plan | `tests/test_corpus_remediation_plan.py`、`tests/test_mcp_tool_registry_contract.py`（確認 plan-only v1 不新增 MCP tool、不執行 remediation） |
 | corpus remediation runner | `tests/test_corpus_remediation_runner.py`、`tests/test_corpus_remediation_plan.py`、`tests/test_corpus_index.py`、`tests/test_mcp_tool_registry_contract.py`（確認 dry-run first、confirmed filter guard、deterministic-only execution、no MCP tool change） |
+| corpus local transcription runner | `tests/test_corpus_local_transcription_runner.py`、`tests/test_corpus_remediation_plan.py`、`tests/test_corpus_index.py`、`tests/test_transcriber.py`、`tests/test_mcp_tool_registry_contract.py`（確認 dry-run first、single-episode confirm guard、explicit local audio path、no download、no MCP tool change） |
 | MCP tool 變更 | `tests/test_mcp_server.py`、`tests/test_mcp_setup_validation.py`、`tests/test_mcp_tool_registry_contract.py` + 同步 `docs/mcp-usage.md` |
 | LLM-facing 變更 | `tests/test_semantic_summarizer.py`、`tests/test_stock_lens_synthesis.py`、`tests/test_research_llm_smoke.py`、`tests/test_*_review.py`、`tests/test_llm_profiles.py`、`tests/test_local_env.py`、`tests/test_llm_ack_guard_contracts.py`、`tests/test_llm_cli_no_leak.py` |
 | side-effect workflow 變更 | `tests/test_research_workflow.py`、`tests/test_external_data_verification.py`、`tests/test_cache_rebuild_guard.py` |

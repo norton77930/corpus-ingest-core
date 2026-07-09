@@ -5,6 +5,7 @@ from .errors import (
     AudioFileMissingError,
     AudioUrlMissingError,
     CacheInitializationError,
+    CorpusLocalTranscriptionRunnerFailedError,
     CorpusIndexFailedError,
     CorpusRemediationPlanFailedError,
     CorpusRemediationRunnerFailedError,
@@ -42,6 +43,7 @@ from .cache import initialize_cache, index_episode, rebuild_cache
 from .corpus_index import generate_corpus_index
 from .corpus_remediation_plan import generate_corpus_remediation_plan
 from .corpus_remediation_runner import run_corpus_remediation
+from .corpus_local_transcription_runner import run_corpus_local_transcription
 from .entity_extractor import extract_mentions
 from .episode_intelligence import generate_episode_intelligence_report
 from .external_data_boundary import generate_external_data_boundary
@@ -64,6 +66,11 @@ from .models import (
     CorpusArtifactFamilyCounts,
     CorpusEpisodeRow,
     CorpusIndexResult,
+    CorpusLocalTranscriptionOutcomeCounts,
+    CorpusLocalTranscriptionRunFilter,
+    CorpusLocalTranscriptionRunResult,
+    CorpusLocalTranscriptionRunRow,
+    CorpusLocalTranscriptionRunWarning,
     CorpusRemediationAction,
     CorpusRemediationActionCounts,
     CorpusRemediationBlocker,
@@ -85,6 +92,12 @@ __all__ = [
     "CorpusEpisodeRow",
     "CorpusIndexFailedError",
     "CorpusIndexResult",
+    "CorpusLocalTranscriptionOutcomeCounts",
+    "CorpusLocalTranscriptionRunFilter",
+    "CorpusLocalTranscriptionRunResult",
+    "CorpusLocalTranscriptionRunnerFailedError",
+    "CorpusLocalTranscriptionRunRow",
+    "CorpusLocalTranscriptionRunWarning",
     "CorpusRemediationAction",
     "CorpusRemediationActionCounts",
     "CorpusRemediationBlocker",
@@ -134,6 +147,7 @@ __all__ = [
     "review_semantic_summary_smoke",
     "run_research_workflow",
     "run_corpus_remediation",
+    "run_corpus_local_transcription",
     "SearchError",
     "search_mentions",
     "search_transcripts",

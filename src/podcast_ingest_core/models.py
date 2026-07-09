@@ -564,6 +564,73 @@ class CorpusRemediationRunResult:
 
 
 @dataclass(frozen=True)
+class CorpusLocalTranscriptionRunFilter:
+    """Corpus local transcription runner 的單集篩選條件。"""
+
+    episode_ref: str | None
+
+
+@dataclass(frozen=True)
+class CorpusLocalTranscriptionOutcomeCounts:
+    """Corpus local transcription runner 的 outcome 彙總。"""
+
+    row_count: int
+    selected_count: int
+    executed_count: int
+    reused_count: int
+    failed_count: int
+    skipped_count: int
+    rejected_count: int
+    warning_count: int
+
+
+@dataclass(frozen=True)
+class CorpusLocalTranscriptionRunWarning:
+    """Corpus local transcription runner 的非致命警告。"""
+
+    scope: str
+    episode_ref: str | None
+    message: str
+
+
+@dataclass(frozen=True)
+class CorpusLocalTranscriptionRunRow:
+    """Corpus local transcription runner 中單一 transcript action 的 outcome 列。"""
+
+    action_id: str
+    podcast_id: str
+    episode_ref: str
+    title: str
+    transcript_status: str
+    audio_status: str
+    audio_path: str | None
+    outcome_status: str
+    reason: str
+    planned_reads: list[str]
+    planned_writes: list[str]
+    output_paths: list[str]
+    warnings: list[str]
+
+
+@dataclass(frozen=True)
+class CorpusLocalTranscriptionRunResult:
+    """Corpus local transcription runner 的 dry-run 或 confirmed 結果。"""
+
+    podcast_id: str
+    run_mode: str
+    confirm: bool
+    source_remediation_plan_json_path: Path
+    source_remediation_plan_markdown_path: Path
+    report_json_path: Path | None
+    report_markdown_path: Path | None
+    filters: CorpusLocalTranscriptionRunFilter
+    counts: CorpusLocalTranscriptionOutcomeCounts
+    rows: list[CorpusLocalTranscriptionRunRow]
+    warnings: list[CorpusLocalTranscriptionRunWarning]
+    not_investment_advice: bool
+
+
+@dataclass(frozen=True)
 class ResearchWorkflowStep:
     """Research workflow 中單一步驟的計畫或執行結果。"""
 
