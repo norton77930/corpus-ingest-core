@@ -91,6 +91,12 @@ class CorpusLocalTranscriptionRunAssetPaths:
     markdown_path: Path
 
 
+@dataclass(frozen=True)
+class CorpusAudioDownloadRunAssetPaths:
+    json_path: Path
+    markdown_path: Path
+
+
 def audio_path(podcast_id: str, episode_ref: str) -> Path:
     """回傳音檔輸出路徑。"""
 
@@ -398,6 +404,18 @@ def corpus_local_transcription_run_asset_paths(
     return CorpusLocalTranscriptionRunAssetPaths(
         json_path=base_dir / "corpus-local-transcription-run.json",
         markdown_path=base_dir / "corpus-local-transcription-run.md",
+    )
+
+
+def corpus_audio_download_run_asset_paths(
+    podcast_id: str,
+) -> CorpusAudioDownloadRunAssetPaths:
+    """回傳 corpus audio download runner report 的 JSON 與 Markdown 輸出路徑。"""
+
+    base_dir = CORPUS_DIR / _safe_slug(podcast_id, "podcast_id")
+    return CorpusAudioDownloadRunAssetPaths(
+        json_path=base_dir / "corpus-audio-download-run.json",
+        markdown_path=base_dir / "corpus-audio-download-run.md",
     )
 
 

@@ -631,6 +631,72 @@ class CorpusLocalTranscriptionRunResult:
 
 
 @dataclass(frozen=True)
+class CorpusAudioDownloadRunFilter:
+    """Corpus audio download runner 的單集篩選條件。"""
+
+    episode_ref: str | None
+
+
+@dataclass(frozen=True)
+class CorpusAudioDownloadOutcomeCounts:
+    """Corpus audio download runner 的 outcome 彙總。"""
+
+    row_count: int
+    selected_count: int
+    downloaded_count: int
+    reused_count: int
+    failed_count: int
+    skipped_count: int
+    rejected_count: int
+    warning_count: int
+
+
+@dataclass(frozen=True)
+class CorpusAudioDownloadRunWarning:
+    """Corpus audio download runner 的非致命警告。"""
+
+    scope: str
+    episode_ref: str | None
+    message: str
+
+
+@dataclass(frozen=True)
+class CorpusAudioDownloadRunRow:
+    """Corpus audio download runner 中單一 audio action 的 outcome 列。"""
+
+    action_id: str
+    podcast_id: str
+    episode_ref: str
+    audio_status: str
+    outcome_status: str
+    reason: str
+    planned_reads: list[str]
+    planned_writes: list[str]
+    local_audio_path: str | None
+    content_type: str | None
+    size_bytes: int | None
+    warnings: list[str]
+
+
+@dataclass(frozen=True)
+class CorpusAudioDownloadRunResult:
+    """Corpus audio download runner 的 dry-run 或 confirmed 結果。"""
+
+    podcast_id: str
+    run_mode: str
+    confirm: bool
+    source_remediation_plan_json_path: Path
+    source_remediation_plan_markdown_path: Path
+    report_json_path: Path | None
+    report_markdown_path: Path | None
+    filters: CorpusAudioDownloadRunFilter
+    counts: CorpusAudioDownloadOutcomeCounts
+    rows: list[CorpusAudioDownloadRunRow]
+    warnings: list[CorpusAudioDownloadRunWarning]
+    not_investment_advice: bool
+
+
+@dataclass(frozen=True)
 class ResearchWorkflowStep:
     """Research workflow 中單一步驟的計畫或執行結果。"""
 

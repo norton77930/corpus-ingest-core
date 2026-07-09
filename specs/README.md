@@ -10,7 +10,9 @@ index. Package `009` is the corpus remediation plan runtime feature built on
 top of the refreshed 008 index. Package `010` is the dry-run-first corpus
 remediation runner runtime feature built on top of the refreshed 009 plan.
 Package `011` is the dry-run-first corpus local transcription runner runtime
-feature for local-audio transcript gaps.
+feature for local-audio transcript gaps. Package `012` is the dry-run-first
+single-episode corpus audio download runner runtime feature for missing-audio
+gaps.
 
 Workflow record: constitution reviewed, no amendment. The backfill follows
 `$speckit-constitution`, `$speckit-specify`, `$speckit-clarify`,
@@ -54,6 +56,7 @@ make one package look like the only active feature.
 - `009-corpus-remediation-plan`: deterministic offline full-ladder corpus remediation/action plan.
 - `010-corpus-remediation-runner`: dry-run-first deterministic corpus remediation runner.
 - `011-corpus-local-transcription-runner`: dry-run-first single-episode local transcription runner.
+- `012-corpus-audio-download-runner`: dry-run-first single-episode audio download runner.
 
 ## roadmap phase Mapping
 
@@ -67,6 +70,7 @@ make one package look like the only active feature.
 - Corpus remediation plan runtime work maps to `009-corpus-remediation-plan`.
 - Corpus remediation runner runtime work maps to `010-corpus-remediation-runner`.
 - Corpus local transcription runner runtime work maps to `011-corpus-local-transcription-runner`.
+- Corpus audio download runner runtime work maps to `012-corpus-audio-download-runner`.
 
 ## core modules Mapping
 
@@ -80,6 +84,7 @@ make one package look like the only active feature.
 - `009`: `corpus_remediation_plan.py`, `corpus_index.py`, `storage.py`, `models.py`, `errors.py`.
 - `010`: `corpus_remediation_runner.py`, `corpus_remediation_plan.py`, `storage.py`, `models.py`, `errors.py`.
 - `011`: `corpus_local_transcription_runner.py`, `corpus_remediation_plan.py`, `transcriber.py`, `storage.py`, `models.py`, `errors.py`.
+- `012`: `corpus_audio_download_runner.py`, `corpus_remediation_plan.py`, `downloader.py`, `storage.py`, `models.py`, `errors.py`.
 
 ## CLI/scripts Mapping
 
@@ -93,6 +98,7 @@ make one package look like the only active feature.
 - `009`: `generate_corpus_remediation_plan.py`.
 - `010`: `run_corpus_remediation.py`.
 - `011`: `run_corpus_local_transcription.py`.
+- `012`: `run_corpus_audio_download.py`.
 
 ## tests Mapping
 
@@ -106,6 +112,7 @@ make one package look like the only active feature.
 - `009`: `test_corpus_remediation_plan.py`.
 - `010`: `test_corpus_remediation_runner.py`.
 - `011`: `test_corpus_local_transcription_runner.py`.
+- `012`: `test_corpus_audio_download_runner.py`.
 
 ## Classification
 
@@ -114,6 +121,7 @@ make one package look like the only active feature.
 - deterministic corpus remediation: package `009`.
 - deterministic corpus remediation runner: package `010`.
 - local transcription runner: package `011`.
+- audio download runner: package `012`.
 - optional LLM: packages `005` and `006`.
 - local fixture: package `004` and workflow integration in `005`.
 - MCP exposed: packages `003` and `005`.

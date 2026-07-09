@@ -5,6 +5,7 @@ from .errors import (
     AudioFileMissingError,
     AudioUrlMissingError,
     CacheInitializationError,
+    CorpusAudioDownloadRunnerFailedError,
     CorpusLocalTranscriptionRunnerFailedError,
     CorpusIndexFailedError,
     CorpusRemediationPlanFailedError,
@@ -44,6 +45,7 @@ from .corpus_index import generate_corpus_index
 from .corpus_remediation_plan import generate_corpus_remediation_plan
 from .corpus_remediation_runner import run_corpus_remediation
 from .corpus_local_transcription_runner import run_corpus_local_transcription
+from .corpus_audio_download_runner import run_corpus_audio_download
 from .entity_extractor import extract_mentions
 from .episode_intelligence import generate_episode_intelligence_report
 from .external_data_boundary import generate_external_data_boundary
@@ -64,6 +66,11 @@ from .transcriber import transcribe_episode
 from .validator import validate_transcript
 from .models import (
     CorpusArtifactFamilyCounts,
+    CorpusAudioDownloadOutcomeCounts,
+    CorpusAudioDownloadRunFilter,
+    CorpusAudioDownloadRunResult,
+    CorpusAudioDownloadRunRow,
+    CorpusAudioDownloadRunWarning,
     CorpusEpisodeRow,
     CorpusIndexResult,
     CorpusLocalTranscriptionOutcomeCounts,
@@ -88,6 +95,12 @@ __all__ = [
     "AudioFileMissingError",
     "AudioUrlMissingError",
     "CacheInitializationError",
+    "CorpusAudioDownloadOutcomeCounts",
+    "CorpusAudioDownloadRunFilter",
+    "CorpusAudioDownloadRunResult",
+    "CorpusAudioDownloadRunnerFailedError",
+    "CorpusAudioDownloadRunRow",
+    "CorpusAudioDownloadRunWarning",
     "CorpusArtifactFamilyCounts",
     "CorpusEpisodeRow",
     "CorpusIndexFailedError",
@@ -146,6 +159,7 @@ __all__ = [
     "review_research_llm_smoke",
     "review_semantic_summary_smoke",
     "run_research_workflow",
+    "run_corpus_audio_download",
     "run_corpus_remediation",
     "run_corpus_local_transcription",
     "SearchError",

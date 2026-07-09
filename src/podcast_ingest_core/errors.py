@@ -58,6 +58,10 @@ class CorpusLocalTranscriptionRunnerFailedError(PodcastIngestCoreError):
     """Corpus local transcription runner 選取、執行或報告寫入失敗。"""
 
 
+class CorpusAudioDownloadRunnerFailedError(PodcastIngestCoreError):
+    """Corpus audio download runner 選取、執行或報告寫入失敗。"""
+
+
 class LLMProviderConfigError(PodcastIngestCoreError):
     """LLM provider 設定不完整或不合法。"""
 
