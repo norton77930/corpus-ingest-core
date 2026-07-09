@@ -79,6 +79,12 @@ class CorpusRemediationPlanAssetPaths:
     markdown_path: Path
 
 
+@dataclass(frozen=True)
+class CorpusRemediationRunAssetPaths:
+    json_path: Path
+    markdown_path: Path
+
+
 def audio_path(podcast_id: str, episode_ref: str) -> Path:
     """回傳音檔輸出路徑。"""
 
@@ -362,6 +368,18 @@ def corpus_remediation_plan_asset_paths(
     return CorpusRemediationPlanAssetPaths(
         json_path=base_dir / "corpus-remediation-plan.json",
         markdown_path=base_dir / "corpus-remediation-plan.md",
+    )
+
+
+def corpus_remediation_run_asset_paths(
+    podcast_id: str,
+) -> CorpusRemediationRunAssetPaths:
+    """回傳 corpus remediation runner report 的 JSON 與 Markdown 輸出路徑。"""
+
+    base_dir = CORPUS_DIR / _safe_slug(podcast_id, "podcast_id")
+    return CorpusRemediationRunAssetPaths(
+        json_path=base_dir / "corpus-remediation-run.json",
+        markdown_path=base_dir / "corpus-remediation-run.md",
     )
 
 

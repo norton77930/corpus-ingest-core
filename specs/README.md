@@ -7,7 +7,8 @@ capability groups and map them to roadmap phase history, core modules,
 CLI/scripts, tests, and safety boundaries.
 Package `008` is the implemented runtime feature for the corpus artifact
 index. Package `009` is the corpus remediation plan runtime feature built on
-top of the refreshed 008 index.
+top of the refreshed 008 index. Package `010` is the dry-run-first corpus
+remediation runner runtime feature built on top of the refreshed 009 plan.
 
 Workflow record: constitution reviewed, no amendment. The backfill follows
 `$speckit-constitution`, `$speckit-specify`, `$speckit-clarify`,
@@ -49,6 +50,7 @@ make one package look like the only active feature.
 - `007-spec-kit-governance`: Spec Kit scaffold, constitution, templates, AGENTS, and docs tests.
 - `008-corpus-artifact-index`: deterministic offline per-episode corpus artifact status index.
 - `009-corpus-remediation-plan`: deterministic offline full-ladder corpus remediation/action plan.
+- `010-corpus-remediation-runner`: dry-run-first deterministic corpus remediation runner.
 
 ## roadmap phase Mapping
 
@@ -60,6 +62,7 @@ make one package look like the only active feature.
 - Phase 7A-7D.1 map to `007-spec-kit-governance`.
 - Corpus artifact index runtime work maps to `008-corpus-artifact-index`.
 - Corpus remediation plan runtime work maps to `009-corpus-remediation-plan`.
+- Corpus remediation runner runtime work maps to `010-corpus-remediation-runner`.
 
 ## core modules Mapping
 
@@ -71,6 +74,7 @@ make one package look like the only active feature.
 - `007`: `.specify/memory/constitution.md`, `.specify/templates/`, `.agents/skills/`, `AGENTS.md`.
 - `008`: `corpus_index.py`, `storage.py`, `models.py`, `errors.py`.
 - `009`: `corpus_remediation_plan.py`, `corpus_index.py`, `storage.py`, `models.py`, `errors.py`.
+- `010`: `corpus_remediation_runner.py`, `corpus_remediation_plan.py`, `storage.py`, `models.py`, `errors.py`.
 
 ## CLI/scripts Mapping
 
@@ -82,6 +86,7 @@ make one package look like the only active feature.
 - `007`: no runtime CLI changes.
 - `008`: `generate_corpus_index.py`.
 - `009`: `generate_corpus_remediation_plan.py`.
+- `010`: `run_corpus_remediation.py`.
 
 ## tests Mapping
 
@@ -93,12 +98,14 @@ make one package look like the only active feature.
 - `007`: `test_architecture_spec_docs.py`, `test_spec_kit_bootstrap.py`, `test_spec_kit_constitution.py`, `test_spec_kit_backfill_docs.py`.
 - `008`: `test_corpus_index.py`.
 - `009`: `test_corpus_remediation_plan.py`.
+- `010`: `test_corpus_remediation_runner.py`.
 
 ## Classification
 
 - deterministic: packages `002`, `003`, `004`, `005`, and `007`.
 - deterministic corpus status: package `008`.
 - deterministic corpus remediation: package `009`.
+- deterministic corpus remediation runner: package `010`.
 - optional LLM: packages `005` and `006`.
 - local fixture: package `004` and workflow integration in `005`.
 - MCP exposed: packages `003` and `005`.

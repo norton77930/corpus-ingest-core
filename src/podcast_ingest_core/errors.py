@@ -50,6 +50,10 @@ class CorpusRemediationPlanFailedError(PodcastIngestCoreError):
     """Corpus remediation plan 產生或輸出寫入失敗。"""
 
 
+class CorpusRemediationRunnerFailedError(PodcastIngestCoreError):
+    """Corpus remediation runner 選取、執行或報告寫入失敗。"""
+
+
 class LLMProviderConfigError(PodcastIngestCoreError):
     """LLM provider 設定不完整或不合法。"""
 

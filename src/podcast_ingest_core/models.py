@@ -494,6 +494,76 @@ class CorpusRemediationPlanResult:
 
 
 @dataclass(frozen=True)
+class CorpusRemediationRunFilter:
+    """Corpus remediation runner 的選取篩選條件。"""
+
+    episode_ref: str | None
+    action_family: str | None
+    max_actions: int | None
+
+
+@dataclass(frozen=True)
+class CorpusRemediationRunCounts:
+    """Corpus remediation runner 的 outcome 彙總。"""
+
+    row_count: int
+    selected_count: int
+    executed_count: int
+    reused_count: int
+    failed_count: int
+    skipped_count: int
+    blocked_count: int
+    excluded_count: int
+    warning_count: int
+
+
+@dataclass(frozen=True)
+class CorpusRemediationRunWarning:
+    """Corpus remediation runner 的非致命警告。"""
+
+    scope: str
+    episode_ref: str | None
+    artifact_family: str | None
+    message: str
+
+
+@dataclass(frozen=True)
+class CorpusRemediationRunRow:
+    """Corpus remediation runner 中單一 action 的 outcome 列。"""
+
+    action_id: str
+    podcast_id: str
+    episode_ref: str
+    title: str
+    artifact_family: str
+    source_status: str
+    outcome_status: str
+    reason: str
+    planned_reads: list[str]
+    planned_writes: list[str]
+    output_paths: list[str]
+    warnings: list[str]
+
+
+@dataclass(frozen=True)
+class CorpusRemediationRunResult:
+    """Corpus remediation runner 的 dry-run 或 confirmed 結果。"""
+
+    podcast_id: str
+    run_mode: str
+    confirm: bool
+    source_remediation_plan_json_path: Path
+    source_remediation_plan_markdown_path: Path
+    report_json_path: Path | None
+    report_markdown_path: Path | None
+    filters: CorpusRemediationRunFilter
+    counts: CorpusRemediationRunCounts
+    rows: list[CorpusRemediationRunRow]
+    warnings: list[CorpusRemediationRunWarning]
+    not_investment_advice: bool
+
+
+@dataclass(frozen=True)
 class ResearchWorkflowStep:
     """Research workflow 中單一步驟的計畫或執行結果。"""
 
