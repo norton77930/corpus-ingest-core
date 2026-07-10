@@ -66,6 +66,10 @@ class CorpusEpisodeIntakeFailedError(PodcastIngestCoreError):
     """Corpus episode intake bootstrap selection or report writing failed."""
 
 
+class CorpusEpisodeWorkflowRunnerFailedError(PodcastIngestCoreError):
+    """Corpus episode workflow runner selection, execution, or reporting failed."""
+
+
 class LLMProviderConfigError(PodcastIngestCoreError):
     """LLM provider 設定不完整或不合法。"""
 

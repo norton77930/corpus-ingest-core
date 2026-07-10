@@ -103,6 +103,12 @@ class CorpusEpisodeIntakeRunAssetPaths:
     markdown_path: Path
 
 
+@dataclass(frozen=True)
+class CorpusEpisodeWorkflowRunAssetPaths:
+    json_path: Path
+    markdown_path: Path
+
+
 def audio_path(podcast_id: str, episode_ref: str) -> Path:
     """回傳音檔輸出路徑。"""
 
@@ -445,6 +451,18 @@ def corpus_episode_intake_run_asset_paths(
     return CorpusEpisodeIntakeRunAssetPaths(
         json_path=base_dir / "corpus-episode-intake-run.json",
         markdown_path=base_dir / "corpus-episode-intake-run.md",
+    )
+
+
+def corpus_episode_workflow_run_asset_paths(
+    podcast_id: str,
+) -> CorpusEpisodeWorkflowRunAssetPaths:
+    """Return corpus episode workflow latest JSON and Markdown report paths."""
+
+    base_dir = CORPUS_DIR / _safe_slug(podcast_id, "podcast_id")
+    return CorpusEpisodeWorkflowRunAssetPaths(
+        json_path=base_dir / "corpus-episode-workflow-run.json",
+        markdown_path=base_dir / "corpus-episode-workflow-run.md",
     )
 
 

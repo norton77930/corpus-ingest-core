@@ -784,6 +784,75 @@ class CorpusEpisodeIntakeRunResult:
 
 
 @dataclass(frozen=True)
+class CorpusEpisodeWorkflowRunFilter:
+    """Corpus fresh episode workflow runner selector options."""
+
+    episode_ref: str
+    stage: str
+    max_actions: int | None
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeWorkflowRunCounts:
+    """Corpus fresh episode workflow runner outcome counts."""
+
+    row_count: int
+    selected_count: int
+    executed_count: int
+    reused_count: int
+    failed_count: int
+    skipped_count: int
+    blocked_count: int
+    rejected_count: int
+    manual_only_count: int
+    warning_count: int
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeWorkflowRunWarning:
+    """Corpus fresh episode workflow runner non-fatal warning."""
+
+    scope: str
+    episode_ref: str | None
+    message: str
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeWorkflowRunRow:
+    """One selected, executed, skipped, blocked, or manual-only workflow stage."""
+
+    stage: str
+    status: str
+    reason: str
+    planned_reads: list[str]
+    planned_writes: list[str]
+    output_paths: list[str]
+    source_report_paths: list[str]
+    stage_counts: dict[str, int]
+    warnings: list[str]
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeWorkflowRunResult:
+    """Corpus fresh episode workflow runner dry-run or confirmed result."""
+
+    podcast_id: str
+    run_mode: str
+    confirm: bool
+    selector: str
+    episode_ref: str | None
+    stage: str
+    selected_stage: str
+    report_json_path: Path | None
+    report_markdown_path: Path | None
+    filters: CorpusEpisodeWorkflowRunFilter
+    counts: CorpusEpisodeWorkflowRunCounts
+    rows: list[CorpusEpisodeWorkflowRunRow]
+    warnings: list[CorpusEpisodeWorkflowRunWarning]
+    not_investment_advice: bool
+
+
+@dataclass(frozen=True)
 class ResearchWorkflowStep:
     """Research workflow 中單一步驟的計畫或執行結果。"""
 

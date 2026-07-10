@@ -21,8 +21,8 @@ constitution -> specify -> clarify -> plan -> checklist -> tasks -> analyze -> i
 ```
 
 <!-- SPECKIT START -->
-For the active Corpus Episode Intake Bootstrap feature, read
-[`specs/013-corpus-episode-intake-bootstrap/plan.md`](specs/013-corpus-episode-intake-bootstrap/plan.md)
+For the active Corpus Fresh Episode Workflow Runner feature, read
+[`specs/014-corpus-fresh-episode-workflow-runner/plan.md`](specs/014-corpus-fresh-episode-workflow-runner/plan.md)
 for technologies, project structure, shell commands, and implementation context.
 <!-- SPECKIT END -->
 
