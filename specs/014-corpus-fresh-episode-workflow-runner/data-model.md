@@ -23,8 +23,20 @@ Validation rules:
 - `podcast_id` must be non-empty.
 - missing or blank selector becomes `latest`.
 - v1 rejects any stage other than `next`.
-- dry-run report paths are null and no workflow report is written.
+- 014 dry-run report paths are null and the complete local tree is unchanged: no seed, audio, transcript, index, plan, 010-014 report, downstream artifact, or `.part` file is created, modified, or deleted.
 - confirmed attempts write latest deterministic workflow reports.
+
+## Package-Private Snapshot Provenance
+
+`_CorpusIndexSnapshot` and `_CorpusRemediationPlanSnapshot` are internal computation carriers, not public result-model fields.
+
+Fields:
+- `result`: the existing typed 008 or 009 result metadata.
+- `payload`: JSON-compatible index or remediation-plan data used by previews.
+- `markdown`: deterministic rendering retained for the public persist boundary.
+
+014 passes the same plan result/payload to all seeded previews with `source_persisted=False`. Standalone 010-012 entry points pass `source_persisted=True` after their existing public 008/009 refresh. Neither value is added to public models, CLI JSON, exports, or artifact schemas.
+
 
 ## Workflow Stage Row
 
@@ -34,7 +46,7 @@ Fields:
 - `stage`: stage family name.
 - `status`: `selected`, `executed`, `reused`, `failed`, `skipped`, `blocked`, `rejected`, `manual_only`, or `completed`.
 - `reason`: bounded reason text.
-- `planned_reads`: metadata-only planned read paths or source labels.
+- `planned_reads`: metadata-only safe local paths or the exact labels `configured podcast RSS feed` and `in-memory corpus snapshot`; unpersisted snapshots must not invent a disk plan path.
 - `planned_writes`: metadata-only planned write paths.
 - `output_paths`: paths written or reused by the selected stage when known.
 - `source_report_paths`: report paths from the selected existing runner when known.

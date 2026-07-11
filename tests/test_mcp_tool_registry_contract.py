@@ -47,7 +47,9 @@ def _registered_tool_names() -> set[str]:
 
 
 def test_mcp_registry_exposes_exactly_the_reviewed_tool_set():
-    assert _registered_tool_names() == EXPECTED_TOOLS
+    actual = _registered_tool_names()
+    assert len(actual) == 12
+    assert actual == EXPECTED_TOOLS
 
 
 def test_side_effect_tools_default_to_dry_run_confirm_false():

@@ -7,10 +7,21 @@ import re
 from typing import Any
 
 from . import storage
-from .corpus_audio_download_runner import run_corpus_audio_download
+from .corpus_audio_download_runner import (
+    _preview_corpus_audio_download_from_plan,
+    run_corpus_audio_download,
+)
 from .corpus_episode_intake import run_corpus_episode_intake
-from .corpus_local_transcription_runner import run_corpus_local_transcription
-from .corpus_remediation_runner import run_corpus_remediation
+from .corpus_index import _build_corpus_index_snapshot
+from .corpus_local_transcription_runner import (
+    _preview_corpus_local_transcription_from_plan,
+    run_corpus_local_transcription,
+)
+from .corpus_remediation_plan import _build_corpus_remediation_plan_snapshot
+from .corpus_remediation_runner import (
+    _preview_corpus_remediation_from_plan,
+    run_corpus_remediation,
+)
 from .errors import CorpusEpisodeWorkflowRunnerFailedError
 from .models import (
     CorpusEpisodeWorkflowRunCounts,
@@ -32,6 +43,15 @@ STAGE_DETERMINISTIC_REMEDIATION = "deterministic_remediation"
 STAGE_COMPLETED = "completed"
 STAGE_BLOCKED = "blocked"
 
+_PLANNED_READ_CONFIGURED_RSS_FEED = "configured podcast RSS feed"
+_PLANNED_READ_IN_MEMORY_CORPUS_SNAPSHOT = "in-memory corpus snapshot"
+_ALLOWED_PLANNED_READ_LABELS = frozenset(
+    {
+        _PLANNED_READ_CONFIGURED_RSS_FEED,
+        _PLANNED_READ_IN_MEMORY_CORPUS_SNAPSHOT,
+    }
+)
+
 _EXECUTABLE_STAGES = {
     STAGE_INTAKE,
     STAGE_AUDIO_DOWNLOAD,
@@ -44,7 +64,9 @@ _URI_SCHEME_PATTERN = re.compile(r'^[A-Za-z][A-Za-z0-9+.-]*://')
 _SAFE_FILENAME_PATTERN = re.compile(
     r'^[^<>:/\\|?*\x00-\x1f]+\.[A-Za-z0-9]{1,16}$'
 )
-_SAFE_PATH_COMPONENT_PATTERN = re.compile(r'^[A-Za-z0-9._-]+$')
+# CJK Unified Ideographs (U+4E00-U+9FFF) are allowed to match storage.title_slug,
+# which deliberately preserves them; ASCII-only would drop legal CJK artifact paths.
+_SAFE_PATH_COMPONENT_PATTERN = re.compile(r'^[A-Za-z0-9._一-鿿-]+$')
 _WORKFLOW_ROW_REASONS = frozenset(
     {
         'episode selector could not be resolved',
@@ -234,10 +256,22 @@ def _select_next_stage(
         }
 
     try:
-        audio_result = run_corpus_audio_download(
+        index_snapshot = _build_corpus_index_snapshot(podcast_id)
+        plan_snapshot = _build_corpus_remediation_plan_snapshot(
             podcast_id,
+            index_result=index_snapshot.result,
+            index_payload=index_snapshot.payload,
+        )
+    except Exception as exc:  # noqa: BLE001 - keep snapshot failures bounded.
+        return _probe_failure(STAGE_AUDIO_DOWNLOAD, episode_ref, exc)
+
+    try:
+        audio_result = _preview_corpus_audio_download_from_plan(
+            podcast_id,
+            plan_result=plan_snapshot.result,
+            plan_payload=plan_snapshot.payload,
             episode_ref=episode_ref,
-            confirm=False,
+            source_persisted=False,
         )
     except Exception as exc:  # noqa: BLE001 - keep probe failures bounded.
         return _probe_failure(STAGE_AUDIO_DOWNLOAD, episode_ref, exc)
@@ -266,10 +300,12 @@ def _select_next_stage(
         }
 
     try:
-        transcription_result = run_corpus_local_transcription(
+        transcription_result = _preview_corpus_local_transcription_from_plan(
             podcast_id,
+            plan_result=plan_snapshot.result,
+            plan_payload=plan_snapshot.payload,
             episode_ref=episode_ref,
-            confirm=False,
+            source_persisted=False,
         )
     except Exception as exc:  # noqa: BLE001 - keep probe failures bounded.
         return _probe_failure(STAGE_LOCAL_TRANSCRIPTION, episode_ref, exc)
@@ -298,21 +334,23 @@ def _select_next_stage(
         }
 
     try:
-        remediation_result = run_corpus_remediation(
+        remediation_result = _preview_corpus_remediation_from_plan(
             podcast_id,
-            confirm=False,
+            plan_result=plan_snapshot.result,
+            plan_payload=plan_snapshot.payload,
             episode_ref=episode_ref,
+            action_family=None,
             max_actions=max_actions,
+            source_persisted=False,
         )
     except Exception as exc:  # noqa: BLE001 - keep probe failures bounded.
         return _probe_failure(STAGE_DETERMINISTIC_REMEDIATION, episode_ref, exc)
-    terminal_selection = _returned_terminal_selection(
-        STAGE_DETERMINISTIC_REMEDIATION,
-        episode_ref,
-        remediation_result,
-    )
-    if terminal_selection is not None:
-        return terminal_selection
+    # Ready deterministic actions take precedence over dependency-chain blocked
+    # families: a fresh transcript always has downstream families (industry_mapping,
+    # external_boundary, semantic_review) blocked on not-yet-built upstream, while
+    # extractive_summary/mentions/episode_intelligence are ready. Select remediation
+    # so the confirmed run executes the ready families; only fail closed as blocked
+    # when no ready action remains (e.g. only the LLM-gated family is left).
     remediation_selected = _first_status_row(remediation_result, "selected")
     if remediation_selected is not None:
         return {
@@ -329,6 +367,13 @@ def _select_next_stage(
             ],
             "warnings": [],
         }
+    terminal_selection = _returned_terminal_selection(
+        STAGE_DETERMINISTIC_REMEDIATION,
+        episode_ref,
+        remediation_result,
+    )
+    if terminal_selection is not None:
+        return terminal_selection
 
     blocked_row = _first_status_row(remediation_result, "blocked")
     if blocked_row is not None:
@@ -363,7 +408,7 @@ def _select_next_stage(
         stage=STAGE_COMPLETED,
         status="completed",
         reason="no executable safe workflow stage remains",
-        planned_reads=[],
+        planned_reads=[_PLANNED_READ_IN_MEMORY_CORPUS_SNAPSHOT],
         planned_writes=[],
         output_paths=[],
         source_report_paths=_source_report_paths(remediation_result),
@@ -449,12 +494,10 @@ def _execute_selected_stage(
             warnings=[f"stage failed: {_safe_exception_category(exc)}"],
         )
 
-    return _stage_row(
+    return _confirmed_stage_row(
         stage=selected_stage,
-        status=_confirmed_status(result),
-        reason=f"{selected_stage} {_confirmed_status(result)}",
-        source_result=result,
-        source_row=_first_row(result),
+        episode_ref=episode_ref,
+        result=result,
     )
 
 
@@ -511,25 +554,69 @@ def _probe_failure(
     }
 
 
-def _confirmed_status(result: Any) -> str:
-    counts = getattr(result, "counts", None)
-    if counts is None:
-        return "completed"
-    if getattr(counts, "failed_count", 0):
+def _rows_for_episode(result: Any, episode_ref: str | None) -> list[Any]:
+    rows = list(getattr(result, "rows", []) or [])
+    if episode_ref is None:
+        return rows
+    return [row for row in rows if getattr(row, "episode_ref", None) == episode_ref]
+
+
+def _confirmed_status_from_rows(rows: list[Any]) -> str:
+    # A positive execution outcome for the target episode wins over the benign
+    # residual outcomes that always accompany it in a multi-family stage. When 014
+    # dispatches 010, the confirmed result mixes the executed ready family with
+    # siblings that are "rejected" (transcription: action outside this stage),
+    # "blocked" (a still-gated ladder family such as the LLM semantic_review), or
+    # "skipped" — none of which should mask the executed work. Only a real "failed"
+    # outranks an execution.
+    statuses = {getattr(row, "outcome_status", None) for row in rows}
+    if "failed" in statuses:
         return "failed"
-    if getattr(counts, "rejected_count", 0):
-        return "rejected"
-    if getattr(counts, "blocked_count", 0):
-        return "blocked"
-    if getattr(counts, "executed_count", 0) or getattr(counts, "downloaded_count", 0):
+    if statuses & {"executed", "downloaded", "seeded"}:
         return "executed"
-    if getattr(counts, "seeded_count", 0):
-        return "executed"
-    if getattr(counts, "reused_count", 0):
+    if "reused" in statuses:
         return "reused"
-    if getattr(counts, "skipped_count", 0):
+    if "blocked" in statuses:
+        return "blocked"
+    if "rejected" in statuses:
+        return "rejected"
+    if "skipped" in statuses:
         return "skipped"
     return "completed"
+
+
+def _collect_row_paths(rows: list[Any], field: str) -> list[str]:
+    collected: list[str] = []
+    for row in rows:
+        for value in getattr(row, field, []) or []:
+            if value not in collected:
+                collected.append(value)
+    return collected
+
+
+def _confirmed_stage_row(
+    *,
+    stage: str,
+    episode_ref: str | None,
+    result: Any,
+) -> CorpusEpisodeWorkflowRunRow:
+    episode_rows = _rows_for_episode(result, episode_ref)
+    status = _confirmed_status_from_rows(episode_rows)
+    reason = _workflow_owned_reason(stage, status, f"{stage} {status}")
+    return CorpusEpisodeWorkflowRunRow(
+        stage=stage,
+        status=status,
+        reason=_safe_message(reason, "reason omitted by safety boundary"),
+        planned_reads=_safe_list(
+            _collect_row_paths(episode_rows, "planned_reads"),
+            allowed_labels=_ALLOWED_PLANNED_READ_LABELS,
+        ),
+        planned_writes=_safe_list(_collect_row_paths(episode_rows, "planned_writes")),
+        output_paths=_safe_list(_collect_row_paths(episode_rows, "output_paths")),
+        source_report_paths=_source_report_paths(result),
+        stage_counts=_stage_counts(result),
+        warnings=[],
+    )
 
 
 def _stage_row(
@@ -549,7 +636,10 @@ def _stage_row(
         stage=stage,
         status=status,
         reason=_safe_message(reason, "reason omitted by safety boundary"),
-        planned_reads=_safe_list(getattr(source_row, "planned_reads", [])),
+        planned_reads=_safe_list(
+            getattr(source_row, "planned_reads", []),
+            allowed_labels=_ALLOWED_PLANNED_READ_LABELS,
+        ),
         planned_writes=_safe_list(getattr(source_row, "planned_writes", [])),
         output_paths=_safe_list(getattr(source_row, "output_paths", [])),
         source_report_paths=_source_report_paths(source_result),
@@ -834,10 +924,19 @@ def _safe_exception_category(exc: Exception) -> str:
     return _safe_message(type(exc).__name__, "stage_dependency_error")
 
 
-def _safe_list(values: Any) -> list[str]:
+def _safe_list(
+    values: Any,
+    *,
+    allowed_labels: frozenset[str] | None = None,
+) -> list[str]:
     if not isinstance(values, list):
         return []
-    values = [value for value in values if _is_safe_local_path(value)]
+    labels = allowed_labels or frozenset()
+    values = [
+        value
+        for value in values
+        if value in labels or _is_safe_local_path(value)
+    ]
     return [
         _safe_message(str(value), "metadata omitted by safety boundary")
         for value in values

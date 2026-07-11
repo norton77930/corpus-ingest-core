@@ -83,6 +83,9 @@ def test_registry_documents_official_active_feature_selection_for_backfilled_spe
         "SPECIFY_FEATURE_DIRECTORY",
         "$env:SPECIFY_FEATURE_DIRECTORY=\"specs/003-metadata-search-mcp-core\"",
         ".specify/feature.json",
+        "local-only",
+        "gitignored",
+        "untracked",
         "check-prerequisites.ps1",
         "backfilled packages do not pin a single active feature by default",
     ]:

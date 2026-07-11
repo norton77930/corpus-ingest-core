@@ -239,3 +239,38 @@ def test_c1_docs_drift_remediation_current_status_and_batch_traceability():
 
     # specs registry maps the Batch guard tests to their safety boundaries.
     assert "Batch Guard Tests" in specs_readme
+
+
+def test_014_stabilization_docs_define_strict_zero_file_dry_run():
+    feature = ROOT / "specs" / "014-corpus-fresh-episode-workflow-runner"
+    spec = _read(feature / "spec.md")
+    package_docs = "\n".join(
+        _read(path)
+        for path in [
+            feature / "spec.md",
+            feature / "plan.md",
+            feature / "research.md",
+            feature / "data-model.md",
+            feature / "contracts" / "corpus-episode-workflow-runner.md",
+            feature / "quickstart.md",
+            feature / "checklists" / "safety.md",
+        ]
+    )
+
+    assert "creates, modifies, or deletes zero files" in spec
+    for phrase in [
+        "in-memory corpus snapshot",
+        "configured podcast RSS feed",
+        "source_persisted=False",
+        "standalone 010-012",
+    ]:
+        assert phrase in package_docs
+
+    direct_docs = [
+        _read(ROOT / "README.md"),
+        _read(ROOT / "specs" / "README.md"),
+        _read(DOCS / "architecture.md"),
+        _read(DOCS / "verification-matrix.md"),
+    ]
+    assert all("zero-file" in text for text in direct_docs)
+    matrix = direct_docs[-1]

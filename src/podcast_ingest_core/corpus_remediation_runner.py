@@ -18,6 +18,7 @@ from .models import (
     CorpusRemediationRunResult,
     CorpusRemediationRunRow,
     CorpusRemediationRunWarning,
+    CorpusRemediationPlanResult,
 )
 from .summarizer import summarize_episode
 
@@ -91,6 +92,17 @@ def run_corpus_remediation(
 
     source_result = generate_corpus_remediation_plan(podcast_id)
     plan_payload = _load_plan_payload(source_result.plan_json_path)
+    if not confirm:
+        return _preview_corpus_remediation_from_plan(
+            podcast_id,
+            plan_result=source_result,
+            plan_payload=plan_payload,
+            episode_ref=episode_ref,
+            action_family=action_family,
+            max_actions=max_actions,
+            source_persisted=True,
+        )
+
     filters = CorpusRemediationRunFilter(
         episode_ref=episode_ref,
         action_family=action_family,
@@ -100,42 +112,76 @@ def run_corpus_remediation(
         podcast_id=podcast_id,
         plan_payload=plan_payload,
         filters=filters,
+        source_plan_reads=[],
     )
-
-    if confirm and not (episode_ref or action_family):
+    if not (episode_ref or action_family):
         raise CorpusRemediationRunnerFailedError(
             "confirm requires episode or action_family"
         )
 
-    run_mode = RUN_MODE_CONFIRMED if confirm else RUN_MODE_DRY_RUN
-    report_paths = (
-        storage.corpus_remediation_run_asset_paths(podcast_id) if confirm else None
+    rows = _execute_selected_rows(
+        rows=rows,
+        selected_action_ids=selected_action_ids,
+        force=force,
+        allow_partial=allow_partial,
     )
-    if confirm:
-        rows = _execute_selected_rows(
-            rows=rows,
-            selected_action_ids=selected_action_ids,
-            force=force,
-            allow_partial=allow_partial,
-        )
-
+    report_paths = storage.corpus_remediation_run_asset_paths(podcast_id)
     result = CorpusRemediationRunResult(
         podcast_id=podcast_id,
-        run_mode=run_mode,
-        confirm=confirm,
+        run_mode=RUN_MODE_CONFIRMED,
+        confirm=True,
         source_remediation_plan_json_path=source_result.plan_json_path,
         source_remediation_plan_markdown_path=source_result.plan_markdown_path,
-        report_json_path=report_paths.json_path if report_paths else None,
-        report_markdown_path=report_paths.markdown_path if report_paths else None,
+        report_json_path=report_paths.json_path,
+        report_markdown_path=report_paths.markdown_path,
         filters=filters,
         counts=_counts(rows, selected_action_ids),
         rows=rows,
         warnings=[],
         not_investment_advice=True,
     )
-    if confirm:
-        _write_run_report(result)
+    _write_run_report(result)
     return result
+
+
+def _preview_corpus_remediation_from_plan(
+    podcast_id: str,
+    *,
+    plan_result: CorpusRemediationPlanResult,
+    plan_payload: dict[str, Any],
+    episode_ref: str | None,
+    action_family: str | None,
+    max_actions: int | None,
+    source_persisted: bool,
+) -> CorpusRemediationRunResult:
+    if max_actions is not None and max_actions <= 0:
+        raise CorpusRemediationRunnerFailedError("max_actions must be positive")
+    filters = CorpusRemediationRunFilter(
+        episode_ref=episode_ref,
+        action_family=action_family,
+        max_actions=max_actions,
+    )
+    source_plan_reads = [] if source_persisted else ["in-memory corpus snapshot"]
+    rows, selected_action_ids = _select_rows(
+        podcast_id=podcast_id,
+        plan_payload=plan_payload,
+        filters=filters,
+        source_plan_reads=source_plan_reads,
+    )
+    return CorpusRemediationRunResult(
+        podcast_id=podcast_id,
+        run_mode=RUN_MODE_DRY_RUN,
+        confirm=False,
+        source_remediation_plan_json_path=plan_result.plan_json_path,
+        source_remediation_plan_markdown_path=plan_result.plan_markdown_path,
+        report_json_path=None,
+        report_markdown_path=None,
+        filters=filters,
+        counts=_counts(rows, selected_action_ids),
+        rows=rows,
+        warnings=[],
+        not_investment_advice=True,
+    )
 
 
 def result_to_dict(result: CorpusRemediationRunResult) -> dict[str, Any]:
@@ -179,6 +225,7 @@ def _select_rows(
     podcast_id: str,
     plan_payload: dict[str, Any],
     filters: CorpusRemediationRunFilter,
+    source_plan_reads: list[str],
 ) -> tuple[list[CorpusRemediationRunRow], set[str]]:
     rows: list[CorpusRemediationRunRow] = []
     selected_action_ids: set[str] = set()
@@ -193,7 +240,11 @@ def _select_rows(
             family = _safe_text(action_payload.get("artifact_family"), "unknown")
             source_status = _safe_text(action_payload.get("status"), "unknown")
             action_id = _safe_text(action_payload.get("action_id"), f"{episode_ref}:{family}")
-            planned_reads = _planned_reads(family, artifact_status)
+            planned_reads = _planned_reads(
+                family,
+                artifact_status,
+                source_plan_reads=source_plan_reads,
+            )
             planned_writes = _planned_writes(podcast_id, episode_ref, title, family)
             outcome_status, reason = _initial_outcome(
                 action_payload=action_payload,
@@ -244,6 +295,10 @@ def _initial_outcome(
 ) -> tuple[str, str]:
     family = _safe_text(action_payload.get("artifact_family"), "unknown")
     source_status = _safe_text(action_payload.get("status"), "unknown")
+    if filters.episode_ref is not None and filters.episode_ref != _safe_text(
+        action_payload.get("action_id"), ""
+    ).split(":", 1)[0]:
+        return "skipped", "episode filter does not match"
     if source_status == "blocked":
         blockers = ", ".join(
             item
@@ -255,10 +310,6 @@ def _initial_outcome(
         return "excluded", _excluded_reason(family)
     if source_status != "ready":
         return "skipped", f"source action status is {source_status}"
-    if filters.episode_ref is not None and filters.episode_ref != _safe_text(
-        action_payload.get("action_id"), ""
-    ).split(":", 1)[0]:
-        return "skipped", "episode filter does not match"
     if filters.action_family is not None and filters.action_family != family:
         return "skipped", "action_family filter does not match"
     if filters.max_actions is not None and selected_count >= filters.max_actions:
@@ -403,7 +454,12 @@ def _counts(
     )
 
 
-def _planned_reads(family: str, artifact_status: dict[str, Any]) -> list[str]:
+def _planned_reads(
+    family: str,
+    artifact_status: dict[str, Any],
+    *,
+    source_plan_reads: list[str],
+) -> list[str]:
     dependency_paths: dict[str, tuple[str, ...]] = {
         "extractive_summary": ("transcript",),
         "mentions": ("transcript",),
@@ -422,7 +478,7 @@ def _planned_reads(family: str, artifact_status: dict[str, Any]) -> list[str]:
         path = status_payload.get("path")
         if isinstance(path, str):
             reads.append(path)
-    return sorted(dict.fromkeys(reads))
+    return [*source_plan_reads, *sorted(dict.fromkeys(reads))]
 
 
 def _planned_writes(

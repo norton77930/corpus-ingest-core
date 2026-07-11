@@ -33,6 +33,7 @@ EXCLUDED_DIR_NAMES = {
 }
 # Relative path prefixes (posix style) that are local-only per .gitignore.
 EXCLUDED_PREFIXES = ("evals/research-llm-smoke/raw/",)
+EXCLUDED_RELATIVE_PATHS = {".specify/feature.json"}
 BINARY_SUFFIXES = {".mp3", ".wav", ".sqlite3", ".pyc", ".png", ".jpg", ".jpeg", ".gif", ".zip"}
 
 SECRET_KEY_PATTERN = re.compile(r"sk-[A-Za-z0-9_-]{8,}")
@@ -56,6 +57,8 @@ def _scannable_files() -> list[Path]:
         if any(part in EXCLUDED_DIR_NAMES for part in relative.parts):
             continue
         posix = relative.as_posix()
+        if posix in EXCLUDED_RELATIVE_PATHS:
+            continue
         if posix.startswith(EXCLUDED_PREFIXES):
             continue
         # Never read the local-only .env file (or any .env.* variant except
@@ -85,6 +88,7 @@ def test_scan_covers_expected_repo_surface():
     # ...and must never include the local-only .env or data artifacts.
     assert ".env" not in files
     assert not any(name.startswith("data/") for name in files)
+    assert ".specify/feature.json" not in files
     assert not any(name.startswith("evals/research-llm-smoke/raw/") for name in files)
 
 

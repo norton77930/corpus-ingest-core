@@ -58,11 +58,25 @@ def _is_ignored(path: str) -> bool:
     return result.returncode == 0
 
 
+def _is_tracked(path: str) -> bool:
+    result = subprocess.run(
+        ["git", "ls-files", "--error-unmatch", "--", path],
+        cwd=ROOT,
+        capture_output=True,
+        timeout=30,
+    )
+    if result.returncode not in (0, 1):
+        pytest.fail(f"git ls-files failed for {path}: {result.stderr!r}")
+    return result.returncode == 0
+
+
 IGNORED_LOCAL_ONLY_PATHS = [
     # local secrets
     ".env",
     ".env.local",
     ".env.backup",
+    # local Spec Kit active-feature selection
+    ".specify/feature.json",
     # local-only LLM provider profiles (endpoints must not be committed)
     "config/llm_profiles.local.yaml",
     "config/anything.local.yaml",
@@ -96,6 +110,10 @@ COMMITTED_TEMPLATE_PATHS = [
 @pytest.mark.parametrize("path", IGNORED_LOCAL_ONLY_PATHS)
 def test_local_only_path_is_ignored(path):
     assert _is_ignored(path), f"{path} must be gitignored (local-only or generated)"
+
+@requires_git
+def test_specify_feature_selection_file_is_untracked():
+    assert not _is_tracked(".specify/feature.json")
 
 
 @requires_git

@@ -376,6 +376,45 @@ def test_corpus_remediation_public_result_contract_exports(tmp_path):
     assert callable(generate_corpus_remediation_plan)
 
 
+def test_corpus_remediation_plan_snapshot_builds_without_writes_until_persisted(
+    monkeypatch, tmp_path
+):
+    from podcast_ingest_core import storage
+    import podcast_ingest_core.corpus_index as corpus_index
+    import podcast_ingest_core.corpus_remediation_plan as remediation_plan
+
+    _write_episode_seed(monkeypatch, tmp_path)
+    index_paths = storage.corpus_index_asset_paths("gooaye")
+    plan_paths = storage.corpus_remediation_plan_asset_paths("gooaye")
+    index_snapshot = corpus_index._build_corpus_index_snapshot("gooaye")
+
+    snapshot = remediation_plan._build_corpus_remediation_plan_snapshot(
+        "gooaye",
+        index_result=index_snapshot.result,
+        index_payload=index_snapshot.payload,
+    )
+
+    assert snapshot.result.podcast_id == "gooaye"
+    assert snapshot.result.plan_json_path == plan_paths.json_path
+    assert snapshot.payload["episodes"][0]["episode_ref"] == "EP677"
+    assert snapshot.markdown.startswith("# Corpus Remediation Plan")
+    assert not index_paths.json_path.exists()
+    assert not index_paths.markdown_path.exists()
+    assert not plan_paths.json_path.exists()
+    assert not plan_paths.markdown_path.exists()
+    assert not list(plan_paths.json_path.parent.glob("*.part"))
+
+    result = remediation_plan._persist_corpus_remediation_plan_snapshot(snapshot)
+
+    assert result is snapshot.result
+    assert not index_paths.json_path.exists()
+    assert not index_paths.markdown_path.exists()
+    assert plan_paths.json_path.exists()
+    assert plan_paths.markdown_path.exists()
+    assert not list(plan_paths.json_path.parent.glob("*.part"))
+
+
+
 def test_generate_corpus_remediation_plan_writes_empty_plan(monkeypatch, tmp_path):
     from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 

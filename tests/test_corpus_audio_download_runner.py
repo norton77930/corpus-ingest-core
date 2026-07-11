@@ -237,6 +237,85 @@ def _rows_by_episode(result) -> dict[str, object]:
     return {row.episode_ref: row for row in result.rows}
 
 
+def test_preview_corpus_audio_download_from_in_memory_plan(
+    monkeypatch, tmp_path
+):
+    from podcast_ingest_core import storage
+    from podcast_ingest_core.models import (
+        CorpusRemediationActionCounts,
+        CorpusRemediationPlanResult,
+    )
+    import podcast_ingest_core.corpus_audio_download_runner as runner
+
+    _use_tmp_data_dirs(monkeypatch, tmp_path)
+    payload = _plan_payload([_episode_payload("EP677", title="EP677 Alpha")])
+    paths = storage.corpus_remediation_plan_asset_paths("gooaye")
+    plan_result = CorpusRemediationPlanResult(
+        podcast_id="gooaye",
+        plan_json_path=paths.json_path,
+        plan_markdown_path=paths.markdown_path,
+        source_corpus_index_json_path=tmp_path / "corpus-index.json",
+        source_corpus_index_markdown_path=tmp_path / "corpus-index.md",
+        episode_count=1,
+        warning_count=0,
+        action_counts=CorpusRemediationActionCounts(
+            action_count=1,
+            blocked_action_count=0,
+            optional_action_count=0,
+            gated_action_count=0,
+        ),
+    )
+
+    result = runner._preview_corpus_audio_download_from_plan(
+        "gooaye",
+        plan_result=plan_result,
+        plan_payload=payload,
+        episode_ref="EP677",
+        source_persisted=False,
+    )
+
+    assert result.counts.selected_count == 1
+    assert result.rows[0].planned_reads == ["in-memory corpus snapshot"]
+    assert not paths.json_path.exists()
+    assert not paths.markdown_path.exists()
+
+
+def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(
+    monkeypatch, tmp_path
+):
+    from podcast_ingest_core import storage
+    import podcast_ingest_core.corpus_audio_download_runner as runner
+
+    _write_episode_seed(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        runner,
+        "download_audio",
+        lambda *args, **kwargs: pytest.fail("dry-run executed downloader"),
+    )
+
+    result = runner.run_corpus_audio_download(
+        "gooaye",
+        episode_ref="EP677",
+        confirm=False,
+    )
+
+    index_paths = storage.corpus_index_asset_paths("gooaye")
+    plan_paths = storage.corpus_remediation_plan_asset_paths("gooaye")
+    report_paths = storage.corpus_audio_download_run_asset_paths("gooaye")
+    assert result.counts.selected_count == 1
+    assert result.source_remediation_plan_json_path == plan_paths.json_path
+    assert result.source_remediation_plan_markdown_path == plan_paths.markdown_path
+    assert index_paths.json_path.exists()
+    assert index_paths.markdown_path.exists()
+    assert plan_paths.json_path.exists()
+    assert plan_paths.markdown_path.exists()
+    assert result.report_json_path is None
+    assert result.report_markdown_path is None
+    assert not report_paths.json_path.exists()
+    assert not report_paths.markdown_path.exists()
+
+
+
 def test_corpus_audio_download_run_asset_paths_contract():
     from podcast_ingest_core.storage import corpus_audio_download_run_asset_paths
 

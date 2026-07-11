@@ -14,6 +14,7 @@ from .models import (
     CorpusLocalTranscriptionRunResult,
     CorpusLocalTranscriptionRunRow,
     CorpusLocalTranscriptionRunWarning,
+    CorpusRemediationPlanResult,
 )
 from .transcriber import transcribe_episode
 
@@ -55,50 +56,80 @@ def run_corpus_local_transcription(
         raise CorpusLocalTranscriptionRunnerFailedError(
             "confirm requires episode"
         )
+    if not confirm:
+        return _preview_corpus_local_transcription_from_plan(
+            podcast_id,
+            plan_result=source_result,
+            plan_payload=plan_payload,
+            episode_ref=normalized_episode_ref,
+            source_persisted=True,
+        )
+
     filters = CorpusLocalTranscriptionRunFilter(episode_ref=normalized_episode_ref)
     rows = _select_rows(
         podcast_id=podcast_id,
         plan_payload=plan_payload,
         filters=filters,
-        confirmed=confirm,
+        confirmed=True,
+        source_plan_reads=[],
     )
-    if confirm:
-        rows = _with_missing_requested_episode_row(
-            rows=rows,
-            podcast_id=podcast_id,
-            filters=filters,
-        )
-        report_paths = storage.corpus_local_transcription_run_asset_paths(podcast_id)
-        rows = _execute_confirmed_rows(
-            rows=rows,
-            model=model,
-            device=device,
-            compute_type=compute_type,
-            vad_filter=vad_filter,
-        )
-        warnings = _confirmed_warnings(rows)
-        result = CorpusLocalTranscriptionRunResult(
-            podcast_id=podcast_id,
-            run_mode=RUN_MODE_CONFIRMED,
-            confirm=True,
-            source_remediation_plan_json_path=source_result.plan_json_path,
-            source_remediation_plan_markdown_path=source_result.plan_markdown_path,
-            report_json_path=report_paths.json_path,
-            report_markdown_path=report_paths.markdown_path,
-            filters=filters,
-            counts=_counts(rows, warnings),
-            rows=rows,
-            warnings=warnings,
-            not_investment_advice=True,
-        )
-        _write_run_report(result)
-        return result
+    rows = _with_missing_requested_episode_row(
+        rows=rows,
+        podcast_id=podcast_id,
+        filters=filters,
+    )
+    report_paths = storage.corpus_local_transcription_run_asset_paths(podcast_id)
+    rows = _execute_confirmed_rows(
+        rows=rows,
+        model=model,
+        device=device,
+        compute_type=compute_type,
+        vad_filter=vad_filter,
+    )
+    warnings = _confirmed_warnings(rows)
+    result = CorpusLocalTranscriptionRunResult(
+        podcast_id=podcast_id,
+        run_mode=RUN_MODE_CONFIRMED,
+        confirm=True,
+        source_remediation_plan_json_path=source_result.plan_json_path,
+        source_remediation_plan_markdown_path=source_result.plan_markdown_path,
+        report_json_path=report_paths.json_path,
+        report_markdown_path=report_paths.markdown_path,
+        filters=filters,
+        counts=_counts(rows, warnings),
+        rows=rows,
+        warnings=warnings,
+        not_investment_advice=True,
+    )
+    _write_run_report(result)
+    return result
+
+
+def _preview_corpus_local_transcription_from_plan(
+    podcast_id: str,
+    *,
+    plan_result: CorpusRemediationPlanResult,
+    plan_payload: dict[str, Any],
+    episode_ref: str | None,
+    source_persisted: bool,
+) -> CorpusLocalTranscriptionRunResult:
+    filters = CorpusLocalTranscriptionRunFilter(
+        episode_ref=_normalize_episode_ref(episode_ref)
+    )
+    source_plan_reads = [] if source_persisted else ["in-memory corpus snapshot"]
+    rows = _select_rows(
+        podcast_id=podcast_id,
+        plan_payload=plan_payload,
+        filters=filters,
+        confirmed=False,
+        source_plan_reads=source_plan_reads,
+    )
     return CorpusLocalTranscriptionRunResult(
         podcast_id=podcast_id,
         run_mode=RUN_MODE_DRY_RUN,
         confirm=False,
-        source_remediation_plan_json_path=source_result.plan_json_path,
-        source_remediation_plan_markdown_path=source_result.plan_markdown_path,
+        source_remediation_plan_json_path=plan_result.plan_json_path,
+        source_remediation_plan_markdown_path=plan_result.plan_markdown_path,
         report_json_path=None,
         report_markdown_path=None,
         filters=filters,
@@ -152,6 +183,7 @@ def _select_rows(
     plan_payload: dict[str, Any],
     filters: CorpusLocalTranscriptionRunFilter,
     confirmed: bool,
+    source_plan_reads: list[str],
 ) -> list[CorpusLocalTranscriptionRunRow]:
     rows: list[CorpusLocalTranscriptionRunRow] = []
     for episode_payload in _episode_payloads(plan_payload):
@@ -161,6 +193,7 @@ def _select_rows(
                 episode_payload=episode_payload,
                 filters=filters,
                 confirmed=confirmed,
+                source_plan_reads=source_plan_reads,
             )
         )
         for action_payload in _action_payloads(episode_payload):
@@ -173,6 +206,7 @@ def _select_rows(
                     episode_payload=episode_payload,
                     action_payload=action_payload,
                     confirmed=confirmed,
+                    source_plan_reads=source_plan_reads,
                 )
             )
     return sorted(rows, key=_row_sort_key)
@@ -226,6 +260,7 @@ def _row_for_episode_transcript(
     episode_payload: dict[str, Any],
     filters: CorpusLocalTranscriptionRunFilter,
     confirmed: bool,
+    source_plan_reads: list[str],
 ) -> CorpusLocalTranscriptionRunRow:
     episode_ref = _safe_text(episode_payload.get("episode_ref"), "unknown")
     artifact_status = _artifact_status(episode_payload)
@@ -249,6 +284,9 @@ def _row_for_episode_transcript(
         audio_path=audio_path,
     )
     planned_writes = _planned_transcript_writes(podcast_id, episode_ref)
+    planned_reads = [*source_plan_reads]
+    if audio_path is not None:
+        planned_reads.append(str(audio_path))
     return CorpusLocalTranscriptionRunRow(
         action_id=action_id,
         podcast_id=podcast_id,
@@ -259,7 +297,7 @@ def _row_for_episode_transcript(
         audio_path=str(audio_path) if audio_path else None,
         outcome_status=outcome_status,
         reason=reason,
-        planned_reads=[str(audio_path)] if audio_path else [],
+        planned_reads=planned_reads,
         planned_writes=planned_writes,
         output_paths=[],
         warnings=_source_warnings(episode_payload, TRANSCRIPT_ACTION_FAMILY),
@@ -272,6 +310,7 @@ def _row_for_non_transcript_action(
     episode_payload: dict[str, Any],
     action_payload: dict[str, Any],
     confirmed: bool,
+    source_plan_reads: list[str],
 ) -> CorpusLocalTranscriptionRunRow:
     episode_ref = _safe_text(episode_payload.get("episode_ref"), "unknown")
     artifact_status = _artifact_status(episode_payload)
@@ -290,7 +329,7 @@ def _row_for_non_transcript_action(
         audio_path=None,
         outcome_status=outcome_status,
         reason=f"{family} is outside local transcription runner v1",
-        planned_reads=[],
+        planned_reads=[*source_plan_reads],
         planned_writes=[],
         output_paths=[],
         warnings=_source_warnings(episode_payload, family),

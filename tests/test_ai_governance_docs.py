@@ -136,6 +136,10 @@ def test_core_adrs_align_with_runtime_and_guard_facts():
     adr_0006 = _read(ADR / "ADR-0006-spec-kit-governance.md")
     assert "full Spec Kit flow" in adr_0006
     assert "SPECIFY_FEATURE_DIRECTORY" in adr_0006
+    assert ".specify/feature.json" in adr_0006
+    assert "local-only" in adr_0006
+    assert "gitignored" in adr_0006
+    assert "untracked" in adr_0006
 
 
 def test_readme_agents_and_verification_matrix_cross_link_governance_docs():

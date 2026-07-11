@@ -13,6 +13,7 @@ data/corpus/
 !.env.example
 .codex/config.toml
 config/*.local.yaml
+/.specify/feature.json
 config/llm_profiles.local.yaml
 evals/**/raw/
 __pycache__/

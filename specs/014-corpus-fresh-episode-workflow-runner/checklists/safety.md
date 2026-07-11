@@ -6,7 +6,7 @@
 
 ## Dry-run and Confirmation
 
-- [x] CHK001 Are dry-run no-write requirements explicit for workflow reports and stage artifacts? [Completeness, Spec FR-004]
+- [x] CHK001 Is 014 dry-run explicitly strict zero-file across seed, audio, transcript, index, plan, 010-014 reports, downstream artifacts, cache/provider/MCP artifacts, and `.part`? [Completeness, Spec FR-004/SC-001]
 - [x] CHK002 Is confirmed execution limited to one `next` stage per run? [Clarity, Spec FR-003/FR-014]
 - [x] CHK003 Are unsupported stage values explicitly rejected? [Edge Case, Spec FR-003]
 
@@ -38,3 +38,6 @@
 - [x] CHK018 Are report contents specified as metadata, counts, paths, outcomes, and warnings only? [Completeness, Spec FR-013]
 - [x] CHK019 Are failure outcomes bounded without continuing to additional stages? [Edge Case, Spec Edge Cases]
 - [x] CHK020 Are manual follow-up warnings required for non-executable actions? [Coverage, Spec US3]
+- [x] CHK021 Must seeded selection build exactly one fresh in-memory snapshot and reuse the same result/payload across all previews? [Consistency, Spec FR-019]
+- [x] CHK022 Is standalone 010-012 refresh-and-persist compatibility distinguished from 014 zero-file behavior? [Compatibility, Spec FR-020]
+- [x] CHK023 Are exact safe planned-read labels and package-private `source_persisted` provenance documented without widening public models, CLI, exports, or MCP? [Boundary, Spec FR-021]

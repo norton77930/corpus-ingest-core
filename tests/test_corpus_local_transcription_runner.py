@@ -13,6 +13,11 @@ def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> None:
     from podcast_ingest_core import storage
     import podcast_ingest_core.corpus_index as corpus_index
 
+    monkeypatch.setattr(storage, "SUMMARIES_DIR", tmp_path / "summaries")
+    monkeypatch.setattr(storage, "MENTIONS_DIR", tmp_path / "mentions")
+    monkeypatch.setattr(storage, "REPORTS_DIR", tmp_path / "reports")
+    monkeypatch.setattr(storage, "MAPPINGS_DIR", tmp_path / "mappings")
+    monkeypatch.setattr(storage, "EXTERNAL_DIR", tmp_path / "external")
     monkeypatch.setattr(storage, "AUDIO_DIR", tmp_path / "audio")
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
     monkeypatch.setattr(storage, "CORPUS_DIR", tmp_path / "corpus", raising=False)
@@ -188,6 +193,107 @@ def _transcript_asset(
         transcribed=not already_exists,
         already_exists=already_exists,
     )
+
+
+def test_preview_corpus_local_transcription_from_in_memory_plan(
+    monkeypatch, tmp_path
+):
+    from podcast_ingest_core import storage
+    from podcast_ingest_core.models import (
+        CorpusRemediationActionCounts,
+        CorpusRemediationPlanResult,
+    )
+    import podcast_ingest_core.corpus_local_transcription_runner as runner
+
+    _use_tmp_data_dirs(monkeypatch, tmp_path)
+    audio_path = storage.AUDIO_DIR / "gooaye" / "EP677__Alpha.mp3"
+    audio_path.parent.mkdir(parents=True, exist_ok=True)
+    audio_path.write_bytes(b"mp3")
+    payload = _plan_payload(
+        [_episode_payload("EP677", title="Alpha", audio_path=str(audio_path))]
+    )
+    paths = storage.corpus_remediation_plan_asset_paths("gooaye")
+    plan_result = CorpusRemediationPlanResult(
+        podcast_id="gooaye",
+        plan_json_path=paths.json_path,
+        plan_markdown_path=paths.markdown_path,
+        source_corpus_index_json_path=tmp_path / "corpus-index.json",
+        source_corpus_index_markdown_path=tmp_path / "corpus-index.md",
+        episode_count=1,
+        warning_count=0,
+        action_counts=CorpusRemediationActionCounts(
+            action_count=1,
+            blocked_action_count=0,
+            optional_action_count=0,
+            gated_action_count=0,
+        ),
+    )
+
+    result = runner._preview_corpus_local_transcription_from_plan(
+        "gooaye",
+        plan_result=plan_result,
+        plan_payload=payload,
+        episode_ref="EP677",
+        source_persisted=False,
+    )
+
+    assert result.counts.selected_count == 1
+    assert "in-memory corpus snapshot" in result.rows[0].planned_reads
+    assert str(audio_path) in result.rows[0].planned_reads
+    assert not paths.json_path.exists()
+    assert not paths.markdown_path.exists()
+
+
+def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(
+    monkeypatch, tmp_path
+):
+    from podcast_ingest_core import storage
+    import podcast_ingest_core.corpus_local_transcription_runner as runner
+
+    _use_tmp_data_dirs(monkeypatch, tmp_path)
+    _write_json(
+        storage.corpus_episode_seed_asset_path("gooaye", "EP677"),
+        {
+            "podcast_id": "gooaye",
+            "episode_ref": "EP677",
+            "title": "Alpha",
+            "has_audio_url": True,
+            "guid_status": "present",
+            "seed_source": "rss",
+            "selector": "latest",
+            "warning_count": 0,
+        },
+    )
+    audio_path = storage.AUDIO_DIR / "gooaye" / "EP677__Alpha.mp3"
+    audio_path.parent.mkdir(parents=True, exist_ok=True)
+    audio_path.write_bytes(b"mp3")
+    monkeypatch.setattr(
+        runner,
+        "transcribe_episode",
+        lambda *args, **kwargs: pytest.fail("dry-run executed transcriber"),
+    )
+
+    result = runner.run_corpus_local_transcription(
+        "gooaye",
+        episode_ref="EP677",
+        confirm=False,
+    )
+
+    index_paths = storage.corpus_index_asset_paths("gooaye")
+    plan_paths = storage.corpus_remediation_plan_asset_paths("gooaye")
+    report_paths = storage.corpus_local_transcription_run_asset_paths("gooaye")
+    assert result.counts.selected_count == 1
+    assert result.source_remediation_plan_json_path == plan_paths.json_path
+    assert result.source_remediation_plan_markdown_path == plan_paths.markdown_path
+    assert index_paths.json_path.exists()
+    assert index_paths.markdown_path.exists()
+    assert plan_paths.json_path.exists()
+    assert plan_paths.markdown_path.exists()
+    assert result.report_json_path is None
+    assert result.report_markdown_path is None
+    assert not report_paths.json_path.exists()
+    assert not report_paths.markdown_path.exists()
+
 
 
 def test_corpus_local_transcription_run_asset_paths_contract():

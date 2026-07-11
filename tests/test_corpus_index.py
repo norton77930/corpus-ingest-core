@@ -353,6 +353,34 @@ def test_corpus_index_public_result_contract_exports(tmp_path):
     assert callable(generate_corpus_index)
 
 
+def test_corpus_index_snapshot_builds_without_writes_until_persisted(
+    monkeypatch, tmp_path
+):
+    from podcast_ingest_core import storage
+    import podcast_ingest_core.corpus_index as corpus_index
+
+    _write_episode_seed(monkeypatch, tmp_path)
+    paths = storage.corpus_index_asset_paths("gooaye")
+
+    snapshot = corpus_index._build_corpus_index_snapshot("gooaye")
+
+    assert snapshot.result.podcast_id == "gooaye"
+    assert snapshot.result.index_json_path == paths.json_path
+    assert snapshot.payload["episodes"][0]["episode_ref"] == "EP677"
+    assert snapshot.markdown.startswith("# Corpus Artifact Index")
+    assert not paths.json_path.exists()
+    assert not paths.markdown_path.exists()
+    assert not list(paths.json_path.parent.glob("*.part"))
+
+    result = corpus_index._persist_corpus_index_snapshot(snapshot)
+
+    assert result is snapshot.result
+    assert paths.json_path.exists()
+    assert paths.markdown_path.exists()
+    assert not list(paths.json_path.parent.glob("*.part"))
+
+
+
 def test_generate_corpus_index_writes_empty_index(monkeypatch, tmp_path):
     from podcast_ingest_core.corpus_index import generate_corpus_index
 

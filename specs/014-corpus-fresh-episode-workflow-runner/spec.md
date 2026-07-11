@@ -14,27 +14,27 @@
 
 - Q: What confirmed execution model should v1 use? -> A: Single next-stage confirmation; each confirmed run executes only the currently selected next safe stage, not the full chain.
 - Q: Which selectors are in scope? -> A: `latest` and one explicit episode reference such as `EP677`.
-- Q: When should a workflow run report be written? -> A: Confirmed runs only; dry-run writes no workflow report.
+- Q: When may workflow evaluation persist local state? -> A: Confirmed runs only; dry-run creates, modifies, or deletes zero files.
 - Q: Which stage interface should v1 expose? -> A: `stage=next` only.
 - Q: How should transcription options behave? -> A: Reuse 011 defaults and allow model/device/compute/VAD options to pass through when local transcription is selected.
-- Q: How should stage probes and confirmed dispatch differ? -> A: Selection may call multiple existing runners with `confirm=False`, but a workflow run may call at most one selected runner with `confirm=True`.
+- Q: How should stage probes and confirmed dispatch differ? -> A: Seeded selection uses package-private previews over one shared in-memory index/plan snapshot, while confirmed dispatch may call at most one selected existing public runner with `confirm=True`.
 - Q: What happens when a probe fails or reports a non-safe status? -> A: Probe exceptions and `failed`, `rejected`, or `blocked` outcomes stop selection fail closed with `selected_stage=blocked`; the row keeps its actual status, while a safely skipped satisfied prerequisite may continue to the next probe.
 - Q: How should safe confirmed stops be reported? -> A: A confirmed terminal probe outcome writes deterministic workflow reports and returns structured CLI JSON with exit code 0; invalid input and system-level command errors remain non-zero.
-- Q: How is fresh corpus state computed without violating dry-run? -> A: Corpus index and remediation state are recomputed in memory during dry-run; index, plan, workflow, and stage artifacts are not persisted.
+- Q: How is fresh corpus state computed without violating dry-run? -> A: Corpus index and remediation state are recomputed in memory during dry-run; seed, audio, transcript, index, plan, 010-014 reports, downstream artifacts, and `.part` files are never created, modified, or deleted.
 
 ## User Scenarios & Testing *(mandatory)*
 
 ### User Story 1 - Preview the Next Safe Stage (Priority: P1)
 
-A local operator wants one command that resolves the latest or explicit episode and reports the next safe corpus action without writing workflow reports or executing any stage.
+A local operator wants one command that resolves the latest or explicit episode and reports the next safe corpus action without executing a stage or changing any local file.
 
 **Why this priority**: Preview is the safe entry point for testing latest episodes. It reduces manual command sequencing while preserving dry-run visibility.
 
-**Independent Test**: A dry-run over mocked episode/corpus state selects exactly one next stage, returns metadata-only output, and writes no 014 run report.
+**Independent Test**: Real 008/009 builders and 010-012 previews cover six corpus states while writer call count stays zero and the before/after tree manifest remains identical, including stale sentinels and `.part` absence.
 
 **Acceptance Scenarios**:
 
-1. **Given** the latest episode is not yet seeded, **When** the operator dry-runs the workflow with `episode_ref=latest`, **Then** the result reports intake as the next stage and writes no workflow report.
+1. **Given** the latest episode is not yet seeded, **When** the operator dry-runs the workflow with `episode_ref=latest`, **Then** the result reports intake as the next stage and creates, modifies, or deletes zero files.
 2. **Given** an explicit episode already has seed metadata but is missing local audio, **When** the operator dry-runs the workflow, **Then** the result reports audio download as the next stage.
 3. **Given** no safe next stage exists, **When** the operator dry-runs the workflow, **Then** the result reports completed or blocked metadata with manual follow-up warnings only.
 
@@ -84,9 +84,9 @@ A local operator wants workflow output to remain safe and factual even when upst
 
 ### Safety and Data Boundaries *(mandatory for research, LLM, MCP, or external-data work)*
 
-- This feature may call existing local core runners for 013, 012, 011, and 010, and may indirectly refresh existing corpus index/remediation metadata through those runners.
-- Dry-run must not write workflow reports, audio, transcript outputs, downstream artifacts, cache files, provider artifacts, or MCP artifacts.
-- Confirmed execution may write only the selected existing stage artifacts and one latest workflow run JSON/Markdown report.
+- 013 dry-run may read the configured podcast RSS feed. Seeded selection builds one in-memory corpus snapshot and uses package-private 012/011/010 previews with `source_persisted=False`; it does not call their public standalone dry-run entry points.
+- `confirm=False` is a strict zero-file operation: it must not create, modify, or delete seed, audio, transcript, index, plan, 010-014 report, downstream, cache, provider, MCP, or `.part` artifacts.
+- Confirmed execution dispatches exactly one existing public runner. That runner may perform its existing refreshed index/plan and selected-stage writes, after which 014 writes one latest workflow JSON/Markdown report; no alternative stage is attempted.
 - This feature must not execute semantic summary/review, LLM calls, stock-lens, synthesis, MCP tools, SQLite cache rebuild, batch latest-N processing, or any stage other than `next`.
 - Outputs and written artifacts must not include full source URLs, URL query strings, raw transcript text, evidence snippets, semantic body text, prompt text, raw LLM output, `.env` values, API keys, tokens, provider secret values, or traceback bodies.
 - External-data boundary/status entries remain availability markers and must not be presented as market facts.
@@ -99,7 +99,7 @@ A local operator wants workflow output to remain safe and factual even when upst
 - **FR-001**: System MUST run the fresh episode workflow for exactly one podcast identifier and one episode selector.
 - **FR-002**: System MUST accept `latest` and one explicit episode reference; missing or blank selector MUST default to `latest`.
 - **FR-003**: System MUST support only `stage=next` in v1 and MUST reject other stage values.
-- **FR-004**: System MUST default to dry-run mode and MUST NOT execute stages or write workflow reports in dry-run mode.
+- **FR-004**: System MUST default to dry-run mode, MUST NOT execute stages, and MUST create, modify, or delete zero files in dry-run mode.
 - **FR-005**: System MUST determine the next safe stage in this order: intake, audio download, local transcription, deterministic remediation, then completed or manual-only follow-up.
 - **FR-006**: System MUST call only the existing 013 intake core runner when the selected next stage is intake.
 - **FR-007**: System MUST call only the existing 012 audio download core runner when the selected next stage is audio download.
@@ -114,6 +114,9 @@ A local operator wants workflow output to remain safe and factual even when upst
 - **FR-016**: System MUST NOT execute semantic summary/review, LLM providers, stock-lens, synthesis, MCP tools, `.env` reads, SQLite cache rebuild, batch latest-N, or full-chain automation.
 - **FR-017**: System MUST NOT include unsafe source content, raw transcript/evidence/semantic/prompt/LLM body text, secret values, traceback bodies, market claims, or investment advice in JSON, Markdown, stdout, or stderr.
 - **FR-018**: System MUST provide a thin local command surface that previews by podcast and selector and confirmed-runs one `next` stage by podcast plus selector only when `--stage next --confirm` is explicit.
+- **FR-019**: Seeded dry-run selection MUST build exactly one fresh in-memory index/plan snapshot and reuse that same snapshot for audio, transcription, and remediation previews.
+- **FR-020**: Public standalone 010-012 dry-runs MUST retain their existing behavior of refreshing and persisting 008/009 while executing no external side effect and writing no own stage report.
+- **FR-021**: The only permitted non-path planned-read values MUST be the exact labels `configured podcast RSS feed` and `in-memory corpus snapshot`; safe local dependency paths remain permitted, while snapshot provenance `source_persisted=False` remains package-private and MUST NOT change public models, CLI JSON, or exports.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -126,7 +129,7 @@ A local operator wants workflow output to remain safe and factual even when upst
 
 ### Measurable Outcomes
 
-- **SC-001**: Dry-run for `latest` returns exactly one selected next stage or one completed/blocked result and creates zero workflow report files.
+- **SC-001**: Dry-run for `latest` returns exactly one selected next stage or one completed/blocked result and creates, modifies, or deletes zero files across the full local tree.
 - **SC-002**: Confirmed workflow execution attempts exactly one stage and writes exactly one pair of latest JSON/Markdown workflow reports.
 - **SC-003**: Confirmed workflow execution for each stage state calls only the matching existing core runner and calls zero non-selected stage runners.
 - **SC-004**: Local transcription confirmed through the workflow passes through model, device, compute type, and VAD options unchanged.
@@ -139,7 +142,7 @@ A local operator wants workflow output to remain safe and factual even when upst
 ## Assumptions
 
 - Existing 013, 012, 011, and 010 core runners remain the source of stage execution behavior and safety boundaries.
-- The workflow runner derives next-stage state from existing runner dry-run output and refreshed corpus metadata rather than duplicating artifact generation logic.
+- The workflow runner derives next-stage state from one fresh in-memory corpus snapshot and package-private preview seams, while confirmed execution delegates to exactly one existing public runner.
 - `latest` resolution may depend on 013 intake behavior; explicit episode references avoid selector drift after the first run.
 - v1 does not expose MCP tooling, scheduling, batch processing, semantic/LLM automation, or automatic cache rebuild.
-- `.specify/feature.json` may point to this feature for local workflow state but remains excluded from commit by default.
+- `SPECIFY_FEATURE_DIRECTORY` takes precedence for explicit local selection; ignored `.specify/feature.json` may preserve local state but is local-only, gitignored, and untracked.

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
 from typing import Any
@@ -9,6 +9,7 @@ from . import storage
 from .corpus_index import generate_corpus_index
 from .errors import CorpusRemediationPlanFailedError
 from .models import (
+    CorpusIndexResult,
     CorpusRemediationAction,
     CorpusRemediationActionCounts,
     CorpusRemediationBlocker,
@@ -57,11 +58,31 @@ _DEPENDENCIES = {
 }
 
 
+@dataclass(frozen=True)
+class _CorpusRemediationPlanSnapshot:
+    result: CorpusRemediationPlanResult
+    payload: dict[str, Any]
+    markdown: str
+
+
 def generate_corpus_remediation_plan(podcast_id: str) -> CorpusRemediationPlanResult:
     """Generate a deterministic local remediation plan for one podcast corpus."""
 
     index_result = generate_corpus_index(podcast_id)
-    index_payload = _load_index_payload(index_result.index_json_path)
+    snapshot = _build_corpus_remediation_plan_snapshot(
+        podcast_id,
+        index_result=index_result,
+        index_payload=_load_index_payload(index_result.index_json_path),
+    )
+    return _persist_corpus_remediation_plan_snapshot(snapshot)
+
+
+def _build_corpus_remediation_plan_snapshot(
+    podcast_id: str,
+    *,
+    index_result: CorpusIndexResult,
+    index_payload: dict[str, Any],
+) -> _CorpusRemediationPlanSnapshot:
     rows = [
         _build_remediation_row(podcast_id, row_payload)
         for row_payload in index_payload.get("episodes", [])
@@ -85,9 +106,7 @@ def generate_corpus_remediation_plan(podcast_id: str) -> CorpusRemediationPlanRe
         "episodes": [asdict(row) for row in rows],
         "not_investment_advice": True,
     }
-    markdown = _render_markdown(payload)
-    _write_plan(paths.json_path, paths.markdown_path, payload, markdown)
-    return CorpusRemediationPlanResult(
+    result = CorpusRemediationPlanResult(
         podcast_id=podcast_id,
         plan_json_path=paths.json_path,
         plan_markdown_path=paths.markdown_path,
@@ -97,6 +116,23 @@ def generate_corpus_remediation_plan(podcast_id: str) -> CorpusRemediationPlanRe
         warning_count=warning_count,
         action_counts=action_counts,
     )
+    return _CorpusRemediationPlanSnapshot(
+        result=result,
+        payload=payload,
+        markdown=_render_markdown(payload),
+    )
+
+
+def _persist_corpus_remediation_plan_snapshot(
+    snapshot: _CorpusRemediationPlanSnapshot,
+) -> CorpusRemediationPlanResult:
+    _write_plan(
+        snapshot.result.plan_json_path,
+        snapshot.result.plan_markdown_path,
+        snapshot.payload,
+        snapshot.markdown,
+    )
+    return snapshot.result
 
 
 def _load_index_payload(index_json_path: Path) -> dict[str, Any]:

@@ -4,7 +4,7 @@
 
 - Existing 013, 012, 011, and 010 corpus runners are available.
 - Configured podcast profile exists in `config/podcasts.yaml` when `latest` must be resolved.
-- Dry-run should be used first before every confirmed stage attempt.
+- 014 dry-run should be used first before every confirmed stage attempt; it differs from standalone 010-012 dry-runs, which still refresh and persist 008/009.
 
 ## Dry-run Latest Episode
 
@@ -16,7 +16,10 @@ Expected:
 - Resolves or evaluates one episode selector.
 - Prints metadata-only JSON with the selected next stage.
 - Does not execute intake, download, transcription, or deterministic remediation.
-- Does not write `corpus-episode-workflow-run.json` or `.md`.
+- Is strict zero-file: the before/after tree manifest is identical, including seed, audio, transcript, index, plan, 010-014 reports, downstream artifacts, and stale sentinels.
+- Creates no `.part` file and neither overwrites nor trusts stale index/plan/report files as stage truth.
+- May include safe local dependency paths; the only non-path labels are exactly `configured podcast RSS feed` for intake and `in-memory corpus snapshot` for seeded state.
+- Builds one seeded in-memory index/plan snapshot and reuses that same result/payload across audio, transcription, and remediation previews with `source_persisted=False`.
 - Does not print full URLs, raw transcript/evidence text, prompt text, raw LLM output, secrets, or traceback bodies.
 
 ## Confirm One Next Stage
@@ -26,13 +29,15 @@ python scripts/run_corpus_episode_workflow.py --podcast gooaye --episode latest 
 ```
 
 Expected:
-- Attempts exactly one selected next stage.
+- Dispatches exactly one selected existing public runner and never falls through to another stage.
 - Requires both `--stage next` and `--confirm`; omit `--stage next` only for dry-run preview.
+- The selected runner may refresh/persist its existing index, plan, stage outputs, and stage report before 014 writes its own workflow report.
 - Writes latest workflow reports:
   - `data/corpus/gooaye/corpus-episode-workflow-run.json`
   - `data/corpus/gooaye/corpus-episode-workflow-run.md`
 - Stops after that stage even if the stage succeeds.
 - Reports whether the stage was executed, reused, failed, rejected, blocked, skipped, or completed.
+- If refreshed confirmed state returns rejected, blocked, or failed, records that outcome and stops.
 
 ## Confirm Transcription Stage With Options
 

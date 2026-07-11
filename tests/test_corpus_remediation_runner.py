@@ -284,6 +284,106 @@ def _install_successful_generators(monkeypatch, tmp_path: Path, calls: list[tupl
     )
 
 
+def test_preview_corpus_remediation_from_in_memory_plan(monkeypatch, tmp_path):
+    from podcast_ingest_core import storage
+    from podcast_ingest_core.models import (
+        CorpusRemediationActionCounts,
+        CorpusRemediationPlanResult,
+    )
+    import podcast_ingest_core.corpus_remediation_runner as runner
+
+    _use_tmp_data_dirs(monkeypatch, tmp_path)
+    payload = _plan_payload(
+        [
+            {
+                "episode_ref": "EP672",
+                "title": "Alpha",
+                "artifact_family": "extractive_summary",
+            }
+        ]
+    )
+    paths = storage.corpus_remediation_plan_asset_paths("gooaye")
+    plan_result = CorpusRemediationPlanResult(
+        podcast_id="gooaye",
+        plan_json_path=paths.json_path,
+        plan_markdown_path=paths.markdown_path,
+        source_corpus_index_json_path=tmp_path / "corpus-index.json",
+        source_corpus_index_markdown_path=tmp_path / "corpus-index.md",
+        episode_count=1,
+        warning_count=0,
+        action_counts=CorpusRemediationActionCounts(
+            action_count=1,
+            blocked_action_count=0,
+            optional_action_count=0,
+            gated_action_count=0,
+        ),
+    )
+
+    result = runner._preview_corpus_remediation_from_plan(
+        "gooaye",
+        plan_result=plan_result,
+        plan_payload=payload,
+        episode_ref="EP672",
+        action_family=None,
+        max_actions=None,
+        source_persisted=False,
+    )
+
+    assert result.counts.selected_count == 1
+    assert "in-memory corpus snapshot" in result.rows[0].planned_reads
+    assert not paths.json_path.exists()
+    assert not paths.markdown_path.exists()
+
+
+def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(
+    monkeypatch, tmp_path
+):
+    from podcast_ingest_core import storage
+    import podcast_ingest_core.corpus_remediation_runner as runner
+
+    _write_transcript_fixture(
+        monkeypatch,
+        tmp_path,
+        podcast_id="gooaye",
+        episode_ref="EP672",
+        title="Alpha",
+    )
+
+    def forbidden_execution(*args, **kwargs):
+        pytest.fail("dry-run executed deterministic remediation")
+
+    for name in (
+        "summarize_episode",
+        "extract_mentions",
+        "generate_episode_intelligence_report",
+        "generate_industry_chain_mapping",
+        "generate_external_data_boundary",
+    ):
+        monkeypatch.setattr(runner, name, forbidden_execution)
+
+    result = runner.run_corpus_remediation(
+        "gooaye",
+        episode_ref="EP672",
+        confirm=False,
+    )
+
+    index_paths = storage.corpus_index_asset_paths("gooaye")
+    plan_paths = storage.corpus_remediation_plan_asset_paths("gooaye")
+    report_paths = storage.corpus_remediation_run_asset_paths("gooaye")
+    assert result.counts.selected_count >= 1
+    assert result.source_remediation_plan_json_path == plan_paths.json_path
+    assert result.source_remediation_plan_markdown_path == plan_paths.markdown_path
+    assert index_paths.json_path.exists()
+    assert index_paths.markdown_path.exists()
+    assert plan_paths.json_path.exists()
+    assert plan_paths.markdown_path.exists()
+    assert result.report_json_path is None
+    assert result.report_markdown_path is None
+    assert not report_paths.json_path.exists()
+    assert not report_paths.markdown_path.exists()
+
+
+
 def test_corpus_remediation_run_asset_paths_contract():
     from podcast_ingest_core.storage import corpus_remediation_run_asset_paths
 
@@ -491,6 +591,43 @@ def test_dry_run_keeps_blocked_and_skipped_rows_visible(monkeypatch, tmp_path):
     assert result.counts.selected_count == 1
     assert result.counts.skipped_count == 1
     assert result.counts.blocked_count == 1
+
+
+def test_episode_filter_skips_other_episode_blocked_action(monkeypatch, tmp_path):
+    """A different episode's blocked action must not leak past the episode filter.
+
+    Regression for finding (a): the workflow's per-episode dry-run judgment was
+    misled because another episode's blocked deterministic action was reported as
+    ``blocked`` instead of ``skipped`` (the ``blocked`` short-circuit ran before the
+    episode filter).
+    """
+    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+
+    _fake_plan_refresh(
+        monkeypatch,
+        tmp_path,
+        _plan_payload(
+            [
+                {
+                    "episode_ref": "EP672",
+                    "artifact_family": "mentions",
+                    "status": "blocked",
+                    "blocking_artifacts": ["transcript"],
+                },
+                {"episode_ref": "EP677", "artifact_family": "extractive_summary"},
+            ]
+        ),
+    )
+
+    result = run_corpus_remediation("gooaye", episode_ref="EP677")
+
+    rows = _rows_by_family(result)
+    assert rows["extractive_summary"][0].outcome_status == "selected"
+    assert rows["extractive_summary"][0].episode_ref == "EP677"
+    assert rows["mentions"][0].episode_ref == "EP672"
+    assert rows["mentions"][0].outcome_status == "skipped"
+    assert result.counts.blocked_count == 0
+    assert result.counts.selected_count == 1
 
 
 def test_dry_run_is_deterministic_and_has_no_generated_at(monkeypatch, tmp_path):

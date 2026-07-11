@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import asdict
+from dataclasses import asdict, dataclass
 import json
 from pathlib import Path
 import re
@@ -34,9 +34,20 @@ _ARRAY_COUNTS_KEY = "__array_counts__"
 _SEMANTIC_REVIEW_TIMESTAMP_PATTERN = re.compile(r"^\d{8}-\d{6}__")
 
 
+@dataclass(frozen=True)
+class _CorpusIndexSnapshot:
+    result: CorpusIndexResult
+    payload: dict[str, Any]
+    markdown: str
+
+
 def generate_corpus_index(podcast_id: str) -> CorpusIndexResult:
     """Generate deterministic local artifact status index for one podcast."""
 
+    return _persist_corpus_index_snapshot(_build_corpus_index_snapshot(podcast_id))
+
+
+def _build_corpus_index_snapshot(podcast_id: str) -> _CorpusIndexSnapshot:
     paths = storage.corpus_index_asset_paths(podcast_id)
     episode_refs = _discover_episode_refs(podcast_id)
     rows = [_build_episode_row(podcast_id, episode_ref) for episode_ref in episode_refs]
@@ -54,9 +65,7 @@ def generate_corpus_index(podcast_id: str) -> CorpusIndexResult:
         "episodes": [asdict(row) for row in rows],
         "not_investment_advice": True,
     }
-    markdown = _render_markdown(payload)
-    _write_index(paths.json_path, paths.markdown_path, payload, markdown)
-    return CorpusIndexResult(
+    result = CorpusIndexResult(
         podcast_id=podcast_id,
         index_json_path=paths.json_path,
         index_markdown_path=paths.markdown_path,
@@ -64,6 +73,21 @@ def generate_corpus_index(podcast_id: str) -> CorpusIndexResult:
         warning_count=warning_count,
         artifact_family_counts=family_counts,
     )
+    return _CorpusIndexSnapshot(
+        result=result,
+        payload=payload,
+        markdown=_render_markdown(payload),
+    )
+
+
+def _persist_corpus_index_snapshot(snapshot: _CorpusIndexSnapshot) -> CorpusIndexResult:
+    _write_index(
+        snapshot.result.index_json_path,
+        snapshot.result.index_markdown_path,
+        snapshot.payload,
+        snapshot.markdown,
+    )
+    return snapshot.result
 
 
 def _discover_episode_refs(podcast_id: str) -> list[str]:

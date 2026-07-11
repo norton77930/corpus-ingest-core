@@ -15,6 +15,7 @@ from .models import (
     CorpusAudioDownloadRunResult,
     CorpusAudioDownloadRunRow,
     CorpusAudioDownloadRunWarning,
+    CorpusRemediationPlanResult,
 )
 
 
@@ -64,6 +65,14 @@ def run_corpus_audio_download(
     normalized_episode_ref = _normalize_episode_ref(episode_ref)
     if confirm and normalized_episode_ref is None:
         raise CorpusAudioDownloadRunnerFailedError("confirm requires episode")
+    if not confirm:
+        return _preview_corpus_audio_download_from_plan(
+            podcast_id,
+            plan_result=source_result,
+            plan_payload=plan_payload,
+            episode_ref=normalized_episode_ref,
+            source_persisted=True,
+        )
 
     filters = CorpusAudioDownloadRunFilter(episode_ref=normalized_episode_ref)
     source_plan_paths = [
@@ -74,42 +83,68 @@ def run_corpus_audio_download(
         podcast_id=podcast_id,
         plan_payload=plan_payload,
         filters=filters,
-        confirmed=confirm,
+        confirmed=True,
         source_plan_paths=source_plan_paths,
     )
-    if confirm:
-        rows = _with_missing_requested_episode_row(
-            rows=rows,
-            podcast_id=podcast_id,
-            filters=filters,
-            source_plan_paths=source_plan_paths,
-        )
-        rows = _execute_confirmed_rows(rows)
-        warnings = _confirmed_warnings(rows)
-        report_paths = storage.corpus_audio_download_run_asset_paths(podcast_id)
-        result = CorpusAudioDownloadRunResult(
-            podcast_id=podcast_id,
-            run_mode=RUN_MODE_CONFIRMED,
-            confirm=True,
-            source_remediation_plan_json_path=source_result.plan_json_path,
-            source_remediation_plan_markdown_path=source_result.plan_markdown_path,
-            report_json_path=report_paths.json_path,
-            report_markdown_path=report_paths.markdown_path,
-            filters=filters,
-            counts=_counts(rows, warnings),
-            rows=rows,
-            warnings=warnings,
-            not_investment_advice=True,
-        )
-        _write_run_report(result)
-        return result
+    rows = _with_missing_requested_episode_row(
+        rows=rows,
+        podcast_id=podcast_id,
+        filters=filters,
+        source_plan_paths=source_plan_paths,
+    )
+    rows = _execute_confirmed_rows(rows)
+    warnings = _confirmed_warnings(rows)
+    report_paths = storage.corpus_audio_download_run_asset_paths(podcast_id)
+    result = CorpusAudioDownloadRunResult(
+        podcast_id=podcast_id,
+        run_mode=RUN_MODE_CONFIRMED,
+        confirm=True,
+        source_remediation_plan_json_path=source_result.plan_json_path,
+        source_remediation_plan_markdown_path=source_result.plan_markdown_path,
+        report_json_path=report_paths.json_path,
+        report_markdown_path=report_paths.markdown_path,
+        filters=filters,
+        counts=_counts(rows, warnings),
+        rows=rows,
+        warnings=warnings,
+        not_investment_advice=True,
+    )
+    _write_run_report(result)
+    return result
 
+
+def _preview_corpus_audio_download_from_plan(
+    podcast_id: str,
+    *,
+    plan_result: CorpusRemediationPlanResult,
+    plan_payload: dict[str, Any],
+    episode_ref: str | None,
+    source_persisted: bool,
+) -> CorpusAudioDownloadRunResult:
+    filters = CorpusAudioDownloadRunFilter(
+        episode_ref=_normalize_episode_ref(episode_ref)
+    )
+    source_plan_reads = (
+        [
+            str(plan_result.plan_json_path),
+            str(plan_result.plan_markdown_path),
+        ]
+        if source_persisted
+        else ["in-memory corpus snapshot"]
+    )
+    rows = _select_rows(
+        podcast_id=podcast_id,
+        plan_payload=plan_payload,
+        filters=filters,
+        confirmed=False,
+        source_plan_paths=source_plan_reads,
+    )
     return CorpusAudioDownloadRunResult(
         podcast_id=podcast_id,
         run_mode=RUN_MODE_DRY_RUN,
         confirm=False,
-        source_remediation_plan_json_path=source_result.plan_json_path,
-        source_remediation_plan_markdown_path=source_result.plan_markdown_path,
+        source_remediation_plan_json_path=plan_result.plan_json_path,
+        source_remediation_plan_markdown_path=plan_result.plan_markdown_path,
         report_json_path=None,
         report_markdown_path=None,
         filters=filters,

@@ -14,7 +14,8 @@ feature for local-audio transcript gaps. Package `012` is the dry-run-first
 single-episode corpus audio download runner runtime feature for missing-audio
 gaps. Package `013` is the dry-run-first RSS episode seed bootstrap runner.
 Package `014` is the dry-run-first fresh episode workflow runner that dispatches
-one next safe stage across packages `013`, `012`, `011`, and `010`.
+one next safe stage across packages `013`, `012`, `011`, and `010`. Its
+dry-run is strict zero-file and reuses one fresh in-memory index/plan snapshot.
 
 Workflow record: constitution reviewed, no amendment. The backfill follows
 `$speckit-constitution`, `$speckit-specify`, `$speckit-clarify`,
@@ -40,10 +41,11 @@ $env:SPECIFY_FEATURE_DIRECTORY="specs/003-metadata-search-mcp-core"
 ```
 
 The official scripts prioritize `SPECIFY_FEATURE_DIRECTORY` and may persist the
-selected value to `.specify/feature.json`. To switch packages, set
-`SPECIFY_FEATURE_DIRECTORY` again before invoking the next Spec Kit command. Do
-not commit a fixed `.specify/feature.json` for this backfill, because that would
-make one package look like the only active feature.
+selected value to `.specify/feature.json`. The persisted file is local-only,
+gitignored, and must remain untracked; a clean clone need not contain it. Set
+`SPECIFY_FEATURE_DIRECTORY` again before invoking the next Spec Kit command,
+or let an official script recreate the ignored local selection file. Never
+commit a fixed selector that makes one package appear uniquely active.
 
 ## Capability Packages
 
@@ -92,7 +94,7 @@ make one package look like the only active feature.
 - `011`: `corpus_local_transcription_runner.py`, `corpus_remediation_plan.py`, `transcriber.py`, `storage.py`, `models.py`, `errors.py`.
 - `012`: `corpus_audio_download_runner.py`, `corpus_remediation_plan.py`, `downloader.py`, `storage.py`, `models.py`, `errors.py`.
 - `013`: `corpus_episode_intake.py`, `feed_reader.py`, `corpus_index.py`, `corpus_remediation_plan.py`, `corpus_audio_download_runner.py`, `storage.py`, `models.py`, `errors.py`.
-- `014`: `corpus_episode_workflow_runner.py`, `corpus_episode_intake.py`, `corpus_audio_download_runner.py`, `corpus_local_transcription_runner.py`, `corpus_remediation_runner.py`, `storage.py`, `models.py`, `errors.py`.
+- `014`: `corpus_episode_workflow_runner.py`, `corpus_episode_intake.py`, `corpus_index.py`, `corpus_remediation_plan.py`, `corpus_audio_download_runner.py`, `corpus_local_transcription_runner.py`, `corpus_remediation_runner.py`, `storage.py`, `models.py`, `errors.py`.
 
 ## CLI/scripts Mapping
 
@@ -124,7 +126,7 @@ make one package look like the only active feature.
 - `011`: `test_corpus_local_transcription_runner.py`.
 - `012`: `test_corpus_audio_download_runner.py`.
 - `013`: `test_corpus_episode_intake.py`, plus seed handoff coverage in `test_corpus_index.py`, `test_corpus_remediation_plan.py`, and `test_corpus_audio_download_runner.py`.
-- `014`: `test_corpus_episode_workflow_runner.py`, plus regression coverage in `test_corpus_episode_intake.py`, `test_corpus_audio_download_runner.py`, `test_corpus_local_transcription_runner.py`, `test_corpus_remediation_runner.py`, `test_corpus_index.py`, and `test_corpus_remediation_plan.py`.
+- `014`: `test_corpus_episode_workflow_runner.py` covers six real corpus states, zero writer calls/tree manifest drift, shared snapshot identity, and deep failure no-leak; standalone compatibility remains covered by `test_corpus_audio_download_runner.py`, `test_corpus_local_transcription_runner.py`, `test_corpus_remediation_runner.py`, `test_corpus_index.py`, and `test_corpus_remediation_plan.py`.
 
 ## Classification
 
@@ -150,7 +152,7 @@ make one package look like the only active feature.
 - Research artifacts preserve evidence separation across podcast evidence, inference, external status, and LLM synthesis.
 - MCP exposed side-effect tools warn about manual cache rebuild and do not rebuild automatically.
 - corpus episode intake is seed-only: dry-run may read configured RSS but writes nothing, confirmed execution writes only safe seed metadata and a run report, and it does not download, transcribe, call LLM/MCP, run downstream remediation, or rebuild cache automatically.
-- corpus fresh episode workflow is one-stage only: dry-run writes no workflow report, confirmed execution requires `stage=next`, dispatches to exactly one existing core runner, and does not execute semantic/LLM, MCP registry, cache rebuild, stock-lens, batch, or non-selected stages.
+- corpus fresh episode workflow is one-stage only: 014 dry-run is zero-file and uses one in-memory snapshot, while standalone 010-012 dry-runs still persist fresh 008/009; confirmed execution requires `stage=next`, dispatches exactly one existing public runner, and does not execute semantic/LLM, MCP registry, cache rebuild, stock-lens, batch, or non-selected stages.
 - no investment advice: no buy/sell/hold, target price, guaranteed return, or personalized recommendation.
 
 ## Batch Guard Tests（audit hardening）

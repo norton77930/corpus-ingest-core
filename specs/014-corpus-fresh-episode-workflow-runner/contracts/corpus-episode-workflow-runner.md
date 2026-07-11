@@ -23,8 +23,8 @@ Contract rules:
 - `podcast_id` identifies exactly one configured or local podcast corpus.
 - `episode_ref` defaults to `latest` when missing or blank.
 - `stage` supports only `next` in v1; other values raise a workflow-specific error.
-- `confirm=False` performs no stage execution and writes no workflow report.
-- `confirm=True` attempts exactly one selected next stage and writes latest workflow reports.
+- `confirm=False` performs no stage execution and is strict zero-file: it creates, modifies, or deletes no seed, audio, transcript, index, plan, 010-014 report, downstream artifact, or `.part` file.
+- `confirm=True` attempts exactly one selected next stage through its existing public runner, accepts any refreshed rejected/blocked/failed outcome without trying another stage, and writes latest workflow reports.
 - Core dispatches to existing core functions only; it must not shell out to scripts.
 
 ## Stage Selection Contract
@@ -32,10 +32,15 @@ Contract rules:
 The selected `next` stage follows this order:
 
 1. `intake`: selected when the episode is not yet seeded/discoverable and 013 can resolve the selector.
-2. `audio_download`: selected when seed/corpus metadata exists, audio is missing, and 012 dry-run reports a ready audio action.
-3. `local_transcription`: selected when local audio is available and transcript is exactly missing according to 011 dry-run criteria.
-4. `deterministic_remediation`: selected when transcript is ready and 010 dry-run reports ready deterministic actions for the episode.
-5. `completed` or `blocked`: selected when no executable safe v1 stage remains.
+2. `audio_download`: selected when seed/corpus metadata exists, audio is missing, and the package-private 012 preview reports a ready audio action.
+3. `local_transcription`: selected when local audio is available and transcript is exactly missing according to the package-private 011 preview.
+4. `deterministic_remediation`: selected when transcript is ready and the package-private 010 preview reports ready deterministic actions for the episode. Ready deterministic actions are selected even while later dependency-chain families (e.g. `industry_mapping`, `external_boundary`, `semantic_review`) remain blocked on not-yet-built upstream; the confirmed run executes the ready families and the operator re-invokes to advance the ladder.
+5. `completed` or `blocked`: selected when no executable safe v1 stage remains. The remediation stage falls through to `blocked` only when no ready deterministic action remains (for example, only the LLM-gated `semantic_review` family is left).
+
+Unseeded selection may read the `configured podcast RSS feed`. Seeded selection builds one fresh `in-memory corpus snapshot` and passes the same plan result/payload through all three previews with `source_persisted=False`. Snapshot or preview exceptions fail closed with category-only metadata and no later probe or dispatch.
+
+Public standalone 010-012 runners remain compatible: their dry-runs refresh and persist 008/009, execute no external side effect, and write no own stage report. No new public parameters, exports, result fields, CLI JSON fields, or MCP tools are introduced.
+
 
 The workflow must not execute semantic summary/review, LLM, stock-lens, synthesis, MCP, cache rebuild, download batch, transcript repair, or any non-selected stage.
 
@@ -88,12 +93,12 @@ CLI rules:
 
 ## Storage Contract
 
-Confirmed attempts write latest deterministic reports:
+Confirmed attempts let exactly one selected public runner perform its existing refreshed index/plan and stage/report writes, then write latest deterministic 014 reports:
 
 - `data/corpus/{podcast_id}/corpus-episode-workflow-run.json`
 - `data/corpus/{podcast_id}/corpus-episode-workflow-run.md`
 
-Dry-run must not write these paths.
+014 dry-run must leave every local path and tree manifest unchanged, including stale index/plan/report sentinels and all `.part` paths.
 
 ## Safety Contract
 

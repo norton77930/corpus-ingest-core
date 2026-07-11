@@ -23,19 +23,29 @@
 **Alternatives considered**:
 - Continue automatically after success: rejected because it weakens auditability and can cause expensive or long-running transcription unexpectedly.
 
-## Decision: Derive stage choice from existing dry-run outputs and local metadata
+## Decision: Build one private in-memory corpus snapshot for seeded selection
 
-**Rationale**: Existing runners already refresh the needed corpus index/remediation state. The workflow runner can call their dry-run modes to choose a stage and then call only the selected runner with confirmation.
+**Rationale**: 008 and 009 already own artifact discovery and action planning, but their public entry points persist outputs. Package-private build/persist boundaries let 014 recompute fresh state once without writing, then reuse the same result and payload for 012, 011, and 010 previews with `source_persisted=False`.
+
+**Implementation boundary**: `_CorpusIndexSnapshot` and `_CorpusRemediationPlanSnapshot` carry existing result metadata, JSON-compatible payload, and Markdown. Their build functions perform no directory creation or file write; existing public generators preserve persistence order and atomic `.part` replacement.
 
 **Alternatives considered**:
-- Read every artifact family directly: rejected because it would duplicate 008/009 logic.
+- Call public standalone dry-run runners from 014: rejected because they intentionally refresh and persist 008/009.
+- Read every artifact family directly in 014: rejected because it would duplicate 008/009 logic and drift from standalone selection.
+
+## Decision: Preserve standalone 010-012 compatibility
+
+**Rationale**: Public 010, 011, and 012 dry-runs continue to persist fresh index/plan state, execute no external side effect, and write no own stage report. Only 014 uses the package-private previews over an unpersisted shared snapshot.
+
+**Alternatives considered**:
+- Change every standalone runner to zero-file: rejected because it would break established refresh-and-write behavior outside 014.
 
 ## Decision: Workflow report is confirmed-only and deterministic
 
-**Rationale**: Existing corpus side-effect runners write latest reports only after confirmed attempts. Keeping the same rule preserves dry-run no-write behavior.
+**Rationale**: Existing corpus side-effect runners write latest reports only after confirmed attempts. 014 additionally treats `confirm=False` as strict zero-file behavior across seed, index, plan, stage, workflow, downstream, and `.part` artifacts.
 
 **Alternatives considered**:
-- Write dry-run reports: rejected because dry-run no-write is a project norm.
+- Write or refresh any dry-run artifact: rejected because 014 must leave the complete tree manifest unchanged.
 - No workflow report: rejected because confirmed orchestration needs an audit artifact.
 
 ## Decision: Exclude semantic, LLM, stock-lens, MCP, cache rebuild, and batch behavior
