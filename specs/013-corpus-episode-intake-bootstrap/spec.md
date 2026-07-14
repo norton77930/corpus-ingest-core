@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-09
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "Create a dry-run-first corpus episode intake bootstrap feature that reads the configured podcast RSS feed to resolve `latest` or one explicit episode, writes local seed metadata only after confirmed execution, lets the existing 008/009/012/011/010 corpus chain process the episode, and excludes download, transcription, downstream remediation, LLM, MCP, cache rebuild, source URL output, secret leakage, and investment advice behavior."
 

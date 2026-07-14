@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-09
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "Create a dry-run-first local corpus transcription runner that builds on 008 corpus index and 009 corpus remediation plan. The runner refreshes the remediation plan, selects only episodes where local audio is available and transcript is fully missing, supports confirmed execution only for one explicit episode, calls the existing transcription capability with an explicit local audio path, writes latest deterministic run reports only after confirmed runs, and excludes download, corrupt/partial transcript repair, LLM, MCP, network, `.env`, cache rebuild, and investment advice behavior."
 

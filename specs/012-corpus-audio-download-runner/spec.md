@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-09
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "Create a dry-run-first corpus audio download runner that builds on 008 corpus index and 009 corpus remediation plan. The runner previews episodes where audio is missing, supports confirmed execution only for one explicit episode, calls the existing audio download capability, writes latest deterministic run reports only after confirmed runs, and excludes transcription, LLM, MCP, cache rebuild, downstream remediation, source URL output, secret leakage, and investment advice behavior."
 

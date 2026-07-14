@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-10
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "Create a dry-run-first corpus fresh episode workflow runner that safely guides testing the newest or explicitly selected episode through the existing 013 intake, 012 audio download, 011 local transcription, and 010 deterministic remediation chain. Confirmed execution must run only the next safe stage for one episode and must not execute semantic/LLM, MCP, cache rebuild, stock-lens, or batch behavior."
 

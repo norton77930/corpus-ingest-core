@@ -4,7 +4,7 @@
 
 **Created**: 2026-07-09
 
-**Status**: Draft
+**Status**: Implemented
 
 **Input**: User description: "Create a deterministic-only, dry-run-first corpus remediation runner that builds on 008 corpus index and 009 corpus remediation plan. The runner refreshes the remediation plan, selects ready deterministic actions, supports confirmed execution only with filters, writes latest deterministic run reports only after confirmed runs, and excludes download, transcription, LLM, MCP, network, `.env`, cache rebuild, and investment advice behavior."
 

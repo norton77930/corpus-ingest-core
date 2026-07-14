@@ -14,7 +14,7 @@ Add a dry-run-first fresh episode workflow runner for one podcast and one episod
 
 **Primary Dependencies**: Existing package only; use standard library and existing `podcast_ingest_core` corpus runners. No new dependency.
 
-**Storage**: Confirmed workflow attempts write the selected public runner''s existing artifacts plus latest workflow reports under `data/corpus/{podcast_id}/corpus-episode-workflow-run.json` and `.md`. A 014 dry-run creates, modifies, or deletes zero files, including index, plan, reports, stage artifacts, and `.part`.
+**Storage**: Confirmed workflow attempts write the selected public runner's existing artifacts plus latest workflow reports under `data/corpus/{podcast_id}/corpus-episode-workflow-run.json` and `.md`. A 014 dry-run creates, modifies, or deletes zero files, including index, plan, reports, stage artifacts, and `.part`.
 
 **Testing**: `pytest>=8.0`; real six-state zero-write integration coverage, deep 008/009 failure/no-leak cases, standalone 010-012 compatibility coverage, existing 010-013 regressions, exact 12-tool MCP registry guard, cache/secret/LLM/no-advice guards, and docs/spec/governance tests.
 
