@@ -8,6 +8,7 @@ from typing import Any, Callable
 from mcp.server.fastmcp import FastMCP
 
 from . import cache as cache_module
+from . import corpus_episode_completion_workflow_runner as completion_workflow_runner
 from . import downloader
 from . import entity_extractor
 from . import feed_reader
@@ -46,6 +47,16 @@ WORKFLOW_CACHE_STALE_WARNING = (
 )
 SEMANTIC_API_COST_ACK = semantic_summarizer.SEMANTIC_API_COST_ACK
 _SAFE_ENV_VAR_PATTERN = re.compile(r"^[A-Z_][A-Z0-9_]*$")
+_COMPLETION_EXECUTABLE_ACTIONS = {
+    "intake",
+    "audio_download",
+    "local_transcription",
+    "deterministic_remediation",
+    "semantic_summary",
+    "semantic_review",
+}
+_COMPLETION_TOOL_ERROR_TYPE = "CorpusEpisodeCompletionWorkflowRunnerFailedError"
+_COMPLETION_TOOL_ERROR_MESSAGE = "corpus episode completion workflow command failed"
 
 mcp = FastMCP("podcast-ingest-core")
 
@@ -581,6 +592,57 @@ def run_research_workflow(
     )
 
 
+@mcp.tool()
+def run_corpus_episode_completion_workflow(
+    podcast_id: str,
+    episode_ref: str = "latest",
+    action: str = "next",
+    confirm: bool = False,
+    api_cost_ack: str = "",
+    transcription_model: str | None = None,
+    transcription_device: str = "cpu",
+    transcription_compute_type: str = "int8",
+    transcription_vad_filter: bool = False,
+    semantic_provider: str = "openai-compatible",
+    semantic_model: str | None = None,
+    semantic_base_url: str | None = None,
+    semantic_api_key_env: str = "OPENAI_API_KEY",
+    semantic_chunk_seconds: int = 600,
+    semantic_max_segments_per_chunk: int = 120,
+) -> dict[str, Any]:
+    """Preview or advance one episode by one explicitly confirmed action."""
+
+    if _completion_request_rejected_early(
+        episode_ref=episode_ref,
+        action=action,
+        confirm=confirm,
+        api_cost_ack=api_cost_ack,
+    ):
+        return _completion_tool_error()
+
+    return _completion_workflow_tool_call(
+        operation=lambda: completion_workflow_runner.run_corpus_episode_completion_workflow(
+            podcast_id=podcast_id,
+            episode_ref=episode_ref,
+            action=action,
+            confirm=confirm,
+            api_cost_ack=api_cost_ack,
+            transcription_model=transcription_model,
+            transcription_device=transcription_device,
+            transcription_compute_type=transcription_compute_type,
+            transcription_vad_filter=transcription_vad_filter,
+            semantic_provider=semantic_provider,
+            semantic_model=semantic_model,
+            semantic_base_url=semantic_base_url,
+            semantic_api_key_env=semantic_api_key_env,
+            semantic_chunk_seconds=semantic_chunk_seconds,
+            semantic_max_segments_per_chunk=semantic_max_segments_per_chunk,
+            progress_callback=None,
+        ),
+        confirm=confirm,
+    )
+
+
 def _tool_call(operation: Callable[[], Any], warnings: list[str] | None = None) -> dict[str, Any]:
     try:
         return tool_success(operation(), warnings=warnings)
@@ -590,6 +652,67 @@ def _tool_call(operation: Callable[[], Any], warnings: list[str] | None = None) 
         return tool_error(str(exc), "ValueError")
     except Exception as exc:
         return tool_error(str(exc), type(exc).__name__)
+
+
+def _completion_workflow_tool_call(
+    *,
+    operation: Callable[[], Any],
+    confirm: bool,
+) -> dict[str, Any]:
+    """Map 016 Core results into bounded envelopes without dependency details."""
+
+    try:
+        result = operation()
+        payload = completion_workflow_runner.result_to_dict(result)
+    except Exception:
+        return _completion_tool_error()
+
+    if confirm:
+        return tool_success(payload)
+    return {
+        "ok": True,
+        "dry_run": True,
+        "requires_confirmation": _completion_result_requires_confirmation(result),
+        "data": payload,
+    }
+
+
+def _completion_request_rejected_early(
+    *,
+    episode_ref: str,
+    action: str,
+    confirm: bool,
+    api_cost_ack: str,
+) -> bool:
+    """Keep invalid confirmed requests away from selection and provider work."""
+
+    if not confirm:
+        return False
+    normalized_action = action.strip().casefold() if isinstance(action, str) else ""
+    normalized_selector = (
+        episode_ref.strip().casefold() if isinstance(episode_ref, str) else ""
+    )
+    if normalized_action == "next" or normalized_selector == "latest":
+        return True
+    return (
+        normalized_action == "semantic_summary"
+        and api_cost_ack != SEMANTIC_API_COST_ACK
+    )
+
+
+def _completion_result_requires_confirmation(result: Any) -> bool:
+    selected_action = getattr(result, "selected_action", None)
+    if selected_action not in _COMPLETION_EXECUTABLE_ACTIONS:
+        return False
+    return any(
+        getattr(row, "status", None) == "selected"
+        and getattr(row, "requires_confirmation", False) is True
+        for row in (getattr(result, "rows", None) or ())
+    )
+
+
+def _completion_tool_error() -> dict[str, Any]:
+    return tool_error(_COMPLETION_TOOL_ERROR_MESSAGE, _COMPLETION_TOOL_ERROR_TYPE)
 
 
 def _semantic_tool_call(

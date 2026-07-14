@@ -146,3 +146,14 @@ def test_rebuild_cache_references_stay_in_reviewed_modules():
         "unexpected rebuild_cache reference in core modules (auto-rebuild is "
         f"forbidden; see constitution principle VIII): {offenders}"
     )
+
+
+def test_completion_workflow_has_no_automatic_cache_rebuild_path():
+    completion_source = (
+        ROOT
+        / "src"
+        / "podcast_ingest_core"
+        / "corpus_episode_completion_workflow_runner.py"
+    ).read_text(encoding="utf-8")
+
+    assert "rebuild_cache" not in completion_source

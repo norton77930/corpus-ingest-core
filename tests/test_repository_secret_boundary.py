@@ -92,6 +92,15 @@ def test_scan_covers_expected_repo_surface():
     assert not any(name.startswith("evals/research-llm-smoke/raw/") for name in files)
 
 
+def test_scan_covers_016_core_cli_mcp_and_portable_skill_surface():
+    files = {path.relative_to(ROOT).as_posix() for path in _scannable_files()}
+
+    assert "src/podcast_ingest_core/corpus_episode_completion_workflow_runner.py" in files
+    assert "scripts/run_corpus_episode_completion_workflow.py" in files
+    assert "src/podcast_ingest_core/mcp_server.py" in files
+    assert ".agents/skills/corpus-episode-completion/SKILL.md" in files
+
+
 def test_no_secret_like_api_key_in_committable_files():
     violations = []
     for path in _scannable_files():

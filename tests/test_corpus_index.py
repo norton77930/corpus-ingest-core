@@ -719,3 +719,91 @@ def test_generate_corpus_index_cli_reports_invalid_podcast(capsys, monkeypatch):
     assert exit_code == 1
     assert captured.out == ""
     assert "podcast_id" in captured.err
+
+def test_semantic_summary_readability_metadata_is_additive_and_legacy_status_stays_available(
+    monkeypatch, tmp_path: Path
+):
+    import podcast_ingest_core.corpus_index as corpus_index
+
+    _write_episode_seed(monkeypatch, tmp_path, episode_ref="EP700", title="Alpha")
+    _write_transcript(monkeypatch, tmp_path, episode_ref="EP700", title="Alpha")
+    summary_path = _write_summary(
+        monkeypatch,
+        tmp_path,
+        episode_ref="EP700",
+        title="Alpha",
+        semantic=True,
+        body="readable semantic body",
+    )
+
+    snapshot = corpus_index._build_corpus_index_snapshot("gooaye")
+    episode = next(
+        row for row in snapshot.payload["episodes"] if row["episode_ref"] == "EP700"
+    )
+    status = episode["artifact_status"]["semantic_summary"]
+
+    assert status["status"] == "available"
+    assert status["exists"] is True
+    assert status["readable"] is True
+    assert status["readability_status"] == "readable"
+    assert status["path"] == str(summary_path)
+    assert "readable semantic body" not in repr(status)
+
+
+def test_semantic_summary_invalid_utf8_is_metadata_unreadable_without_changing_legacy_status(
+    monkeypatch, tmp_path: Path
+):
+    import podcast_ingest_core.corpus_index as corpus_index
+
+    _write_episode_seed(monkeypatch, tmp_path, episode_ref="EP701", title="Alpha")
+    _write_transcript(monkeypatch, tmp_path, episode_ref="EP701", title="Alpha")
+    summary_path = _write_summary(
+        monkeypatch,
+        tmp_path,
+        episode_ref="EP701",
+        title="Alpha",
+        semantic=True,
+    )
+    summary_path.write_bytes(b"\xffsecret semantic sentinel")
+
+    snapshot = corpus_index._build_corpus_index_snapshot("gooaye")
+    episode = next(
+        row for row in snapshot.payload["episodes"] if row["episode_ref"] == "EP701"
+    )
+    status = episode["artifact_status"]["semantic_summary"]
+
+    assert status["status"] == "available"
+    assert status["exists"] is True
+    assert status["readable"] is False
+    assert status["readability_status"] == "unreadable"
+    assert status["warning_count"] >= 1
+    assert "secret semantic sentinel" not in repr(status)
+
+def test_semantic_summary_oversize_is_fail_closed_with_bounded_read(
+    monkeypatch, tmp_path: Path
+):
+    import podcast_ingest_core.corpus_index as corpus_index
+
+    _write_episode_seed(monkeypatch, tmp_path, episode_ref="EP702", title="Alpha")
+    _write_transcript(monkeypatch, tmp_path, episode_ref="EP702", title="Alpha")
+    summary_path = _write_summary(
+        monkeypatch,
+        tmp_path,
+        episode_ref="EP702",
+        title="Alpha",
+        semantic=True,
+    )
+    summary_path.write_bytes(
+        b"x" * (corpus_index._SEMANTIC_SUMMARY_MAX_READ_BYTES + 1)
+    )
+
+    snapshot = corpus_index._build_corpus_index_snapshot("gooaye")
+    episode = next(
+        row for row in snapshot.payload["episodes"] if row["episode_ref"] == "EP702"
+    )
+    status = episode["artifact_status"]["semantic_summary"]
+
+    assert status["status"] == "available"
+    assert status["readable"] is False
+    assert status["readability_status"] == "unreadable"
+    assert status["warning_count"] >= 1

@@ -124,6 +124,27 @@ def test_run_validation_checks_dry_run_and_semantic_ack_guard(tmp_path, monkeypa
     assert checks["semantic_ack_guard"]["ok"] is True
 
 
+def test_run_validation_checks_completion_tool_skill_and_early_guard(tmp_path, monkeypatch):
+    from scripts import validate_mcp_setup
+
+    cache_path = tmp_path / "podcast_ingest.sqlite3"
+    cache_path.write_text("", encoding="utf-8")
+    runner_path = tmp_path / "run_mcp_server.py"
+    runner_path.write_text("print('ok')", encoding="utf-8")
+    monkeypatch.setattr(validate_mcp_setup.storage, "cache_db_path", lambda: cache_path)
+    monkeypatch.setattr(validate_mcp_setup, "RUNNER_PATH", runner_path)
+    monkeypatch.setattr(validate_mcp_setup, "search_transcripts", lambda *args, **kwargs: [])
+    monkeypatch.setattr(validate_mcp_setup, "search_mentions", lambda *args, **kwargs: [])
+
+    result = validate_mcp_setup.run_validation(podcast_id="gooaye", query="台積電")
+
+    checks = {check["name"]: check for check in result["checks"]}
+    assert checks["completion_tool_registry"]["ok"] is True
+    assert checks["completion_tool_registry"]["tool_count"] == 13
+    assert checks["completion_skill_metadata"]["ok"] is True
+    assert checks["completion_confirmed_next_guard"]["ok"] is True
+
+
 def test_validate_mcp_setup_main_outputs_json(monkeypatch, capsys, tmp_path):
     from scripts import validate_mcp_setup
 

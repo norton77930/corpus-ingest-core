@@ -71,6 +71,23 @@ Phase 6L consolidated workflow tool，dry-run first：`confirm=false` 只回傳 
 
 MCP 版刻意只暴露 core workflow 參數的子集：不含 fixture external data verification（`include_external_data_verification`）與 reviewed semantic context opt-in（`include_semantic_context_in_synthesis`）。需要完整參數時請使用 CLI `python scripts/run_research_workflow.py`。
 
+### Human-Controlled Episode Completion Tool
+
+- `run_corpus_episode_completion_workflow`
+
+016 completion tool 使用 preview → human approval → one action 的流程。先以
+`action=next, confirm=false` 取得 canonical episode、selected action、planned
+reads/writes 與風險；只有在使用者明確同意後，才以該 canonical episode、同一個
+explicit action 與 `confirm=true` 執行一次。confirmed mode 會拒絕 `next` 與
+`latest`。若 selected action 是 `semantic_summary`，使用者還必須提供 exact
+`api_cost_ack`；MCP server 不會載入 `.env`，也不會自動 rebuild cache。完成或
+blocked/rejected 後必須停止，不會自動改跑下一個 action。
+
+需要讓 Agent 依人類控制流程操作時，掛載 repository 的 portable
+`corpus-episode-completion` Skill。它只使用此 MCP tool：preview、解釋、等待
+明確同意、確認同一個 canonical action、回報並停止；MCP 不可用時不改用 CLI、
+terminal、scheduler 或 retry。
+
 ## Safety
 
 MCP tools 不接受任意本機檔案路徑，也不構成投資建議。

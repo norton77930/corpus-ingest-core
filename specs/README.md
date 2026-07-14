@@ -16,6 +16,11 @@ gaps. Package `013` is the dry-run-first RSS episode seed bootstrap runner.
 Package `014` is the dry-run-first fresh episode workflow runner that dispatches
 one next safe stage across packages `013`, `012`, `011`, and `010`. Its
 dry-run is strict zero-file and reuses one fresh in-memory index/plan snapshot.
+Package `015` is the standalone strict-zero-file semantic summary/review runner.
+Package `016` is the human-controlled corpus episode completion workflow runner:
+it previews one action across intake through semantic review, then permits one
+matching confirmed action through Core, CLI, the reviewed MCP tool, or the
+portable Skill.
 
 Workflow record: constitution reviewed, no amendment. The backfill follows
 `$speckit-constitution`, `$speckit-specify`, `$speckit-clarify`,
@@ -63,6 +68,8 @@ commit a fixed selector that makes one package appear uniquely active.
 - `012-corpus-audio-download-runner`: dry-run-first single-episode audio download runner.
 - `013-corpus-episode-intake-bootstrap`: dry-run-first RSS episode seed bootstrap runner.
 - `014-corpus-fresh-episode-workflow-runner`: dry-run-first one-stage fresh episode workflow runner.
+- `015-corpus-semantic-remediation-runner`: standalone strict-zero-file semantic summary/review runner.
+- `016-corpus-episode-completion-workflow-runner`: human-controlled strict-zero-file completion workflow, one MCP tool, and portable Skill.
 
 ## roadmap phase Mapping
 
@@ -79,6 +86,8 @@ commit a fixed selector that makes one package appear uniquely active.
 - Corpus audio download runner runtime work maps to `012-corpus-audio-download-runner`.
 - Corpus episode intake bootstrap runtime work maps to `013-corpus-episode-intake-bootstrap`.
 - Corpus fresh episode workflow runner runtime work maps to `014-corpus-fresh-episode-workflow-runner`.
+- Corpus semantic remediation runner runtime work maps to `015-corpus-semantic-remediation-runner`.
+- Corpus episode completion workflow runner runtime work maps to `016-corpus-episode-completion-workflow-runner`.
 
 ## core modules Mapping
 
@@ -95,6 +104,8 @@ commit a fixed selector that makes one package appear uniquely active.
 - `012`: `corpus_audio_download_runner.py`, `corpus_remediation_plan.py`, `downloader.py`, `storage.py`, `models.py`, `errors.py`.
 - `013`: `corpus_episode_intake.py`, `feed_reader.py`, `corpus_index.py`, `corpus_remediation_plan.py`, `corpus_audio_download_runner.py`, `storage.py`, `models.py`, `errors.py`.
 - `014`: `corpus_episode_workflow_runner.py`, `corpus_episode_intake.py`, `corpus_index.py`, `corpus_remediation_plan.py`, `corpus_audio_download_runner.py`, `corpus_local_transcription_runner.py`, `corpus_remediation_runner.py`, `storage.py`, `models.py`, `errors.py`.
+- `015`: `corpus_semantic_remediation_runner.py`, `corpus_index.py`, `semantic_summarizer.py`, `semantic_summary_smoke_review.py`, `storage.py`, `models.py`, `errors.py`.
+- `016`: `corpus_episode_completion_workflow_runner.py`, `corpus_episode_intake.py`, `corpus_episode_workflow_runner.py`, `corpus_semantic_remediation_runner.py`, `mcp_server.py`, `storage.py`, `models.py`, `errors.py`, and `.agents/skills/corpus-episode-completion/SKILL.md`.
 
 ## CLI/scripts Mapping
 
@@ -111,6 +122,8 @@ commit a fixed selector that makes one package appear uniquely active.
 - `012`: `run_corpus_audio_download.py`.
 - `013`: `run_corpus_episode_intake.py`.
 - `014`: `run_corpus_episode_workflow.py`.
+- `015`: `run_corpus_semantic_remediation.py`.
+- `016`: `run_corpus_episode_completion_workflow.py`, `validate_mcp_setup.py`.
 
 ## tests Mapping
 
@@ -127,6 +140,8 @@ commit a fixed selector that makes one package appear uniquely active.
 - `012`: `test_corpus_audio_download_runner.py`.
 - `013`: `test_corpus_episode_intake.py`, plus seed handoff coverage in `test_corpus_index.py`, `test_corpus_remediation_plan.py`, and `test_corpus_audio_download_runner.py`.
 - `014`: `test_corpus_episode_workflow_runner.py` covers six real corpus states, zero writer calls/tree manifest drift, shared snapshot identity, and deep failure no-leak; standalone compatibility remains covered by `test_corpus_audio_download_runner.py`, `test_corpus_local_transcription_runner.py`, `test_corpus_remediation_runner.py`, `test_corpus_index.py`, and `test_corpus_remediation_plan.py`.
+- `015`: `test_corpus_semantic_remediation_runner.py` covers the complete state table, real 008/009 zero-file manifests, exact acknowledgement ordering, real semantic/review cores, no-leak, cache, MCP, and 014 compatibility guards.
+- `016`: `test_corpus_episode_completion_workflow_runner.py` covers strict-zero-file previews, fresh confirmed one-action dispatch, reports, acknowledgement/no-leak boundaries, and CLI; `test_mcp_server.py`, `test_mcp_tool_registry_contract.py`, `test_mcp_setup_validation.py`, and `test_corpus_episode_completion_skill.py` cover the reviewed MCP and portable Skill surfaces.
 
 ## Classification
 
@@ -138,9 +153,11 @@ commit a fixed selector that makes one package appear uniquely active.
 - audio download runner: package `012`.
 - episode intake bootstrap runner: package `013`.
 - fresh episode workflow runner: package `014`.
+- semantic remediation runner: package `015`.
+- human-controlled episode completion workflow runner: package `016`.
 - optional LLM: packages `005` and `006`.
 - local fixture: package `004` and workflow integration in `005`.
-- MCP exposed: packages `003` and `005`.
+- MCP exposed: packages `003`, `005`, and `016`.
 - eval/review only: packages `003`, `006`, and `007`.
 
 ## Safety Boundaries
@@ -153,6 +170,8 @@ commit a fixed selector that makes one package appear uniquely active.
 - MCP exposed side-effect tools warn about manual cache rebuild and do not rebuild automatically.
 - corpus episode intake is seed-only: dry-run may read configured RSS but writes nothing, confirmed execution writes only safe seed metadata and a run report, and it does not download, transcribe, call LLM/MCP, run downstream remediation, or rebuild cache automatically.
 - corpus fresh episode workflow is one-stage only: 014 dry-run is zero-file and uses one in-memory snapshot, while standalone 010-012 dry-runs still persist fresh 008/009; confirmed execution requires `stage=next`, dispatches exactly one existing public runner, and does not execute semantic/LLM, MCP registry, cache rebuild, stock-lens, batch, or non-selected stages.
+- corpus semantic remediation is standalone: dry-run is strict zero-file and bypasses profile/`.env`; confirmed summary requires exact api_cost_ack before profile/provider resolution; review is deterministic; exactly one executor runs; no generated_at latest report; no 010/014/MCP/cache integration; not investment advice.
+- corpus episode completion is human-controlled: strict-zero-file preview uses one in-memory snapshot, confirmed rejects `next`/`latest` and drift before one explicit runner dispatch, exact summary acknowledgement precedes profile/`.env`/provider work, and the reviewed local stdio MCP registry has exact 13 tools. The portable Skill has no CLI/terminal fallback, retry, scheduler, or automatic second action.
 - no investment advice: no buy/sell/hold, target price, guaranteed return, or personalized recommendation.
 
 ## Batch Guard Tests（audit hardening）

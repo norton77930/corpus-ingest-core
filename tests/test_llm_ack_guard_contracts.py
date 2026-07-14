@@ -126,6 +126,7 @@ def test_ack_constant_has_single_source_of_truth():
         stock_lens_synthesis,
     )
     from scripts import (
+        run_corpus_episode_completion_workflow,
         run_research_llm_smoke,
         run_semantic_summary_smoke,
         summarize_episode,
@@ -139,6 +140,7 @@ def test_ack_constant_has_single_source_of_truth():
     assert run_research_llm_smoke.SEMANTIC_API_COST_ACK is canonical
     assert run_semantic_summary_smoke.SEMANTIC_API_COST_ACK is canonical
     assert summarize_episode.SEMANTIC_API_COST_ACK is canonical
+    assert run_corpus_episode_completion_workflow.SEMANTIC_API_COST_ACK is canonical
 
 
 @pytest.mark.parametrize("bad_ack_argv", [[], ["--api-cost-ack", "wrong ack text"]])
@@ -215,3 +217,30 @@ def test_mcp_semantic_dry_run_reports_env_name_only_never_value(monkeypatch):
     assert response["inputs"]["api_key_env_configured"] is True
     serialized = json.dumps(response, ensure_ascii=False, default=str)
     assert "fake-key-value" not in serialized
+
+def test_corpus_semantic_cli_reuses_canonical_ack_constant():
+    from podcast_ingest_core import llm_provider
+    from scripts import run_corpus_semantic_remediation as corpus_semantic_cli
+
+    assert corpus_semantic_cli.SEMANTIC_API_COST_ACK is llm_provider.SEMANTIC_API_COST_ACK
+
+
+def test_completion_summary_rejects_bad_ack_before_selection_or_executor(monkeypatch):
+    from podcast_ingest_core import corpus_episode_completion_workflow_runner as runner
+    from podcast_ingest_core.errors import CorpusEpisodeCompletionWorkflowRunnerFailedError
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("invalid acknowledgement reached completion workflow work")
+
+    monkeypatch.setattr(runner, "run_corpus_episode_intake", forbidden)
+    monkeypatch.setattr(runner, "_build_corpus_index_snapshot", forbidden)
+    monkeypatch.setattr(runner, "run_corpus_semantic_remediation", forbidden)
+
+    with pytest.raises(CorpusEpisodeCompletionWorkflowRunnerFailedError, match="api_cost_ack"):
+        runner.run_corpus_episode_completion_workflow(
+            "gooaye",
+            episode_ref="EP677",
+            action="semantic_summary",
+            confirm=True,
+            api_cost_ack="wrong acknowledgement",
+        )

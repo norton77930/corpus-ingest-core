@@ -67,6 +67,29 @@ Side-effect dry-run response：
 {"ok": true, "dry_run": true, "requires_confirmation": true, "tool": "transcribe_episode", "next_step": "Call this tool again with confirm=true to execute."}
 ```
 
+## 016 Human-Controlled Completion Tool and Portable Skill
+
+016 makes the reviewed local stdio registry exact 13 tools by adding
+`run_corpus_episode_completion_workflow`; the existing twelve tool signatures and envelopes remain
+unchanged. Its default is a strict-zero-file preview across intake, audio,
+transcription, deterministic remediation, semantic summary, and semantic
+review. A dry-run returns one selected action or a bounded blocked/completed
+state, never a full-chain execution.
+
+The repository portable `corpus-episode-completion` Skill is the human-control
+layer for agents. It may only call this reviewed MCP tool: first
+`action=next, confirm=false`, then explain the result and wait for an explicit
+approval of the returned canonical episode and exact selected action. It must
+not treat general approval as confirmation, invoke a CLI/terminal fallback,
+retry, schedule work, or launch an automatic second action.
+
+Confirmed requests reject `latest` and `next`, recompute state to reject drift,
+and dispatch at most one matching Core runner. Confirmed semantic summary
+requires the exact acknowledgement before profile, `.env`, or provider work;
+semantic review has no LLM configuration. The tool writes a metadata-only
+latest 016 report only after a valid confirmed action, and does not rebuild
+index, plan, or SQLite cache automatically.
+
 ## 對 MCP 友善的設計
 
 - deterministic path：工具可用 `podcast_id` 與 `episode_ref` 找到對應檔案。

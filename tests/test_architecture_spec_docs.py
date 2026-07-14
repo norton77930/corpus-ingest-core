@@ -241,6 +241,24 @@ def test_c1_docs_drift_remediation_current_status_and_batch_traceability():
     assert "Batch Guard Tests" in specs_readme
 
 
+def test_corpus_runtime_lifecycle_status_matches_registry_and_roadmap():
+    for package in [
+        "010-corpus-remediation-runner",
+        "011-corpus-local-transcription-runner",
+        "012-corpus-audio-download-runner",
+        "013-corpus-episode-intake-bootstrap",
+        "014-corpus-fresh-episode-workflow-runner",
+        "015-corpus-semantic-remediation-runner",
+        "016-corpus-episode-completion-workflow-runner",
+    ]:
+        spec = _read(ROOT / "specs" / package / "spec.md")
+        assert "**Status**: Implemented" in spec
+
+    roadmap = _read(DOCS / "roadmap.md")
+    assert "015-corpus-semantic-remediation-runner" in roadmap
+    assert "Latest implemented corpus package is **016-corpus-episode-completion-workflow-runner**" in roadmap
+    assert "next unused feature package number is **017**" in roadmap
+
 def test_014_stabilization_docs_define_strict_zero_file_dry_run():
     feature = ROOT / "specs" / "014-corpus-fresh-episode-workflow-runner"
     spec = _read(feature / "spec.md")
@@ -274,3 +292,97 @@ def test_014_stabilization_docs_define_strict_zero_file_dry_run():
     ]
     assert all("zero-file" in text for text in direct_docs)
     matrix = direct_docs[-1]
+    assert "tree manifest" in matrix
+    assert "writer call count" in matrix
+    assert "one shared snapshot" in matrix
+    assert "exact 12 MCP tools" in matrix
+
+def test_015_semantic_remediation_docs_and_registry_contract():
+    feature = ROOT / "specs" / "015-corpus-semantic-remediation-runner"
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    architecture = (ROOT / "docs" / "architecture.md").read_text(encoding="utf-8")
+    registry = (ROOT / "specs" / "README.md").read_text(encoding="utf-8")
+    verification = (ROOT / "docs" / "verification-matrix.md").read_text(
+        encoding="utf-8"
+    )
+    handoff = (ROOT / "docs" / "agent-handoff.md").read_text(encoding="utf-8")
+    roadmap = (ROOT / "docs" / "roadmap.md").read_text(encoding="utf-8")
+    agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
+
+    for relative_path in (
+        "spec.md",
+        "plan.md",
+        "research.md",
+        "data-model.md",
+        "quickstart.md",
+        "tasks.md",
+        "contracts/corpus-semantic-remediation.md",
+        "checklists/requirements.md",
+        "checklists/safety.md",
+    ):
+        assert (feature / relative_path).is_file()
+
+    assert "run_corpus_semantic_remediation" in readme
+    assert "run_corpus_semantic_remediation.py" in readme
+    assert "strict zero-file" in readme
+    assert "semantic_summary" in readme
+    assert "semantic_review" in readme
+    assert "corpus-semantic-remediation-run.json" in readme
+    assert "corpus_semantic_remediation_runner.py" in architecture
+    assert "exactly one" in architecture
+    assert "does not call 010 or 014" in architecture
+    assert "015-corpus-semantic-remediation-runner" in registry
+    assert "corpus_semantic_remediation_runner.py" in registry
+    assert "run_corpus_semantic_remediation.py" in registry
+    assert "test_corpus_semantic_remediation_runner.py" in registry
+    assert "corpus semantic remediation runner" in verification
+    assert "test_corpus_semantic_remediation_runner.py" in verification
+    assert "015-corpus-semantic-remediation-runner" in handoff
+    assert "015-corpus-semantic-remediation-runner" in roadmap
+    assert "016" in roadmap
+    assert "specs/016-corpus-episode-completion-workflow-runner/plan.md" in agents
+
+
+def test_016_completion_workflow_docs_and_agent_surface_contract():
+    feature = ROOT / "specs" / "016-corpus-episode-completion-workflow-runner"
+    readme = _read(ROOT / "README.md")
+    architecture = _read(DOCS / "architecture.md")
+    handoff = _read(DOCS / "agent-handoff.md")
+    roadmap = _read(DOCS / "roadmap.md")
+    registry = _read(ROOT / "specs" / "README.md")
+    verification = _read(DOCS / "verification-matrix.md")
+    mcp_usage = _read(DOCS / "mcp-usage.md")
+    agents = _read(ROOT / "AGENTS.md")
+
+    for relative_path in (
+        "spec.md",
+        "plan.md",
+        "research.md",
+        "data-model.md",
+        "quickstart.md",
+        "tasks.md",
+        "contracts/corpus-episode-completion-workflow.md",
+        "checklists/requirements.md",
+        "checklists/safety.md",
+    ):
+        assert (feature / relative_path).is_file()
+
+    assert "run_corpus_episode_completion_workflow" in readme
+    assert "run_corpus_episode_completion_workflow.py" in readme
+    assert "corpus-episode-completion-workflow-run.json" in readme
+    assert "strict zero-file" in readme
+    assert "corpus_episode_completion_workflow_runner.py" in architecture
+    assert "one explicit action" in architecture
+    assert "exact 13" in architecture
+    assert "016-corpus-episode-completion-workflow-runner" in handoff
+    assert "13 reviewed tools" in handoff
+    assert "016-corpus-episode-completion-workflow-runner" in roadmap
+    assert "next unused feature package number is **017**" in roadmap
+    assert "016-corpus-episode-completion-workflow-runner" in registry
+    assert "run_corpus_episode_completion_workflow.py" in registry
+    assert "run_corpus_episode_completion_workflow" in registry
+    assert "test_corpus_episode_completion_workflow_runner.py" in verification
+    assert "test_corpus_episode_completion_skill.py" in verification
+    assert "run_corpus_episode_completion_workflow" in mcp_usage
+    assert "corpus-episode-completion" in mcp_usage
+    assert "specs/016-corpus-episode-completion-workflow-runner/plan.md" in agents

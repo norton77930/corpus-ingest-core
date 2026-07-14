@@ -853,6 +853,173 @@ class CorpusEpisodeWorkflowRunResult:
 
 
 @dataclass(frozen=True)
+class CorpusSemanticRemediationRunFilter:
+    """Corpus semantic remediation runner normalized request metadata."""
+
+    episode_ref: str
+    action: str
+    provider: str | None
+    model: str | None
+    chunk_seconds: int
+    max_segments_per_chunk: int
+
+
+@dataclass(frozen=True)
+class CorpusSemanticRemediationRunCounts:
+    """Corpus semantic remediation runner outcome counts."""
+
+    row_count: int
+    selected_count: int
+    executed_count: int
+    reused_count: int
+    completed_count: int
+    failed_count: int
+    blocked_count: int
+    rejected_count: int
+    manual_only_count: int
+    warning_count: int
+
+
+@dataclass(frozen=True)
+class CorpusSemanticRemediationRunWarning:
+    """Corpus semantic remediation runner bounded warning."""
+
+    scope: str
+    episode_ref: str | None
+    message: str
+
+
+@dataclass(frozen=True)
+class CorpusSemanticRemediationRunRow:
+    """One semantic remediation decision or confirmed attempt outcome."""
+
+    episode_ref: str
+    action: str
+    status: str
+    reason: str
+    requires_api_cost_ack: bool
+    transcript_transfer_risk: bool
+    may_incur_api_cost: bool
+    manual_only: bool
+    planned_reads: list[str]
+    planned_writes: list[str]
+    output_paths: list[str]
+    source_report_paths: list[str]
+    provider: str | None
+    model: str | None
+    failure_category: str | None
+    warnings: list[str]
+
+
+@dataclass(frozen=True)
+class CorpusSemanticRemediationRunResult:
+    """Corpus semantic remediation runner dry-run or confirmed result."""
+
+    podcast_id: str
+    run_mode: str
+    confirm: bool
+    episode_ref: str
+    requested_action: str
+    selected_action: str
+    executed_action: str | None
+    report_json_path: Path | None
+    report_markdown_path: Path | None
+    filters: CorpusSemanticRemediationRunFilter
+    counts: CorpusSemanticRemediationRunCounts
+    rows: list[CorpusSemanticRemediationRunRow]
+    warnings: list[CorpusSemanticRemediationRunWarning]
+    not_investment_advice: bool
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeCompletionWorkflowRunFilter:
+    """Normalized non-secret completion workflow request metadata."""
+
+    episode_ref: str
+    action: str
+    transcription_model: str | None
+    transcription_device: str
+    transcription_compute_type: str
+    transcription_vad_filter: bool
+    semantic_provider: str | None
+    semantic_model: str | None
+    semantic_chunk_seconds: int
+    semantic_max_segments_per_chunk: int
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeCompletionWorkflowRunCounts:
+    """Completion workflow outcome counts."""
+
+    row_count: int
+    selected_count: int
+    executed_count: int
+    reused_count: int
+    completed_count: int
+    failed_count: int
+    blocked_count: int
+    rejected_count: int
+    manual_only_count: int
+    warning_count: int
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeCompletionWorkflowRunWarning:
+    """Bounded completion workflow warning."""
+
+    scope: str
+    episode_ref: str | None
+    message: str
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeCompletionWorkflowRunRow:
+    """One completion workflow decision or stage attempt."""
+
+    episode_ref: str | None
+    action: str
+    status: str
+    reason: str
+    requires_confirmation: bool
+    requires_api_cost_ack: bool
+    network_risk: bool
+    local_compute_risk: bool
+    transcript_transfer_risk: bool
+    may_incur_api_cost: bool
+    manual_only: bool
+    planned_reads: list[str]
+    planned_writes: list[str]
+    output_paths: list[str]
+    source_report_paths: list[str]
+    stage_counts: dict[str, int]
+    provider: str | None
+    model: str | None
+    failure_category: str | None
+    warnings: list[str]
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeCompletionWorkflowRunResult:
+    """Dry-run or confirmed single-action completion workflow result."""
+
+    podcast_id: str
+    run_mode: str
+    confirm: bool
+    selector: str
+    episode_ref: str | None
+    requested_action: str
+    selected_action: str
+    executed_action: str | None
+    report_json_path: Path | None
+    report_markdown_path: Path | None
+    filters: CorpusEpisodeCompletionWorkflowRunFilter
+    counts: CorpusEpisodeCompletionWorkflowRunCounts
+    rows: list[CorpusEpisodeCompletionWorkflowRunRow]
+    warnings: list[CorpusEpisodeCompletionWorkflowRunWarning]
+    not_investment_advice: bool
+
+
+@dataclass(frozen=True)
 class ResearchWorkflowStep:
     """Research workflow 中單一步驟的計畫或執行結果。"""
 

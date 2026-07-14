@@ -32,6 +32,7 @@ SEMANTIC_REVIEW_REPORTS_DIR = Path("evals") / "research-llm-smoke" / "reports"
 _AUDIO_SUFFIXES = {".mp3", ".m4a", ".wav", ".aac", ".flac"}
 _ARRAY_COUNTS_KEY = "__array_counts__"
 _SEMANTIC_REVIEW_TIMESTAMP_PATTERN = re.compile(r"^\d{8}-\d{6}__")
+_SEMANTIC_SUMMARY_MAX_READ_BYTES = 2 * 1024 * 1024
 
 
 @dataclass(frozen=True)
@@ -331,10 +332,22 @@ def _summary_status(podcast_id: str, episode_ref: str, *, semantic: bool) -> dic
             if not path.name.endswith(".semantic.md")
         ]
     if not candidates:
-        return {**_missing_status(), "exists": False, "path": None}
+        missing = {**_missing_status(), "exists": False, "path": None}
+        if semantic:
+            missing.update(readable=False, readability_status="missing")
+        return missing
     selected = candidates[0]
     family = "semantic_summary" if semantic else "extractive_summary"
     warnings = _duplicate_warnings(family, candidates, selected)
+    readability: dict[str, Any] = {}
+    if semantic:
+        readable, readability_warning = _semantic_summary_readability(selected)
+        readability = {
+            "readable": readable,
+            "readability_status": "readable" if readable else "unreadable",
+        }
+        if readability_warning is not None:
+            warnings.append(readability_warning)
     return {
         "status": "available",
         "exists": True,
@@ -343,7 +356,20 @@ def _summary_status(podcast_id: str, episode_ref: str, *, semantic: bool) -> dic
         "candidate_count": len(candidates),
         "warnings": warnings,
         "warning_count": len(warnings),
+        **readability,
     }
+
+
+def _semantic_summary_readability(path: Path) -> tuple[bool, str | None]:
+    try:
+        with path.open("rb") as handle:
+            payload = handle.read(_SEMANTIC_SUMMARY_MAX_READ_BYTES + 1)
+        if len(payload) > _SEMANTIC_SUMMARY_MAX_READ_BYTES:
+            return False, "semantic summary readability check exceeded size limit"
+        payload.decode("utf-8")
+    except (OSError, UnicodeError):
+        return False, "semantic summary is not readable UTF-8"
+    return True, None
 
 
 def _mentions_status(podcast_id: str, episode_ref: str) -> dict[str, Any]:

@@ -109,6 +109,18 @@ class CorpusEpisodeWorkflowRunAssetPaths:
     markdown_path: Path
 
 
+@dataclass(frozen=True)
+class CorpusSemanticRemediationRunAssetPaths:
+    json_path: Path
+    markdown_path: Path
+
+
+@dataclass(frozen=True)
+class CorpusEpisodeCompletionWorkflowRunAssetPaths:
+    json_path: Path
+    markdown_path: Path
+
+
 def audio_path(podcast_id: str, episode_ref: str) -> Path:
     """回傳音檔輸出路徑。"""
 
@@ -463,6 +475,30 @@ def corpus_episode_workflow_run_asset_paths(
     return CorpusEpisodeWorkflowRunAssetPaths(
         json_path=base_dir / "corpus-episode-workflow-run.json",
         markdown_path=base_dir / "corpus-episode-workflow-run.md",
+    )
+
+
+def corpus_semantic_remediation_run_asset_paths(
+    podcast_id: str,
+) -> CorpusSemanticRemediationRunAssetPaths:
+    """Return semantic remediation latest JSON and Markdown report paths."""
+
+    base_dir = CORPUS_DIR / _safe_slug(podcast_id, "podcast_id")
+    return CorpusSemanticRemediationRunAssetPaths(
+        json_path=base_dir / "corpus-semantic-remediation-run.json",
+        markdown_path=base_dir / "corpus-semantic-remediation-run.md",
+    )
+
+
+def corpus_episode_completion_workflow_run_asset_paths(
+    podcast_id: str,
+) -> CorpusEpisodeCompletionWorkflowRunAssetPaths:
+    """Return completion workflow latest JSON and Markdown report paths."""
+
+    base_dir = CORPUS_DIR / _safe_slug(podcast_id, "podcast_id")
+    return CorpusEpisodeCompletionWorkflowRunAssetPaths(
+        json_path=base_dir / "corpus-episode-completion-workflow-run.json",
+        markdown_path=base_dir / "corpus-episode-completion-workflow-run.md",
     )
 
 

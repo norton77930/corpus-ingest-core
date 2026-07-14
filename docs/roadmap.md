@@ -186,6 +186,8 @@
 ### 已完成到哪
 
 - 最高完成功能階段為 **Phase 6V.1（Review Gate Boundary Alignment）**；上方 Phase 0 → 6V.1 的功能階段皆已落地，並由 `tests/` 對應守衛測試鎖定。
+- Latest implemented corpus package is **016-corpus-episode-completion-workflow-runner**. It follows **015-corpus-semantic-remediation-runner** with a human-controlled one-action completion flow through Core, CLI, one MCP tool, and a portable Skill; packages `008` through `016` cover index, planning, bounded stage runners, fresh workflow, semantic remediation, and completion.
+- The next unused feature package number is **017**.
 - 其後為 audit-remediation 硬化（**非編號功能階段，不進 Phase 序列**），對應目前 HEAD：
   - **Batch 2**：安全/契約守衛測試（secret boundary、gitignore policy、MCP tool registry、LLM ack 契約、LLM CLI no-leak、manual cache rebuild）。
   - **Batch 2.5**：AI handoff governance docs 守衛。

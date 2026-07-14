@@ -8,6 +8,8 @@ from .errors import (
     CorpusAudioDownloadRunnerFailedError,
     CorpusEpisodeIntakeFailedError,
     CorpusEpisodeWorkflowRunnerFailedError,
+    CorpusEpisodeCompletionWorkflowRunnerFailedError,
+    CorpusSemanticRemediationRunnerFailedError,
     CorpusLocalTranscriptionRunnerFailedError,
     CorpusIndexFailedError,
     CorpusRemediationPlanFailedError,
@@ -50,6 +52,11 @@ from .corpus_local_transcription_runner import run_corpus_local_transcription
 from .corpus_audio_download_runner import run_corpus_audio_download
 from .corpus_episode_intake import run_corpus_episode_intake
 from .corpus_episode_workflow_runner import run_corpus_episode_workflow
+from .corpus_episode_completion_workflow_runner import (
+    result_to_dict as corpus_episode_completion_workflow_result_to_dict,
+    run_corpus_episode_completion_workflow,
+)
+from .corpus_semantic_remediation_runner import run_corpus_semantic_remediation
 from .entity_extractor import extract_mentions
 from .episode_intelligence import generate_episode_intelligence_report
 from .external_data_boundary import generate_external_data_boundary
@@ -85,6 +92,16 @@ from .models import (
     CorpusEpisodeWorkflowRunResult,
     CorpusEpisodeWorkflowRunRow,
     CorpusEpisodeWorkflowRunWarning,
+    CorpusEpisodeCompletionWorkflowRunCounts,
+    CorpusEpisodeCompletionWorkflowRunFilter,
+    CorpusEpisodeCompletionWorkflowRunResult,
+    CorpusEpisodeCompletionWorkflowRunRow,
+    CorpusEpisodeCompletionWorkflowRunWarning,
+    CorpusSemanticRemediationRunCounts,
+    CorpusSemanticRemediationRunFilter,
+    CorpusSemanticRemediationRunResult,
+    CorpusSemanticRemediationRunRow,
+    CorpusSemanticRemediationRunWarning,
     CorpusEpisodeRow,
     CorpusEpisodeSeed,
     CorpusIndexResult,
@@ -106,9 +123,13 @@ from .models import (
     CorpusRemediationWarning,
 )
 from .storage import (
+    CorpusEpisodeCompletionWorkflowRunAssetPaths,
+    CorpusSemanticRemediationRunAssetPaths,
+    corpus_episode_completion_workflow_run_asset_paths,
     corpus_episode_intake_run_asset_paths,
     corpus_episode_seed_asset_path,
     corpus_episode_workflow_run_asset_paths,
+    corpus_semantic_remediation_run_asset_paths,
 )
 
 __all__ = [
@@ -134,11 +155,28 @@ __all__ = [
     "CorpusEpisodeWorkflowRunnerFailedError",
     "CorpusEpisodeWorkflowRunRow",
     "CorpusEpisodeWorkflowRunWarning",
+    "CorpusEpisodeCompletionWorkflowRunAssetPaths",
+    "CorpusEpisodeCompletionWorkflowRunCounts",
+    "CorpusEpisodeCompletionWorkflowRunFilter",
+    "CorpusEpisodeCompletionWorkflowRunResult",
+    "CorpusEpisodeCompletionWorkflowRunnerFailedError",
+    "CorpusEpisodeCompletionWorkflowRunRow",
+    "CorpusEpisodeCompletionWorkflowRunWarning",
+    "CorpusSemanticRemediationRunAssetPaths",
+    "CorpusSemanticRemediationRunCounts",
+    "CorpusSemanticRemediationRunFilter",
+    "CorpusSemanticRemediationRunResult",
+    "CorpusSemanticRemediationRunnerFailedError",
+    "CorpusSemanticRemediationRunRow",
+    "CorpusSemanticRemediationRunWarning",
     "CorpusEpisodeRow",
     "CorpusEpisodeSeed",
     "corpus_episode_intake_run_asset_paths",
+    "corpus_episode_completion_workflow_run_asset_paths",
+    "corpus_episode_completion_workflow_result_to_dict",
     "corpus_episode_seed_asset_path",
     "corpus_episode_workflow_run_asset_paths",
+    "corpus_semantic_remediation_run_asset_paths",
     "CorpusIndexFailedError",
     "CorpusIndexResult",
     "CorpusLocalTranscriptionOutcomeCounts",
@@ -198,6 +236,8 @@ __all__ = [
     "run_corpus_audio_download",
     "run_corpus_episode_intake",
     "run_corpus_episode_workflow",
+    "run_corpus_episode_completion_workflow",
+    "run_corpus_semantic_remediation",
     "run_corpus_remediation",
     "run_corpus_local_transcription",
     "SearchError",

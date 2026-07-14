@@ -52,6 +52,11 @@ def _app_python_files():
 
 
 def test_provider_constructed_only_in_factory_module():
+    completion_core = (
+        ROOT / "src" / "podcast_ingest_core" / "corpus_episode_completion_workflow_runner.py"
+    )
+    assert completion_core in _app_python_files()
+
     offenders = sorted(
         path.relative_to(ROOT).as_posix()
         for path in _app_python_files()

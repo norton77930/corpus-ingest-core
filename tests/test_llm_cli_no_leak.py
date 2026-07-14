@@ -192,3 +192,80 @@ def test_research_smoke_dry_run_does_not_leak_transcript_text(
     combined_output = captured.out + captured.err
     assert TRANSCRIPT_MARKER not in combined_output
     assert FAKE_KEY_VALUE not in combined_output
+
+def test_corpus_semantic_cli_uncontained_error_is_category_only(monkeypatch, capsys):
+    from scripts import run_corpus_semantic_remediation as cli
+
+    monkeypatch.setattr(
+        cli,
+        "run_corpus_semantic_remediation",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            RuntimeError(
+                "raw transcript prompt text raw response semantic body "
+                "https://endpoint.invalid/?token=secret sk-test-secret-value Traceback"
+            )
+        ),
+    )
+    monkeypatch.setattr(
+        cli.sys,
+        "argv",
+        [
+            "run_corpus_semantic_remediation.py",
+            "--podcast",
+            "gooaye",
+            "--episode",
+            "EP700",
+        ],
+    )
+
+    with pytest.raises(SystemExit) as exc_info:
+        cli.main()
+    captured = capsys.readouterr()
+
+    assert exc_info.value.code == 1
+    assert captured.out == ""
+    assert "RuntimeError" in captured.err
+    for forbidden in (
+        "raw transcript",
+        "prompt text",
+        "raw response",
+        "semantic body",
+        "endpoint.invalid",
+        "token=secret",
+        "sk-test-secret-value",
+        "Traceback",
+    ):
+        assert forbidden not in captured.err
+
+
+def test_completion_cli_uncontained_error_is_category_only(monkeypatch, capsys):
+    from scripts import run_corpus_episode_completion_workflow as cli
+
+    monkeypatch.setattr(
+        cli,
+        "run_corpus_episode_completion_workflow",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            RuntimeError(
+                "raw transcript prompt text raw response semantic body "
+                "https://endpoint.invalid/?token=secret sk-test-secret-value Traceback"
+            )
+        ),
+    )
+
+    status = cli.main(["--podcast", "gooaye"])
+    captured = capsys.readouterr()
+
+    assert status == 1
+    assert captured.out == ""
+    assert "RuntimeError" in captured.err
+    for forbidden in (
+        "raw transcript",
+        "prompt text",
+        "raw response",
+        "semantic body",
+        "endpoint.invalid",
+        "token=secret",
+        "sk-test-secret-value",
+        "Traceback",
+    ):
+        assert forbidden not in captured.err

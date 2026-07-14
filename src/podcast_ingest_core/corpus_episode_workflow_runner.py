@@ -265,11 +265,32 @@ def _select_next_stage(
     except Exception as exc:  # noqa: BLE001 - keep snapshot failures bounded.
         return _probe_failure(STAGE_AUDIO_DOWNLOAD, episode_ref, exc)
 
+    return _preview_corpus_episode_workflow_from_snapshot(
+        podcast_id,
+        episode_ref=episode_ref,
+        plan_result=plan_snapshot.result,
+        plan_payload=plan_snapshot.payload,
+        max_actions=max_actions,
+        allow_semantic_handoff=False,
+    )
+
+
+def _preview_corpus_episode_workflow_from_snapshot(
+    podcast_id: str,
+    *,
+    episode_ref: str,
+    plan_result: Any,
+    plan_payload: dict[str, Any],
+    max_actions: int | None,
+    allow_semantic_handoff: bool = False,
+) -> dict[str, Any]:
+    """Preview deterministic stages from a caller-owned corpus snapshot."""
+
     try:
         audio_result = _preview_corpus_audio_download_from_plan(
             podcast_id,
-            plan_result=plan_snapshot.result,
-            plan_payload=plan_snapshot.payload,
+            plan_result=plan_result,
+            plan_payload=plan_payload,
             episode_ref=episode_ref,
             source_persisted=False,
         )
@@ -302,8 +323,8 @@ def _select_next_stage(
     try:
         transcription_result = _preview_corpus_local_transcription_from_plan(
             podcast_id,
-            plan_result=plan_snapshot.result,
-            plan_payload=plan_snapshot.payload,
+            plan_result=plan_result,
+            plan_payload=plan_payload,
             episode_ref=episode_ref,
             source_persisted=False,
         )
@@ -333,24 +354,41 @@ def _select_next_stage(
             "warnings": [],
         }
 
+    if allow_semantic_handoff and not _snapshot_transcript_is_valid(
+        plan_payload,
+        episode_ref,
+    ):
+        return {
+            "selected_stage": STAGE_BLOCKED,
+            "episode_ref": episode_ref,
+            "rows": [
+                CorpusEpisodeWorkflowRunRow(
+                    stage=STAGE_BLOCKED,
+                    status="blocked",
+                    reason="next workflow stage is blocked",
+                    planned_reads=[_PLANNED_READ_IN_MEMORY_CORPUS_SNAPSHOT],
+                    planned_writes=[],
+                    output_paths=[],
+                    source_report_paths=[],
+                    stage_counts={},
+                    warnings=[],
+                )
+            ],
+            "warnings": [],
+        }
+
     try:
         remediation_result = _preview_corpus_remediation_from_plan(
             podcast_id,
-            plan_result=plan_snapshot.result,
-            plan_payload=plan_snapshot.payload,
+            plan_result=plan_result,
+            plan_payload=plan_payload,
             episode_ref=episode_ref,
             action_family=None,
-            max_actions=max_actions,
+            max_actions=1 if allow_semantic_handoff else max_actions,
             source_persisted=False,
         )
     except Exception as exc:  # noqa: BLE001 - keep probe failures bounded.
         return _probe_failure(STAGE_DETERMINISTIC_REMEDIATION, episode_ref, exc)
-    # Ready deterministic actions take precedence over dependency-chain blocked
-    # families: a fresh transcript always has downstream families (industry_mapping,
-    # external_boundary, semantic_review) blocked on not-yet-built upstream, while
-    # extractive_summary/mentions/episode_intelligence are ready. Select remediation
-    # so the confirmed run executes the ready families; only fail closed as blocked
-    # when no ready action remains (e.g. only the LLM-gated family is left).
     remediation_selected = _first_status_row(remediation_result, "selected")
     if remediation_selected is not None:
         return {
@@ -367,16 +405,28 @@ def _select_next_stage(
             ],
             "warnings": [],
         }
+    semantic_families = {"semantic_summary", "semantic_review"}
     terminal_selection = _returned_terminal_selection(
         STAGE_DETERMINISTIC_REMEDIATION,
         episode_ref,
         remediation_result,
+        ignored_artifact_families=(semantic_families if allow_semantic_handoff else None),
     )
     if terminal_selection is not None:
         return terminal_selection
 
-    blocked_row = _first_status_row(remediation_result, "blocked")
-    if blocked_row is not None:
+    blocked_rows = [
+        row
+        for row in getattr(remediation_result, "rows", [])
+        if getattr(row, "outcome_status", None) == "blocked"
+    ]
+    if allow_semantic_handoff:
+        blocked_rows = [
+            row
+            for row in blocked_rows
+            if getattr(row, "artifact_family", None) not in semantic_families
+        ]
+    if blocked_rows:
         return {
             "selected_stage": STAGE_BLOCKED,
             "episode_ref": episode_ref,
@@ -386,7 +436,7 @@ def _select_next_stage(
                     status="blocked",
                     reason="next workflow stage is blocked",
                     source_result=remediation_result,
-                    source_row=blocked_row,
+                    source_row=blocked_rows[0],
                 )
             ],
             "warnings": [],
@@ -402,6 +452,10 @@ def _select_next_stage(
         )
         for row in getattr(remediation_result, "rows", [])
         if getattr(row, "outcome_status", None) == "excluded"
+        and (
+            not allow_semantic_handoff
+            or getattr(row, "artifact_family", None) not in semantic_families
+        )
     ]
     warnings = _manual_follow_up_warnings(episode_ref) if manual_rows else []
     completed_row = CorpusEpisodeWorkflowRunRow(
@@ -423,6 +477,24 @@ def _select_next_stage(
     }
 
 
+def _snapshot_transcript_is_valid(
+    plan_payload: dict[str, Any],
+    episode_ref: str,
+) -> bool:
+    episodes = plan_payload.get("episodes")
+    if not isinstance(episodes, list):
+        return False
+    for episode in episodes:
+        if not isinstance(episode, dict) or episode.get("episode_ref") != episode_ref:
+            continue
+        artifact_status = episode.get("artifact_status")
+        if not isinstance(artifact_status, dict):
+            return False
+        transcript = artifact_status.get("transcript")
+        return isinstance(transcript, dict) and transcript.get("status") == "valid"
+    return False
+
+
 def _execute_selected_stage(
     *,
     selected_stage: str,
@@ -441,7 +513,7 @@ def _execute_selected_stage(
         if selected_stage == STAGE_INTAKE:
             result = run_corpus_episode_intake(
                 podcast_id,
-                episode_ref=selector,
+                episode_ref=episode_ref or selector,
                 confirm=True,
             )
         elif selected_stage == STAGE_AUDIO_DOWNLOAD:
@@ -505,8 +577,15 @@ def _returned_terminal_selection(
     stage: str,
     episode_ref: str | None,
     result: Any,
+    *,
+    ignored_artifact_families: set[str] | None = None,
 ) -> dict[str, Any] | None:
     for row in getattr(result, 'rows', []):
+        if (
+            ignored_artifact_families is not None
+            and getattr(row, 'artifact_family', None) in ignored_artifact_families
+        ):
+            continue
         status = getattr(row, 'outcome_status', None)
         if status not in {'failed', 'rejected', 'blocked'}:
             continue
@@ -562,6 +641,8 @@ def _rows_for_episode(result: Any, episode_ref: str | None) -> list[Any]:
 
 
 def _confirmed_status_from_rows(rows: list[Any]) -> str:
+    if not rows:
+        return "rejected"
     # A positive execution outcome for the target episode wins over the benign
     # residual outcomes that always accompany it in a multi-family stage. When 014
     # dispatches 010, the confirmed result mixes the executed ready family with
@@ -594,6 +675,16 @@ def _collect_row_paths(rows: list[Any], field: str) -> list[str]:
     return collected
 
 
+def _collect_output_paths(rows: list[Any]) -> list[str]:
+    collected = _collect_row_paths(rows, "output_paths")
+    for row in rows:
+        for field in ("seed_json_path", "local_audio_path"):
+            value = getattr(row, field, None)
+            if isinstance(value, str) and value not in collected:
+                collected.append(value)
+    return collected
+
+
 def _confirmed_stage_row(
     *,
     stage: str,
@@ -612,7 +703,7 @@ def _confirmed_stage_row(
             allowed_labels=_ALLOWED_PLANNED_READ_LABELS,
         ),
         planned_writes=_safe_list(_collect_row_paths(episode_rows, "planned_writes")),
-        output_paths=_safe_list(_collect_row_paths(episode_rows, "output_paths")),
+        output_paths=_safe_list(_collect_output_paths(episode_rows)),
         source_report_paths=_source_report_paths(result),
         stage_counts=_stage_counts(result),
         warnings=[],

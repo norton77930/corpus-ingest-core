@@ -369,7 +369,11 @@ def _audio_result(
                 reason="audio missing and download action ready",
                 planned_reads=[str(tmp_path / "plan.json")],
                 planned_writes=[str(tmp_path / "audio.mp3")],
-                local_audio_path=None,
+                local_audio_path=(
+                    str(tmp_path / "audio.mp3")
+                    if status in {"downloaded", "reused"}
+                    else None
+                ),
                 content_type=None,
                 size_bytes=None,
                 warnings=[],
@@ -586,7 +590,10 @@ def _install_stage_doubles(
 
     def fake_intake(podcast_id: str, **kwargs):
         calls.append(("intake", kwargs))
-        return intake or _intake_result(
+        result = intake
+        if callable(result):
+            return result(kwargs)
+        return result or _intake_result(
             tmp_path,
             selector=kwargs.get("episode_ref", "latest"),
             confirm=kwargs.get("confirm", False),
@@ -1055,6 +1062,53 @@ def test_seeded_probe_builds_one_snapshot_and_reuses_it_across_previews(
         ("transcription", "gooaye", True, True, False),
         ("remediation", "gooaye", True, True, False),
     ]
+
+
+def test_snapshot_preview_seam_bounds_deterministic_actions_to_one(
+    monkeypatch, tmp_path
+):
+    import podcast_ingest_core.corpus_episode_workflow_runner as workflow
+
+    calls: list[tuple[str, int | None]] = []
+    monkeypatch.setattr(
+        workflow,
+        "_preview_corpus_audio_download_from_plan",
+        lambda *args, **kwargs: _audio_result(tmp_path, status="skipped"),
+    )
+    monkeypatch.setattr(
+        workflow,
+        "_preview_corpus_local_transcription_from_plan",
+        lambda *args, **kwargs: _transcription_result(tmp_path, status="skipped"),
+    )
+
+    def remediation_preview(*args, **kwargs):
+        calls.append(("remediation", kwargs["max_actions"]))
+        return _remediation_result(tmp_path, status="selected")
+
+    monkeypatch.setattr(
+        workflow,
+        "_preview_corpus_remediation_from_plan",
+        remediation_preview,
+    )
+
+    result = workflow._preview_corpus_episode_workflow_from_snapshot(
+        "gooaye",
+        episode_ref="EP677",
+        plan_result=object(),
+        plan_payload={
+            "episodes": [
+                {
+                    "episode_ref": "EP677",
+                    "artifact_status": {"transcript": {"status": "valid"}},
+                }
+            ]
+        },
+        max_actions=None,
+        allow_semantic_handoff=True,
+    )
+
+    assert result["selected_stage"] == "deterministic_remediation"
+    assert calls == [("remediation", 1)]
 
 
 
@@ -1700,12 +1754,47 @@ def test_confirmed_unseeded_episode_calls_intake_only_and_writes_report(
 
     assert [name for name, _kwargs in calls] == ["intake", "intake"]
     assert calls[-1][1]["confirm"] is True
+    assert calls[-1][1]["episode_ref"] == "EP677"
     assert result.selected_stage == "intake"
     assert result.counts.executed_count == 1
+    assert result.rows[0].output_paths == [
+        str(tmp_path / "corpus" / "gooaye" / "seed.json")
+    ]
     assert result.report_json_path is not None
     assert result.report_json_path.exists()
     assert result.report_markdown_path is not None
     assert result.report_markdown_path.exists()
+
+
+def test_confirmed_intake_target_disappearance_is_rejected(monkeypatch, tmp_path):
+    from podcast_ingest_core.corpus_episode_workflow_runner import (
+        run_corpus_episode_workflow,
+    )
+
+    _use_tmp_data_dirs(monkeypatch, tmp_path)
+
+    def intake_double(kwargs):
+        if kwargs.get("confirm"):
+            return _intake_result(
+                tmp_path,
+                selector="EP677",
+                episode_ref=None,
+                status="rejected",
+                confirm=True,
+            )
+        return _intake_result(tmp_path, episode_ref="EP677", status="selected")
+
+    calls: list[tuple[str, dict]] = []
+    _install_stage_doubles(monkeypatch, tmp_path, calls, intake=intake_double)
+
+    result = run_corpus_episode_workflow(
+        "gooaye", episode_ref="latest", stage="next", confirm=True
+    )
+
+    assert [name for name, _kwargs in calls] == ["intake", "intake"]
+    assert result.selected_stage == "intake"
+    assert result.rows[0].status == "rejected"
+    assert result.rows[0].output_paths == []
 
 
 def test_confirmed_remediation_report_reflects_target_episode_not_first_row(
@@ -1812,6 +1901,49 @@ def test_confirmed_remediation_report_reflects_target_episode_not_first_row(
     assert target_output in row.output_paths
     assert other_write not in row.planned_writes
     assert other_write not in row.output_paths
+
+
+def test_confirmed_remediation_target_disappearance_is_rejected(
+    monkeypatch, tmp_path
+):
+    from podcast_ingest_core.corpus_episode_workflow_runner import (
+        run_corpus_episode_workflow,
+    )
+
+    _write_seed(monkeypatch, tmp_path)
+
+    def remediation_double(kwargs):
+        if kwargs.get("confirm"):
+            return _remediation_result(
+                tmp_path,
+                episode_ref="EP672",
+                status="blocked",
+                confirm=True,
+            )
+        return _remediation_result(tmp_path, episode_ref="EP677", status="selected")
+
+    calls: list[tuple[str, dict]] = []
+    _install_stage_doubles(
+        monkeypatch,
+        tmp_path,
+        calls,
+        audio=_audio_result(tmp_path, status="skipped"),
+        transcription=_transcription_result(tmp_path, status="skipped"),
+        remediation=remediation_double,
+    )
+
+    result = run_corpus_episode_workflow(
+        "gooaye", episode_ref="EP677", stage="next", confirm=True
+    )
+
+    assert result.selected_stage == "deterministic_remediation"
+    assert result.rows[0].status == "rejected"
+    assert result.rows[0].planned_writes == []
+    assert result.rows[0].output_paths == []
+    last_stage, last_kwargs = calls[-1]
+    assert last_stage == "remediation"
+    assert last_kwargs["episode_ref"] == "EP677"
+    assert last_kwargs["confirm"] is True
 
 
 def test_confirmed_transcription_executed_despite_rejected_sibling_rows(
@@ -2072,6 +2204,7 @@ def test_confirmed_seeded_missing_audio_calls_audio_only(monkeypatch, tmp_path):
     assert calls[-1][1] == {"episode_ref": "EP677", "confirm": True}
     assert result.selected_stage == "audio_download"
     assert result.counts.executed_count == 1
+    assert result.rows[0].output_paths == [str(tmp_path / "audio.mp3")]
 
 
 def test_confirmed_local_transcription_passes_runtime_options(monkeypatch, tmp_path):

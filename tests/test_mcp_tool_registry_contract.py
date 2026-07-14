@@ -28,7 +28,7 @@ READ_QUERY_TOOLS = {
     "search_mentions",
     "rebuild_cache",
 }
-SIDE_EFFECT_TOOLS = {
+LEGACY_SIDE_EFFECT_TOOLS = {
     "download_audio",
     "transcribe_episode",
     "summarize_episode_extractive",
@@ -36,7 +36,24 @@ SIDE_EFFECT_TOOLS = {
     "semantic_summarize_episode",
     "run_research_workflow",
 }
-EXPECTED_TOOLS = READ_QUERY_TOOLS | SIDE_EFFECT_TOOLS
+COMPLETION_WORKFLOW_TOOL = "run_corpus_episode_completion_workflow"
+LEGACY_TOOL_ORDER = [
+    "list_episodes",
+    "get_episode",
+    "validate_transcript",
+    "search_transcripts",
+    "search_mentions",
+    "rebuild_cache",
+    "download_audio",
+    "summarize_episode_extractive",
+    "extract_mentions",
+    "transcribe_episode",
+    "semantic_summarize_episode",
+    "run_research_workflow",
+]
+LEGACY_EXPECTED_TOOLS = READ_QUERY_TOOLS | LEGACY_SIDE_EFFECT_TOOLS
+SIDE_EFFECT_TOOLS = LEGACY_SIDE_EFFECT_TOOLS | {COMPLETION_WORKFLOW_TOOL}
+EXPECTED_TOOLS = LEGACY_EXPECTED_TOOLS | {COMPLETION_WORKFLOW_TOOL}
 
 
 def _registered_tool_names() -> set[str]:
@@ -48,8 +65,20 @@ def _registered_tool_names() -> set[str]:
 
 def test_mcp_registry_exposes_exactly_the_reviewed_tool_set():
     actual = _registered_tool_names()
-    assert len(actual) == 12
+    assert len(actual) == 13
     assert actual == EXPECTED_TOOLS
+    assert LEGACY_EXPECTED_TOOLS <= actual
+
+
+def test_completion_tool_is_appended_after_the_preserved_twelve_tool_order():
+    from podcast_ingest_core import mcp_server
+
+    tools = asyncio.run(mcp_server.mcp.list_tools())
+
+    assert [tool.name for tool in tools] == [
+        *LEGACY_TOOL_ORDER,
+        COMPLETION_WORKFLOW_TOOL,
+    ]
 
 
 def test_side_effect_tools_default_to_dry_run_confirm_false():
@@ -135,3 +164,39 @@ def test_mcp_workflow_tool_exposes_deliberate_core_parameter_subset():
             f"MCP run_research_workflow unexpectedly exposes {hidden_parameter}; "
             "this widens the reviewed MCP surface (see audit F-08)"
         )
+
+
+def test_completion_workflow_tool_mirrors_the_bounded_core_schema():
+    from podcast_ingest_core import mcp_server
+
+    signature = inspect.signature(mcp_server.run_corpus_episode_completion_workflow)
+    assert list(signature.parameters) == [
+        "podcast_id",
+        "episode_ref",
+        "action",
+        "confirm",
+        "api_cost_ack",
+        "transcription_model",
+        "transcription_device",
+        "transcription_compute_type",
+        "transcription_vad_filter",
+        "semantic_provider",
+        "semantic_model",
+        "semantic_base_url",
+        "semantic_api_key_env",
+        "semantic_chunk_seconds",
+        "semantic_max_segments_per_chunk",
+    ]
+    assert signature.parameters["confirm"].default is False
+    for forbidden in (
+        "force",
+        "partial",
+        "batch",
+        "latest_n",
+        "retry",
+        "scheduler",
+        "loop",
+        "full_chain",
+        "progress_callback",
+    ):
+        assert forbidden not in signature.parameters

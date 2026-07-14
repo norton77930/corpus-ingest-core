@@ -108,7 +108,33 @@ codex mcp add podcast-ingest-core -- python D:/path/to/podcast-ingest-core/scrip
 請 dry-run semantic_summarize_episode，不要呼叫 LLM，先列出風險與 required acknowledgement。
 ```
 
-## 7. 不應 Commit 的內容
+## 7. Human-Controlled 016 Completion Workflow
+
+本機 stdio registry 現在有 exact 13 個 reviewed tools，其中
+`run_corpus_episode_completion_workflow` 是 016 的 human-controlled completion
+tool。若要讓 Codex 按人類確認流程操作，讓 repository 的 portable
+`corpus-episode-completion` Skill 可見；它是 client-neutral instructions，不需
+把個人 Codex 設定或任何 Skill copy commit 到 repository。
+
+對 completion workflow，先用 `action=next, confirm=false` preview。Skill 必須
+說明 canonical episode、selected action、planned writes、blockers 與 risks，並
+等待使用者對同一個 canonical ref 和 explicit action 的無歧義確認。一般性的
+「繼續」或「我同意」不是 confirmed action；只有下一次同時提供 canonical ref、
+selected action 與 `confirm=true` 的呼叫才可執行一次。`semantic_summary`
+仍需要使用者提供 exact `api_cost_ack`。
+
+若 tool 不可用、preview 被 blocked/rejected，或 confirmed result 被拒絕，Skill
+只回報 bounded result 並停止：不得改用 CLI、terminal、其他 side-effect tool、
+retry、scheduler 或 autonomous loop。Completion tool 不會讀 `.env`，也不會
+自動 rebuild cache。
+
+可用下列 read-only setup guard 確認 registry、Skill metadata 與 early rejection：
+
+```powershell
+python scripts/validate_mcp_setup.py
+```
+
+## 8. 不應 Commit 的內容
 
 不要 commit：
 
@@ -117,4 +143,3 @@ codex mcp add podcast-ingest-core -- python D:/path/to/podcast-ingest-core/scrip
 - API key
 - `.env`
 - transcript / audio / summary / SQLite cache 大檔，除非專案政策明確允許
-

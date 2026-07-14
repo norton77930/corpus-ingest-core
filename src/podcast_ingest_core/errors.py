@@ -70,6 +70,14 @@ class CorpusEpisodeWorkflowRunnerFailedError(PodcastIngestCoreError):
     """Corpus episode workflow runner selection, execution, or reporting failed."""
 
 
+class CorpusSemanticRemediationRunnerFailedError(PodcastIngestCoreError):
+    """Corpus semantic remediation runner validation, execution, or reporting failed."""
+
+
+class CorpusEpisodeCompletionWorkflowRunnerFailedError(PodcastIngestCoreError):
+    """Corpus episode completion workflow validation or execution failed."""
+
+
 class LLMProviderConfigError(PodcastIngestCoreError):
     """LLM provider 設定不完整或不合法。"""
 

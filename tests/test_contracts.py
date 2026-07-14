@@ -323,3 +323,26 @@ def test_search_result_models_include_phase_3b_fields():
         "warning_count",
         "blocked_check_count",
     } <= semantic_review_fields
+
+
+def test_corpus_semantic_remediation_additive_public_contract():
+    from podcast_ingest_core import (
+        CorpusSemanticRemediationRunAssetPaths,
+        CorpusSemanticRemediationRunResult,
+        CorpusSemanticRemediationRunnerFailedError,
+        PodcastIngestCoreError,
+        corpus_semantic_remediation_run_asset_paths,
+        run_corpus_semantic_remediation,
+    )
+
+    assert callable(run_corpus_semantic_remediation)
+    assert callable(corpus_semantic_remediation_run_asset_paths)
+    assert CorpusSemanticRemediationRunAssetPaths.__name__ == (
+        "CorpusSemanticRemediationRunAssetPaths"
+    )
+    assert CorpusSemanticRemediationRunResult.__name__ == (
+        "CorpusSemanticRemediationRunResult"
+    )
+    assert issubclass(
+        CorpusSemanticRemediationRunnerFailedError, PodcastIngestCoreError
+    )

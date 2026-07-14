@@ -21,8 +21,8 @@ constitution -> specify -> clarify -> plan -> checklist -> tasks -> analyze -> i
 ```
 
 <!-- SPECKIT START -->
-For the active Corpus Fresh Episode Workflow Runner feature, read
-[`specs/014-corpus-fresh-episode-workflow-runner/plan.md`](specs/014-corpus-fresh-episode-workflow-runner/plan.md)
+For the active Corpus Episode Completion Workflow Runner feature, read
+[`specs/016-corpus-episode-completion-workflow-runner/plan.md`](specs/016-corpus-episode-completion-workflow-runner/plan.md)
 for technologies, project structure, shell commands, and implementation context.
 <!-- SPECKIT END -->
 

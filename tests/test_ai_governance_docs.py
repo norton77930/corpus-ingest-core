@@ -96,6 +96,9 @@ def test_ai_development_framework_keeps_hierarchy_lifecycle_and_checks():
     ]:
         assert phrase in text
 
+    assert "恰 13 個" in text
+    assert "恰 12 個" not in text
+
 
 def test_adr_index_and_core_adrs_exist_with_short_format():
     index = _read(ADR / "README.md")
@@ -161,3 +164,47 @@ def test_readme_agents_and_verification_matrix_cross_link_governance_docs():
 
     assert "git diff --check" in matrix
     assert "test_ai_governance_docs.py" in matrix
+
+def test_015_docs_preserve_llm_secret_mcp_and_cache_boundaries():
+    root = Path(__file__).resolve().parents[1]
+    combined = "\n".join(
+        (root / relative_path).read_text(encoding="utf-8")
+        for relative_path in (
+            "README.md",
+            "docs/architecture.md",
+            "specs/README.md",
+            "docs/verification-matrix.md",
+        )
+    )
+
+    assert "exact api_cost_ack" in combined
+    assert "before profile" in combined
+    assert "`.env`" in combined
+    assert "exact 12" in combined
+    assert "does not rebuild" in combined
+    assert "not investment advice" in combined
+    assert "no generated_at" in combined
+
+
+def test_016_docs_preserve_human_controlled_mcp_and_skill_boundaries():
+    codex_setup = _read(DOCS / "codex-mcp-setup.md")
+    readiness = _read(DOCS / "mcp-readiness.md")
+    tool_eval = _read(DOCS / "mcp-tool-use-eval.md")
+    prompts = _read(DOCS / "mcp-eval-prompts.md")
+    quickstart = _read(
+        ROOT
+        / "specs"
+        / "016-corpus-episode-completion-workflow-runner"
+        / "quickstart.md"
+    )
+
+    assert "run_corpus_episode_completion_workflow" in codex_setup
+    assert "corpus-episode-completion" in codex_setup
+    assert "exact 13" in readiness
+    assert "corpus-episode-completion" in readiness
+    assert "run_corpus_episode_completion_workflow" in tool_eval
+    assert "run_corpus_episode_completion_workflow" in prompts
+    assert "confirm=false" in prompts
+    assert "fresh ephemeral" in quickstart
+    assert "unsafe podcast id" in quickstart
+    assert "no CLI" in quickstart

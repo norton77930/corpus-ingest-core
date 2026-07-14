@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+from types import SimpleNamespace
 
 
 def test_to_jsonable_handles_dataclass_path_list_and_dict():
@@ -790,6 +791,212 @@ def test_semantic_summarize_episode_core_errors_return_error_response(monkeypatc
         "error_type": "LLMProviderRequestError",
         "message": "provider failed",
     }
+
+
+def test_completion_workflow_mcp_dry_run_forwards_to_core_and_uses_bounded_envelope(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    captured = {}
+    result = SimpleNamespace(
+        selected_action="semantic_summary",
+        rows=[SimpleNamespace(status="selected", requires_confirmation=True)],
+    )
+
+    def fake_run(**kwargs):
+        captured.update(kwargs)
+        return result
+
+    monkeypatch.setattr(
+        mcp_server.completion_workflow_runner,
+        "run_corpus_episode_completion_workflow",
+        fake_run,
+    )
+    monkeypatch.setattr(
+        mcp_server.completion_workflow_runner,
+        "result_to_dict",
+        lambda value: {
+            "selected_action": value.selected_action,
+            "episode_ref": "EP672",
+            "rows": [],
+            "not_investment_advice": True,
+        },
+    )
+
+    response = mcp_server.run_corpus_episode_completion_workflow(
+        podcast_id="gooaye",
+        episode_ref="latest",
+        action="next",
+        confirm=False,
+        transcription_model="tiny",
+        semantic_model="safe-model",
+    )
+
+    assert response == {
+        "ok": True,
+        "dry_run": True,
+        "requires_confirmation": True,
+        "data": {
+            "selected_action": "semantic_summary",
+            "episode_ref": "EP672",
+            "rows": [],
+            "not_investment_advice": True,
+        },
+    }
+    assert captured["podcast_id"] == "gooaye"
+    assert captured["episode_ref"] == "latest"
+    assert captured["action"] == "next"
+    assert captured["confirm"] is False
+    assert captured["progress_callback"] is None
+
+
+def test_completion_workflow_mcp_terminal_dry_run_does_not_require_confirmation(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    result = SimpleNamespace(selected_action="blocked", rows=[])
+    monkeypatch.setattr(
+        mcp_server.completion_workflow_runner,
+        "run_corpus_episode_completion_workflow",
+        lambda **kwargs: result,
+    )
+    monkeypatch.setattr(
+        mcp_server.completion_workflow_runner,
+        "result_to_dict",
+        lambda value: {"selected_action": value.selected_action, "rows": []},
+    )
+
+    response = mcp_server.run_corpus_episode_completion_workflow(
+        podcast_id="gooaye",
+        confirm=False,
+    )
+
+    assert response["ok"] is True
+    assert response["dry_run"] is True
+    assert response["requires_confirmation"] is False
+
+
+def test_completion_workflow_mcp_failed_selected_action_does_not_require_confirmation(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    result = SimpleNamespace(
+        selected_action="semantic_summary",
+        rows=[SimpleNamespace(status="failed", requires_confirmation=False)],
+    )
+    monkeypatch.setattr(
+        mcp_server.completion_workflow_runner,
+        "run_corpus_episode_completion_workflow",
+        lambda **kwargs: result,
+    )
+    monkeypatch.setattr(
+        mcp_server.completion_workflow_runner,
+        "result_to_dict",
+        lambda value: {
+            "selected_action": value.selected_action,
+            "rows": [{"status": "failed", "requires_confirmation": False}],
+        },
+    )
+
+    response = mcp_server.run_corpus_episode_completion_workflow(
+        podcast_id="gooaye",
+        confirm=False,
+    )
+
+    assert response["ok"] is True
+    assert response["dry_run"] is True
+    assert response["requires_confirmation"] is False
+
+
+def test_completion_workflow_mcp_confirmed_result_uses_success_envelope(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    captured = {}
+    result = SimpleNamespace(selected_action="audio_download", rows=[])
+
+    def fake_run(**kwargs):
+        captured.update(kwargs)
+        return result
+
+    monkeypatch.setattr(
+        mcp_server.completion_workflow_runner,
+        "run_corpus_episode_completion_workflow",
+        fake_run,
+    )
+    monkeypatch.setattr(
+        mcp_server.completion_workflow_runner,
+        "result_to_dict",
+        lambda value: {"selected_action": value.selected_action, "executed_action": "audio_download"},
+    )
+
+    response = mcp_server.run_corpus_episode_completion_workflow(
+        podcast_id="gooaye",
+        episode_ref="EP672",
+        action="audio_download",
+        confirm=True,
+    )
+
+    assert response == {
+        "ok": True,
+        "data": {"selected_action": "audio_download", "executed_action": "audio_download"},
+    }
+    assert captured["confirm"] is True
+    assert captured["progress_callback"] is None
+
+
+def test_completion_workflow_mcp_uses_fixed_category_only_error_envelope(monkeypatch):
+    from podcast_ingest_core import mcp_server
+    from podcast_ingest_core.errors import CorpusEpisodeCompletionWorkflowRunnerFailedError
+
+    monkeypatch.setattr(
+        mcp_server.completion_workflow_runner,
+        "run_corpus_episode_completion_workflow",
+        lambda **kwargs: (_ for _ in ()).throw(
+            CorpusEpisodeCompletionWorkflowRunnerFailedError(
+                "https://private.example.test/path?token=secret raw transcript traceback"
+            )
+        ),
+    )
+
+    response = mcp_server.run_corpus_episode_completion_workflow(
+        podcast_id="gooaye",
+        confirm=False,
+    )
+
+    assert response == {
+        "ok": False,
+        "error_type": "CorpusEpisodeCompletionWorkflowRunnerFailedError",
+        "message": "corpus episode completion workflow command failed",
+    }
+
+
+def test_completion_workflow_mcp_semantic_ack_rejects_before_selection_work(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    called = False
+
+    def fake_run(**kwargs):
+        nonlocal called
+        called = True
+        raise AssertionError("core selection must not run for an invalid acknowledgement")
+
+    monkeypatch.setattr(
+        mcp_server.completion_workflow_runner,
+        "run_corpus_episode_completion_workflow",
+        fake_run,
+    )
+
+    response = mcp_server.run_corpus_episode_completion_workflow(
+        podcast_id="gooaye",
+        episode_ref="EP672",
+        action="semantic_summary",
+        confirm=True,
+        api_cost_ack="wrong acknowledgement",
+    )
+
+    assert response == {
+        "ok": False,
+        "error_type": "CorpusEpisodeCompletionWorkflowRunnerFailedError",
+        "message": "corpus episode completion workflow command failed",
+    }
+    assert called is False
 
 
 def _workflow_result(*, dry_run=True, requires_api_cost_ack=False, stock_query="台積電"):
