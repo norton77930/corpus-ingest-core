@@ -8,6 +8,7 @@ data/mappings/
 data/external/
 data/stock-lens/
 data/corpus/
+data/notes/
 .env
 .env.*
 !.env.example
@@ -16,6 +17,7 @@ config/*.local.yaml
 /.specify/feature.json
 config/llm_profiles.local.yaml
 evals/**/raw/
+.venv/
 __pycache__/
 .pytest_cache/
 .pytest-tmp/

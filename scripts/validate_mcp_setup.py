@@ -22,6 +22,14 @@ COMPLETION_TOOL_NAME = "run_corpus_episode_completion_workflow"
 COMPLETION_SKILL_PATH = (
     PROJECT_ROOT / ".agents" / "skills" / "corpus-episode-completion" / "SKILL.md"
 )
+LATEST_DETERMINISTIC_TOOL_NAME = "run_corpus_latest_episode_deterministic_workflow"
+LATEST_DETERMINISTIC_SKILL_PATH = (
+    PROJECT_ROOT
+    / ".agents"
+    / "skills"
+    / "corpus-latest-episode-processing"
+    / "SKILL.md"
+)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -206,7 +214,9 @@ def _check_completion_surface(checks: list[dict[str, Any]], mcp_server) -> None:
         _add_check(
             checks,
             "completion_tool_registry",
-            len(tool_names) == 13 and COMPLETION_TOOL_NAME in tool_names,
+            len(tool_names) == 14
+            and COMPLETION_TOOL_NAME in tool_names
+            and LATEST_DETERMINISTIC_TOOL_NAME in tool_names,
             tool_count=len(tool_names),
             tool=COMPLETION_TOOL_NAME,
         )
@@ -232,6 +242,22 @@ def _check_completion_surface(checks: list[dict[str, Any]], mcp_server) -> None:
             "completion_skill_metadata",
             False,
             message="completion skill metadata is unavailable.",
+        )
+
+    try:
+        skill_text = LATEST_DETERMINISTIC_SKILL_PATH.read_text(encoding="utf-8")
+        _add_check(
+            checks,
+            "latest_deterministic_skill_metadata",
+            _has_latest_deterministic_skill_metadata(skill_text),
+            path=str(LATEST_DETERMINISTIC_SKILL_PATH),
+        )
+    except OSError:
+        _add_check(
+            checks,
+            "latest_deterministic_skill_metadata",
+            False,
+            message="latest deterministic skill metadata is unavailable.",
         )
 
     try:
@@ -266,6 +292,18 @@ def _has_completion_skill_metadata(skill_text: str) -> bool:
         and lines[1] == "name: corpus-episode-completion"
         and lines[2]
         == "description: Safely preview and advance one podcast episode by one explicit MCP-managed action with human approval."
+        and lines[3] == "---"
+    )
+
+
+def _has_latest_deterministic_skill_metadata(skill_text: str) -> bool:
+    lines = skill_text.splitlines()
+    return (
+        len(lines) >= 4
+        and lines[0] == "---"
+        and lines[1] == "name: corpus-latest-episode-processing"
+        and lines[2]
+        == "description: Process one configured podcast's latest deterministic workflow once with confirmed MCP execution after an explicit request."
         and lines[3] == "---"
     )
 

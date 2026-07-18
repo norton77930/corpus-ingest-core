@@ -124,6 +124,7 @@ def run_corpus_episode_workflow(
         podcast_id=podcast_id,
         selector=selector,
         max_actions=max_actions,
+        allow_semantic_handoff=False,
     )
     rows = selection["rows"]
     selected_stage = selection["selected_stage"]
@@ -207,6 +208,7 @@ def _select_next_stage(
     podcast_id: str,
     selector: str,
     max_actions: int | None,
+    allow_semantic_handoff: bool = False,
 ) -> dict[str, Any]:
     try:
         intake_result = run_corpus_episode_intake(
@@ -271,7 +273,7 @@ def _select_next_stage(
         plan_result=plan_snapshot.result,
         plan_payload=plan_snapshot.payload,
         max_actions=max_actions,
-        allow_semantic_handoff=False,
+        allow_semantic_handoff=allow_semantic_handoff,
     )
 
 
@@ -389,11 +391,37 @@ def _preview_corpus_episode_workflow_from_snapshot(
         )
     except Exception as exc:  # noqa: BLE001 - keep probe failures bounded.
         return _probe_failure(STAGE_DETERMINISTIC_REMEDIATION, episode_ref, exc)
+    semantic_families = {"semantic_summary", "semantic_review"}
+    if allow_semantic_handoff and _semantic_handoff_result_is_invalid(
+        remediation_result,
+        semantic_families,
+        episode_ref,
+        plan_payload=plan_payload,
+    ):
+        return {
+            "selected_stage": STAGE_BLOCKED,
+            "episode_ref": episode_ref,
+            "rows": [
+                CorpusEpisodeWorkflowRunRow(
+                    stage=STAGE_BLOCKED,
+                    status="blocked",
+                    reason="semantic handoff classification is invalid",
+                    planned_reads=[_PLANNED_READ_IN_MEMORY_CORPUS_SNAPSHOT],
+                    planned_writes=[],
+                    output_paths=[],
+                    source_report_paths=[],
+                    stage_counts={},
+                    warnings=[],
+                )
+            ],
+            "warnings": [],
+        }
     remediation_selected = _first_status_row(remediation_result, "selected")
     if remediation_selected is not None:
         return {
             "selected_stage": STAGE_DETERMINISTIC_REMEDIATION,
             "episode_ref": episode_ref,
+            "action_id": getattr(remediation_selected, "action_id", None),
             "rows": [
                 _stage_row(
                     stage=STAGE_DETERMINISTIC_REMEDIATION,
@@ -405,7 +433,6 @@ def _preview_corpus_episode_workflow_from_snapshot(
             ],
             "warnings": [],
         }
-    semantic_families = {"semantic_summary", "semantic_review"}
     terminal_selection = _returned_terminal_selection(
         STAGE_DETERMINISTIC_REMEDIATION,
         episode_ref,
@@ -475,6 +502,59 @@ def _preview_corpus_episode_workflow_from_snapshot(
         "rows": [*manual_rows, completed_row],
         "warnings": warnings,
     }
+
+
+def _semantic_handoff_result_is_invalid(
+    remediation_result: object,
+    semantic_families: set[str],
+    episode_ref: str,
+    *,
+    plan_payload: dict[str, Any] | None = None,
+) -> bool:
+    rows = getattr(remediation_result, "rows", None)
+    if not isinstance(rows, list):
+        return True
+    known_statuses = {
+        "selected",
+        "skipped",
+        "blocked",
+        "excluded",
+        "failed",
+        "rejected",
+        "executed",
+        "reused",
+    }
+    saw_target_row = False
+    for row in rows:
+        family = getattr(row, "artifact_family", None)
+        status = getattr(row, "outcome_status", None)
+        row_episode_ref = getattr(row, "episode_ref", None)
+        if (
+            not isinstance(family, str)
+            or status not in known_statuses
+            or not isinstance(row_episode_ref, str)
+        ):
+            return True
+        if row_episode_ref != episode_ref:
+            if status != "skipped":
+                return True
+            continue
+        saw_target_row = True
+        if family in semantic_families and status not in {"blocked", "excluded"}:
+            return True
+    if saw_target_row:
+        return False
+    if rows or not isinstance(plan_payload, dict):
+        return True
+    episodes = plan_payload.get("episodes")
+    if not isinstance(episodes, list):
+        return True
+    for episode in episodes:
+        if not isinstance(episode, dict) or episode.get("episode_ref") != episode_ref:
+            continue
+        actions = episode.get("actions")
+        return not (isinstance(actions, list) and not actions)
+    return True
 
 
 def _snapshot_transcript_is_valid(

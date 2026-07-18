@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -1110,6 +1111,265 @@ def test_snapshot_preview_seam_bounds_deterministic_actions_to_one(
     assert result["selected_stage"] == "deterministic_remediation"
     assert calls == [("remediation", 1)]
 
+
+def test_snapshot_remediation_selection_exposes_internal_action_identity(
+    monkeypatch,
+    tmp_path,
+):
+    """017 receives identity from the private mapping, not the public 014 row."""
+    import podcast_ingest_core.corpus_episode_workflow_runner as workflow
+
+    monkeypatch.setattr(
+        workflow,
+        "_preview_corpus_audio_download_from_plan",
+        lambda *args, **kwargs: _audio_result(tmp_path, status="skipped"),
+    )
+    monkeypatch.setattr(
+        workflow,
+        "_preview_corpus_local_transcription_from_plan",
+        lambda *args, **kwargs: _transcription_result(tmp_path, status="skipped"),
+    )
+    monkeypatch.setattr(
+        workflow,
+        "_preview_corpus_remediation_from_plan",
+        lambda *args, **kwargs: _remediation_result(
+            tmp_path,
+            status="selected",
+            family="mentions",
+        ),
+    )
+
+    selection = workflow._preview_corpus_episode_workflow_from_snapshot(
+        "gooaye",
+        episode_ref="EP677",
+        plan_result=object(),
+        plan_payload={
+            "episodes": [
+                {
+                    "episode_ref": "EP677",
+                    "artifact_status": {"transcript": {"status": "valid"}},
+                }
+            ]
+        },
+        max_actions=1,
+        allow_semantic_handoff=True,
+    )
+
+    assert selection["selected_stage"] == "deterministic_remediation"
+    assert selection["action_id"] == "EP677:mentions"
+    assert not hasattr(selection["rows"][0], "action_id")
+
+
+def test_snapshot_semantic_handoff_ignores_non_target_semantic_skips(
+    monkeypatch,
+    tmp_path,
+):
+    import podcast_ingest_core.corpus_episode_workflow_runner as workflow
+
+    monkeypatch.setattr(
+        workflow,
+        "_preview_corpus_audio_download_from_plan",
+        lambda *args, **kwargs: _audio_result(tmp_path, status="skipped"),
+    )
+    monkeypatch.setattr(
+        workflow,
+        "_preview_corpus_local_transcription_from_plan",
+        lambda *args, **kwargs: _transcription_result(tmp_path, status="skipped"),
+    )
+    remediation_result = _remediation_result(
+        tmp_path,
+        status="excluded",
+        family="semantic_summary",
+    )
+    remediation_result = replace(
+        remediation_result,
+        counts=replace(
+            remediation_result.counts,
+            row_count=4,
+            skipped_count=2,
+            blocked_count=1,
+        ),
+        rows=[
+            remediation_result.rows[0],
+            _remediation_result(
+                tmp_path,
+                status="blocked",
+                family="semantic_review",
+            ).rows[0],
+            _remediation_result(
+                tmp_path,
+                episode_ref="EP676",
+                status="skipped",
+                family="semantic_summary",
+            ).rows[0],
+            _remediation_result(
+                tmp_path,
+                episode_ref="EP676",
+                status="skipped",
+                family="semantic_review",
+            ).rows[0],
+        ],
+    )
+    monkeypatch.setattr(
+        workflow,
+        "_preview_corpus_remediation_from_plan",
+        lambda *args, **kwargs: remediation_result,
+    )
+
+    result = workflow._preview_corpus_episode_workflow_from_snapshot(
+        "gooaye",
+        episode_ref="EP677",
+        plan_result=object(),
+        plan_payload={
+            "episodes": [
+                {
+                    "episode_ref": "EP677",
+                    "artifact_status": {"transcript": {"status": "valid"}},
+                }
+            ]
+        },
+        max_actions=None,
+        allow_semantic_handoff=True,
+    )
+
+    assert result["selected_stage"] == "completed"
+    assert result["episode_ref"] == "EP677"
+    assert result["rows"][-1].status == "completed"
+
+
+@pytest.mark.parametrize(
+    ("row_episode_ref", "family", "status", "expected_invalid"),
+    (
+        (None, None, None, True),
+        ("EP676", "mentions", "skipped", True),
+        ("EP677", "mentions", "skipped", False),
+        ("EP677", "mentions", "reused", False),
+        ("EP677", "mentions", "executed", False),
+        ("EP677", "semantic_summary", "blocked", False),
+        ("EP677", "semantic_summary", "excluded", False),
+        ("EP677", "semantic_summary", "selected", True),
+    ),
+)
+def test_semantic_handoff_validator_requires_well_formed_canonical_target_evidence(
+    tmp_path,
+    row_episode_ref,
+    family,
+    status,
+    expected_invalid,
+):
+    import podcast_ingest_core.corpus_episode_workflow_runner as workflow
+
+    rows = []
+    if status is not None:
+        rows = [
+            _remediation_result(
+                tmp_path,
+                episode_ref=row_episode_ref,
+                family=family,
+                status=status,
+            ).rows[0]
+        ]
+
+    assert workflow._semantic_handoff_result_is_invalid(
+        SimpleNamespace(rows=rows),
+        {"semantic_summary", "semantic_review"},
+        "EP677",
+    ) is expected_invalid
+
+
+@pytest.mark.parametrize(
+    "semantic_status",
+    (
+        "selected",
+        "failed",
+        "rejected",
+        "unknown",
+        "missing_rows",
+        "empty_rows",
+        "non_target_skipped_only",
+        "missing_episode_ref",
+        "mismatched_episode_ref",
+    ),
+)
+def test_snapshot_semantic_handoff_fails_closed_on_invalid_semantic_result(
+    monkeypatch,
+    tmp_path,
+    semantic_status,
+):
+    import podcast_ingest_core.corpus_episode_workflow_runner as workflow
+
+    monkeypatch.setattr(
+        workflow,
+        "_preview_corpus_audio_download_from_plan",
+        lambda *args, **kwargs: _audio_result(tmp_path, status="skipped"),
+    )
+    monkeypatch.setattr(
+        workflow,
+        "_preview_corpus_local_transcription_from_plan",
+        lambda *args, **kwargs: _transcription_result(tmp_path, status="skipped"),
+    )
+    if semantic_status == "missing_rows":
+        remediation_result = SimpleNamespace(warnings=[])
+    elif semantic_status == "empty_rows":
+        remediation_result = SimpleNamespace(rows=[], warnings=[])
+    else:
+        remediation_result = _remediation_result(
+            tmp_path,
+            episode_ref=(
+                "EP676" if semantic_status == "non_target_skipped_only" else "EP677"
+            ),
+            status=(
+                "excluded"
+                if semantic_status
+                in {"missing_episode_ref", "mismatched_episode_ref"}
+                else "skipped"
+                if semantic_status == "non_target_skipped_only"
+                else semantic_status
+            ),
+            family="semantic_summary",
+        )
+        if semantic_status in {
+            "missing_episode_ref",
+            "mismatched_episode_ref",
+        }:
+            remediation_result = replace(
+                remediation_result,
+                rows=[
+                    replace(
+                        remediation_result.rows[0],
+                        episode_ref=(
+                            None
+                            if semantic_status == "missing_episode_ref"
+                            else "EP676"
+                        ),
+                    )
+                ],
+            )
+    monkeypatch.setattr(
+        workflow,
+        "_preview_corpus_remediation_from_plan",
+        lambda *args, **kwargs: remediation_result,
+    )
+
+    result = workflow._preview_corpus_episode_workflow_from_snapshot(
+        "gooaye",
+        episode_ref="EP677",
+        plan_result=object(),
+        plan_payload={
+            "episodes": [
+                {
+                    "episode_ref": "EP677",
+                    "artifact_status": {"transcript": {"status": "valid"}},
+                }
+            ]
+        },
+        max_actions=None,
+        allow_semantic_handoff=True,
+    )
+
+    assert result["selected_stage"] == "blocked"
+    assert result["episode_ref"] == "EP677"
+    assert result["rows"][0].status == "blocked"
 
 
 @pytest.mark.parametrize("failure_point", ("index", "plan"))

@@ -78,6 +78,12 @@ class CorpusEpisodeCompletionWorkflowRunnerFailedError(PodcastIngestCoreError):
     """Corpus episode completion workflow validation or execution failed."""
 
 
+class CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError(
+    PodcastIngestCoreError
+):
+    """Latest deterministic episode workflow validation or execution failed."""
+
+
 class LLMProviderConfigError(PodcastIngestCoreError):
     """LLM provider 設定不完整或不合法。"""
 

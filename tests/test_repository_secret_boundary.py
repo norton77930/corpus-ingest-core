@@ -14,7 +14,9 @@ local-only or generated locations that mirror the .gitignore policy.
 
 from __future__ import annotations
 
+import os
 import re
+import sys
 from pathlib import Path
 
 
@@ -27,6 +29,7 @@ EXCLUDED_DIR_NAMES = {
     ".tmp",
     ".pytest-tmp",
     ".pytest_cache",
+    ".venv",
     "__pycache__",
     ".claude",
     ".codex",
@@ -50,25 +53,28 @@ PRIVATE_ENDPOINT_PATTERN = re.compile(
 
 def _scannable_files() -> list[Path]:
     files = []
-    for path in sorted(ROOT.rglob("*")):
-        if not path.is_file():
-            continue
-        relative = path.relative_to(ROOT)
-        if any(part in EXCLUDED_DIR_NAMES for part in relative.parts):
-            continue
-        posix = relative.as_posix()
-        if posix in EXCLUDED_RELATIVE_PATHS:
-            continue
-        if posix.startswith(EXCLUDED_PREFIXES):
-            continue
-        # Never read the local-only .env file (or any .env.* variant except
-        # the committed sanitized template .env.example).
-        if relative.name.startswith(".env") and relative.name != ".env.example":
-            continue
-        if path.suffix.lower() in BINARY_SUFFIXES:
-            continue
-        files.append(path)
-    return files
+    for current_root, directories, filenames in os.walk(ROOT):
+        directories[:] = sorted(
+            directory
+            for directory in directories
+            if directory not in EXCLUDED_DIR_NAMES
+        )
+        for filename in sorted(filenames):
+            path = Path(current_root) / filename
+            relative = path.relative_to(ROOT)
+            posix = relative.as_posix()
+            if posix in EXCLUDED_RELATIVE_PATHS:
+                continue
+            if posix.startswith(EXCLUDED_PREFIXES):
+                continue
+            # Never read the local-only .env file (or any .env.* variant except
+            # the committed sanitized template .env.example).
+            if relative.name.startswith(".env") and relative.name != ".env.example":
+                continue
+            if path.suffix.lower() in BINARY_SUFFIXES:
+                continue
+            files.append(path)
+    return sorted(files)
 
 
 def _read_text(path: Path) -> str | None:
@@ -89,6 +95,7 @@ def test_scan_covers_expected_repo_surface():
     assert ".env" not in files
     assert not any(name.startswith("data/") for name in files)
     assert ".specify/feature.json" not in files
+    assert not any(name.startswith(".venv/") for name in files)
     assert not any(name.startswith("evals/research-llm-smoke/raw/") for name in files)
 
 
@@ -99,6 +106,42 @@ def test_scan_covers_016_core_cli_mcp_and_portable_skill_surface():
     assert "scripts/run_corpus_episode_completion_workflow.py" in files
     assert "src/podcast_ingest_core/mcp_server.py" in files
     assert ".agents/skills/corpus-episode-completion/SKILL.md" in files
+
+
+def test_scan_covers_017_core_cli_mcp_and_portable_skill_surface():
+    files = {path.relative_to(ROOT).as_posix() for path in _scannable_files()}
+
+    assert "src/podcast_ingest_core/corpus_latest_episode_deterministic_workflow_runner.py" in files
+    assert "scripts/run_corpus_latest_episode_deterministic_workflow.py" in files
+    assert "src/podcast_ingest_core/mcp_server.py" in files
+    assert ".agents/skills/corpus-latest-episode-processing/SKILL.md" in files
+
+
+def test_scan_prunes_excluded_directories_before_descending(monkeypatch, tmp_path):
+    guard = sys.modules[__name__]
+    (tmp_path / ".git" / "objects").mkdir(parents=True)
+    (tmp_path / ".git" / "objects" / "unscanned.txt").write_text(
+        "must not be traversed",
+        encoding="utf-8",
+    )
+    (tmp_path / "src").mkdir()
+    (tmp_path / "src" / "included.py").write_text("pass", encoding="utf-8")
+    monkeypatch.setattr(guard, "ROOT", tmp_path)
+
+    visited = []
+    original_walk = guard.os.walk
+
+    def tracking_walk(*args, **kwargs):
+        for current_root, directories, filenames in original_walk(*args, **kwargs):
+            visited.append(Path(current_root))
+            yield current_root, directories, filenames
+
+    monkeypatch.setattr(guard.os, "walk", tracking_walk)
+
+    files = _scannable_files()
+
+    assert files == [tmp_path / "src" / "included.py"]
+    assert tmp_path / ".git" not in visited
 
 
 def test_no_secret_like_api_key_in_committable_files():

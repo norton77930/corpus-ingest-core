@@ -1020,6 +1020,79 @@ class CorpusEpisodeCompletionWorkflowRunResult:
 
 
 @dataclass(frozen=True)
+class CorpusLatestEpisodeDeterministicWorkflowRunFilter:
+    """Normalized non-secret latest deterministic workflow request metadata."""
+
+    transcription_model: str | None
+    transcription_device: str
+    transcription_compute_type: str
+    transcription_vad_filter: bool
+
+
+@dataclass(frozen=True)
+class CorpusLatestEpisodeDeterministicWorkflowRunCounts:
+    """Latest deterministic workflow outcome counts."""
+
+    row_count: int
+    selected_count: int
+    executed_count: int
+    reused_count: int
+    ready_count: int
+    failed_count: int
+    blocked_count: int
+    rejected_count: int
+    warning_count: int
+
+
+@dataclass(frozen=True)
+class CorpusLatestEpisodeDeterministicWorkflowRunWarning:
+    """Bounded latest deterministic workflow warning."""
+
+    scope: str
+    episode_ref: str | None
+    message: str
+
+
+@dataclass(frozen=True)
+class CorpusLatestEpisodeDeterministicWorkflowRunRow:
+    """One latest deterministic workflow decision or action attempt."""
+
+    episode_ref: str | None
+    stage: str
+    action_id: str | None
+    status: str
+    reason: str
+    requires_confirmation: bool
+    network_risk: bool
+    local_compute_risk: bool
+    planned_reads: list[str]
+    planned_writes: list[str]
+    output_paths: list[str]
+    source_report_paths: list[str]
+    failure_category: str | None
+    warnings: list[str]
+
+
+@dataclass(frozen=True)
+class CorpusLatestEpisodeDeterministicWorkflowRunResult:
+    """Dry-run or confirmed latest deterministic workflow result."""
+
+    podcast_id: str
+    run_mode: str
+    confirm: bool
+    selector: str
+    episode_ref: str | None
+    outcome: str
+    report_json_path: Path | None
+    report_markdown_path: Path | None
+    filters: CorpusLatestEpisodeDeterministicWorkflowRunFilter
+    counts: CorpusLatestEpisodeDeterministicWorkflowRunCounts
+    rows: list[CorpusLatestEpisodeDeterministicWorkflowRunRow]
+    warnings: list[CorpusLatestEpisodeDeterministicWorkflowRunWarning]
+    not_investment_advice: bool
+
+
+@dataclass(frozen=True)
 class ResearchWorkflowStep:
     """Research workflow 中單一步驟的計畫或執行結果。"""
 

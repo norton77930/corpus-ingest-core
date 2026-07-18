@@ -88,6 +88,12 @@ blocked/rejected 後必須停止，不會自動改跑下一個 action。
 明確同意、確認同一個 canonical action、回報並停止；MCP 不可用時不改用 CLI、
 terminal、scheduler 或 retry。
 
+### Latest Episode Deterministic Processing Tool
+
+- `run_corpus_latest_episode_deterministic_workflow`
+
+017 tool 預設 `confirm=false`，只解析一次當前 latest 並回傳 zero-file 計畫。SPEC 017 is Implemented. The 2026-07-17 `seeded`/`downloaded` mapping issue is a resolved historical blocker; recorded metadata-only confirmed EP679 evidence ends at `ready_for_semantic_summary`. An explicit natural-language request for one configured podcast's latest episode authorizes the portable `corpus-latest-episode-processing` Skill to acknowledge once, call this dedicated MCP workflow exactly once with `confirm=true`, report once, and stop. It must not make a `confirm=false` preview-before-confirm call, retry, use a fallback/terminal/CLI, invoke semantic summary/review, rebuild cache, batch, schedule, or make a second call. The Core pins the same canonical episode, processes only intake, download, local transcription, and deterministic remediation, then stops at `ready_for_semantic_summary` without `.env` or LLM/provider access.
+
 ## Safety
 
 MCP tools 不接受任意本機檔案路徑，也不構成投資建議。

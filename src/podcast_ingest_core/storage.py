@@ -121,6 +121,12 @@ class CorpusEpisodeCompletionWorkflowRunAssetPaths:
     markdown_path: Path
 
 
+@dataclass(frozen=True)
+class CorpusLatestEpisodeDeterministicWorkflowRunAssetPaths:
+    json_path: Path
+    markdown_path: Path
+
+
 def audio_path(podcast_id: str, episode_ref: str) -> Path:
     """回傳音檔輸出路徑。"""
 
@@ -499,6 +505,18 @@ def corpus_episode_completion_workflow_run_asset_paths(
     return CorpusEpisodeCompletionWorkflowRunAssetPaths(
         json_path=base_dir / "corpus-episode-completion-workflow-run.json",
         markdown_path=base_dir / "corpus-episode-completion-workflow-run.md",
+    )
+
+
+def corpus_latest_episode_deterministic_workflow_run_asset_paths(
+    podcast_id: str,
+) -> CorpusLatestEpisodeDeterministicWorkflowRunAssetPaths:
+    """Return latest deterministic workflow JSON and Markdown report paths."""
+
+    base_dir = CORPUS_DIR / _safe_slug(podcast_id, "podcast_id")
+    return CorpusLatestEpisodeDeterministicWorkflowRunAssetPaths(
+        json_path=base_dir / "corpus-latest-episode-deterministic-workflow-run.json",
+        markdown_path=base_dir / "corpus-latest-episode-deterministic-workflow-run.md",
     )
 
 

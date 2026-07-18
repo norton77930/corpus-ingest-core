@@ -124,6 +124,32 @@ def test_run_validation_checks_dry_run_and_semantic_ack_guard(tmp_path, monkeypa
     assert checks["semantic_ack_guard"]["ok"] is True
 
 
+def test_latest_deterministic_skill_metadata_requires_confirmed_single_call_description():
+    from scripts import validate_mcp_setup
+
+    confirmed_skill = "\n".join(
+        [
+            "---",
+            "name: corpus-latest-episode-processing",
+            "description: Process one configured podcast's latest deterministic workflow once with confirmed MCP execution after an explicit request.",
+            "---",
+        ]
+    )
+    blocked_preview_skill = "\n".join(
+        [
+            "---",
+            "name: corpus-latest-episode-processing",
+            "description: Preview one configured podcast's latest deterministic workflow while confirmed processing remains blocked.",
+            "---",
+        ]
+    )
+
+    assert validate_mcp_setup._has_latest_deterministic_skill_metadata(confirmed_skill)
+    assert not validate_mcp_setup._has_latest_deterministic_skill_metadata(
+        blocked_preview_skill
+    )
+
+
 def test_run_validation_checks_completion_tool_skill_and_early_guard(tmp_path, monkeypatch):
     from scripts import validate_mcp_setup
 
@@ -140,7 +166,8 @@ def test_run_validation_checks_completion_tool_skill_and_early_guard(tmp_path, m
 
     checks = {check["name"]: check for check in result["checks"]}
     assert checks["completion_tool_registry"]["ok"] is True
-    assert checks["completion_tool_registry"]["tool_count"] == 13
+    assert checks["completion_tool_registry"]["tool_count"] == 14
+    assert checks["latest_deterministic_skill_metadata"]["ok"] is True
     assert checks["completion_skill_metadata"]["ok"] is True
     assert checks["completion_confirmed_next_guard"]["ok"] is True
 

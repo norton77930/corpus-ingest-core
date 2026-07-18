@@ -255,9 +255,12 @@ def test_corpus_runtime_lifecycle_status_matches_registry_and_roadmap():
         assert "**Status**: Implemented" in spec
 
     roadmap = _read(DOCS / "roadmap.md")
-    assert "015-corpus-semantic-remediation-runner" in roadmap
-    assert "Latest implemented corpus package is **016-corpus-episode-completion-workflow-runner**" in roadmap
-    assert "next unused feature package number is **017**" in roadmap
+    assert (
+        "Latest implemented corpus package is "
+        "**017-corpus-latest-episode-deterministic-workflow**"
+    ) in roadmap
+    assert "SPEC 017 is Implemented" in roadmap
+    assert "next unused feature package number is **018**" in roadmap
 
 def test_014_stabilization_docs_define_strict_zero_file_dry_run():
     feature = ROOT / "specs" / "014-corpus-fresh-episode-workflow-runner"
@@ -340,7 +343,7 @@ def test_015_semantic_remediation_docs_and_registry_contract():
     assert "015-corpus-semantic-remediation-runner" in handoff
     assert "015-corpus-semantic-remediation-runner" in roadmap
     assert "016" in roadmap
-    assert "specs/016-corpus-episode-completion-workflow-runner/plan.md" in agents
+    assert "specs/017-corpus-latest-episode-deterministic-workflow/plan.md" in agents
 
 
 def test_016_completion_workflow_docs_and_agent_surface_contract():
@@ -377,7 +380,7 @@ def test_016_completion_workflow_docs_and_agent_surface_contract():
     assert "016-corpus-episode-completion-workflow-runner" in handoff
     assert "13 reviewed tools" in handoff
     assert "016-corpus-episode-completion-workflow-runner" in roadmap
-    assert "next unused feature package number is **017**" in roadmap
+    assert "017-corpus-latest-episode-deterministic-workflow" in roadmap
     assert "016-corpus-episode-completion-workflow-runner" in registry
     assert "run_corpus_episode_completion_workflow.py" in registry
     assert "run_corpus_episode_completion_workflow" in registry
@@ -385,4 +388,150 @@ def test_016_completion_workflow_docs_and_agent_surface_contract():
     assert "test_corpus_episode_completion_skill.py" in verification
     assert "run_corpus_episode_completion_workflow" in mcp_usage
     assert "corpus-episode-completion" in mcp_usage
-    assert "specs/016-corpus-episode-completion-workflow-runner/plan.md" in agents
+    assert "specs/017-corpus-latest-episode-deterministic-workflow/plan.md" in agents
+
+
+def test_017_latest_episode_deterministic_workflow_docs_and_agent_surface_contract():
+    feature = ROOT / "specs" / "017-corpus-latest-episode-deterministic-workflow"
+    spec = _read(feature / "spec.md")
+    plan = _read(feature / "plan.md")
+    research = _read(feature / "research.md")
+    data_model = _read(feature / "data-model.md")
+    quickstart = _read(feature / "quickstart.md")
+    requirements = _read(feature / "checklists" / "requirements.md")
+    tasks = _read(feature / "tasks.md")
+    skill = _read(
+        ROOT
+        / ".agents"
+        / "skills"
+        / "corpus-latest-episode-processing"
+        / "SKILL.md"
+    )
+    roadmap = _read(DOCS / "roadmap.md")
+    readme = _read(ROOT / "README.md")
+    architecture = _read(DOCS / "architecture.md")
+    handoff = _read(DOCS / "agent-handoff.md")
+    registry = _read(ROOT / "specs" / "README.md")
+    verification = _read(DOCS / "verification-matrix.md")
+    mcp_usage = _read(DOCS / "mcp-usage.md")
+    agents = _read(ROOT / "AGENTS.md")
+
+    for relative_path in (
+        "spec.md",
+        "plan.md",
+        "research.md",
+        "data-model.md",
+        "quickstart.md",
+        "tasks.md",
+        "contracts/latest-episode-deterministic-workflow.md",
+        "checklists/requirements.md",
+        "checklists/safety.md",
+    ):
+        assert (feature / relative_path).is_file()
+
+    assert "**Status**: Implemented" in spec
+    assert "canonical episode reference" in spec
+    assert "fail closed" in spec
+    assert "action identity coherence" in spec
+    assert "semantic handoff" in spec
+    assert "_select_next_stage(..., allow_semantic_handoff=True)" in plan
+    assert "014 public workflow contract remains unchanged" in plan
+    assert "_select_next_stage(..., allow_semantic_handoff=True)" in research
+    assert "014 public workflow contract remains unchanged" in research
+    assert "identity fields" in data_model
+    assert "both action identifiers are present but differ" in data_model
+    assert "present but malformed" in data_model
+    assert "semantic row" in data_model
+    assert "target semantic rows may only use `blocked` or `excluded`" in data_model
+    assert "canonical target remediation evidence" in data_model
+    assert "non-target row may be ignored only when its status is `skipped`" in data_model
+    assert "row statuses, not top-level outcomes" in data_model
+    assert "non-target filter-generated `skipped` rows" in research
+    assert "`--confirm`" in quickstart
+    assert "explicit natural-language request is a one-time execution authorization" in quickstart
+    assert "metadata-only evidence" in requirements
+    assert "- [x] Feature meets measurable outcomes defined in Success Criteria" in requirements
+    assert "2026-07-17" in tasks
+    assert "historical blocker resolved" in tasks
+    assert "action-identity mismatch" in tasks
+    assert "malformed action identity" in tasks
+    assert "missing target remediation evidence" in tasks
+    assert "credential assignments" in tasks
+    assert "non-HTTP URI query/fragment data" in tasks
+    assert "top-level outcome" in tasks
+    assert "episode_ref=EP679" in tasks
+    assert "outcome=ready_for_semantic_summary" in tasks
+
+    assert "run_corpus_latest_episode_deterministic_workflow" in readme
+    assert "run_corpus_latest_episode_deterministic_workflow.py" in readme
+    assert "corpus_latest_episode_deterministic_workflow_runner.py" in architecture
+    assert "ready_for_semantic_summary" in architecture
+    assert "exact 14" in architecture
+    assert "017-corpus-latest-episode-deterministic-workflow" in handoff
+    assert "14 reviewed tools" in handoff
+    assert "017-corpus-latest-episode-deterministic-workflow" in registry
+    assert "run_corpus_latest_episode_deterministic_workflow.py" in registry
+    assert "test_corpus_latest_episode_deterministic_workflow_runner.py" in verification
+    assert "run_corpus_latest_episode_deterministic_workflow" in mcp_usage
+    assert "corpus-latest-episode-processing" in mcp_usage
+    assert "specs/017-corpus-latest-episode-deterministic-workflow/plan.md" in agents
+    for text in (
+        quickstart,
+        readme,
+        architecture,
+        handoff,
+        registry,
+        verification,
+        mcp_usage,
+    ):
+        assert "SPEC 017 is Implemented" in text
+    assert "Acknowledge once that the explicit natural-language request is a one-time execution authorization" in skill
+    assert "Call `run_corpus_latest_episode_deterministic_workflow` exactly once with `confirm=true`" in skill
+    assert "Report the metadata-only result once and stop" in skill
+    assert "Do not call with `confirm=false` before the confirmed call" in skill
+    assert "Do not call this tool more than once" in skill
+    assert "Do not call with `confirm=true`" not in skill
+    assert "next unused feature package number is **018**" in roadmap
+
+
+def test_readme_lists_current_corpus_workflow_surfaces_in_their_sections():
+    readme = _read(ROOT / "README.md")
+    directory_section = readme.split("## 目錄結構", 1)[1].split(
+        "## Core Functions", 1
+    )[0]
+    core_block = readme.split("## Core Functions", 1)[1].split(
+        "```python", 1
+    )[1].split("```", 1)[0]
+    output_section = readme.split("## 輸出路徑規則", 1)[1].split(
+        "## CLI 範例", 1
+    )[0]
+    mcp_section = readme.split("啟動本機 MCP server：", 1)[1].split(
+        "## MCP Client Integration", 1
+    )[0]
+
+    for script in [
+        "run_corpus_episode_completion_workflow.py",
+        "run_corpus_latest_episode_deterministic_workflow.py",
+    ]:
+        assert script in directory_section
+
+    for function in [
+        "run_corpus_semantic_remediation(",
+        "run_corpus_episode_completion_workflow(",
+        "run_corpus_latest_episode_deterministic_workflow(",
+    ]:
+        assert function in core_block
+
+    for report in [
+        "corpus-episode-completion-workflow-run.json",
+        "corpus-episode-completion-workflow-run.md",
+        "corpus-latest-episode-deterministic-workflow-run.json",
+        "corpus-latest-episode-deterministic-workflow-run.md",
+    ]:
+        assert report in output_section
+
+    for tool in [
+        "run_corpus_episode_completion_workflow",
+        "run_corpus_latest_episode_deterministic_workflow",
+    ]:
+        assert f"- `{tool}`" in mcp_section

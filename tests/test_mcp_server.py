@@ -999,6 +999,81 @@ def test_completion_workflow_mcp_semantic_ack_rejects_before_selection_work(monk
     assert called is False
 
 
+def test_latest_deterministic_workflow_mcp_uses_bounded_envelopes(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    captured = {}
+    dry_result = SimpleNamespace(outcome="dry_run", episode_ref="EP672")
+
+    def fake_run(*args, **kwargs):
+        captured["args"] = args
+        captured.update(kwargs)
+        return dry_result
+
+    monkeypatch.setattr(
+        mcp_server.latest_deterministic_workflow_runner,
+        "run_corpus_latest_episode_deterministic_workflow",
+        fake_run,
+    )
+    monkeypatch.setattr(
+        mcp_server.latest_deterministic_workflow_runner,
+        "result_to_dict",
+        lambda result: {"outcome": result.outcome, "episode_ref": result.episode_ref},
+    )
+
+    response = mcp_server.run_corpus_latest_episode_deterministic_workflow(
+        podcast_id="gooaye",
+        transcription_model="tiny",
+        transcription_vad_filter=True,
+    )
+
+    assert response == {
+        "ok": True,
+        "dry_run": True,
+        "requires_confirmation": True,
+        "data": {"outcome": "dry_run", "episode_ref": "EP672"},
+    }
+    assert captured == {
+        "args": ("gooaye",),
+        "confirm": False,
+        "transcription_model": "tiny",
+        "transcription_device": "cpu",
+        "transcription_compute_type": "int8",
+        "transcription_vad_filter": True,
+    }
+
+    ready_result = SimpleNamespace(outcome="ready_for_semantic_summary", episode_ref="EP672")
+    monkeypatch.setattr(
+        mcp_server.latest_deterministic_workflow_runner,
+        "run_corpus_latest_episode_deterministic_workflow",
+        lambda *args, **kwargs: ready_result,
+    )
+    confirmed = mcp_server.run_corpus_latest_episode_deterministic_workflow(
+        podcast_id="gooaye",
+        confirm=True,
+    )
+    assert confirmed == {
+        "ok": True,
+        "data": {"outcome": "ready_for_semantic_summary", "episode_ref": "EP672"},
+    }
+
+    monkeypatch.setattr(
+        mcp_server.latest_deterministic_workflow_runner,
+        "run_corpus_latest_episode_deterministic_workflow",
+        lambda *args, **kwargs: (_ for _ in ()).throw(
+            RuntimeError("https://private.example.test/path?token=secret raw transcript")
+        ),
+    )
+    rejected = mcp_server.run_corpus_latest_episode_deterministic_workflow(
+        podcast_id="gooaye",
+    )
+    assert rejected == {
+        "ok": False,
+        "error_type": "CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError",
+        "message": "corpus latest episode deterministic workflow command failed",
+    }
+
+
 def _workflow_result(*, dry_run=True, requires_api_cost_ack=False, stock_query="台積電"):
     from podcast_ingest_core.models import ResearchWorkflowResult, ResearchWorkflowStep
 

@@ -37,6 +37,7 @@ LEGACY_SIDE_EFFECT_TOOLS = {
     "run_research_workflow",
 }
 COMPLETION_WORKFLOW_TOOL = "run_corpus_episode_completion_workflow"
+LATEST_DETERMINISTIC_WORKFLOW_TOOL = "run_corpus_latest_episode_deterministic_workflow"
 LEGACY_TOOL_ORDER = [
     "list_episodes",
     "get_episode",
@@ -52,8 +53,14 @@ LEGACY_TOOL_ORDER = [
     "run_research_workflow",
 ]
 LEGACY_EXPECTED_TOOLS = READ_QUERY_TOOLS | LEGACY_SIDE_EFFECT_TOOLS
-SIDE_EFFECT_TOOLS = LEGACY_SIDE_EFFECT_TOOLS | {COMPLETION_WORKFLOW_TOOL}
-EXPECTED_TOOLS = LEGACY_EXPECTED_TOOLS | {COMPLETION_WORKFLOW_TOOL}
+SIDE_EFFECT_TOOLS = LEGACY_SIDE_EFFECT_TOOLS | {
+    COMPLETION_WORKFLOW_TOOL,
+    LATEST_DETERMINISTIC_WORKFLOW_TOOL,
+}
+EXPECTED_TOOLS = LEGACY_EXPECTED_TOOLS | {
+    COMPLETION_WORKFLOW_TOOL,
+    LATEST_DETERMINISTIC_WORKFLOW_TOOL,
+}
 
 
 def _registered_tool_names() -> set[str]:
@@ -65,12 +72,12 @@ def _registered_tool_names() -> set[str]:
 
 def test_mcp_registry_exposes_exactly_the_reviewed_tool_set():
     actual = _registered_tool_names()
-    assert len(actual) == 13
+    assert len(actual) == 14
     assert actual == EXPECTED_TOOLS
     assert LEGACY_EXPECTED_TOOLS <= actual
 
 
-def test_completion_tool_is_appended_after_the_preserved_twelve_tool_order():
+def test_workflow_tools_are_appended_after_the_preserved_twelve_tool_order():
     from podcast_ingest_core import mcp_server
 
     tools = asyncio.run(mcp_server.mcp.list_tools())
@@ -78,6 +85,7 @@ def test_completion_tool_is_appended_after_the_preserved_twelve_tool_order():
     assert [tool.name for tool in tools] == [
         *LEGACY_TOOL_ORDER,
         COMPLETION_WORKFLOW_TOOL,
+        LATEST_DETERMINISTIC_WORKFLOW_TOOL,
     ]
 
 
@@ -197,6 +205,40 @@ def test_completion_workflow_tool_mirrors_the_bounded_core_schema():
         "scheduler",
         "loop",
         "full_chain",
+        "progress_callback",
+    ):
+        assert forbidden not in signature.parameters
+
+
+def test_latest_deterministic_workflow_tool_exposes_only_local_inputs():
+    from podcast_ingest_core import mcp_server
+
+    signature = inspect.signature(
+        mcp_server.run_corpus_latest_episode_deterministic_workflow
+    )
+    assert list(signature.parameters) == [
+        "podcast_id",
+        "confirm",
+        "transcription_model",
+        "transcription_device",
+        "transcription_compute_type",
+        "transcription_vad_filter",
+    ]
+    assert signature.parameters["confirm"].default is False
+    for forbidden in (
+        "episode_ref",
+        "force",
+        "allow_partial",
+        "semantic_provider",
+        "semantic_model",
+        "semantic_base_url",
+        "semantic_api_key_env",
+        "provider",
+        "endpoint",
+        "credential",
+        "api_cost_ack",
+        "retry",
+        "scheduler",
         "progress_callback",
     ):
         assert forbidden not in signature.parameters

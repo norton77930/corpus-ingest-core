@@ -4,9 +4,10 @@
 
 ## Project Summary
 
-Podcast Ingestion Core 是一個本機優先的通用 Podcast 擷取與研究核心：RSS episode listing、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive 摘要、opt-in 的 OpenAI-compatible LLM semantic summary、deterministic mention extraction、SQLite metadata cache / search、stdio-only MCP server（恰好 13 個 reviewed tools），以及 deterministic research workflow（stock lens synthesis、external data boundary）。第一個 podcast profile 是 Gooaye 股癌，但核心程式不得寫死股癌；所有 podcast-specific 設定在 `config/podcasts.yaml`。本專案支援 evidence-based 研究整理，明確**不**提供投資建議。
-Corpus packages 008–016 add local artifact indexing/planning, bounded intake/download/transcription/deterministic remediation, a one-stage fresh workflow, standalone `015-corpus-semantic-remediation-runner`, and the human-controlled `016-corpus-episode-completion-workflow-runner`. 016 previews in memory with strict zero-file behavior, then only dispatches one exact human-approved action through Core, CLI, MCP, or its portable Skill.
-The local stdio registry has exact 13 reviewed tools; the 016 addition preserves the prior 12 tool contracts.
+Podcast Ingestion Core 是一個本機優先的通用 Podcast 擷取與研究核心：RSS episode listing、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive 摘要、opt-in 的 OpenAI-compatible LLM semantic summary、deterministic mention extraction、SQLite metadata cache / search、stdio-only MCP server（恰好 14 個 reviewed tools），以及 deterministic research workflow（stock lens synthesis、external data boundary）。第一個 podcast profile 是 Gooaye 股癌，但核心程式不得寫死股癌；所有 podcast-specific 設定在 `config/podcasts.yaml`。本專案支援 evidence-based 研究整理，明確**不**提供投資建議。
+Corpus packages 008–017 add local artifact indexing/planning, bounded intake/download/transcription/deterministic remediation, a one-stage fresh workflow, standalone `015-corpus-semantic-remediation-runner`, the human-controlled `016-corpus-episode-completion-workflow-runner`, and `017-corpus-latest-episode-deterministic-workflow`. 016 previews in memory with strict zero-file behavior, then only dispatches one exact human-approved action. 017 locks latest once per confirmed run, advances only deterministic stages, and stops at `ready_for_semantic_summary`.
+The local stdio registry has exact 14 reviewed tools; the 016 addition preserves the prior 12 tool contracts and 017 adds the bounded deterministic latest-episode tool.
+For historical context, 016 introduced 13 reviewed tools before 017 added the fourteenth tool.
 
 ## First 10 Minutes（閱讀順序）
 
@@ -35,7 +36,7 @@ README.md 是 quick orientation 與 CLI 範例，不是 governance source。
 
 ## Implemented / Not Implemented
 
-- **已實作**：RSS episode listing、episode lookup、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive Markdown 摘要、opt-in LLM semantic summary pipeline、deterministic mention extraction、SQLite metadata cache / search、stdio-only MCP server（13 tools）、research workflow orchestration、stock lens synthesis、external data boundary（local fixture only）。
+- **已實作**：RSS episode listing、episode lookup、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive Markdown 摘要、opt-in LLM semantic summary pipeline、deterministic mention extraction、SQLite metadata cache / search、stdio-only MCP server（14 tools）、research workflow orchestration、stock lens synthesis、external data boundary（local fixture only）。
 - **Corpus 已實作**：008–016，包括 strict-zero-file 014 workflow、standalone semantic remediation runner，以及 human-controlled completion workflow；confirmed summary requires exact acknowledgement before profile/`.env`, while deterministic review uses no LLM configuration.
 - **未實作**：Web UI、排程、embedding、vector search、live market API（明確不批准，見邊界）。
 
@@ -52,10 +53,11 @@ README.md 是 quick orientation 與 CLI 範例，不是 governance source。
 | No live market API | External market data 只用 boundary scaffold / local fixture；不讀 API key、不打 HTTP provider、不捏造市場事實 | `tests/test_external_data_boundary.py`、`tests/test_external_data_verification.py` |
 | 015 strict zero-file / one executor | Explicit episode only; dry-run resolves no profile/`.env` and writes zero files; confirmed summary/review dispatches exactly one executor; reports are metadata-only with no `generated_at`; index/plan/cache remain manual | `tests/test_corpus_semantic_remediation_runner.py` |
 | 016 completion workflow / Skill | strict-zero-file preview selects one next action; confirmed rejects `next`/`latest` and drift, dispatches exactly one runner, writes a metadata-only report, and the portable Skill permits no local fallback or automatic second action | `tests/test_corpus_episode_completion_workflow_runner.py`、`tests/test_corpus_episode_completion_skill.py`、`tests/test_mcp_setup_validation.py` |
+| 017 latest deterministic workflow / Skill | SPEC 017 is Implemented. The resolved historical `seeded`/`downloaded` mapping blocker has recorded metadata-only EP679 evidence ending at `ready_for_semantic_summary`. An explicit natural-language latest-episode request is the one-time execution authorization: the portable Skill acknowledges once, calls the dedicated MCP tool once with `confirm=true`, reports once, and stops. The MCP tool remains dry-run by default outside that protocol; no semantic work, retry, fallback, CLI/terminal use, cache rebuild, or second call is allowed | `tests/test_corpus_latest_episode_deterministic_workflow_runner.py`、`tests/test_corpus_latest_episode_processing_skill.py`、`tests/test_mcp_tool_registry_contract.py` |
 | No investment advice | 不得產生 buy/sell/hold、target price、guaranteed returns 或個人化投資建議；review gate 會拒絕 prohibited advice 輸出 | `tests/test_research_llm_smoke_review.py`、`tests/test_gooaye_lens.py` |
 | No automatic cache rebuild | Side-effect tools 完成後不得自動 `rebuild_cache`，只回 cache stale warning；rebuild 是手動操作 | `tests/test_cache_rebuild_guard.py` |
 | Thin CLI / thick core | Runtime 行為住在 `src/podcast_ingest_core`；`scripts/` 與 MCP tools 只解析輸入、呼叫 core、格式化輸出 | `tests/test_contracts.py` |
-| MCP JSON envelope | MCP responses 維持既有 envelope：`{"ok": true, "data": ...}`、`{"ok": false, ...}`、dry-run 含 `"dry_run": true`；恰好 13 個 reviewed tools | `tests/test_mcp_tool_registry_contract.py`、`tests/test_mcp_server.py` |
+| MCP JSON envelope | MCP responses 維持既有 envelope：`{"ok": true, "data": ...}`、`{"ok": false, ...}`、dry-run 含 `"dry_run": true`；恰好 14 個 reviewed tools | `tests/test_mcp_tool_registry_contract.py`、`tests/test_mcp_server.py` |
 
 ## How to Start a New Feature
 

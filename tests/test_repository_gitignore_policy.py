@@ -58,6 +58,21 @@ def _is_ignored(path: str) -> bool:
     return result.returncode == 0
 
 
+def _ignore_pattern_source(path: str) -> str | None:
+    result = subprocess.run(
+        ["git", "check-ignore", "-v", "--no-index", "--", path],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
+    if result.returncode not in (0, 1):
+        pytest.fail(f"git check-ignore failed for {path}: {result.stderr!r}")
+    if result.returncode == 1:
+        return None
+    return result.stdout.partition(":")[0].replace("\\", "/")
+
+
 def _is_tracked(path: str) -> bool:
     result = subprocess.run(
         ["git", "ls-files", "--error-unmatch", "--", path],
@@ -86,6 +101,7 @@ IGNORED_LOCAL_ONLY_PATHS = [
     ".pytest-tmp/run/probe.txt",
     ".tmp/probe.txt",
     ".pytest_cache/v/cache/nodeids",
+    ".venv/Lib/site-packages/example.py",
     # generated data artifacts (SQLite cache is derived data; research
     # artifacts embed transcript-derived text and stay local)
     "data/audio/gooaye/EP1.mp3",
@@ -97,6 +113,7 @@ IGNORED_LOCAL_ONLY_PATHS = [
     "data/mappings/gooaye/EP1.industry-map.json",
     "data/external/gooaye/EP1.external-boundary.json",
     "data/stock-lens/gooaye/q.stock-lens.json",
+    "data/notes/gooaye/EP1-analysis.md",
 ]
 
 COMMITTED_TEMPLATE_PATHS = [
@@ -110,6 +127,15 @@ COMMITTED_TEMPLATE_PATHS = [
 @pytest.mark.parametrize("path", IGNORED_LOCAL_ONLY_PATHS)
 def test_local_only_path_is_ignored(path):
     assert _is_ignored(path), f"{path} must be gitignored (local-only or generated)"
+
+
+@requires_git
+def test_virtualenv_path_is_ignored_by_repository_policy():
+    path = ".venv/Lib/site-packages/example.py"
+
+    assert path in IGNORED_LOCAL_ONLY_PATHS
+    assert _ignore_pattern_source(path) == ".gitignore"
+
 
 @requires_git
 def test_specify_feature_selection_file_is_untracked():

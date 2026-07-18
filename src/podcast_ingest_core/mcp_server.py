@@ -9,6 +9,7 @@ from mcp.server.fastmcp import FastMCP
 
 from . import cache as cache_module
 from . import corpus_episode_completion_workflow_runner as completion_workflow_runner
+from . import corpus_latest_episode_deterministic_workflow_runner as latest_deterministic_workflow_runner
 from . import downloader
 from . import entity_extractor
 from . import feed_reader
@@ -57,6 +58,12 @@ _COMPLETION_EXECUTABLE_ACTIONS = {
 }
 _COMPLETION_TOOL_ERROR_TYPE = "CorpusEpisodeCompletionWorkflowRunnerFailedError"
 _COMPLETION_TOOL_ERROR_MESSAGE = "corpus episode completion workflow command failed"
+_LATEST_DETERMINISTIC_WORKFLOW_TOOL_ERROR_TYPE = (
+    "CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError"
+)
+_LATEST_DETERMINISTIC_WORKFLOW_TOOL_ERROR_MESSAGE = (
+    "corpus latest episode deterministic workflow command failed"
+)
 
 mcp = FastMCP("podcast-ingest-core")
 
@@ -643,6 +650,30 @@ def run_corpus_episode_completion_workflow(
     )
 
 
+@mcp.tool()
+def run_corpus_latest_episode_deterministic_workflow(
+    podcast_id: str,
+    confirm: bool = False,
+    transcription_model: str | None = None,
+    transcription_device: str = "cpu",
+    transcription_compute_type: str = "int8",
+    transcription_vad_filter: bool = False,
+) -> dict[str, Any]:
+    """Preview or process one current latest episode through local deterministic stages."""
+
+    return _latest_deterministic_workflow_tool_call(
+        operation=lambda: latest_deterministic_workflow_runner.run_corpus_latest_episode_deterministic_workflow(
+            podcast_id,
+            confirm=confirm,
+            transcription_model=transcription_model,
+            transcription_device=transcription_device,
+            transcription_compute_type=transcription_compute_type,
+            transcription_vad_filter=transcription_vad_filter,
+        ),
+        confirm=confirm,
+    )
+
+
 def _tool_call(operation: Callable[[], Any], warnings: list[str] | None = None) -> dict[str, Any]:
     try:
         return tool_success(operation(), warnings=warnings)
@@ -673,6 +704,32 @@ def _completion_workflow_tool_call(
         "ok": True,
         "dry_run": True,
         "requires_confirmation": _completion_result_requires_confirmation(result),
+        "data": payload,
+    }
+
+
+def _latest_deterministic_workflow_tool_call(
+    *,
+    operation: Callable[[], Any],
+    confirm: bool,
+) -> dict[str, Any]:
+    """Map 017 Core results into the existing bounded MCP envelope."""
+
+    try:
+        result = operation()
+        payload = latest_deterministic_workflow_runner.result_to_dict(result)
+    except Exception:
+        return tool_error(
+            _LATEST_DETERMINISTIC_WORKFLOW_TOOL_ERROR_MESSAGE,
+            _LATEST_DETERMINISTIC_WORKFLOW_TOOL_ERROR_TYPE,
+        )
+
+    if confirm:
+        return tool_success(payload)
+    return {
+        "ok": True,
+        "dry_run": True,
+        "requires_confirmation": True,
         "data": payload,
     }
 

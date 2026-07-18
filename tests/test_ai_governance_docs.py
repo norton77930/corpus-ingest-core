@@ -96,8 +96,8 @@ def test_ai_development_framework_keeps_hierarchy_lifecycle_and_checks():
     ]:
         assert phrase in text
 
-    assert "恰 13 個" in text
-    assert "恰 12 個" not in text
+    assert "恰 14 個" in text
+    assert "恰 13 個" not in text
 
 
 def test_adr_index_and_core_adrs_exist_with_short_format():

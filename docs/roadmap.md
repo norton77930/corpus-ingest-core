@@ -186,8 +186,9 @@
 ### 已完成到哪
 
 - 最高完成功能階段為 **Phase 6V.1（Review Gate Boundary Alignment）**；上方 Phase 0 → 6V.1 的功能階段皆已落地，並由 `tests/` 對應守衛測試鎖定。
-- Latest implemented corpus package is **016-corpus-episode-completion-workflow-runner**. It follows **015-corpus-semantic-remediation-runner** with a human-controlled one-action completion flow through Core, CLI, one MCP tool, and a portable Skill; packages `008` through `016` cover index, planning, bounded stage runners, fresh workflow, semantic remediation, and completion.
-- The next unused feature package number is **017**.
+- Latest implemented corpus package is **017-corpus-latest-episode-deterministic-workflow**. It follows **016-corpus-episode-completion-workflow-runner**, which follows **015-corpus-semantic-remediation-runner**, with request-bounded, canonical latest-episode deterministic processing through Core, CLI, one MCP tool, and a portable Skill; packages `008` through `017` cover index, planning, bounded stage runners, fresh workflow, semantic remediation, completion, and latest-episode deterministic readiness.
+- SPEC 017 is Implemented. The 2026-07-17 confirmed EP679 stop at `blocked` before audio download, caused by the `seeded`/`downloaded` child-outcome mapping gap, is a resolved historical blocker. The final metadata-only confirmed report is `episode_ref=EP679`, `outcome=ready_for_semantic_summary`, `ready_count=1`, `blocked_count=0`, and `failed_count=0`; no semantic stage ran.
+- The next unused feature package number is **018**.
 - 其後為 audit-remediation 硬化（**非編號功能階段，不進 Phase 序列**），對應目前 HEAD：
   - **Batch 2**：安全/契約守衛測試（secret boundary、gitignore policy、MCP tool registry、LLM ack 契約、LLM CLI no-leak、manual cache rebuild）。
   - **Batch 2.5**：AI handoff governance docs 守衛。

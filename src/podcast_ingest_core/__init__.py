@@ -9,6 +9,7 @@ from .errors import (
     CorpusEpisodeIntakeFailedError,
     CorpusEpisodeWorkflowRunnerFailedError,
     CorpusEpisodeCompletionWorkflowRunnerFailedError,
+    CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError,
     CorpusSemanticRemediationRunnerFailedError,
     CorpusLocalTranscriptionRunnerFailedError,
     CorpusIndexFailedError,
@@ -56,6 +57,10 @@ from .corpus_episode_completion_workflow_runner import (
     result_to_dict as corpus_episode_completion_workflow_result_to_dict,
     run_corpus_episode_completion_workflow,
 )
+from .corpus_latest_episode_deterministic_workflow_runner import (
+    result_to_dict as corpus_latest_episode_deterministic_workflow_result_to_dict,
+    run_corpus_latest_episode_deterministic_workflow,
+)
 from .corpus_semantic_remediation_runner import run_corpus_semantic_remediation
 from .entity_extractor import extract_mentions
 from .episode_intelligence import generate_episode_intelligence_report
@@ -97,6 +102,11 @@ from .models import (
     CorpusEpisodeCompletionWorkflowRunResult,
     CorpusEpisodeCompletionWorkflowRunRow,
     CorpusEpisodeCompletionWorkflowRunWarning,
+    CorpusLatestEpisodeDeterministicWorkflowRunCounts,
+    CorpusLatestEpisodeDeterministicWorkflowRunFilter,
+    CorpusLatestEpisodeDeterministicWorkflowRunResult,
+    CorpusLatestEpisodeDeterministicWorkflowRunRow,
+    CorpusLatestEpisodeDeterministicWorkflowRunWarning,
     CorpusSemanticRemediationRunCounts,
     CorpusSemanticRemediationRunFilter,
     CorpusSemanticRemediationRunResult,
@@ -124,8 +134,10 @@ from .models import (
 )
 from .storage import (
     CorpusEpisodeCompletionWorkflowRunAssetPaths,
+    CorpusLatestEpisodeDeterministicWorkflowRunAssetPaths,
     CorpusSemanticRemediationRunAssetPaths,
     corpus_episode_completion_workflow_run_asset_paths,
+    corpus_latest_episode_deterministic_workflow_run_asset_paths,
     corpus_episode_intake_run_asset_paths,
     corpus_episode_seed_asset_path,
     corpus_episode_workflow_run_asset_paths,
@@ -162,6 +174,13 @@ __all__ = [
     "CorpusEpisodeCompletionWorkflowRunnerFailedError",
     "CorpusEpisodeCompletionWorkflowRunRow",
     "CorpusEpisodeCompletionWorkflowRunWarning",
+    "CorpusLatestEpisodeDeterministicWorkflowRunAssetPaths",
+    "CorpusLatestEpisodeDeterministicWorkflowRunCounts",
+    "CorpusLatestEpisodeDeterministicWorkflowRunFilter",
+    "CorpusLatestEpisodeDeterministicWorkflowRunResult",
+    "CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError",
+    "CorpusLatestEpisodeDeterministicWorkflowRunRow",
+    "CorpusLatestEpisodeDeterministicWorkflowRunWarning",
     "CorpusSemanticRemediationRunAssetPaths",
     "CorpusSemanticRemediationRunCounts",
     "CorpusSemanticRemediationRunFilter",
@@ -173,6 +192,8 @@ __all__ = [
     "CorpusEpisodeSeed",
     "corpus_episode_intake_run_asset_paths",
     "corpus_episode_completion_workflow_run_asset_paths",
+    "corpus_latest_episode_deterministic_workflow_run_asset_paths",
+    "corpus_latest_episode_deterministic_workflow_result_to_dict",
     "corpus_episode_completion_workflow_result_to_dict",
     "corpus_episode_seed_asset_path",
     "corpus_episode_workflow_run_asset_paths",
@@ -237,6 +258,7 @@ __all__ = [
     "run_corpus_episode_intake",
     "run_corpus_episode_workflow",
     "run_corpus_episode_completion_workflow",
+    "run_corpus_latest_episode_deterministic_workflow",
     "run_corpus_semantic_remediation",
     "run_corpus_remediation",
     "run_corpus_local_transcription",
