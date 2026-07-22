@@ -94,6 +94,14 @@ terminal、scheduler 或 retry。
 
 017 tool 預設 `confirm=false`，只解析一次當前 latest 並回傳 zero-file 計畫。SPEC 017 is Implemented. The 2026-07-17 `seeded`/`downloaded` mapping issue is a resolved historical blocker; recorded metadata-only confirmed EP679 evidence ends at `ready_for_semantic_summary`. An explicit natural-language request for one configured podcast's latest episode authorizes the portable `corpus-latest-episode-processing` Skill to acknowledge once, call this dedicated MCP workflow exactly once with `confirm=true`, report once, and stop. It must not make a `confirm=false` preview-before-confirm call, retry, use a fallback/terminal/CLI, invoke semantic summary/review, rebuild cache, batch, schedule, or make a second call. The Core pins the same canonical episode, processes only intake, download, local transcription, and deterministic remediation, then stops at `ready_for_semantic_summary` without `.env` or LLM/provider access.
 
+### Latest Episode Verified Research Report Tool
+
+- `run_latest_episode_verified_research_report_workflow`
+
+018 tool follows a mandatory preview → explicit episode-scoped approval → one confirmed call protocol. First call with `confirm=false`; it resolves latest once and returns a strict-zero-file plan, canonical `episode_ref`, risk summary, and required exact `api_cost_ack`. Do not treat preview as approval. After the user supplies the same `expected_episode_ref` and the exact acknowledgement text, call once with `confirm=true`. Invalid acknowledgement or a changed canonical reference is rejected before RSS, environment/provider access, writers, or child stages. Confirmed execution uses the pinned deterministic ladder, permits semantic work only through a passed review gate, and publishes a deterministic, digest-versioned JSON/Markdown/manifest bundle atomically. It neither retries, schedules, rebuilds cache, uses a live external provider, nor provides investment advice.
+
+Use the portable `latest-episode-verified-research-report` Skill for this human-controlled protocol. It must not substitute CLI, terminal, retry, scheduler, fallback, or another side-effect tool.
+
 ## Safety
 
 MCP tools 不接受任意本機檔案路徑，也不構成投資建議。

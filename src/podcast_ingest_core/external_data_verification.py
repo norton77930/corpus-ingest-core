@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -11,7 +12,10 @@ from .errors import (
     ExternalDataVerificationInputError,
 )
 from .models import ExternalDataVerificationAsset
-from .storage import find_external_data_boundary_asset_paths
+from .storage import external_data_boundary_asset_paths
+from . import storage
+from .canonical_transcript import current_canonical_transcript_identity
+from .episode_claim import episode_writer_claimed
 
 
 VERIFICATION_MODE = "fixture-external-data-v1"
@@ -20,8 +24,10 @@ SUPPORTED_PROVIDER = "fixture"
 DEFAULT_EXTERNAL_MARKET_DATA_FIXTURE_PATH = Path(
     "config/external_market_data_fixtures.yaml"
 )
+PREVERIFICATION_BOUNDARIES_DIR = storage.CORPUS_DIR
 
 
+@episode_writer_claimed
 def verify_external_data_boundary(
     podcast_id: str,
     episode_ref: str,
@@ -38,12 +44,25 @@ def verify_external_data_boundary(
     if provider != SUPPORTED_PROVIDER:
         raise ExternalDataVerificationInputError(f"unsupported external data provider: {provider}")
 
-    paths = find_external_data_boundary_asset_paths(podcast_id, episode_ref)
+    transcript_identity = current_canonical_transcript_identity(podcast_id, episode_ref)
+    paths = (
+        None
+        if transcript_identity is None
+        else external_data_boundary_asset_paths(
+            podcast_id, episode_ref, transcript_identity.title
+        )
+    )
     if paths is None or not paths.json_path.exists():
         raise ExternalDataVerificationInputError(
             f"找不到 external boundary：{podcast_id}/{episode_ref}"
         )
 
+    try:
+        boundary_input_raw = paths.json_path.read_bytes()
+    except OSError as exc:
+        raise ExternalDataVerificationInputError(
+            "external boundary is unreadable"
+        ) from exc
     payload = _load_boundary_payload(paths.json_path)
     _validate_boundary_identity(payload, podcast_id, episode_ref)
     boundary_mode = _required_text(payload, "boundary_mode")
@@ -90,7 +109,7 @@ def verify_external_data_boundary(
             not_investment_advice=True,
         )
 
-    if _is_verified(payload) and not force:
+    if _is_verified(payload, fixture_path=fixture_path) and not force:
         verified_count = _verified_candidate_count(candidates)
         return ExternalDataVerificationAsset(
             podcast_id=podcast_id,
@@ -145,12 +164,20 @@ def verify_external_data_boundary(
             verified_count += 1
         updated_candidates.append(updated)
 
+    snapshot_path = _write_preverification_boundary_snapshot(
+        podcast_id, episode_ref, boundary_input_raw
+    )
     payload["candidate_boundaries"] = updated_candidates
     payload["warnings"] = _unique(warnings)
     payload["external_data_verification"] = {
         "verification_mode": VERIFICATION_MODE,
         "provider": provider,
-        "fixture_path": str(fixture_path),
+        "fixture_path": fixture_path.resolve(strict=False).as_posix(),
+        "fixture_sha256": _fixture_sha256(fixture_path),
+        "boundary_input_path": paths.json_path.resolve(strict=False).as_posix(),
+        "boundary_input_sha256": hashlib.sha256(boundary_input_raw).hexdigest(),
+        "preverification_snapshot_path": snapshot_path.resolve(strict=False).as_posix(),
+        "preverification_snapshot_sha256": hashlib.sha256(boundary_input_raw).hexdigest(),
         "candidate_count": len(updated_candidates),
         "verified_candidate_count": verified_count,
         "not_investment_advice": True,
@@ -272,11 +299,29 @@ def _match_fixture(
     return None
 
 
-def _is_verified(payload: dict[str, Any]) -> bool:
+def _is_verified(payload: dict[str, Any], *, fixture_path: Path | None = None) -> bool:
+    """Recognize only a marker bound to the current fixture bytes when supplied."""
+
     verification = payload.get("external_data_verification")
-    if not isinstance(verification, dict):
+    if not isinstance(verification, dict) or verification.get("verification_mode") != VERIFICATION_MODE:
         return False
-    return verification.get("verification_mode") == VERIFICATION_MODE
+    if fixture_path is None:
+        return True
+    current_sha = _fixture_sha256(fixture_path)
+    return (
+        current_sha is not None
+        and verification.get("fixture_path") == fixture_path.resolve(strict=False).as_posix()
+        and verification.get("fixture_sha256") == current_sha
+        and isinstance(verification.get("boundary_input_path"), str)
+        and isinstance(verification.get("boundary_input_sha256"), str)
+    )
+
+
+def _fixture_sha256(path: Path) -> str | None:
+    try:
+        return hashlib.sha256(path.read_bytes()).hexdigest()
+    except OSError:
+        return None
 
 
 def _verified_candidate_count(candidates: list[dict[str, Any]]) -> int:
@@ -359,6 +404,44 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         ]
     )
     return "\n".join(lines)
+
+
+def _write_preverification_boundary_snapshot(
+    podcast_id: str, episode_ref: str, boundary_raw: bytes
+) -> Path:
+    """Preserve the exact boundary bytes before fixture verification mutates it."""
+
+    digest = hashlib.sha256(boundary_raw).hexdigest()
+    directory = (
+        PREVERIFICATION_BOUNDARIES_DIR
+        / podcast_id
+        / "verified-research"
+        / "preverification-boundaries"
+    )
+    path = directory / f"{storage.title_slug(episode_ref, 'episode')}-{digest}.json"
+    stage_path = path.with_name(f".{path.name}.part")
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+        if path.exists():
+            if path.read_bytes() != boundary_raw:
+                raise ExternalDataVerificationFailedError(
+                    "preverification boundary snapshot identity collision"
+                )
+            return path
+        stage_path.write_bytes(boundary_raw)
+        stage_path.replace(path)
+        return path
+    except ExternalDataVerificationFailedError:
+        raise
+    except OSError as exc:
+        raise ExternalDataVerificationFailedError(
+            f"寫入 preverification boundary snapshot 失敗：{exc}"
+        ) from exc
+    finally:
+        try:
+            stage_path.unlink(missing_ok=True)
+        except OSError:
+            pass
 
 
 def _write_boundary(json_path: Path, markdown_path: Path, payload: dict[str, Any], markdown: str) -> None:

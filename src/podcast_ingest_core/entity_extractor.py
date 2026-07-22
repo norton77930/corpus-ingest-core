@@ -14,7 +14,9 @@ from .errors import (
     TranscriptParseError,
 )
 from .models import Mention, MentionEvidence, MentionExtractionAsset
-from .storage import find_transcript_asset_paths, mention_asset_paths
+from .storage import mention_asset_paths
+from .canonical_transcript import resolve_canonical_transcript_asset_paths
+from .episode_claim import episode_writer_claimed
 from .validator import validate_transcript
 
 
@@ -119,6 +121,7 @@ MARKDOWN_TYPE_TITLES = {
 }
 
 
+@episode_writer_claimed
 def extract_mentions(
     podcast_id: str,
     episode_ref: str,
@@ -136,7 +139,7 @@ def extract_mentions(
     validation = validate_transcript(podcast_id, episode_ref)
     _raise_for_invalid_transcript(validation.status, validation.problems, allow_partial)
 
-    transcript_paths = find_transcript_asset_paths(podcast_id, episode_ref)
+    transcript_paths = resolve_canonical_transcript_asset_paths(podcast_id, episode_ref)
     if transcript_paths is None:
         raise TranscriptMissingError(f"找不到逐字稿 JSON：{podcast_id}/{episode_ref}")
 
@@ -171,6 +174,7 @@ def extract_mentions(
         "episode_ref": episode_ref,
         "title": title,
         "extraction_mode": EXTRACTION_MODE,
+        "generation_options": {"max_evidence_per_mention": max_evidence_per_mention},
         "segment_count": segment_count,
         "mention_count": len(mentions),
         "mentions": [_mention_to_dict(mention) for mention in mentions],

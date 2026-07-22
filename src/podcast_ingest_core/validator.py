@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Any
 
 from .models import TranscriptValidationResult
+from .canonical_transcript import resolve_canonical_transcript_asset_paths
 from . import storage
 
 
@@ -21,7 +22,7 @@ VALIDATION_STATUSES = {
 def validate_transcript(podcast_id: str, episode_ref: str) -> TranscriptValidationResult:
     """檢查指定 episode 的 transcript outputs 是否完整且可用。"""
 
-    paths = storage.find_transcript_asset_paths(podcast_id, episode_ref)
+    paths = resolve_canonical_transcript_asset_paths(podcast_id, episode_ref)
     if paths is None:
         part_paths = _candidate_part_paths(podcast_id, episode_ref)
         warnings = [

@@ -9,6 +9,8 @@ import re
 from typing import Any
 
 from . import storage
+from .audit_report_pair import write_atomic_audit_report_pair
+from .episode_claim import episode_writer_claimed
 from .corpus_audio_download_runner import run_corpus_audio_download
 from .corpus_episode_intake import run_corpus_episode_intake
 from .corpus_episode_workflow_runner import (
@@ -17,6 +19,10 @@ from .corpus_episode_workflow_runner import (
 from .corpus_local_transcription_runner import run_corpus_local_transcription
 from .corpus_remediation_runner import run_corpus_remediation
 from .errors import CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError
+from .canonical_transcript import (
+    CanonicalTranscriptResolutionError,
+    resolve_canonical_transcript_asset_paths,
+)
 from .models import (
     CorpusLatestEpisodeDeterministicWorkflowRunCounts,
     CorpusLatestEpisodeDeterministicWorkflowRunFilter,
@@ -127,12 +133,10 @@ def run_corpus_latest_episode_deterministic_workflow(
             filters=filters,
             rows=[_terminal_row(None, "blocked", "latest episode could not be resolved")],
         )
-
-    probe_row, selected_stage = _probe_stage(
-        normalized_podcast_id,
-        canonical_episode_ref,
-    )
     if not confirm:
+        probe_row, _selected_stage = _probe_stage(
+            normalized_podcast_id, canonical_episode_ref
+        )
         return _build_result(
             podcast_id=normalized_podcast_id,
             confirm=False,
@@ -141,19 +145,78 @@ def run_corpus_latest_episode_deterministic_workflow(
             filters=filters,
             rows=[probe_row],
         )
+    return _run_pinned_deterministic_workflow(
+        normalized_podcast_id,
+        canonical_episode_ref,
+        filters=filters,
+        write_report=True,
+    )
 
+
+@episode_writer_claimed
+def _run_pinned_deterministic_workflow(
+    podcast_id: str,
+    canonical_episode_ref: str,
+    *,
+    filters: CorpusLatestEpisodeDeterministicWorkflowRunFilter,
+    write_report: bool,
+) -> CorpusLatestEpisodeDeterministicWorkflowRunResult:
+    """Run the 017 deterministic ladder for an already pinned canonical episode.
+
+    This package-private seam deliberately performs no latest resolution.  It lets
+    SPEC 018 reuse the exact 017 stage loop without adding another RSS lookup.
+    """
+
+    probe_row, selected_stage = _probe_stage(podcast_id, canonical_episode_ref)
     rows: list[CorpusLatestEpisodeDeterministicWorkflowRunRow] = []
     remediation_actions = 0
     completed_remediation_action_ids: set[str] = set()
     while True:
         if selected_stage == STAGE_COMPLETED:
+            try:
+                canonical_transcript = resolve_canonical_transcript_asset_paths(
+                    podcast_id, canonical_episode_ref
+                )
+            except CanonicalTranscriptResolutionError:
+                rows.append(
+                    _terminal_row(
+                        canonical_episode_ref,
+                        "blocked",
+                        "canonical transcript title variants are ambiguous",
+                    )
+                )
+                return _confirmed_result(
+                    podcast_id,
+                    canonical_episode_ref,
+                    "blocked",
+                    filters,
+                    rows,
+                    write_report=write_report,
+                )
+            if canonical_transcript is None:
+                rows.append(
+                    _terminal_row(
+                        canonical_episode_ref,
+                        "blocked",
+                        "canonical transcript is unavailable",
+                    )
+                )
+                return _confirmed_result(
+                    podcast_id,
+                    canonical_episode_ref,
+                    "blocked",
+                    filters,
+                    rows,
+                    write_report=write_report,
+                )
             rows.append(_ready_row(canonical_episode_ref))
             return _confirmed_result(
-                normalized_podcast_id,
+                podcast_id,
                 canonical_episode_ref,
                 STAGE_READY,
                 filters,
                 rows,
+                write_report=write_report,
             )
         if selected_stage not in _EXECUTABLE_STAGES:
             rows.append(
@@ -166,11 +229,12 @@ def run_corpus_latest_episode_deterministic_workflow(
                 )
             )
             return _confirmed_result(
-                normalized_podcast_id,
+                podcast_id,
                 canonical_episode_ref,
                 "blocked",
                 filters,
                 rows,
+                write_report=write_report,
             )
         if selected_stage == STAGE_DETERMINISTIC_REMEDIATION and (
             remediation_actions >= _MAX_REMEDIATION_ACTIONS
@@ -184,40 +248,39 @@ def run_corpus_latest_episode_deterministic_workflow(
                 )
             )
             return _confirmed_result(
-                normalized_podcast_id,
+                podcast_id,
                 canonical_episode_ref,
                 "blocked",
                 filters,
                 rows,
+                write_report=write_report,
             )
 
         attempted = _execute_stage(
             selected_stage=selected_stage,
-            podcast_id=normalized_podcast_id,
+            podcast_id=podcast_id,
             episode_ref=canonical_episode_ref,
-            transcription_model=transcription_model,
-            transcription_device=transcription_device,
-            transcription_compute_type=transcription_compute_type,
-            transcription_vad_filter=transcription_vad_filter,
+            transcription_model=filters.transcription_model,
+            transcription_device=filters.transcription_device,
+            transcription_compute_type=filters.transcription_compute_type,
+            transcription_vad_filter=filters.transcription_vad_filter,
             selected_row=probe_row,
         )
         rows.append(attempted)
         if attempted.status not in {"executed", "reused"}:
             return _confirmed_result(
-                normalized_podcast_id,
+                podcast_id,
                 canonical_episode_ref,
                 attempted.status,
                 filters,
                 rows,
+                write_report=write_report,
             )
         if selected_stage == STAGE_DETERMINISTIC_REMEDIATION:
             if attempted.action_id is not None:
                 completed_remediation_action_ids.add(attempted.action_id)
             remediation_actions += 1
-        probe_row, selected_stage = _probe_stage(
-            normalized_podcast_id,
-            canonical_episode_ref,
-        )
+        probe_row, selected_stage = _probe_stage(podcast_id, canonical_episode_ref)
 
 
 def result_to_dict(
@@ -573,6 +636,8 @@ def _confirmed_result(
     outcome: str,
     filters: CorpusLatestEpisodeDeterministicWorkflowRunFilter,
     rows: list[CorpusLatestEpisodeDeterministicWorkflowRunRow],
+    *,
+    write_report: bool = True,
 ) -> CorpusLatestEpisodeDeterministicWorkflowRunResult:
     report_paths = storage.corpus_latest_episode_deterministic_workflow_run_asset_paths(
         podcast_id
@@ -595,7 +660,8 @@ def _confirmed_result(
         report_markdown_path=report_paths.markdown_path,
         warnings=warnings,
     )
-    _write_run_report(result)
+    if write_report:
+        _write_run_report(result)
     return result
 
 
@@ -604,17 +670,15 @@ def _write_run_report(result: CorpusLatestEpisodeDeterministicWorkflowRunResult)
         return
     payload = result_to_dict(result)
     try:
-        result.report_json_path.parent.mkdir(parents=True, exist_ok=True)
-        result.report_json_path.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
-        result.report_markdown_path.write_text(
+        write_atomic_audit_report_pair(
+            result.report_json_path,
+            result.report_markdown_path,
+            payload,
             "# Latest Episode Deterministic Workflow\n\n"
             f"- Outcome: {payload['outcome']}\n"
             f"- Episode: {payload['episode_ref'] or 'none'}\n"
             "- SQLite cache may be stale; rebuild cache manually.\n"
             "- This report is not investment advice.\n",
-            encoding="utf-8",
         )
     except OSError as exc:
         raise CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError(

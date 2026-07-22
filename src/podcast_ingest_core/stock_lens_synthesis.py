@@ -14,6 +14,7 @@ from .errors import (
 )
 from .llm_provider import SemanticSummaryProvider, create_provider
 from .models import StockLensSynthesisResult
+from .report_safety import strip_safety_disclaimers
 from .semantic_summarizer import SEMANTIC_API_COST_ACK
 from . import storage
 
@@ -28,39 +29,12 @@ DEBUG_OUTPUT_PATH_ENV = "PODCAST_INGEST_STOCK_LENS_SYNTHESIS_DEBUG_OUTPUT_PATH"
 SEMANTIC_REVIEW_REPORTS_DIR = Path("evals") / "research-llm-smoke" / "reports"
 SEMANTIC_CONTEXT_TRUNCATION_MARKER = "\n[semantic context truncated]"
 _SECRET_LIKE_PATTERN = re.compile(r"\bsk-[A-Za-z0-9_-]{8,}\b")
-_EN_TRADE_ACTION_LIST = r"(?:buy/sell/hold|buy\s*,\s*sell\s*,\s*(?:or\s*)?hold)"
 RISKS = [
     "Calls an external LLM API",
     "May incur API cost risk",
     "Uses only Phase 6F stock lens JSON as LLM input",
     "Does not use raw transcript text or semantic summary files",
     "Does not fetch external market data",
-]
-SAFETY_DISCLAIMER_PATTERNS = [
-    re.compile(r"不構成投資建議"),
-    re.compile(
-        r"不提供(?:任何)?(?:買賣建議|買進、賣出(?:或|/)?持有建議|買進/賣出/持有建議)"
-        r"(?:[、,，或\s]*(?:目標價|保證報酬))*"
-    ),
-    re.compile(r"沒有(?:目標價|保證報酬)"),
-    re.compile(
-        r"\b(?:no|without)\s+buy/sell/hold(?:\s+(?:advice|recommendations?))?\b",
-        re.IGNORECASE,
-    ),
-    re.compile(
-        rf"\b(?:does\s+not\s+constitute|is\s+not|not)\s+(?:a\s+)?"
-        rf"{_EN_TRADE_ACTION_LIST}\s+(?:recommendation|advice)\b",
-        re.IGNORECASE,
-    ),
-    re.compile(
-        rf"\bno\s+{_EN_TRADE_ACTION_LIST}\s+"
-        rf"(?:recommendation|recommendations|advice)\b(?:\s+is\s+provided)?",
-        re.IGNORECASE,
-    ),
-    re.compile(r"\bno\s+target\s+prices?\b", re.IGNORECASE),
-    re.compile(r"\bwithout\s+(?:a\s+)?target\s+price\b", re.IGNORECASE),
-    re.compile(r"\bno\s+guaranteed\s+returns?\b", re.IGNORECASE),
-    re.compile(r"\bwithout\s+guaranteed\s+returns?\b", re.IGNORECASE),
 ]
 PROHIBITED_ADVICE_PATTERNS = [
     ("trade_action", re.compile(r"\b(?:buy|sell|hold)\b", re.IGNORECASE)),
@@ -581,7 +555,7 @@ def _messages_for_source(compact_source: dict[str, Any]) -> list[dict[str, str]]
 
 
 def _raise_for_prohibited_output(text: str) -> None:
-    review_text = _strip_safety_disclaimers(text)
+    review_text = strip_safety_disclaimers(text)
     matched_guard = _matched_prohibited_guard(review_text)
     if matched_guard is not None:
         raise StockLensSynthesisInputError(
@@ -596,12 +570,6 @@ def _matched_prohibited_guard(text: str) -> str | None:
             return name
     return None
 
-
-def _strip_safety_disclaimers(text: str) -> str:
-    review_text = text
-    for pattern in SAFETY_DISCLAIMER_PATTERNS:
-        review_text = pattern.sub(" ", review_text)
-    return review_text
 
 
 def _write_debug_output_if_requested(text: str) -> None:

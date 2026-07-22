@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import Any, Callable
 
 from .entity_extractor import extract_mentions
+from .episode_claim import episode_writer_claimed
+from .generation_proof import notify_child_artifact_committed
 from .episode_intelligence import generate_episode_intelligence_report
 from .errors import PodcastIngestCoreError, ResearchWorkflowFailedError, ResearchWorkflowInputError
 from .external_data_boundary import generate_external_data_boundary
@@ -18,6 +20,7 @@ from .semantic_summarizer import SEMANTIC_API_COST_ACK, semantic_summarize_episo
 from .stock_lens import generate_stock_lens_report
 from .stock_lens_synthesis import generate_stock_lens_synthesis_report
 from . import storage
+from .canonical_transcript import resolve_canonical_transcript_asset_paths
 from .validator import validate_transcript
 
 
@@ -33,6 +36,7 @@ DOWNSTREAM_REFRESH_WARNING = (
 EXTERNAL_API_STEPS = ["semantic_summarize_episode"]
 
 
+@episode_writer_claimed
 def run_research_workflow(
     podcast_id: str,
     episode_ref: str,
@@ -93,7 +97,7 @@ def run_research_workflow(
             f"unsupported external data provider: {external_data_provider}"
         )
     validation = validate_transcript(podcast_id, episode_ref)
-    transcript_paths = storage.find_transcript_asset_paths(podcast_id, episode_ref)
+    transcript_paths = resolve_canonical_transcript_asset_paths(podcast_id, episode_ref)
     planned_reads = [str(transcript_paths.json_path)] if transcript_paths else []
     step_specs = _step_specs(
         podcast_id=podcast_id,
@@ -553,7 +557,9 @@ def _execute_step(spec: dict[str, Any]) -> ResearchWorkflowStep:
     operation: Callable[[], Any] = spec["operation"]
     asset = operation()
     artifact_paths = _asset_paths(asset)
-    generated = artifact_paths if getattr(asset, "generated", False) else []
+    generated_flag = bool(getattr(asset, "generated", False))
+    _notify_research_step_commit(spec["name"], asset, generated=generated_flag)
+    generated = artifact_paths if generated_flag else []
     reused = artifact_paths if getattr(asset, "already_exists", False) else []
     return ResearchWorkflowStep(
         name=spec["name"],
@@ -565,6 +571,26 @@ def _execute_step(spec: dict[str, Any]) -> ResearchWorkflowStep:
         generated_artifacts=generated,
         reused_artifacts=reused,
     )
+
+
+def _notify_research_step_commit(name: str, asset: Any, *, generated: bool) -> None:
+    """Emit one role-specific post-writer event before the next stage begins."""
+
+    role_field = {
+        "extract_mentions": ("mentions", "mentions_json_path"),
+        "generate_episode_intelligence_report": ("intelligence", "report_json_path"),
+        "generate_industry_chain_mapping": ("industry_mapping", "mapping_json_path"),
+        "generate_external_data_boundary": ("external_boundary", "boundary_json_path"),
+        "verify_external_data_boundary": ("fixture", "boundary_json_path"),
+        "generate_stock_lens_report": ("stock_lens", "report_json_path"),
+    }.get(name)
+    if role_field is None:
+        return
+    role, field = role_field
+    path = getattr(asset, field, None)
+    if path is None:
+        return
+    notify_child_artifact_committed(role, Path(path), generated=generated)
 
 
 def _asset_paths(asset: Any) -> list[str]:

@@ -186,9 +186,10 @@
 ### 已完成到哪
 
 - 最高完成功能階段為 **Phase 6V.1（Review Gate Boundary Alignment）**；上方 Phase 0 → 6V.1 的功能階段皆已落地，並由 `tests/` 對應守衛測試鎖定。
-- Latest implemented corpus package is **017-corpus-latest-episode-deterministic-workflow**. It follows **016-corpus-episode-completion-workflow-runner**, which follows **015-corpus-semantic-remediation-runner**, with request-bounded, canonical latest-episode deterministic processing through Core, CLI, one MCP tool, and a portable Skill; packages `008` through `017` cover index, planning, bounded stage runners, fresh workflow, semantic remediation, completion, and latest-episode deterministic readiness.
+- Latest implemented corpus package is **018-latest-episode-verified-research-report-workflow**. It follows **017-corpus-latest-episode-deterministic-workflow**, **016-corpus-episode-completion-workflow-runner**, and **015-corpus-semantic-remediation-runner**. Packages `008` through `018` cover index, planning, bounded stage runners, fresh workflow, semantic remediation, completion, latest deterministic readiness, and an episode-scoped verified research report.
 - SPEC 017 is Implemented. The 2026-07-17 confirmed EP679 stop at `blocked` before audio download, caused by the `seeded`/`downloaded` child-outcome mapping gap, is a resolved historical blocker. The final metadata-only confirmed report is `episode_ref=EP679`, `outcome=ready_for_semantic_summary`, `ready_count=1`, `blocked_count=0`, and `failed_count=0`; no semantic stage ran.
-- The next unused feature package number is **018**.
+- SPEC 018 is Implemented. It adds strict zero-write preview, exact `expected_episode_ref` plus exact acknowledgement before protected access, one pinned latest episode, semantic review exact `passed` gate, fixed-safe deterministic research, checkpoint/resume metadata, and content-digest JSON/Markdown/manifest bundle publication with atomic reuse/fail-closed behavior. It adds the fifteenth reviewed MCP tool and a portable preview → explicit approval → one confirmed call Skill; no live market API, automatic cache rebuild, retry/scheduler, or investment advice is added.
+- The next unused feature package number is **019**.
 - 其後為 audit-remediation 硬化（**非編號功能階段，不進 Phase 序列**），對應目前 HEAD：
   - **Batch 2**：安全/契約守衛測試（secret boundary、gitignore policy、MCP tool registry、LLM ack 契約、LLM CLI no-leak、manual cache rebuild）。
   - **Batch 2.5**：AI handoff governance docs 守衛。

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -9,16 +10,17 @@ import yaml
 from .config import load_podcast_profile
 from .errors import IndustryMappingFailedError, IndustryMappingInputError
 from .models import IndustryChainMappingAsset
-from .storage import (
-    find_episode_intelligence_report_asset_paths,
-    industry_chain_mapping_asset_paths,
-)
+from . import storage
+from .storage import industry_chain_mapping_asset_paths
+from .canonical_transcript import current_canonical_transcript_identity
+from .episode_claim import episode_writer_claimed
 
 
 MAPPING_MODE = "deterministic-industry-chain-v1"
 DEFAULT_MAPPING_CONFIG_PATH = Path("config/industry_chain_mappings.yaml")
 
 
+@episode_writer_claimed
 def generate_industry_chain_mapping(
     podcast_id: str,
     episode_ref: str,
@@ -36,7 +38,14 @@ def generate_industry_chain_mapping(
         raise ValueError("max_evidence_per_candidate 必須大於 0。")
 
     profile = load_podcast_profile(podcast_id)
-    report_paths = find_episode_intelligence_report_asset_paths(podcast_id, episode_ref)
+    transcript_identity = current_canonical_transcript_identity(podcast_id, episode_ref)
+    report_paths = (
+        None
+        if transcript_identity is None
+        else storage.episode_intelligence_report_asset_paths(
+            podcast_id, episode_ref, transcript_identity.title
+        )
+    )
     if report_paths is None or not report_paths.json_path.exists():
         raise IndustryMappingInputError(
             f"找不到 episode intelligence report：{podcast_id}/{episode_ref}"
@@ -92,6 +101,11 @@ def generate_industry_chain_mapping(
         "episode_ref": episode_ref,
         "title": title,
         "mapping_mode": MAPPING_MODE,
+        "generation_options": {
+            "max_candidates_per_node": max_candidates_per_node,
+            "max_evidence_per_candidate": max_evidence_per_candidate,
+        },
+        "mapping_config": _config_file_identity(DEFAULT_MAPPING_CONFIG_PATH),
         "mapping_status": _mapping_status(report_status),
         "source_status": {
             "episode_intelligence_report": "available",
@@ -174,6 +188,17 @@ def _load_mapping_config(path: Path) -> tuple[dict[str, Any], list[str]]:
     if not isinstance(industry_nodes, dict) or not isinstance(company_aliases, dict):
         return {}, ["mapping config must include industry_nodes and company_aliases mappings"]
     return payload, []
+
+
+def _config_file_identity(path: Path) -> dict[str, str | None]:
+    try:
+        raw = path.read_bytes()
+    except OSError:
+        return {"path": path.resolve(strict=False).as_posix(), "sha256": None}
+    return {
+        "path": path.resolve(strict=False).as_posix(),
+        "sha256": hashlib.sha256(raw).hexdigest(),
+    }
 
 
 def _load_existing_mapping_counts(json_path: Path) -> dict[str, Any]:

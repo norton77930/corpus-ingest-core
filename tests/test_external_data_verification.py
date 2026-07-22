@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import json
+from pathlib import Path
 import sys
+from types import SimpleNamespace
 
 import pytest
 
@@ -10,7 +13,16 @@ def _use_tmp_data_dirs(monkeypatch, tmp_path):
     from podcast_ingest_core import storage
 
     monkeypatch.setattr(storage, "EXTERNAL_DIR", tmp_path / "external")
+    import podcast_ingest_core.external_data_verification as external_verification
 
+    monkeypatch.setattr(
+        external_verification, "PREVERIFICATION_BOUNDARIES_DIR", tmp_path / "corpus"
+    )
+    monkeypatch.setattr(
+        external_verification,
+        "current_canonical_transcript_identity",
+        lambda _podcast_id, _episode_ref: SimpleNamespace(title="EP672 title"),
+    )
 
 def _write_boundary(
     monkeypatch,
@@ -167,6 +179,7 @@ def test_verify_external_data_boundary_confirm_updates_fixture_matches(
 
     paths = _write_boundary(monkeypatch, tmp_path)
     fixture_path = _write_fixture(tmp_path)
+    preverification_boundary = paths.json_path.read_bytes()
 
     asset = verify_external_data_boundary(
         "gooaye",
@@ -182,8 +195,13 @@ def test_verify_external_data_boundary_confirm_updates_fixture_matches(
     assert asset.generated is True
     assert asset.already_exists is False
     assert asset.verified_candidate_count == 2
-    assert payload["external_data_verification"]["provider"] == "fixture"
-    assert payload["external_data_verification"]["verified_candidate_count"] == 2
+    verification = payload["external_data_verification"]
+    snapshot_path = Path(verification["preverification_snapshot_path"])
+    assert verification["provider"] == "fixture"
+    assert verification["verified_candidate_count"] == 2
+    assert verification["boundary_input_sha256"] == hashlib.sha256(preverification_boundary).hexdigest()
+    assert verification["preverification_snapshot_sha256"] == hashlib.sha256(preverification_boundary).hexdigest()
+    assert snapshot_path.read_bytes() == preverification_boundary
     assert explicit["external_verification_status"] == "verified"
     assert explicit["source_status"] == "fixture_available"
     assert explicit["data_date"] == "2026-06-28"
@@ -291,6 +309,17 @@ def test_verify_external_data_boundary_reuses_verified_artifact_unless_force(
 
     paths = _write_boundary(monkeypatch, tmp_path, verified=True)
     fixture_path = _write_fixture(tmp_path)
+    boundary_input_raw = paths.json_path.read_bytes()
+    payload = json.loads(boundary_input_raw)
+    payload["external_data_verification"].update(
+        {
+            "fixture_path": fixture_path.resolve().as_posix(),
+            "fixture_sha256": hashlib.sha256(fixture_path.read_bytes()).hexdigest(),
+            "boundary_input_path": paths.json_path.resolve().as_posix(),
+            "boundary_input_sha256": hashlib.sha256(boundary_input_raw).hexdigest(),
+        }
+    )
+    paths.json_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
     before = paths.json_path.read_text(encoding="utf-8")
 
     asset = verify_external_data_boundary(

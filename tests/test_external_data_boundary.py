@@ -9,6 +9,7 @@ import pytest
 def _use_tmp_data_dirs(monkeypatch, tmp_path):
     from podcast_ingest_core import storage
 
+    monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
     monkeypatch.setattr(storage, "MAPPINGS_DIR", tmp_path / "mappings")
     monkeypatch.setattr(storage, "EXTERNAL_DIR", tmp_path / "external", raising=False)
 
@@ -23,9 +24,25 @@ def _write_industry_mapping(
     mapping_status="final",
     corrupt=False,
 ):
+    from podcast_ingest_core import storage
     from podcast_ingest_core.storage import industry_chain_mapping_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
+    transcript = storage.transcript_asset_paths(podcast_id, episode_ref, title)
+    transcript.json_path.parent.mkdir(parents=True, exist_ok=True)
+    transcript.json_path.write_text(
+        json.dumps(
+            {
+                "podcast_id": podcast_id,
+                "episode_ref": episode_ref,
+                "title": title,
+                "segments": [],
+            }
+        ),
+        encoding="utf-8",
+    )
+    transcript.text_path.write_text("fixture", encoding="utf-8")
+    transcript.srt_path.write_text("fixture", encoding="utf-8")
     paths = industry_chain_mapping_asset_paths(podcast_id, episode_ref, title)
     paths.json_path.parent.mkdir(parents=True, exist_ok=True)
     if corrupt:

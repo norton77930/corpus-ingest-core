@@ -228,6 +228,8 @@ confirmed action, local fallback command, or additional loop is started.
 - **FR-025**: Codex MUST be validated for safe skill/tool discovery and dry-run
   selection; Hermes Agent and OpenClaw client-specific setup and live validation
   MUST remain outside 016.
+- **FR-026**: Preview and confirmed execution MUST validate semantic provider, model, base URL, credential-variable name, chunk duration, and segment cap whenever fresh selection actually chooses `semantic_summary`, including `action=next` preview after fresh selection. Invalid selected-action settings are rejected before report writes, provider construction, or child dispatch; preview metadata reflects the same effective selected action and validated options.
+- **FR-027**: A confirmed outcome MUST retain the selected child row's safe report paths, safe warnings, and category-only failure classification, plus safe top-level child JSON/Markdown report paths and warnings. It MUST deduplicate safe local report paths and MUST omit raw child exception messages, unsafe paths, URI data, and credentials.
 
 ### Key Entities
 

@@ -8,6 +8,12 @@ from typing import Any, Callable
 
 from . import storage
 from .errors import CorpusIndexFailedError
+from .semantic_review_artifact import (
+    inspect_semantic_review,
+    parse_semantic_review_filename,
+    semantic_review_candidates,
+)
+from .semantic_summary_identity import canonical_semantic_summary_path
 from .models import (
     CorpusArtifactFamilyCounts,
     CorpusEpisodeRow,
@@ -31,7 +37,6 @@ SUPPORTED_ARTIFACT_FAMILIES = (
 SEMANTIC_REVIEW_REPORTS_DIR = Path("evals") / "research-llm-smoke" / "reports"
 _AUDIO_SUFFIXES = {".mp3", ".m4a", ".wav", ".aac", ".flac"}
 _ARRAY_COUNTS_KEY = "__array_counts__"
-_SEMANTIC_REVIEW_TIMESTAMP_PATTERN = re.compile(r"^\d{8}-\d{6}__")
 _SEMANTIC_SUMMARY_MAX_READ_BYTES = 2 * 1024 * 1024
 
 
@@ -126,18 +131,11 @@ def _episode_refs_from_directory(
 def _episode_refs_from_semantic_reviews(podcast_id: str) -> set[str]:
     if not SEMANTIC_REVIEW_REPORTS_DIR.exists():
         return set()
-    prefix = f"__{podcast_id}__"
-    suffix = ".semantic-review.json"
     refs: set[str] = set()
-    for path in sorted(SEMANTIC_REVIEW_REPORTS_DIR.glob(f"*{prefix}*{suffix}")):
-        name = path.name
-        if prefix not in name or not name.endswith(suffix):
-            continue
-        if _semantic_review_timestamp(path) is None:
-            continue
-        episode_ref = name.split(prefix, 1)[1].removesuffix(suffix)
-        if episode_ref:
-            refs.add(episode_ref)
+    for path in sorted(SEMANTIC_REVIEW_REPORTS_DIR.glob("*.semantic-review*.json")):
+        parsed = parse_semantic_review_filename(path, podcast_id)
+        if parsed is not None:
+            refs.add(parsed.episode_ref)
     return refs
 
 
@@ -155,12 +153,29 @@ def _is_audio_path(path: Path) -> bool:
 
 def _build_episode_row(podcast_id: str, episode_ref: str) -> CorpusEpisodeRow:
     source_metadata = _source_metadata(podcast_id, episode_ref)
+    transcript = _transcript_status(podcast_id, episode_ref)
+    canonical_summary_path = canonical_semantic_summary_path(podcast_id, episode_ref)
+    semantic_summary = _summary_status(
+        podcast_id,
+        episode_ref,
+        semantic=True,
+        canonical_path=canonical_summary_path,
+    )
+    semantic_summary_path = semantic_summary.get("path")
     artifact_status = {
         "audio": _audio_status(podcast_id, episode_ref),
-        "transcript": _transcript_status(podcast_id, episode_ref),
+        "transcript": transcript,
         "extractive_summary": _summary_status(podcast_id, episode_ref, semantic=False),
-        "semantic_summary": _summary_status(podcast_id, episode_ref, semantic=True),
-        "semantic_review": _semantic_review_status(podcast_id, episode_ref),
+        "semantic_summary": semantic_summary,
+        "semantic_review": _semantic_review_status(
+            podcast_id,
+            episode_ref,
+            semantic_summary_path=(
+                Path(semantic_summary_path)
+                if isinstance(semantic_summary_path, str)
+                else None
+            ),
+        ),
         "mentions": _mentions_status(podcast_id, episode_ref),
         "episode_intelligence": _episode_intelligence_status(podcast_id, episode_ref),
         "industry_mapping": _industry_mapping_status(podcast_id, episode_ref),
@@ -321,7 +336,13 @@ def _transcript_status(podcast_id: str, episode_ref: str) -> dict[str, Any]:
     }
 
 
-def _summary_status(podcast_id: str, episode_ref: str, *, semantic: bool) -> dict[str, Any]:
+def _summary_status(
+    podcast_id: str,
+    episode_ref: str,
+    *,
+    semantic: bool,
+    canonical_path: Path | None = None,
+) -> dict[str, Any]:
     summary_dir = storage.SUMMARIES_DIR / podcast_id
     if semantic:
         candidates = sorted(summary_dir.glob(f"{episode_ref}__*.semantic.md"))
@@ -336,7 +357,26 @@ def _summary_status(podcast_id: str, episode_ref: str, *, semantic: bool) -> dic
         if semantic:
             missing.update(readable=False, readability_status="missing")
         return missing
-    selected = candidates[0]
+    if semantic:
+        # A stale title variant is not a substitute for the transcript-bound
+        # semantic summary.  The caller must generate/review the canonical path.
+        if canonical_path is None or canonical_path not in candidates:
+            return {
+                **_missing_status(),
+                "exists": False,
+                "path": None,
+                "readable": False,
+                "readability_status": "missing",
+                "candidate_count": len(candidates),
+                "warnings": [
+                    "noncanonical semantic summary candidates ignored; "
+                    "transcript-title-bound summary is missing"
+                ],
+                "warning_count": 1,
+            }
+        selected = canonical_path
+    else:
+        selected = candidates[0]
     family = "semantic_summary" if semantic else "extractive_summary"
     warnings = _duplicate_warnings(family, candidates, selected)
     readability: dict[str, Any] = {}
@@ -470,9 +510,16 @@ def _external_boundary_status(podcast_id: str, episode_ref: str) -> dict[str, An
     )
 
 
-def _semantic_review_status(podcast_id: str, episode_ref: str) -> dict[str, Any]:
-    candidates, ignored_warnings = _semantic_review_candidates(podcast_id, episode_ref)
-    if not candidates:
+def _semantic_review_status(
+    podcast_id: str,
+    episode_ref: str,
+    *,
+    semantic_summary_path: Path | None = None,
+) -> dict[str, Any]:
+    candidates, rejected, ignored_warnings = _semantic_review_candidates(
+        podcast_id, episode_ref
+    )
+    if not candidates and not rejected:
         return {
             **_missing_status(),
             "review_status": "missing",
@@ -485,56 +532,49 @@ def _semantic_review_status(podcast_id: str, episode_ref: str) -> dict[str, Any]
             "warnings": ignored_warnings,
         }
 
-    selected = candidates[-1]
-    payload, unreadable_warning = _load_json_metadata(
-        selected,
+    selected = candidates[-1] if candidates else rejected[-1]
+    if semantic_summary_path is None:
+        review_status = "needs_review"
+        payload: dict[str, Any] | None = None
+        inspection_path = selected
+    else:
+        inspection = inspect_semantic_review(
+            podcast_id,
+            episode_ref,
+            semantic_summary_path=semantic_summary_path,
+            review_reports_dir=SEMANTIC_REVIEW_REPORTS_DIR,
+        )
+        review_status = inspection.review_status
+        payload = inspection.review_payload
+        inspection_path = inspection.review_path or selected
+    metadata, unreadable_warning = _load_json_metadata(
+        inspection_path,
         fields=(
-            "review_status",
-            "check_count",
-            "failed_check_count",
-            "warning_count",
-            "blocked_check_count",
+            "check_count", "failed_check_count", "warning_count", "blocked_check_count",
         ),
         array_count_fields=("checks",),
     )
+    payload = (
+        payload
+        if isinstance(payload, dict)
+        else metadata if isinstance(metadata, dict) else {}
+    )
+    warnings = [*ignored_warnings]
     if unreadable_warning is not None:
-        return {
-            "status": "unreadable",
-            "review_status": "unreadable",
-            "review_json_path": str(selected),
-            "review_markdown_path": str(selected.with_suffix(".md")),
-            "check_count": 0,
-            "failed_check_count": 0,
-            "warning_count": 1,
-            "blocked_check_count": 0,
-            "candidate_count": len(candidates),
-            "warnings": [*ignored_warnings, unreadable_warning],
-            "paths": {
-                "json": str(selected),
-                "markdown": str(selected.with_suffix(".md")),
-            },
-        }
-    assert payload is not None
-    review_status = _safe_text(payload.get("review_status"), "available")
+        warnings.append(unreadable_warning)
     return {
         "status": review_status,
         "review_status": review_status,
-        "review_json_path": str(selected),
-        "review_markdown_path": str(selected.with_suffix(".md")),
-        "check_count": _safe_int(
-            payload.get("check_count"), default=_array_count(payload, "checks", 0)
-        ),
+        "review_json_path": str(inspection_path),
+        "review_markdown_path": str(inspection_path.with_suffix(".md")),
+        "check_count": _safe_int(payload.get("check_count")),
         "failed_check_count": _safe_int(payload.get("failed_check_count")),
         "warning_count": _safe_int(payload.get("warning_count")),
         "blocked_check_count": _safe_int(payload.get("blocked_check_count")),
         "candidate_count": len(candidates),
-        "warnings": ignored_warnings,
-        "paths": {
-            "json": str(selected),
-            "markdown": str(selected.with_suffix(".md")),
-        },
+        "warnings": warnings,
+        "paths": {"json": str(inspection_path), "markdown": str(inspection_path.with_suffix(".md"))},
     }
-
 
 def _json_artifact_status(
     *,
@@ -624,28 +664,14 @@ def _standard_suffix_candidates(
 
 def _semantic_review_candidates(
     podcast_id: str, episode_ref: str
-) -> tuple[list[Path], list[str]]:
-    if not SEMANTIC_REVIEW_REPORTS_DIR.exists():
-        return [], []
-    candidates: list[tuple[str, str, Path]] = []
-    warnings: list[str] = []
-    for path in sorted(
-        SEMANTIC_REVIEW_REPORTS_DIR.glob(
-            f"*__{podcast_id}__{episode_ref}.semantic-review.json"
-        )
-    ):
-        timestamp = _semantic_review_timestamp(path)
-        if timestamp is None:
-            warnings.append(f"ignored non-timestamped semantic review candidate: {path}")
-            continue
-        candidates.append((timestamp, path.name, path))
-    return [path for _timestamp, _name, path in sorted(candidates)], warnings
-
-
-def _semantic_review_timestamp(path: Path) -> str | None:
-    if not _SEMANTIC_REVIEW_TIMESTAMP_PATTERN.match(path.name):
-        return None
-    return path.name.split("__", 1)[0]
+) -> tuple[list[Path], list[Path], list[str]]:
+    candidates, rejected = semantic_review_candidates(
+        SEMANTIC_REVIEW_REPORTS_DIR, podcast_id, episode_ref
+    )
+    return candidates, rejected, [
+        f"ignored non-timestamped semantic review candidate: {path}"
+        for path in rejected
+    ]
 
 
 def _duplicate_warnings(family: str, candidates: list[Path], selected: Path) -> list[str]:

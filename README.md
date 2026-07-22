@@ -71,6 +71,7 @@ scripts/
   run_corpus_semantic_remediation.py
   run_corpus_episode_completion_workflow.py
   run_corpus_latest_episode_deterministic_workflow.py
+  run_latest_episode_verified_research_report_workflow.py
   extract_mentions.py
   rebuild_cache.py
   search_transcripts.py
@@ -290,6 +291,14 @@ run_corpus_latest_episode_deterministic_workflow(
     transcription_compute_type="int8",
     transcription_vad_filter=False,
 )
+run_latest_episode_verified_research_report_workflow(
+    podcast_id,
+    confirm=False,
+    expected_episode_ref=None,
+    api_cost_ack="",
+    stock_query=None,
+    include_fixture_verification=False,
+)
 ```
 
 `summarize_episode` 是 deterministic / extractive template，不呼叫外部 LLM API，也不產生語意推論。`semantic_summarize_episode` 會使用 OpenAI-compatible API 產生語意摘要，重要判斷應盡量附 timestamp evidence，且不構成投資建議。`extract_mentions` 使用 deterministic rules 從 transcript segments 擷取 mentions，每筆 mention 都保留 timestamp evidence。`generate_episode_intelligence_report` 使用 deterministic rules 從既有 transcript 與 mentions artifact 產生單集 episode intelligence report，不呼叫 LLM、不查外部市場資料、不產生股票 mapping 或投資建議。`generate_industry_chain_mapping` 使用本機 deterministic mapping config 從既有 episode intelligence report 產生產業鏈節點與股票候選，會明確區分 podcast explicit evidence 與 inferred / needs-verification 研究線索。`generate_external_data_boundary` 使用本機 boundary config 從既有 industry mapping 產生外部資料查證邊界 scaffold，不呼叫外部 provider、不讀 API key、不產生市場現況事實。`verify_external_data_boundary` 是 Phase 6M fixture provider scaffold：dry-run first，`confirm=True` 才會用本機 fixture 嘗試更新既有 external boundary；它有 confirm guard、no live market API、no MCP tool changes，也不提供投資建議。`load_gooaye_lens_model` 只載入與驗證本機 Gooaye Lens 分析框架，不產生股票報告、不呼叫 LLM、不查外部市場資料。`generate_stock_lens_report` 使用 podcast-wide local artifacts 與 Gooaye Lens 產生股票/公司研究框架，不呼叫 LLM、不查外部市場資料、不提供買賣建議、目標價或保證報酬。`generate_stock_lens_synthesis_report` 是 Phase 6J Stock Lens LLM Synthesis：dry-run first，預設 LLM input boundary 是 6F stock lens JSON only，confirmed execution 必須提供 exact api_cost_ack；Phase 6V 可明確 opt in reviewed semantic summary context，但仍不讀 raw transcript、不查外部市場資料、no MCP tool changes，也不提供買賣建議。`run_research_workflow` 是 dry-run first 的本機 research workflow runner，串接 mentions、episode intelligence、industry mapping、external boundary 與可選 stock lens；Phase 6I 支援 optional semantic summary execution inside research workflow，Phase 6K 支援 workflow opt-in synthesis，可用 `include_stock_lens_synthesis=True` 把 Phase 6J synthesis 接在 stock lens report 後面。Phase 6N 支援 optional workflow fixture verification，可用 `include_external_data_verification=True` 在 external boundary 後以本機 fixture provider 更新外部查證狀態；此步驟 no live market API、no API key、no MCP tool changes、no automatic cache rebuild，也不提供投資建議。`generate_corpus_index` 只掃描本機 per-episode artifacts 與 semantic review metadata，寫入 deterministic corpus status JSON/Markdown；它不讀 RSS、不讀 SQLite cache、不呼叫 LLM、不讀 `.env`、不新增 MCP tool，也不輸出 raw transcript/evidence/semantic body。`generate_corpus_remediation_plan` 會先刷新 corpus index，再從本機 status metadata 推導 full-ladder 缺口、blockers、warnings 與 manual-only action text，寫入 deterministic remediation JSON/Markdown；它不執行下載、轉錄、摘要、workflow、LLM、MCP 或 cache rebuild，也不輸出 raw transcript/evidence/semantic body/prompt/raw LLM output。`run_corpus_audio_download` 會先刷新 remediation plan，dry-run 只回傳 audio missing 且 action ready 的候選 metadata，不讀 RSS、不呼叫 network/downloader、不寫 run report；confirmed execution 必須指定單一 episode，才會呼叫既有 `download_audio()`，並寫入 latest deterministic audio download run report，內容不含 source URL、query string、secret 或 traceback。`run_corpus_remediation` 會先刷新 remediation plan，dry-run 只回傳 selected/skipped/blocked/excluded metadata；confirmed execution 必須指定 episode 或 action family，只執行 transcript-ready deterministic families（extractive summary、mentions、episode intelligence、industry mapping、external boundary），並寫入 latest deterministic run report。`run_corpus_local_transcription` 會先刷新 remediation plan，dry-run 只回傳本機 audio available 且 transcript missing 的候選 metadata；confirmed execution 必須指定單一 episode，且只用 explicit local `audio_path` 呼叫既有轉錄 core，不下載音檔、不修 corrupt/partial transcript、不碰 LLM/MCP/cache rebuild，並寫入 latest deterministic local transcription run report。`run_corpus_episode_workflow` 是 fresh episode 的 dry-run-first 安全入口：依序判斷 intake、audio download、local transcription、deterministic remediation 的下一個 safe stage；dry-run 不寫 workflow report、不執行 stage，confirmed execution 必須使用 `stage="next"` 且只執行一個 stage，寫入 latest deterministic workflow run report。LLM 步驟都必須 `confirm=True` 並提供 exact `api_cost_ack` 才會呼叫外部 LLM。此 workflow 仍不查外部市場資料、no raw transcript for stock lens synthesis、no MCP tool changes，也不自動 rebuild cache。`rebuild_cache` 只索引既有 artifacts，不會自動下載、轉錄、摘要、抽 mentions、產生研究報告、產生 mapping、產生 external boundary 或產生 stock lens report。
@@ -301,6 +310,8 @@ run_corpus_latest_episode_deterministic_workflow(
 `run_corpus_episode_completion_workflow(...)` 是 016 的 single-episode completion Core：dry-run 以 strict zero-file 判斷從 intake 到 semantic review 的下一個 action；人類確認後只能對 canonical episode 明確執行一個 matching action，然後停止。stdio MCP 的同名 `run_corpus_episode_completion_workflow` tool 保持此 preview → human approval → one action 的界線，不讀 `.env`、不自動 rebuild cache，也不提供投資建議。
 
 `run_corpus_latest_episode_deterministic_workflow(...)` 是 017 的 one-request latest-episode Core：dry-run 只解析當下 latest 並回傳 strict-zero-file 的 deterministic 處理計畫。SPEC 017 is Implemented. The 2026-07-17 `seeded`/`downloaded` child-outcome mapping problem is a resolved historical blocker; recorded metadata-only confirmed EP679 evidence ends with `outcome=ready_for_semantic_summary`, `ready_count=1`, `blocked_count=0`, and `failed_count=0`. The contract locks one canonical episode at start, processes intake、下載、本機轉錄與必要 deterministic remediation, fails closed on a failed/blocked stage, and stops at `ready_for_semantic_summary` without `.env`、provider、semantic summary/review、retry、or cache rebuild.
+
+`run_latest_episode_verified_research_report_workflow(...)` 是 SPEC 018 的 latest-episode verified research report Core。預設 `confirm=False` 僅解析一次 latest 並回傳 strict-zero-file preview，不建立 checkpoint、staging 或 report bundle。confirmed request 必須在 RSS、環境/provider、writer 與 child stage 前提供 preview 所得的 exact `expected_episode_ref`，以及完全相等的 `api_cost_ack`；它重用 pinned 017 deterministic ladder，在 semantic summary/review exact `passed` gate 後，以固定安全 research options 建立 deterministic JSON、Markdown 與 manifest bundle。bundle 採 content digest version、atomic directory publish、identical-content reuse 與 conflict fail-closed；不自動 rebuild cache、不查 live market API，且不構成投資建議。
 
 `validate_transcript` 可用來確認逐字稿是完整、空白、部分完成、缺失或損壞。
 
@@ -349,6 +360,8 @@ run_corpus_latest_episode_deterministic_workflow(
 - Corpus episode completion workflow run Markdown：`data/corpus/{podcast_id}/corpus-episode-completion-workflow-run.md`
 - Corpus latest deterministic workflow run JSON：`data/corpus/{podcast_id}/corpus-latest-episode-deterministic-workflow-run.json`
 - Corpus latest deterministic workflow run Markdown：`data/corpus/{podcast_id}/corpus-latest-episode-deterministic-workflow-run.md`
+- Verified research checkpoint：`data/corpus/{podcast_id}/verified-research/{episode_ref}.checkpoint.json`
+- Verified research report bundle：`data/research-reports/{podcast_id}/{episode_ref}/v1-{source_digest}/report.json`、`report.md`、`manifest.json`
 - SQLite metadata cache：`data/cache/podcast_ingest.sqlite3`
 - Episode cache：`data/cache/{podcast_id}/episodes.json`
 
@@ -441,6 +454,14 @@ python scripts/run_corpus_latest_episode_deterministic_workflow.py --podcast goo
 ```
 
 SPEC 017 is Implemented. 如由 Agent 收到「幫我處理 Gooaye 最新一集」等明確請求，`corpus-latest-episode-processing` Skill 將該 explicit natural-language request 視為一次 execution authorization：acknowledge once、僅以 `confirm=true` 呼叫一次 dedicated `run_corpus_latest_episode_deterministic_workflow` MCP tool、回報 metadata-only result once，然後停止。MCP tool 本身仍預設 `confirm=false` dry-run；Skill 不得先 preview、不得 second call，亦不得使用 CLI/terminal fallback、排程、批次、重試、cache rebuild 或 semantic summary/review。
+
+預覽 latest verified research report workflow：
+
+```powershell
+python scripts/run_latest_episode_verified_research_report_workflow.py --podcast gooaye
+```
+
+SPEC 018 的 preview 是 strict zero-write，會回傳一個 canonical episode reference 與 exact required acknowledgement。只有在使用者對該 previewed episode 明確同意後，才以同一個 `--expected-episode-ref` 和 exact `--api-cost-ack` 執行一次 `--confirm`。確認必須發生在 RSS、environment/provider、writer 或 child stage 前；workflow 重用 pinned deterministic ladder，要求 semantic review exact `passed`，再以固定安全 options 完成 deterministic research。完成後將以 source digest version 的 `report.json`、`report.md` 與 `manifest.json` 原子發布，identical bundle reuse，conflict fail-closed；不做 retry、scheduler、live market API 或 cache rebuild，且不構成投資建議。
 
 列出最新集數：
 
@@ -684,8 +705,9 @@ Side-effect tools 是：
 - `run_research_workflow`
 - `run_corpus_episode_completion_workflow`
 - `run_corpus_latest_episode_deterministic_workflow`
+- `run_latest_episode_verified_research_report_workflow`
 
-本機 reviewed stdio registry 共 14 個 tools。上述 side-effect tools 預設 `confirm=false`，只回傳 dry-run action plan，不會下載、轉錄或寫檔；確認 action plan 後才使用 `confirm=true`。`run_corpus_episode_completion_workflow` 維持 preview → human approval → one explicit action，`run_corpus_latest_episode_deterministic_workflow` 只處理 latest episode 的本機 deterministic stages 並在 semantic summary 前停止。所有 side-effect tools 完成後都不會自動 rebuild SQLite cache，且不提供投資建議。例如：
+本機 reviewed stdio registry 共 15 個 tools。上述 side-effect tools 預設 `confirm=false`，只回傳 dry-run action plan，不會下載、轉錄或寫檔；確認 action plan 後才使用 `confirm=true`。`run_corpus_episode_completion_workflow` 維持 preview → human approval → one explicit action，`run_corpus_latest_episode_deterministic_workflow` 只處理 latest episode 的本機 deterministic stages 並在 semantic summary 前停止。`run_latest_episode_verified_research_report_workflow` 必須先 preview，再由使用者給出相同 canonical `expected_episode_ref` 與 exact `api_cost_ack` 後只 confirmed 呼叫一次。所有 side-effect tools 完成後都不會自動 rebuild SQLite cache，且不提供投資建議。例如：
 
 ```text
 Call transcribe_episode with confirm=false first to review the action plan.

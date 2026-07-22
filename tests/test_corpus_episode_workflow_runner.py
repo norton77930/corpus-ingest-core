@@ -812,10 +812,8 @@ def test_dry_run_uses_fresh_real_corpus_state_without_any_writes(
         _write_real_audio()
     if corpus_state in {"transcript_ready", "complete"}:
         _write_real_transcript()
-        semantic_path = (
-            storage.SUMMARIES_DIR
-            / "gooaye"
-            / "EP677__EP677 Alpha.semantic.md"
+        semantic_path = storage.semantic_summary_asset_path(
+            "gooaye", "EP677", "EP677 Alpha"
         )
         semantic_path.parent.mkdir(parents=True, exist_ok=True)
         semantic_path.write_text("# existing semantic summary", encoding="utf-8")

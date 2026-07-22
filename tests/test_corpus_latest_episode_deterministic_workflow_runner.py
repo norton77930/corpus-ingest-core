@@ -362,6 +362,7 @@ def _stage_result(
 def test_confirmed_run_pins_latest_and_advances_every_deterministic_stage(monkeypatch):
     import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
+    monkeypatch.setattr(runner, "resolve_canonical_transcript_asset_paths", lambda *args: object())
     calls: list[tuple[str, str, bool]] = []
     stages = iter(
         [
@@ -934,6 +935,7 @@ def test_failed_stage_stops_before_later_transcription_or_remediation(monkeypatc
 def test_partial_episode_resumes_at_first_missing_stage(monkeypatch):
     import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
+    monkeypatch.setattr(runner, "resolve_canonical_transcript_asset_paths", lambda *args: object())
     stages = iter(["local_transcription", "completed"])
     monkeypatch.setattr(
         runner,
@@ -974,6 +976,7 @@ def test_partial_episode_resumes_at_first_missing_stage(monkeypatch):
 def test_already_deterministic_ready_episode_runs_no_stage_executor(monkeypatch):
     import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
+    monkeypatch.setattr(runner, "resolve_canonical_transcript_asset_paths", lambda *args: object())
     monkeypatch.setattr(
         runner,
         "run_corpus_episode_intake",

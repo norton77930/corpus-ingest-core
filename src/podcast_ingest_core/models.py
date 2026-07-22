@@ -1093,6 +1093,77 @@ class CorpusLatestEpisodeDeterministicWorkflowRunResult:
 
 
 @dataclass(frozen=True)
+class LatestEpisodeVerifiedResearchReportWorkflowRunFilter:
+    """Normalized bounded inputs for the SPEC 018 report workflow."""
+
+    expected_episode_ref: str | None
+    stock_query: str | None
+    include_fixture_verification: bool
+    transcription_model: str | None
+    transcription_device: str
+    transcription_compute_type: str
+    transcription_vad_filter: bool
+    semantic_provider: str | None
+    semantic_model: str | None
+    semantic_base_url_identity_sha256: str | None
+    semantic_chunk_seconds: int
+    semantic_max_segments_per_chunk: int
+
+
+@dataclass(frozen=True)
+class LatestEpisodeVerifiedResearchReportWorkflowStep:
+    """A planned or completed bounded SPEC 018 workflow stage."""
+
+    stage: str
+    status: str
+    reason: str
+    requires_confirmation: bool
+    requires_api_cost_ack: bool
+    network_risk: bool
+    local_compute_risk: bool
+    transcript_transfer_risk: bool
+    may_incur_api_cost: bool
+    planned_reads: list[str]
+    planned_writes: list[str]
+    output_paths: list[str]
+    failure_category: str | None
+
+
+@dataclass(frozen=True)
+class LatestEpisodeVerifiedResearchReportWorkflowWarning:
+    """A bounded non-fatal SPEC 018 workflow warning."""
+
+    scope: str
+    episode_ref: str | None
+    message: str
+
+
+@dataclass(frozen=True)
+class LatestEpisodeVerifiedResearchReportWorkflowRunResult:
+    """Dry-run or confirmed latest verified research report result."""
+
+    podcast_id: str
+    run_mode: str
+    confirm: bool
+    selector: str
+    episode_ref: str | None
+    expected_episode_ref: str | None
+    outcome: str
+    required_api_cost_ack: str
+    report_version: str | None
+    source_digest: str | None
+    bundle_dir: Path | None
+    report_json_path: Path | None
+    report_markdown_path: Path | None
+    manifest_path: Path | None
+    checkpoint_path: Path | None
+    filters: LatestEpisodeVerifiedResearchReportWorkflowRunFilter
+    stage_plan: list[LatestEpisodeVerifiedResearchReportWorkflowStep]
+    warnings: list[LatestEpisodeVerifiedResearchReportWorkflowWarning]
+    not_investment_advice: bool
+
+
+@dataclass(frozen=True)
 class ResearchWorkflowStep:
     """Research workflow 中單一步驟的計畫或執行結果。"""
 

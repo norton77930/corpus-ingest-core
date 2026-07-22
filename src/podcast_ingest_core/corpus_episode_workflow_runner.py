@@ -23,6 +23,7 @@ from .corpus_remediation_runner import (
     run_corpus_remediation,
 )
 from .errors import CorpusEpisodeWorkflowRunnerFailedError
+from .episode_claim import episode_writer_claimed
 from .models import (
     CorpusEpisodeWorkflowRunCounts,
     CorpusEpisodeWorkflowRunFilter,
@@ -575,6 +576,7 @@ def _snapshot_transcript_is_valid(
     return False
 
 
+@episode_writer_claimed
 def _execute_selected_stage(
     *,
     selected_stage: str,

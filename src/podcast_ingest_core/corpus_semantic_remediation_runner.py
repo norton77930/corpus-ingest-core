@@ -8,6 +8,9 @@ import re
 from typing import Any
 
 from . import storage
+from .audit_report_pair import write_atomic_audit_report_pair
+from .episode_claim import episode_writer_claimed
+from .generation_proof import notify_child_artifact_committed
 from .corpus_index import _build_corpus_index_snapshot
 from .corpus_remediation_plan import _build_corpus_remediation_plan_snapshot
 from .errors import CorpusSemanticRemediationRunnerFailedError
@@ -271,6 +274,7 @@ def _build_result(
     )
 
 
+@episode_writer_claimed
 def _execute_semantic_summary(
     *,
     row: CorpusSemanticRemediationRunRow,
@@ -310,6 +314,17 @@ def _execute_semantic_summary(
             warnings=["semantic summary execution failed"],
         )
     status = "reused" if getattr(summary, "already_exists", False) else "executed"
+    summary_path = Path(str(getattr(summary, "summary_path", "")))
+    notify_child_artifact_committed(
+        "semantic_summary",
+        summary_path,
+        generated=status == "executed",
+        metadata={
+            "provider": getattr(summary, "provider", None),
+            "model": getattr(summary, "model", None),
+            "summary_mode": getattr(summary, "summary_mode", None),
+        },
+    )
     reason = (
         "semantic summary already exists"
         if status == "reused"
@@ -353,6 +368,12 @@ def _execute_semantic_review(
 
     review_status = getattr(review, "review_status", None)
     passed = review_status == "passed"
+    review_path = getattr(review, "review_json_path", None)
+    if passed and isinstance(review_path, Path):
+        notify_child_artifact_committed(
+            "semantic_review", review_path, generated=True,
+            metadata={"review_status": review_status},
+        )
     output_paths = _safe_list(
         [
             str(getattr(review, "review_json_path", "")),
@@ -402,11 +423,12 @@ def _write_run_report(result: CorpusSemanticRemediationRunResult) -> None:
         return
     payload = result_to_dict(result)
     try:
-        _write_atomic_text(
+        write_atomic_audit_report_pair(
             result.report_json_path,
-            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True),
+            result.report_markdown_path,
+            payload,
+            _render_markdown(payload),
         )
-        _write_atomic_text(result.report_markdown_path, _render_markdown(payload))
     except OSError as exc:
         raise CorpusSemanticRemediationRunnerFailedError(
             "failed to write corpus semantic remediation run report: "
@@ -730,7 +752,11 @@ def _reduce_episode_state(
                 episode_ref=episode_ref,
                 action=ACTION_SEMANTIC_REVIEW,
                 status="selected",
-                reason="semantic review is missing",
+                reason=(
+                    "semantic review is missing"
+                    if review_status == "missing"
+                    else "semantic review is not current"
+                ),
                 planned_reads=_safe_list(
                     [_IN_MEMORY_SNAPSHOT_LABEL, *summary_paths],
                     allowed_labels={_IN_MEMORY_SNAPSHOT_LABEL},

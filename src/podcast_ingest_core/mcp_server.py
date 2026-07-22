@@ -10,6 +10,7 @@ from mcp.server.fastmcp import FastMCP
 from . import cache as cache_module
 from . import corpus_episode_completion_workflow_runner as completion_workflow_runner
 from . import corpus_latest_episode_deterministic_workflow_runner as latest_deterministic_workflow_runner
+from . import latest_episode_verified_research_report_workflow_runner as verified_research_report_workflow_runner
 from . import downloader
 from . import entity_extractor
 from . import feed_reader
@@ -64,6 +65,13 @@ _LATEST_DETERMINISTIC_WORKFLOW_TOOL_ERROR_TYPE = (
 _LATEST_DETERMINISTIC_WORKFLOW_TOOL_ERROR_MESSAGE = (
     "corpus latest episode deterministic workflow command failed"
 )
+_VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL_ERROR_TYPE = (
+    "LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError"
+)
+_VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL_ERROR_MESSAGE = (
+    "latest episode verified research report workflow command failed"
+)
+_SAFE_EPISODE_REF_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]{0,127}$")
 
 mcp = FastMCP("podcast-ingest-core")
 
@@ -674,6 +682,52 @@ def run_corpus_latest_episode_deterministic_workflow(
     )
 
 
+@mcp.tool()
+def run_latest_episode_verified_research_report_workflow(
+    podcast_id: str,
+    confirm: bool = False,
+    expected_episode_ref: str | None = None,
+    api_cost_ack: str = "",
+    stock_query: str | None = None,
+    include_fixture_verification: bool = False,
+    transcription_model: str | None = None,
+    transcription_device: str = "cpu",
+    transcription_compute_type: str = "int8",
+    transcription_vad_filter: bool = False,
+    semantic_provider: str = "openai-compatible",
+    semantic_model: str | None = None,
+    semantic_chunk_seconds: int = 600,
+    semantic_max_segments_per_chunk: int = 120,
+) -> dict[str, Any]:
+    """Preview or complete one approved latest verified research report workflow."""
+
+    if _verified_research_report_request_rejected_early(
+        confirm=confirm,
+        expected_episode_ref=expected_episode_ref,
+        api_cost_ack=api_cost_ack,
+    ):
+        return _verified_research_report_tool_error()
+    return _verified_research_report_workflow_tool_call(
+        operation=lambda: verified_research_report_workflow_runner.run_latest_episode_verified_research_report_workflow(
+            podcast_id,
+            confirm=confirm,
+            expected_episode_ref=expected_episode_ref,
+            api_cost_ack=api_cost_ack,
+            stock_query=stock_query,
+            include_fixture_verification=include_fixture_verification,
+            transcription_model=transcription_model,
+            transcription_device=transcription_device,
+            transcription_compute_type=transcription_compute_type,
+            transcription_vad_filter=transcription_vad_filter,
+            semantic_provider=semantic_provider,
+            semantic_model=semantic_model,
+            semantic_chunk_seconds=semantic_chunk_seconds,
+            semantic_max_segments_per_chunk=semantic_max_segments_per_chunk,
+        ),
+        confirm=confirm,
+    )
+
+
 def _tool_call(operation: Callable[[], Any], warnings: list[str] | None = None) -> dict[str, Any]:
     try:
         return tool_success(operation(), warnings=warnings)
@@ -732,6 +786,48 @@ def _latest_deterministic_workflow_tool_call(
         "requires_confirmation": True,
         "data": payload,
     }
+
+
+def _verified_research_report_workflow_tool_call(
+    *, operation: Callable[[], Any], confirm: bool
+) -> dict[str, Any]:
+    """Map SPEC 018 Core results into a category-only bounded MCP envelope."""
+
+    try:
+        result = operation()
+        payload = verified_research_report_workflow_runner.result_to_dict(result)
+    except Exception:
+        return _verified_research_report_tool_error()
+    if confirm:
+        return tool_success(payload)
+    return {
+        "ok": True,
+        "dry_run": True,
+        "requires_confirmation": True,
+        "data": payload,
+    }
+
+
+def _verified_research_report_request_rejected_early(
+    *, confirm: bool, expected_episode_ref: str | None, api_cost_ack: str
+) -> bool:
+    """Reject unapproved confirmed requests before RSS or Core access."""
+
+    if not confirm:
+        return False
+    return (
+        not isinstance(expected_episode_ref, str)
+        or not _SAFE_EPISODE_REF_PATTERN.fullmatch(expected_episode_ref)
+        or expected_episode_ref.casefold() == "latest"
+        or api_cost_ack != SEMANTIC_API_COST_ACK
+    )
+
+
+def _verified_research_report_tool_error() -> dict[str, Any]:
+    return tool_error(
+        _VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL_ERROR_MESSAGE,
+        _VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL_ERROR_TYPE,
+    )
 
 
 def _completion_request_rejected_early(

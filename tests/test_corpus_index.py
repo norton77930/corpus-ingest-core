@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import sys
 from pathlib import Path
@@ -135,6 +136,17 @@ def _write_summary(
     suffix = ".semantic.md" if semantic else ".md"
     path = storage.SUMMARIES_DIR / podcast_id / f"{episode_ref}__{title}{suffix}"
     path.parent.mkdir(parents=True, exist_ok=True)
+    if semantic and body == "summary body must not leak":
+        body = "\n".join(
+            (
+                "Summary mode: semantic-llm",
+                "Provider: fixture",
+                "Model: fixture",
+                "Transcript status: valid",
+                "[00:00:00 - 00:00:05] fixture",
+                "## Chunk Summaries",
+            )
+        )
     path.write_text(body, encoding="utf-8")
     return path
 
@@ -289,21 +301,27 @@ def _write_semantic_review(
     warning_count: int = 0,
     blocked_check_count: int = 0,
 ) -> Path:
+    """Create passing fixtures through the production deterministic writer."""
+    import podcast_ingest_core.semantic_summary_smoke_review as review
+
+    review.REPORTS_DIR = review_dir
+    created = review.review_semantic_summary_smoke(podcast_id, episode_ref)
     json_path = review_dir / f"{timestamp}__{podcast_id}__{episode_ref}.semantic-review.json"
-    _write_json(
-        json_path,
-        {
-            "podcast_id": podcast_id,
-            "episode_ref": episode_ref,
-            "review_status": review_status,
-            "check_count": check_count,
-            "failed_check_count": failed_check_count,
-            "warning_count": warning_count,
-            "blocked_check_count": blocked_check_count,
-            "checks": [{"name": "safe", "status": "pass", "message": "body omitted"}],
-        },
-    )
-    json_path.with_suffix(".md").write_text("# review body must not leak", encoding="utf-8")
+    if created.review_json_path != json_path:
+        created.review_markdown_path.replace(json_path.with_suffix(".md"))
+        created.review_json_path.replace(json_path)
+    if review_status == "passed":
+        return json_path
+
+    # Non-passing artifacts are deliberately malformed test inputs.  Authentic
+    # readers must mark them needs_review rather than trusting their status.
+    payload = json.loads(json_path.read_text(encoding="utf-8"))
+    payload["review_status"] = review_status
+    payload["failed_check_count"] = failed_check_count
+    payload["warning_count"] = warning_count
+    payload["blocked_check_count"] = blocked_check_count
+    payload["check_count"] = len(payload["checks"])
+    _write_json(json_path, payload)
     return json_path
 
 
@@ -573,10 +591,10 @@ def test_generate_corpus_index_selects_latest_semantic_review(monkeypatch, tmp_p
     result = generate_corpus_index("gooaye")
 
     semantic_review = _payload(result)["episodes"][0]["artifact_status"]["semantic_review"]
-    assert semantic_review["status"] == "failed"
-    assert semantic_review["review_status"] == "failed"
+    assert semantic_review["status"] == "needs_review"
+    assert semantic_review["review_status"] == "needs_review"
     assert semantic_review["review_json_path"] == str(latest)
-    assert semantic_review["check_count"] == 4
+    assert semantic_review["check_count"] == 8
     assert semantic_review["failed_check_count"] == 1
     assert semantic_review["warning_count"] == 2
     assert semantic_review["candidate_count"] == 2
@@ -651,6 +669,7 @@ def test_generate_corpus_index_reports_missing_semantic_review(monkeypatch, tmp_
     from podcast_ingest_core.corpus_index import generate_corpus_index
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
+    _write_transcript(monkeypatch, tmp_path)
     semantic_path = _write_summary(monkeypatch, tmp_path, semantic=True)
 
     result = generate_corpus_index("gooaye")

@@ -21,7 +21,9 @@ from .llm_provider import (
     require_exact_api_cost_ack,
 )
 from .models import SummaryAsset
-from .storage import find_transcript_asset_paths, semantic_summary_asset_path
+from .storage import semantic_summary_asset_path
+from .canonical_transcript import resolve_canonical_transcript_asset_paths
+from .episode_claim import episode_writer_claimed
 from .validator import validate_transcript
 
 
@@ -29,6 +31,7 @@ SUMMARY_MODE = "semantic-llm"
 _TIMESTAMP_EVIDENCE_PATTERN = re.compile(r"\[\d{2}:\d{2}:\d{2}\s*-\s*\d{2}:\d{2}:\d{2}\]")
 
 
+@episode_writer_claimed
 def semantic_summarize_episode(
     podcast_id: str,
     episode_ref: str,
@@ -60,7 +63,7 @@ def semantic_summarize_episode(
     validation = validate_transcript(podcast_id, episode_ref)
     _raise_for_invalid_transcript(validation.status, validation.problems, allow_partial)
 
-    transcript_paths = find_transcript_asset_paths(podcast_id, episode_ref)
+    transcript_paths = resolve_canonical_transcript_asset_paths(podcast_id, episode_ref)
     if transcript_paths is None:
         raise TranscriptMissingError(f"找不到逐字稿 JSON：{podcast_id}/{episode_ref}")
     if not transcript_paths.json_path.exists():

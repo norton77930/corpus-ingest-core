@@ -14,15 +14,17 @@ from .errors import (
 from .models import EpisodeIntelligenceReportAsset
 from .storage import (
     episode_intelligence_report_asset_paths,
-    find_transcript_asset_paths,
     mention_asset_paths,
 )
+from .canonical_transcript import resolve_canonical_transcript_asset_paths
+from .episode_claim import episode_writer_claimed
 from .validator import validate_transcript
 
 
 REPORT_MODE = "deterministic-episode-intelligence-v1"
 
 
+@episode_writer_claimed
 def generate_episode_intelligence_report(
     podcast_id: str,
     episode_ref: str,
@@ -43,7 +45,7 @@ def generate_episode_intelligence_report(
     validation = validate_transcript(podcast_id, episode_ref)
     _raise_for_invalid_transcript(validation.status, validation.problems, allow_partial)
 
-    transcript_paths = find_transcript_asset_paths(podcast_id, episode_ref)
+    transcript_paths = resolve_canonical_transcript_asset_paths(podcast_id, episode_ref)
     if transcript_paths is None:
         raise TranscriptMissingError(f"找不到逐字稿 JSON：{podcast_id}/{episode_ref}")
 
@@ -91,6 +93,10 @@ def generate_episode_intelligence_report(
         "episode_ref": episode_ref,
         "title": title,
         "report_mode": REPORT_MODE,
+        "generation_options": {
+            "window_seconds": window_seconds,
+            "max_evidence_per_section": max_evidence_per_section,
+        },
         "report_status": report_status,
         "source_status": {
             "transcript": validation.status,

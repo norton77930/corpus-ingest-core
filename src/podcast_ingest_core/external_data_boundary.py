@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -9,10 +10,9 @@ import yaml
 from .config import load_podcast_profile
 from .errors import ExternalDataBoundaryFailedError, ExternalDataBoundaryInputError
 from .models import ExternalDataBoundaryAsset
-from .storage import (
-    external_data_boundary_asset_paths,
-    find_industry_chain_mapping_asset_paths,
-)
+from .storage import external_data_boundary_asset_paths, industry_chain_mapping_asset_paths
+from .canonical_transcript import current_canonical_transcript_identity
+from .episode_claim import episode_writer_claimed
 
 
 BOUNDARY_MODE = "external-data-boundary-v1"
@@ -20,6 +20,7 @@ SUPPORTED_MAPPING_MODE = "deterministic-industry-chain-v1"
 DEFAULT_BOUNDARY_CONFIG_PATH = Path("config/external_data_boundary.yaml")
 
 
+@episode_writer_claimed
 def generate_external_data_boundary(
     podcast_id: str,
     episode_ref: str,
@@ -30,7 +31,14 @@ def generate_external_data_boundary(
     """從 Phase 6C industry mapping 產生 external data boundary scaffold。"""
 
     profile = load_podcast_profile(podcast_id)
-    mapping_paths = find_industry_chain_mapping_asset_paths(podcast_id, episode_ref)
+    transcript_identity = current_canonical_transcript_identity(podcast_id, episode_ref)
+    mapping_paths = (
+        None
+        if transcript_identity is None
+        else industry_chain_mapping_asset_paths(
+            podcast_id, episode_ref, transcript_identity.title
+        )
+    )
     if mapping_paths is None or not mapping_paths.json_path.exists():
         raise ExternalDataBoundaryInputError(
             f"找不到 industry chain mapping：{podcast_id}/{episode_ref}"
@@ -86,6 +94,7 @@ def generate_external_data_boundary(
         "episode_ref": episode_ref,
         "title": title,
         "boundary_mode": BOUNDARY_MODE,
+        "boundary_config": _config_file_identity(DEFAULT_BOUNDARY_CONFIG_PATH),
         "boundary_status": _boundary_status(mapping_status),
         "source_status": {
             "industry_mapping": "available",
@@ -214,6 +223,17 @@ def _candidate_boundary(
         "source_status": "not_fetched",
         "data_date": None,
         "required_external_checks": checks,
+    }
+
+
+def _config_file_identity(path: Path) -> dict[str, str | None]:
+    try:
+        raw = path.read_bytes()
+    except OSError:
+        return {"path": path.resolve(strict=False).as_posix(), "sha256": None}
+    return {
+        "path": path.resolve(strict=False).as_posix(),
+        "sha256": hashlib.sha256(raw).hexdigest(),
     }
 
 

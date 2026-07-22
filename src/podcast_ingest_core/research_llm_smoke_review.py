@@ -7,12 +7,12 @@ from pathlib import Path
 from typing import Any
 
 from .models import ResearchLLMSmokeReviewResult
+from .report_safety import strip_safety_disclaimers
 from . import storage
 from .stock_lens_synthesis import (
     INPUT_BOUNDARY,
     REVIEWED_SEMANTIC_INPUT_BOUNDARY,
     _matched_prohibited_guard,
-    _strip_safety_disclaimers,
 )
 
 
@@ -221,7 +221,7 @@ def _evaluate_markdown(markdown_text: str) -> list[dict[str, str]]:
             "raw transcript dump scan",
         ),
     ]
-    review_text = _strip_safety_disclaimers(markdown_text)
+    review_text = strip_safety_disclaimers(markdown_text)
     matched_guard = _matched_prohibited_guard(review_text)
     checks.append(
         _check(

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+import hashlib
 import importlib
 import json
 from pathlib import Path
@@ -268,18 +269,52 @@ def _write_semantic_review(
     warning_count: int = 0,
 ) -> Path:
     json_path = review_dir / f"{timestamp}__{podcast_id}__{episode_ref}.semantic-review.json"
-    _write_json(
-        json_path,
-        {
-            "podcast_id": podcast_id,
-            "episode_ref": episode_ref,
-            "review_status": review_status,
-            "check_count": check_count,
-            "failed_check_count": failed_check_count,
-            "warning_count": warning_count,
-            "checks": [{"message": "semantic review body must not leak"}],
-        },
+    if review_status == "passed":
+        import podcast_ingest_core.semantic_summary_smoke_review as review
+
+        review.REPORTS_DIR = review_dir
+        created = review.review_semantic_summary_smoke(podcast_id, episode_ref)
+        if created.review_json_path != json_path:
+            created.review_markdown_path.replace(json_path.with_suffix(".md"))
+            created.review_json_path.replace(json_path)
+        return json_path
+    from podcast_ingest_core import storage
+
+    checks = [
+        {"name": name, "status": "pass", "message": "fixture"}
+        for name in (
+            "semantic_summary_exists", "secret_leak", "traceback_leak",
+            "raw_transcript_dump", "timestamp_evidence", "chunk_summaries",
+            "metadata", "prohibited_advice",
+        )
+    ]
+    if review_status == "failed":
+        checks[1]["status"] = "fail"
+    elif review_status == "blocked":
+        checks[0]["status"] = "blocked"
+    for index in range(min(warning_count, 3)):
+        checks[4 + index]["status"] = "warn"
+    payload = {
+        "review_mode": "semantic-summary-smoke-review-v1",
+        "review_boundary": "deterministic-local-review-no-llm-env-network-or-summary-rewrite-v1",
+        "podcast_id": podcast_id,
+        "episode_ref": episode_ref,
+        "review_status": review_status,
+        "check_count": len(checks),
+        "failed_check_count": sum(check["status"] == "fail" for check in checks),
+        "warning_count": sum(check["status"] == "warn" for check in checks),
+        "blocked_check_count": sum(check["status"] == "blocked" for check in checks),
+        "checks": checks,
+        "not_investment_advice_notice": True,
+    }
+    summary_paths = sorted(
+        (storage.SUMMARIES_DIR / podcast_id).glob(f"{episode_ref}__*.semantic.md")
     )
+    if summary_paths:
+        payload["semantic_summary_sha256"] = hashlib.sha256(
+            summary_paths[0].read_bytes()
+        ).hexdigest()
+    _write_json(json_path, payload)
     json_path.with_suffix(".md").write_text("# review body must not leak", encoding="utf-8")
     return json_path
 
@@ -791,11 +826,11 @@ def test_generate_corpus_remediation_plan_blocks_semantic_review_when_transcript
     result = generate_corpus_remediation_plan("gooaye")
 
     row = _episode(_payload(result), "EP672")
-    semantic_review = _action(row, "semantic_review")
+    semantic_summary = _action(row, "semantic_summary")
     assert row["artifact_status"]["transcript"]["status"] == "missing"
-    assert row["artifact_status"]["semantic_summary"]["status"] == "available"
-    assert semantic_review["status"] == "blocked"
-    assert semantic_review["blocking_artifacts"] == ["transcript"]
+    assert row["artifact_status"]["semantic_summary"]["status"] == "missing"
+    assert semantic_summary["status"] == "blocked"
+    assert semantic_summary["blocking_artifacts"] == ["transcript"]
 
 
 def test_generate_corpus_remediation_plan_marks_semantic_summary_gated(
@@ -823,6 +858,7 @@ def test_generate_corpus_remediation_plan_reports_semantic_review_metadata(
     from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     review_dir = _use_tmp_data_dirs(monkeypatch, tmp_path)
+    _write_transcript(monkeypatch, tmp_path)
     _write_summary(monkeypatch, tmp_path, semantic=True)
     review_path = _write_semantic_review(
         review_dir,
@@ -837,9 +873,9 @@ def test_generate_corpus_remediation_plan_reports_semantic_review_metadata(
     row = _episode(_payload(result), "EP672")
     assert "semantic_review" not in {action["artifact_family"] for action in row["actions"]}
     semantic_review = row["artifact_status"]["semantic_review"]
-    assert semantic_review["review_status"] == "failed"
+    assert semantic_review["review_status"] == "needs_review"
     assert semantic_review["review_json_path"] == str(review_path)
-    assert semantic_review["check_count"] == 4
+    assert semantic_review["check_count"] == 8
     assert semantic_review["failed_check_count"] == 1
     assert semantic_review["warning_count"] == 2
 

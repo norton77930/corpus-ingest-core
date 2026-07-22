@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "podcast-ingest-core"
 version = "0.1.0"
-description = "通用 Podcast 擷取核心，Phase 0 建立設定、資料模型、路徑與 stub 介面。"
+description = "本機優先的 Podcast 擷取、轉錄、研究 artifacts、搜尋與 MCP workflow 核心。"
 readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [

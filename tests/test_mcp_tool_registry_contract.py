@@ -38,6 +38,7 @@ LEGACY_SIDE_EFFECT_TOOLS = {
 }
 COMPLETION_WORKFLOW_TOOL = "run_corpus_episode_completion_workflow"
 LATEST_DETERMINISTIC_WORKFLOW_TOOL = "run_corpus_latest_episode_deterministic_workflow"
+VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL = "run_latest_episode_verified_research_report_workflow"
 LEGACY_TOOL_ORDER = [
     "list_episodes",
     "get_episode",
@@ -56,10 +57,12 @@ LEGACY_EXPECTED_TOOLS = READ_QUERY_TOOLS | LEGACY_SIDE_EFFECT_TOOLS
 SIDE_EFFECT_TOOLS = LEGACY_SIDE_EFFECT_TOOLS | {
     COMPLETION_WORKFLOW_TOOL,
     LATEST_DETERMINISTIC_WORKFLOW_TOOL,
+    VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL,
 }
 EXPECTED_TOOLS = LEGACY_EXPECTED_TOOLS | {
     COMPLETION_WORKFLOW_TOOL,
     LATEST_DETERMINISTIC_WORKFLOW_TOOL,
+    VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL,
 }
 
 
@@ -72,7 +75,7 @@ def _registered_tool_names() -> set[str]:
 
 def test_mcp_registry_exposes_exactly_the_reviewed_tool_set():
     actual = _registered_tool_names()
-    assert len(actual) == 14
+    assert len(actual) == 15
     assert actual == EXPECTED_TOOLS
     assert LEGACY_EXPECTED_TOOLS <= actual
 
@@ -86,6 +89,7 @@ def test_workflow_tools_are_appended_after_the_preserved_twelve_tool_order():
         *LEGACY_TOOL_ORDER,
         COMPLETION_WORKFLOW_TOOL,
         LATEST_DETERMINISTIC_WORKFLOW_TOOL,
+        VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL,
     ]
 
 

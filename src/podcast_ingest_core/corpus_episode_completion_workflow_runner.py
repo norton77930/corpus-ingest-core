@@ -7,6 +7,8 @@ from pathlib import Path
 import re
 
 from . import storage
+from .audit_report_pair import write_atomic_audit_report_pair
+from .episode_claim import episode_writer_claimed
 from .corpus_audio_download_runner import run_corpus_audio_download
 from .corpus_episode_intake import run_corpus_episode_intake
 from .corpus_episode_workflow_runner import (
@@ -46,6 +48,12 @@ RUN_MODE_CONFIRMED = "confirmed"
 DEFAULT_SEMANTIC_CHUNK_SECONDS = 600
 DEFAULT_SEMANTIC_MAX_SEGMENTS_PER_CHUNK = 120
 _SAFE_IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+_SAFE_PROVIDER_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
+_SAFE_MODEL_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
+_SAFE_ENVIRONMENT_PATTERN = re.compile(r"^[A-Z_][A-Z0-9_]{0,127}$")
+_SAFE_BASE_URL_PATTERN = re.compile(
+    r"^https?://[A-Za-z0-9.-]+(?::[0-9]{1,5})?(?:/[A-Za-z0-9._~/-]*)?$"
+)
 _URI_SCHEME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*://")
 _SAFE_FILENAME_PATTERN = re.compile(
     r"^[^<>:/\\|?*\x00-\x1f]+\.[A-Za-z0-9]{1,16}$"
@@ -115,10 +123,13 @@ def run_corpus_episode_completion_workflow(
     selector = _normalize_selector(episode_ref)
     requested_action = _normalize_action(action)
     if requested_action == ACTION_SEMANTIC_SUMMARY:
-        _require_positive_int(semantic_chunk_seconds, "semantic_chunk_seconds")
-        _require_positive_int(
-            semantic_max_segments_per_chunk,
-            "semantic_max_segments_per_chunk",
+        _validate_semantic_summary_settings(
+            semantic_provider=semantic_provider,
+            semantic_model=semantic_model,
+            semantic_base_url=semantic_base_url,
+            semantic_api_key_env=semantic_api_key_env,
+            semantic_chunk_seconds=semantic_chunk_seconds,
+            semantic_max_segments_per_chunk=semantic_max_segments_per_chunk,
         )
     if confirm:
         _require_confirmed_request(
@@ -131,6 +142,15 @@ def run_corpus_episode_completion_workflow(
         normalized_podcast_id,
         selector,
     )
+    if selected_action == ACTION_SEMANTIC_SUMMARY and requested_action == ACTION_NEXT:
+        _validate_semantic_summary_settings(
+            semantic_provider=semantic_provider,
+            semantic_model=semantic_model,
+            semantic_base_url=semantic_base_url,
+            semantic_api_key_env=semantic_api_key_env,
+            semantic_chunk_seconds=semantic_chunk_seconds,
+            semantic_max_segments_per_chunk=semantic_max_segments_per_chunk,
+        )
     if confirm:
         if selected_action in {ACTION_BLOCKED, ACTION_COMPLETED}:
             return _build_result(
@@ -287,29 +307,14 @@ def _write_run_report(result: CorpusEpisodeCompletionWorkflowRunResult) -> None:
     if result.report_json_path is None or result.report_markdown_path is None:
         return
     payload = result_to_dict(result)
-    json_part_path = result.report_json_path.with_name(
-        f"{result.report_json_path.name}.part"
-    )
-    markdown_part_path = result.report_markdown_path.with_name(
-        f"{result.report_markdown_path.name}.part"
-    )
     try:
-        result.report_json_path.parent.mkdir(parents=True, exist_ok=True)
-        json_part_path.unlink(missing_ok=True)
-        markdown_part_path.unlink(missing_ok=True)
-        json_part_path.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True),
-            encoding="utf-8",
+        write_atomic_audit_report_pair(
+            result.report_json_path,
+            result.report_markdown_path,
+            payload,
+            _render_markdown(payload),
         )
-        markdown_part_path.write_text(_render_markdown(payload), encoding="utf-8")
-        json_part_path.replace(result.report_json_path)
-        markdown_part_path.replace(result.report_markdown_path)
     except OSError as exc:
-        for part_path in (json_part_path, markdown_part_path):
-            try:
-                part_path.unlink(missing_ok=True)
-            except OSError:
-                pass
         raise CorpusEpisodeCompletionWorkflowRunnerFailedError(
             "failed to write completion workflow report: "
             f"{type(exc).__name__}"
@@ -542,6 +547,7 @@ def _preview_selection(
     )
 
 
+@episode_writer_claimed
 def _execute_confirmed_action(
     *,
     selected_row: CorpusEpisodeCompletionWorkflowRunRow,
@@ -655,6 +661,26 @@ def _confirmed_row_from_stage_result(
         if getattr(row, "episode_ref", None) == episode_ref
     ]
     status = _confirmed_status(source_rows)
+    child_report_paths = [
+        *_collect_row_values(source_rows, "source_report_paths"),
+        getattr(source_result, "report_json_path", None),
+        getattr(source_result, "report_markdown_path", None),
+    ]
+    failure_category = next(
+        (
+            _safe_exception_category(getattr(row, "failure_category", None))
+            for row in source_rows
+            if _safe_exception_category(getattr(row, "failure_category", None)) is not None
+        ),
+        None,
+    )
+    child_warnings = [
+        *_collect_row_values(source_rows, "warnings"),
+        *[
+            getattr(warning, "message", warning)
+            for warning in (getattr(source_result, "warnings", []) or [])
+        ],
+    ]
     return replace(
         selected_row,
         status=status,
@@ -670,14 +696,12 @@ def _confirmed_row_from_stage_result(
         output_paths=_safe_string_list(
             _collect_row_values(source_rows, "output_paths")
         ),
-        source_report_paths=_safe_string_list(
-            _collect_row_values(source_rows, "source_report_paths")
-        ),
+        source_report_paths=_safe_string_list(child_report_paths),
         stage_counts=_safe_stage_counts(
             getattr(source_result, "stage_counts", {})
         ),
-        failure_category=None,
-        warnings=[],
+        failure_category=failure_category,
+        warnings=_safe_warning_list(child_warnings),
     )
 
 
@@ -1028,7 +1052,11 @@ def _normalize_selector(value: str | None) -> str:
     normalized = value.strip()
     if not normalized:
         return DEFAULT_SELECTOR
-    if normalized == DEFAULT_SELECTOR or _SAFE_IDENTIFIER_PATTERN.fullmatch(normalized):
+    if normalized.casefold() == DEFAULT_SELECTOR:
+        if normalized != DEFAULT_SELECTOR:
+            raise CorpusEpisodeCompletionWorkflowRunnerFailedError("episode_ref is invalid")
+        return DEFAULT_SELECTOR
+    if _SAFE_IDENTIFIER_PATTERN.fullmatch(normalized):
         if normalized.casefold().startswith(f"{DEFAULT_SELECTOR}-"):
             raise CorpusEpisodeCompletionWorkflowRunnerFailedError(
                 "episode_ref is invalid"
@@ -1051,6 +1079,46 @@ def _require_positive_int(value: object, name: str) -> None:
         raise CorpusEpisodeCompletionWorkflowRunnerFailedError(f"{name} is invalid")
 
 
+def _validate_semantic_summary_settings(
+    *,
+    semantic_provider: object,
+    semantic_model: object,
+    semantic_base_url: object,
+    semantic_api_key_env: object,
+    semantic_chunk_seconds: object,
+    semantic_max_segments_per_chunk: object,
+) -> None:
+    """Validate settings only when fresh selection can execute semantic summary."""
+
+    _require_positive_int(semantic_chunk_seconds, "semantic_chunk_seconds")
+    _require_positive_int(
+        semantic_max_segments_per_chunk, "semantic_max_segments_per_chunk"
+    )
+    if (
+        not isinstance(semantic_provider, str)
+        or not _SAFE_PROVIDER_PATTERN.fullmatch(semantic_provider)
+        or _safe_output_text(semantic_provider) != semantic_provider
+    ):
+        raise CorpusEpisodeCompletionWorkflowRunnerFailedError("semantic_provider is invalid")
+    if semantic_model is not None and (
+        not isinstance(semantic_model, str)
+        or not _SAFE_MODEL_PATTERN.fullmatch(semantic_model)
+        or _safe_output_text(semantic_model) != semantic_model
+    ):
+        raise CorpusEpisodeCompletionWorkflowRunnerFailedError("semantic_model is invalid")
+    if semantic_base_url is not None and (
+        not isinstance(semantic_base_url, str)
+        or not _SAFE_BASE_URL_PATTERN.fullmatch(semantic_base_url)
+        or "@" in semantic_base_url
+        or _safe_output_text(semantic_base_url) != semantic_base_url
+    ):
+        raise CorpusEpisodeCompletionWorkflowRunnerFailedError("semantic_base_url is invalid")
+    if not isinstance(semantic_api_key_env, str) or not _SAFE_ENVIRONMENT_PATTERN.fullmatch(
+        semantic_api_key_env
+    ):
+        raise CorpusEpisodeCompletionWorkflowRunnerFailedError("semantic_api_key_env is invalid")
+
+
 def _require_confirmed_request(
     *,
     selector: str,
@@ -1061,7 +1129,7 @@ def _require_confirmed_request(
         raise CorpusEpisodeCompletionWorkflowRunnerFailedError(
             "confirmed action must be explicit"
         )
-    if selector == DEFAULT_SELECTOR:
+    if selector.casefold() == DEFAULT_SELECTOR:
         raise CorpusEpisodeCompletionWorkflowRunnerFailedError(
             "confirmed episode_ref must be canonical"
         )
@@ -1101,7 +1169,23 @@ def _safe_paths_or_labels(values: object) -> list[str]:
 def _safe_string_list(values: object) -> list[str]:
     if not isinstance(values, list):
         return []
-    return [value for value in values if _is_safe_local_path(value)]
+    safe_values: list[str] = []
+    for value in values:
+        if _is_safe_local_path(value) and value not in safe_values:
+            safe_values.append(value)
+    return safe_values
+
+
+def _safe_warning_list(values: object) -> list[str]:
+    if not isinstance(values, list):
+        return []
+    warnings: list[str] = []
+    for value in values:
+        if not isinstance(value, str) or not value or _safe_output_text(value) != value:
+            continue
+        if value not in warnings:
+            warnings.append(value)
+    return warnings
 
 
 def _safe_stage_counts(value: object) -> dict[str, int]:

@@ -30,6 +30,14 @@ LATEST_DETERMINISTIC_SKILL_PATH = (
     / "corpus-latest-episode-processing"
     / "SKILL.md"
 )
+VERIFIED_RESEARCH_REPORT_TOOL_NAME = "run_latest_episode_verified_research_report_workflow"
+VERIFIED_RESEARCH_REPORT_SKILL_PATH = (
+    PROJECT_ROOT
+    / ".agents"
+    / "skills"
+    / "latest-episode-verified-research-report"
+    / "SKILL.md"
+)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -110,6 +118,18 @@ def run_validation(podcast_id: str = "gooaye", query: str = DEFAULT_QUERY) -> di
         _add_check(
             checks,
             "completion_confirmed_next_guard",
+            False,
+            message="mcp_server import failed.",
+        )
+        _add_check(
+            checks,
+            "verified_research_report_skill_metadata",
+            False,
+            message="mcp_server import failed.",
+        )
+        _add_check(
+            checks,
+            "verified_research_report_confirmed_guard",
             False,
             message="mcp_server import failed.",
         )
@@ -214,11 +234,12 @@ def _check_completion_surface(checks: list[dict[str, Any]], mcp_server) -> None:
         _add_check(
             checks,
             "completion_tool_registry",
-            len(tool_names) == 14
+            len(tool_names) == 15
             and COMPLETION_TOOL_NAME in tool_names
-            and LATEST_DETERMINISTIC_TOOL_NAME in tool_names,
+            and LATEST_DETERMINISTIC_TOOL_NAME in tool_names
+            and VERIFIED_RESEARCH_REPORT_TOOL_NAME in tool_names,
             tool_count=len(tool_names),
-            tool=COMPLETION_TOOL_NAME,
+            tool=VERIFIED_RESEARCH_REPORT_TOOL_NAME,
         )
     except Exception:
         _add_check(
@@ -283,6 +304,45 @@ def _check_completion_surface(checks: list[dict[str, Any]], mcp_server) -> None:
             message="completion confirmed-next guard failed.",
         )
 
+    try:
+        skill_text = VERIFIED_RESEARCH_REPORT_SKILL_PATH.read_text(encoding="utf-8")
+        _add_check(
+            checks,
+            "verified_research_report_skill_metadata",
+            _has_verified_research_report_skill_metadata(skill_text),
+            path=str(VERIFIED_RESEARCH_REPORT_SKILL_PATH),
+        )
+    except OSError:
+        _add_check(
+            checks,
+            "verified_research_report_skill_metadata",
+            False,
+            message="verified research report skill metadata is unavailable.",
+        )
+
+    try:
+        rejected = mcp_server.run_latest_episode_verified_research_report_workflow(
+            podcast_id="unsafe/podcast",
+            confirm=True,
+            expected_episode_ref=None,
+            api_cost_ack="",
+        )
+        _add_check(
+            checks,
+            "verified_research_report_confirmed_guard",
+            rejected.get("ok") is False
+            and rejected.get("error_type")
+            == "LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError",
+            tool=VERIFIED_RESEARCH_REPORT_TOOL_NAME,
+        )
+    except Exception:
+        _add_check(
+            checks,
+            "verified_research_report_confirmed_guard",
+            False,
+            message="verified research report confirmed guard failed.",
+        )
+
 
 def _has_completion_skill_metadata(skill_text: str) -> bool:
     lines = skill_text.splitlines()
@@ -304,6 +364,18 @@ def _has_latest_deterministic_skill_metadata(skill_text: str) -> bool:
         and lines[1] == "name: corpus-latest-episode-processing"
         and lines[2]
         == "description: Process one configured podcast's latest deterministic workflow once with confirmed MCP execution after an explicit request."
+        and lines[3] == "---"
+    )
+
+
+def _has_verified_research_report_skill_metadata(skill_text: str) -> bool:
+    lines = skill_text.splitlines()
+    return (
+        len(lines) >= 4
+        and lines[0] == "---"
+        and lines[1] == "name: latest-episode-verified-research-report"
+        and lines[2]
+        == "description: Preview and, after explicit episode-scoped approval plus exact acknowledgement, complete one latest verified research report workflow through one MCP call."
         and lines[3] == "---"
     )
 

@@ -26,7 +26,7 @@ download/local-transcription/deterministic-remediation stages, stops before
 semantic work, and exposes one reviewed MCP tool plus a portable Skill. SPEC 017 is Implemented.
 The 2026-07-17 `seeded`/`downloaded` mapping gap is a resolved
 historical blocker; the recorded metadata-only EP679 outcome is
-`ready_for_semantic_summary`.
+`ready_for_semantic_summary`. Package `018` is the implemented latest-episode verified research report workflow: it has strict zero-write preview, exact episode-scoped `expected_episode_ref` plus exact `api_cost_ack` before protected access, pinned 017 deterministic preparation, semantic review exact `passed` gate, fixed-safe deterministic research, checkpoint/artifact-driven resumption, and atomic source-digest report bundle publication. It exposes one appended reviewed MCP tool and a portable approval Skill; it has no live market API or investment advice.
 
 Workflow record: constitution reviewed, no amendment. The backfill follows
 `$speckit-constitution`, `$speckit-specify`, `$speckit-clarify`,
@@ -77,6 +77,7 @@ commit a fixed selector that makes one package appear uniquely active.
 - `015-corpus-semantic-remediation-runner`: standalone strict-zero-file semantic summary/review runner.
 - `016-corpus-episode-completion-workflow-runner`: human-controlled strict-zero-file completion workflow, one MCP tool, and portable Skill.
 - `017-corpus-latest-episode-deterministic-workflow`: implemented request-bounded latest-episode processing through local deterministic readiness, one MCP tool, and portable Skill.
+- `018-latest-episode-verified-research-report-workflow`: implemented strict-zero-write preview and episode-scoped verified research report workflow, source-digest atomic bundle, one appended MCP tool, and portable Skill.
 
 ## roadmap phase Mapping
 
@@ -96,6 +97,7 @@ commit a fixed selector that makes one package appear uniquely active.
 - Corpus semantic remediation runner runtime work maps to `015-corpus-semantic-remediation-runner`.
 - Corpus episode completion workflow runner runtime work maps to `016-corpus-episode-completion-workflow-runner`.
 - Corpus latest deterministic workflow runtime work maps to `017-corpus-latest-episode-deterministic-workflow`.
+- Latest verified research report runtime work maps to `018-latest-episode-verified-research-report-workflow`.
 
 ## core modules Mapping
 
@@ -115,6 +117,7 @@ commit a fixed selector that makes one package appear uniquely active.
 - `015`: `corpus_semantic_remediation_runner.py`, `corpus_index.py`, `semantic_summarizer.py`, `semantic_summary_smoke_review.py`, `storage.py`, `models.py`, `errors.py`.
 - `016`: `corpus_episode_completion_workflow_runner.py`, `corpus_episode_intake.py`, `corpus_episode_workflow_runner.py`, `corpus_semantic_remediation_runner.py`, `mcp_server.py`, `storage.py`, `models.py`, `errors.py`, and `.agents/skills/corpus-episode-completion/SKILL.md`.
 - `017`: `corpus_latest_episode_deterministic_workflow_runner.py`, `corpus_episode_intake.py`, `corpus_episode_workflow_runner.py`, `mcp_server.py`, `storage.py`, `models.py`, `errors.py`, and `.agents/skills/corpus-latest-episode-processing/SKILL.md`.
+- `018`: `latest_episode_verified_research_report_workflow_runner.py`, `verified_research_report.py`, `corpus_latest_episode_deterministic_workflow_runner.py`, `research_workflow.py`, `mcp_server.py`, `storage.py`, `models.py`, `errors.py`, and `.agents/skills/latest-episode-verified-research-report/SKILL.md`.
 
 ## CLI/scripts Mapping
 
@@ -134,6 +137,7 @@ commit a fixed selector that makes one package appear uniquely active.
 - `015`: `run_corpus_semantic_remediation.py`.
 - `016`: `run_corpus_episode_completion_workflow.py`, `validate_mcp_setup.py`.
 - `017`: `run_corpus_latest_episode_deterministic_workflow.py`, `validate_mcp_setup.py`.
+- `018`: `run_latest_episode_verified_research_report_workflow.py`, `validate_mcp_setup.py`.
 
 ## tests Mapping
 
@@ -153,6 +157,7 @@ commit a fixed selector that makes one package appear uniquely active.
 - `015`: `test_corpus_semantic_remediation_runner.py` covers the complete state table, real 008/009 zero-file manifests, exact acknowledgement ordering, real semantic/review cores, no-leak, cache, MCP, and 014 compatibility guards.
 - `016`: `test_corpus_episode_completion_workflow_runner.py` covers strict-zero-file previews, fresh confirmed one-action dispatch, reports, acknowledgement/no-leak boundaries, and CLI; `test_mcp_server.py`, `test_mcp_tool_registry_contract.py`, `test_mcp_setup_validation.py`, and `test_corpus_episode_completion_skill.py` cover the reviewed MCP and portable Skill surfaces.
 - `017`: `test_corpus_latest_episode_deterministic_workflow_runner.py` covers latest pinning, deterministic stage ordering, stop/resume/noop, reports, and thin CLI; `test_mcp_server.py`, `test_mcp_tool_registry_contract.py`, `test_repository_secret_boundary.py`, and `test_corpus_latest_episode_processing_skill.py` cover the reviewed MCP and portable Skill surfaces.
+- `018`: `test_latest_episode_verified_research_report_workflow_runner.py` covers approval ordering, strict zero-write preview, pinned helper reuse, semantic/research gates, provenance, digest bundle publication/reuse/conflict; `test_latest_episode_verified_research_report_skill.py`, `test_mcp_server.py`, `test_mcp_tool_registry_contract.py`, and `test_mcp_setup_validation.py` cover CLI, MCP, setup-validator, and portable Skill surfaces.
 
 ## Classification
 
@@ -167,9 +172,10 @@ commit a fixed selector that makes one package appear uniquely active.
 - semantic remediation runner: package `015`.
 - human-controlled episode completion workflow runner: package `016`.
 - latest-episode deterministic workflow runner: implemented package `017`.
+- latest-episode verified research report workflow: implemented package `018`.
 - optional LLM: packages `005` and `006`.
 - local fixture: package `004` and workflow integration in `005`.
-- MCP exposed: packages `003`, `005`, `016`, and `017`.
+- MCP exposed: packages `003`, `005`, `016`, `017`, and `018`.
 - eval/review only: packages `003`, `006`, and `007`.
 
 ## Safety Boundaries
@@ -184,7 +190,8 @@ commit a fixed selector that makes one package appear uniquely active.
 - corpus fresh episode workflow is one-stage only: 014 dry-run is zero-file and uses one in-memory snapshot, while standalone 010-012 dry-runs still persist fresh 008/009; confirmed execution requires `stage=next`, dispatches exactly one existing public runner, and does not execute semantic/LLM, MCP registry, cache rebuild, stock-lens, batch, or non-selected stages.
 - corpus semantic remediation is standalone: dry-run is strict zero-file and bypasses profile/`.env`; confirmed summary requires exact api_cost_ack before profile/provider resolution; review is deterministic; exactly one executor runs; no generated_at latest report; no 010/014/MCP/cache integration; not investment advice.
 - corpus episode completion is human-controlled: strict-zero-file preview uses one in-memory snapshot, confirmed rejects `next`/`latest` and drift before one explicit runner dispatch, exact summary acknowledgement precedes profile/`.env`/provider work, and the reviewed local stdio MCP registry has exact 13 tools. The portable Skill has no CLI/terminal fallback, retry, scheduler, or automatic second action.
-- corpus latest deterministic workflow is request-bounded: confirmed mode resolves latest once, then runs only deterministic intake/download/transcription/remediation stages until `ready_for_semantic_summary`; it has no semantic/LLM/provider/env work, retry, scheduler, batch, cache rebuild, or automatic second MCP call. The reviewed local stdio MCP registry has exact 14 tools.
+- corpus latest deterministic workflow is request-bounded: confirmed mode resolves latest once, then runs only deterministic intake/download/transcription/remediation stages until `ready_for_semantic_summary`; it has no semantic/LLM/provider/env work, retry, scheduler, batch, cache rebuild, or automatic second MCP call. The reviewed local stdio MCP registry had exact 14 tools before 018.
+- latest verified research report workflow is episode-scoped: preview is strict zero-write, confirmed mode checks exact `expected_episode_ref` and exact `api_cost_ack` before protected access, reuses pinned deterministic preparation, requires review exact `passed`, invokes fixed-safe research, and atomically publishes/reuses/fails closed a source-digest JSON/Markdown/manifest bundle. It uses no live market API, no retry/scheduler/cache rebuild, and no investment advice; the reviewed local stdio MCP registry has exact 15 tools.
 - no investment advice: no buy/sell/hold, target price, guaranteed return, or personalized recommendation.
 
 ## Batch Guard Tests（audit hardening）

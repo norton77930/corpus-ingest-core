@@ -206,30 +206,13 @@ def _write_semantic_summary() -> None:
 
 
 def _write_passing_semantic_review(tmp_path: Path) -> None:
-    path = (
-        tmp_path
-        / "evals"
-        / "research-llm-smoke"
-        / "reports"
-        / "20260712-010101__gooaye__EP677.semantic-review.json"
+    from podcast_ingest_core.semantic_summary_smoke_review import (
+        review_semantic_summary_smoke,
     )
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(
-        json.dumps(
-            {
-                "podcast_id": "gooaye",
-                "episode_ref": "EP677",
-                "review_status": "passed",
-                "check_count": 1,
-                "failed_check_count": 0,
-                "warning_count": 0,
-                "blocked_check_count": 0,
-                "checks": [],
-            }
-        ),
-        encoding="utf-8",
-    )
-    path.with_suffix(".md").write_text("# review", encoding="utf-8")
+
+    # Produce the fixture through the production writer/evaluator rather than a
+    # self-authored all-pass payload.
+    review_semantic_summary_smoke("gooaye", "EP677")
 
 
 def _write_stale_corpus_sentinels() -> dict[Path, bytes]:
@@ -561,6 +544,59 @@ def test_dry_run_uses_real_snapshot_ladder_without_writes(
         assert result.rows[0].network_risk is True
         assert result.rows[0].transcript_transfer_risk is True
         assert result.rows[0].may_incur_api_cost is True
+    assert _tree_manifest(tmp_path) == before
+
+
+@pytest.mark.parametrize("defect", ("unreadable", "unknown", "forged", "stale"))
+def test_contract_inauthentic_review_is_manual_only_for_dry_run_and_confirmation(
+    monkeypatch, tmp_path: Path, defect: str
+):
+    from podcast_ingest_core.corpus_episode_completion_workflow_runner import (
+        run_corpus_episode_completion_workflow,
+    )
+
+    _use_tmp_data_dirs(monkeypatch, tmp_path)
+    _install_rss_episode(monkeypatch)
+    _write_seed()
+    _write_local_audio()
+    _write_transcript()
+    _write_deterministic_artifacts()
+    _write_semantic_summary()
+    _write_passing_semantic_review(tmp_path)
+    review_path = next(
+        (tmp_path / "evals" / "research-llm-smoke" / "reports").glob("*.json")
+    )
+    if defect == "unreadable":
+        review_path.write_bytes(b"{not-json")
+    elif defect == "unknown":
+        review_path.write_text(json.dumps({"review_status": "available"}), encoding="utf-8")
+    else:
+        review_payload = json.loads(review_path.read_text(encoding="utf-8"))
+        if defect == "forged":
+            review_payload["review_boundary"] = "forged-review-boundary"
+        else:
+            review_payload["semantic_summary_sha256"] = "0" * 64
+        review_path.write_text(json.dumps(review_payload), encoding="utf-8")
+    before = _tree_manifest(tmp_path)
+
+    preview = run_corpus_episode_completion_workflow(
+        "gooaye", episode_ref="EP677"
+    )
+    confirmed = run_corpus_episode_completion_workflow(
+        "gooaye",
+        episode_ref="EP677",
+        action="semantic_review",
+        confirm=True,
+    )
+
+    assert preview.selected_action == "blocked"
+    assert preview.rows[0].status == "blocked"
+    assert preview.rows[0].manual_only is True
+    assert confirmed.selected_action == "blocked"
+    assert confirmed.executed_action is None
+    assert confirmed.rows[0].status == "blocked"
+    assert confirmed.report_json_path is None
+    assert confirmed.report_markdown_path is None
     assert _tree_manifest(tmp_path) == before
 
 
@@ -1717,3 +1753,114 @@ def test_completion_cli_uses_category_only_error_output(monkeypatch, capsys):
     assert "RuntimeError" in stderr
     for forbidden in ("https://", "token", "leak-token", "traceback"):
         assert forbidden not in stderr.lower()
+
+
+def test_red_confirmed_stage_preserves_safe_child_provenance_warnings_and_failure_category():
+    """016 dispatch reports contained child outcome metadata without raw exception text."""
+
+    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+
+    selected = _selected_completion_row("audio_download")
+    safe_report = "data/corpus/gooaye/child-report.json"
+    source_result = SimpleNamespace(
+        report_json_path=safe_report,
+        report_markdown_path="data/corpus/gooaye/child-report.md",
+        warnings=[SimpleNamespace(message="child report warning")],
+        rows=[
+            SimpleNamespace(
+                episode_ref="EP677",
+                outcome_status="failed",
+                planned_reads=[],
+                planned_writes=[],
+                output_paths=[],
+                source_report_paths=[safe_report, "https://invalid.example/?token=leak"],
+                failure_category="RuntimeError",
+                warnings=["child row warning", "token=leak"],
+                stage_counts={},
+            )
+        ],
+    )
+
+    row = runner._confirmed_row_from_stage_result(
+        selected_row=selected,
+        selected_action="audio_download",
+        episode_ref="EP677",
+        source_result=source_result,
+    )
+
+    assert row.status == "failed"
+    assert row.failure_category == "RuntimeError"
+    assert row.source_report_paths == [
+        safe_report,
+        "data/corpus/gooaye/child-report.md",
+    ]
+    assert row.warnings == ["child row warning", "child report warning"]
+    assert "token" not in repr(row)
+
+
+@pytest.mark.parametrize(
+    ("options", "message"),
+    (
+        ({"semantic_chunk_seconds": 0}, "semantic_chunk_seconds"),
+        ({"semantic_max_segments_per_chunk": 0}, "semantic_max_segments_per_chunk"),
+        ({"semantic_provider": "provider?bad"}, "semantic_provider"),
+        ({"semantic_model": "model?bad"}, "semantic_model"),
+    ),
+)
+def test_red_next_preview_validates_actual_semantic_summary_settings_after_fresh_selection(
+    monkeypatch, options, message
+):
+    """A `next` preview may not advertise an impossible semantic-summary action."""
+
+    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    from podcast_ingest_core import CorpusEpisodeCompletionWorkflowRunnerFailedError
+
+    selected = _selected_completion_row("semantic_summary")
+    monkeypatch.setattr(
+        runner,
+        "_preview_selection",
+        lambda *args, **kwargs: (selected, "semantic_summary", "EP677", []),
+    )
+
+    with pytest.raises(CorpusEpisodeCompletionWorkflowRunnerFailedError, match=message):
+        runner.run_corpus_episode_completion_workflow(
+            "gooaye", episode_ref="EP677", action="next", **options
+        )
+
+
+@pytest.mark.parametrize(
+    ("options", "message"),
+    (
+        ({"semantic_provider": "provider?bad"}, "semantic_provider"),
+        ({"semantic_model": "model?bad"}, "semantic_model"),
+    ),
+)
+def test_red_confirmed_semantic_summary_validates_provider_model_before_child_dispatch(
+    monkeypatch, options, message
+):
+    """Selected-action validation must complete before a provider-capable child runs."""
+
+    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    from podcast_ingest_core import CorpusEpisodeCompletionWorkflowRunnerFailedError
+
+    selected = _selected_completion_row("semantic_summary")
+    monkeypatch.setattr(
+        runner,
+        "_preview_selection",
+        lambda *args, **kwargs: (selected, "semantic_summary", "EP677", []),
+    )
+    monkeypatch.setattr(
+        runner,
+        "run_corpus_semantic_remediation",
+        lambda *args, **kwargs: pytest.fail("invalid semantic settings reached child dispatch"),
+    )
+
+    with pytest.raises(CorpusEpisodeCompletionWorkflowRunnerFailedError, match=message):
+        runner.run_corpus_episode_completion_workflow(
+            "gooaye",
+            episode_ref="EP677",
+            action="semantic_summary",
+            confirm=True,
+            api_cost_ack=runner.SEMANTIC_API_COST_ACK,
+            **options,
+        )

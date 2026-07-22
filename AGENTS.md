@@ -21,9 +21,9 @@ constitution -> specify -> clarify -> plan -> checklist -> tasks -> analyze -> i
 ```
 
 <!-- SPECKIT START -->
-For the active Latest Episode Deterministic Workflow feature, read
-[`specs/017-corpus-latest-episode-deterministic-workflow/plan.md`](specs/017-corpus-latest-episode-deterministic-workflow/plan.md)
-for technologies, project structure, shell commands, and implementation context.
+For the active Latest Episode Verified Research Report Workflow feature, read
+[`specs/018-latest-episode-verified-research-report-workflow/plan.md`](specs/018-latest-episode-verified-research-report-workflow/plan.md)
+for technologies, project structure, shell commands, approval boundaries, and implementation context.
 <!-- SPECKIT END -->
 
 ## Engineering Rules

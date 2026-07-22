@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+import hashlib
 import json
 from pathlib import Path
+
+import pytest
 
 
 def _write_semantic_summary(
@@ -15,6 +18,24 @@ def _write_semantic_summary(
     import podcast_ingest_core.storage as storage
 
     monkeypatch.setattr(storage, "SUMMARIES_DIR", tmp_path / "summaries")
+    monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
+    transcript = storage.transcript_asset_paths("gooaye", "EP672", "title")
+    transcript.json_path.parent.mkdir(parents=True, exist_ok=True)
+    transcript.json_path.write_text(
+        json.dumps(
+            {
+                "podcast_id": "gooaye",
+                "episode_ref": "EP672",
+                "title": "title",
+                "segment_count": 1,
+                "completed": True,
+                "segments": [{"id": 1, "start": 0, "end": 1, "text": "fixture"}],
+            }
+        ),
+        encoding="utf-8",
+    )
+    transcript.text_path.write_text("fixture", encoding="utf-8")
+    transcript.srt_path.write_text("fixture", encoding="utf-8")
     path = tmp_path / "summaries" / "gooaye" / "EP672__title.semantic.md"
     path.parent.mkdir(parents=True, exist_ok=True)
     timestamp = "`[00:00:01 - 00:00:10]`" if include_timestamp else ""
@@ -58,6 +79,7 @@ def test_review_semantic_summary_smoke_generates_passed_report(monkeypatch, tmp_
     assert payload["review_status"] == "passed"
     assert payload["semantic_summary_path"] == str(summary_path)
     assert payload["failed_check_count"] == 0
+    assert payload["semantic_summary_sha256"] == hashlib.sha256(summary_path.read_bytes()).hexdigest()
     assert "Semantic Summary Smoke Review" in markdown
     assert "timestamp_evidence" in markdown
 
@@ -73,7 +95,7 @@ def test_review_semantic_summary_smoke_blocks_missing_artifact(monkeypatch, tmp_
 
     payload = json.loads(result.review_json_path.read_text(encoding="utf-8"))
     assert result.review_status == "blocked"
-    assert payload["blocked_check_count"] == 1
+    assert payload["blocked_check_count"] == 8
     assert any(check["name"] == "semantic_summary_exists" for check in payload["checks"])
 
 
@@ -146,6 +168,53 @@ def test_review_semantic_summary_smoke_rejects_direct_trade_advice(
         and "matched_guard=trade_action" in check["message"]
         for check in payload["checks"]
     )
+
+
+@pytest.mark.parametrize(
+    "advice",
+    (
+        "You should buy ACME.",
+        "You should sell ACME.",
+        "You should hold ACME.",
+        "I recommend buying ACME.",
+        "I recommend selling ACME.",
+        "Consider buying ACME.",
+        "推薦買進 ACME。",
+        "建議賣出 ACME。",
+        "值得買進 ACME。",
+    ),
+)
+def test_red_review_and_assembler_share_personalized_advice_guard(monkeypatch, tmp_path, advice):
+    from podcast_ingest_core.verified_research_report import (
+        VerifiedResearchReportInputError,
+        _assert_safe_source_bytes,
+        _source_artifact,
+    )
+    import podcast_ingest_core.semantic_summary_smoke_review as review
+
+    summary_path = _write_semantic_summary(monkeypatch, tmp_path, extra=advice)
+    monkeypatch.setattr(review, "REPORTS_DIR", tmp_path / "reports")
+
+    result = review.review_semantic_summary_smoke("gooaye", "EP672")
+
+    assert result.review_status == "failed"
+    with pytest.raises(VerifiedResearchReportInputError, match="safety boundary"):
+        _assert_safe_source_bytes(_source_artifact("semantic_summary", summary_path, True), "semantic summary")
+
+
+def test_review_semantic_summary_smoke_allows_attributed_quoted_historical_advice(monkeypatch, tmp_path):
+    import podcast_ingest_core.semantic_summary_smoke_review as review
+
+    _write_semantic_summary(
+        monkeypatch,
+        tmp_path,
+        extra='The transcript quoted "You should buy ACME" as a historical example.\n主持人引述「建議買進」作為歷史案例。',
+    )
+    monkeypatch.setattr(review, "REPORTS_DIR", tmp_path / "reports")
+
+    result = review.review_semantic_summary_smoke("gooaye", "EP672")
+
+    assert result.review_status == "passed"
 
 
 def test_review_semantic_summary_smoke_rejects_target_price_and_guaranteed_return(
@@ -233,3 +302,198 @@ def test_review_semantic_summary_smoke_cli_parses_arguments(monkeypatch, tmp_pat
     assert captured["args"] == ("gooaye", "EP672")
     assert captured["kwargs"]["workflow_stdout_path"] == tmp_path / "stdout.json"
     assert payload["review_status"] == "passed"
+
+
+def test_review_binds_summary_hash_and_rejects_extended_credential_forms(monkeypatch, tmp_path):
+    import podcast_ingest_core.semantic_summary_smoke_review as review
+
+    summary_path = _write_semantic_summary(
+        monkeypatch,
+        tmp_path,
+        extra="\n".join(
+            [
+                "AWS_SECRET_ACCESS_KEY=not-a-real-secret",
+                "-----BEGIN PRIVATE KEY-----",
+                "credential: not-a-real-secret",
+                "access_token = not-a-real-secret",
+                "password: not-a-real-secret",
+            ]
+        ),
+    )
+    monkeypatch.setattr(review, "REPORTS_DIR", tmp_path / "reports")
+
+    result = review.review_semantic_summary_smoke("gooaye", "EP672")
+
+    payload = json.loads(result.review_json_path.read_text(encoding="utf-8"))
+    assert payload["semantic_summary_sha256"] == hashlib.sha256(summary_path.read_bytes()).hexdigest()
+    assert result.review_status == "failed"
+    assert any(check["name"] == "secret_leak" and check["status"] == "fail" for check in payload["checks"])
+
+
+def test_review_rejects_json_and_yaml_quoted_credential_assignments(monkeypatch, tmp_path):
+    import podcast_ingest_core.semantic_summary_smoke_review as review
+
+    _write_semantic_summary(
+        monkeypatch,
+        tmp_path,
+        extra='"password": "not-a-real-secret"\n\'token\': \'not-a-real-secret\'',
+    )
+    monkeypatch.setattr(review, "REPORTS_DIR", tmp_path / "reports")
+
+    result = review.review_semantic_summary_smoke("gooaye", "EP672")
+
+    payload = json.loads(result.review_json_path.read_text(encoding="utf-8"))
+    assert result.review_status == "failed"
+    assert any(
+        check["name"] == "secret_leak" and check["status"] == "fail"
+        for check in payload["checks"]
+    )
+
+
+@pytest.mark.parametrize(
+    "quoted_advice",
+    (
+        'The transcript quoted "You should buy ACME" as a historical example.',
+        "The transcript said “You should buy ACME” as a historical example.",
+        "主持人引述「建議買進 ACME」作為歷史案例。",
+    ),
+)
+def test_red_attributed_quote_exception_only_excludes_the_matched_quote_content(quoted_advice):
+    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+
+    assert matched_investment_advice_guard(quoted_advice) is None
+    assert (
+        matched_investment_advice_guard(f"{quoted_advice} You should sell ACME.")
+        == "trade_action"
+    )
+
+
+@pytest.mark.parametrize(
+    "mismatched_quote_advice",
+    (
+        'The transcript quoted "You should buy ACME” as a historical example.',
+        "The transcript said “You should buy ACME」 as a historical example.",
+        "主持人引述「建議買進 ACME\"作為歷史案例。",
+    ),
+)
+def test_red_mismatched_quote_never_receives_the_attributed_advice_exception(mismatched_quote_advice):
+    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+
+    assert matched_investment_advice_guard(mismatched_quote_advice) == "trade_action"
+
+
+@pytest.mark.parametrize(
+    "text",
+    (
+        "This report is not investment advice. Buy ACME now.",
+        "This report is not investment advice.\n- Sell ACME now.",
+        "本報告不構成投資建議。立即買進 ACME。",
+        "本報告不構成投資建議。\n- 賣出 ACME。",
+    ),
+)
+def test_red_disclaimer_never_bypasses_direct_trade_command(text):
+    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+
+    assert matched_investment_advice_guard(text) == "trade_action"
+
+
+@pytest.mark.parametrize(
+    "disclaimer",
+    (
+        "This report is not investment advice.",
+        "本報告不構成投資建議。",
+    ),
+)
+def test_disclaimer_without_trade_command_is_not_rejected(disclaimer):
+    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+
+    assert matched_investment_advice_guard(disclaimer) is None
+
+
+@pytest.mark.parametrize(
+    "text",
+    (
+        'The analyst said markets were volatile. "You should buy ACME".',
+        'The transcript recorded "the analyst said nothing" then "You should buy ACME".',
+        'The transcript quoted "a historical note" then "You should buy ACME".',
+        'The transcript quoted ""You should buy ACME"" as an ambiguous ASCII quote.',
+        'The transcript quoted "The analyst said "You should buy ACME"".',
+    ),
+)
+def test_red_attribution_exception_fails_closed_for_unrelated_or_ambiguous_quotes(text):
+    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+
+    assert matched_investment_advice_guard(text) == "trade_action"
+
+
+@pytest.mark.parametrize(
+    "text",
+    (
+        'The transcript quoted "You should buy ACME" as a historical example.',
+        "主持人引述「建議買進 ACME」作為歷史案例。",
+    ),
+)
+def test_direct_single_quote_attribution_remains_a_historical_exception(text):
+    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+
+    assert matched_investment_advice_guard(text) is None
+
+
+@pytest.mark.parametrize(
+    "text",
+    (
+        "This report is not investment advice: Buy ACME.",
+        "This report is not investment advice; Sell ACME.",
+        "general text：Hold ACME.",
+        "general text；Buy ACME.",
+        "本報告不構成投資建議：立即買進 ACME。",
+        "本報告不構成投資建議；賣出 ACME。",
+        "一般文字: 持有 ACME。",
+        "一般文字；立即買進 ACME。",
+    ),
+)
+def test_red_sentence_or_clause_boundary_rejects_trade_commands_after_colons_and_semicolons(text):
+    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+
+    assert matched_investment_advice_guard(text) == "trade_action"
+
+
+@pytest.mark.parametrize(
+    "disclaimer",
+    (
+        "This report is not investment advice: no buy/sell/hold advice is provided.",
+        "本報告不構成投資建議；不提供任何買賣建議。",
+    ),
+)
+def test_red_colon_or_semicolon_disclaimer_without_command_remains_allowed(disclaimer):
+    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+
+    assert matched_investment_advice_guard(disclaimer) is None
+
+
+@pytest.mark.parametrize(
+    "text",
+    (
+        'said: "You should buy ACME"',
+        "說：「建議買進 ACME」",
+    ),
+)
+def test_red_subjectless_quote_attribution_never_receives_historical_exception(text):
+    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+
+    assert matched_investment_advice_guard(text) == "trade_action"
+
+
+@pytest.mark.parametrize(
+    "text",
+    (
+        'The analyst said: "You should buy ACME"',
+        'They said: "You should buy ACME"',
+        "分析師說：「建議買進 ACME」",
+        "旁白說：「建議買進 ACME」",
+    ),
+)
+def test_red_explicit_quote_attribution_subjects_remain_historical_exceptions(text):
+    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+
+    assert matched_investment_advice_guard(text) is None

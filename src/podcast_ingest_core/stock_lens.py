@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import asdict
+import hashlib
 import json
 from pathlib import Path
 from typing import Any
@@ -62,6 +63,7 @@ def generate_stock_lens_report(
     warnings: list[str] = []
     direct_evidence: list[dict[str, Any]] = []
     inferred_leads: list[dict[str, Any]] = []
+    used_input_set: list[dict[str, str]] = []
     has_partial = False
 
     mapping_paths = _mapping_paths(podcast_id)
@@ -74,8 +76,26 @@ def generate_stock_lens_report(
             raise StockLensReportInputError(
                 f"industry mapping mode 不支援：{mapping_path}"
             )
+        if mapping_payload.get("podcast_id") != podcast_id:
+            raise StockLensReportInputError("industry mapping identity does not match podcast")
         episode_ref = _required_text(mapping_payload, "episode_ref")
         title = _required_text(mapping_payload, "title")
+        boundary_payload = _load_boundary_payload(
+            podcast_id=podcast_id,
+            episode_ref=episode_ref,
+            title=title,
+        )
+        used_input_set.extend(
+            (
+                _input_identity("industry_mapping", mapping_path),
+                _input_identity(
+                    "external_boundary",
+                    storage.external_data_boundary_asset_paths(
+                        podcast_id, episode_ref, title
+                    ).json_path,
+                ),
+            )
+        )
         matched_candidates = [
             candidate
             for candidate in _stock_candidates(mapping_payload)
@@ -96,24 +116,17 @@ def generate_stock_lens_report(
                 f"industry mapping status 不支援：{mapping_status}"
             )
 
-        boundary_payload, boundary_warning = _load_boundary_payload(
-            podcast_id=podcast_id,
-            episode_ref=episode_ref,
-        )
-        if boundary_warning:
-            warnings.append(boundary_warning)
-        if boundary_payload is not None:
-            boundary_status = _required_text(boundary_payload, "boundary_status")
-            if boundary_status == "partial-draft":
-                if not allow_partial:
-                    raise StockLensReportInputError(
-                        "matched external boundary status is partial-draft；請使用 --allow-partial。"
-                    )
-                has_partial = True
-            elif boundary_status != "final":
+        boundary_status = _required_text(boundary_payload, "boundary_status")
+        if boundary_status == "partial-draft":
+            if not allow_partial:
                 raise StockLensReportInputError(
-                    f"external boundary status 不支援：{boundary_status}"
+                    "matched external boundary status is partial-draft；請使用 --allow-partial。"
                 )
+            has_partial = True
+        elif boundary_status != "final":
+            raise StockLensReportInputError(
+                f"external boundary status 不支援：{boundary_status}"
+            )
 
         boundary_candidates = _boundary_candidates(boundary_payload)
         for candidate in matched_candidates:
@@ -141,6 +154,11 @@ def generate_stock_lens_report(
         "podcast_id": podcast_id,
         "stock_query": stock_query,
         "report_mode": REPORT_MODE,
+        "generation_options": {"max_evidence_items": max_evidence_items},
+        "input_set_lineage": sorted(
+            used_input_set, key=lambda item: (item["role"], item["path"])
+        ),
+        "lens_config": _config_file_identity(Path("config/gooaye_lens.yaml")),
         "report_status": report_status,
         "source_status": {
             "industry_mappings": "available" if mapping_paths else "missing",
@@ -203,11 +221,15 @@ def _load_mapping_payload(json_path: Path) -> dict[str, Any]:
 
 
 def _load_boundary_payload(
-    *, podcast_id: str, episode_ref: str
-) -> tuple[dict[str, Any] | None, str | None]:
-    paths = storage.find_external_data_boundary_asset_paths(podcast_id, episode_ref)
-    if paths is None or not paths.json_path.exists():
-        return None, f"external boundary missing: {podcast_id}/{episode_ref}"
+    *, podcast_id: str, episode_ref: str, title: str
+) -> dict[str, Any]:
+    """Load only the boundary at the mapping's immutable identity-derived path."""
+
+    paths = storage.external_data_boundary_asset_paths(podcast_id, episode_ref, title)
+    if not paths.json_path.is_file():
+        raise StockLensReportInputError(
+            f"external boundary missing for mapping identity: {podcast_id}/{episode_ref}/{title}"
+        )
     try:
         payload = json.loads(paths.json_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
@@ -218,11 +240,29 @@ def _load_boundary_payload(
         raise StockLensReportInputError(f"無法讀取 external boundary：{exc}") from exc
     if not isinstance(payload, dict):
         raise StockLensReportInputError("external boundary JSON 必須是 object。")
+    if (
+        payload.get("podcast_id") != podcast_id
+        or payload.get("episode_ref") != episode_ref
+        or payload.get("title") != title
+    ):
+        raise StockLensReportInputError("external boundary identity does not match mapping")
     if _required_text(payload, "boundary_mode") != SUPPORTED_BOUNDARY_MODE:
         raise StockLensReportInputError(
             f"external boundary mode 不支援：{paths.json_path}"
         )
-    return payload, None
+    return payload
+
+
+def _input_identity(role: str, path: Path) -> dict[str, str]:
+    try:
+        raw = path.read_bytes()
+    except OSError as exc:
+        raise StockLensReportInputError(f"stock lens input is unreadable: {path}") from exc
+    return {
+        "role": role,
+        "path": path.resolve(strict=False).as_posix(),
+        "sha256": hashlib.sha256(raw).hexdigest(),
+    }
 
 
 def _required_text(payload: dict[str, Any], key: str) -> str:
@@ -349,6 +389,17 @@ def _has_boundary(
         if match["external_boundary"].get("required_external_checks"):
             return True
     return False
+
+
+def _config_file_identity(path: Path) -> dict[str, str | None]:
+    try:
+        raw = path.read_bytes()
+    except OSError:
+        return {"path": path.resolve(strict=False).as_posix(), "sha256": None}
+    return {
+        "path": path.resolve(strict=False).as_posix(),
+        "sha256": hashlib.sha256(raw).hexdigest(),
+    }
 
 
 def _load_existing_report_counts(json_path: Path) -> dict[str, Any]:

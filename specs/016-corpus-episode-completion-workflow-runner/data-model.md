@@ -79,12 +79,12 @@ One selected, terminal, rejected, or attempted outcome.
 | `planned_reads` | `list[str]` | Safe local paths plus exact labels such as configured feed/in-memory snapshot |
 | `planned_writes` | `list[str]` | Safe local paths or an exact timestamped-review label; empty for terminal states |
 | `output_paths` | `list[str]` | Safe concrete output paths from the one attempted runner |
-| `source_report_paths` | `list[str]` | Safe existing report paths used as state metadata |
+| `source_report_paths` | `list[str]` | Deduplicated safe child-row and top-level child JSON/Markdown report paths; unsafe/non-local paths are omitted |
 | `stage_counts` | `dict[str, int]` | Allowlisted non-negative count keys from the stage result |
 | `provider` | `str \| None` | Safe semantic provider identifier only when relevant |
 | `model` | `str \| None` | Safe local/semantic model identifier only when relevant |
-| `failure_category` | `str \| None` | Exception class/category only; no message |
-| `warnings` | `list[str]` | Fixed metadata-only warnings |
+| `failure_category` | `str \| None` | Safe child exception class/category only; no message |
+| `warnings` | `list[str]` | Deduplicated safe child-row/top-level metadata warnings only |
 
 ## `CorpusEpisodeCompletionWorkflowRunResult`
 

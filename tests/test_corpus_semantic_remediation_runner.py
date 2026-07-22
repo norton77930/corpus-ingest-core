@@ -321,21 +321,29 @@ def _write_semantic_review(
     path.parent.mkdir(parents=True, exist_ok=True)
     if raw_bytes is not None:
         path.write_bytes(raw_bytes)
-    else:
-        _write_json(
-            path,
-            {
-                "podcast_id": "gooaye",
-                "episode_ref": episode_ref,
-                "review_status": review_status,
-                "check_count": 1,
-                "failed_check_count": int(review_status == "failed"),
-                "warning_count": 0,
-                "blocked_check_count": int(review_status == "blocked"),
-                "checks": [],
-            },
-        )
-        path.with_suffix(".md").write_text("# review fixture", encoding="utf-8")
+        return path
+
+    from podcast_ingest_core import storage
+    from podcast_ingest_core.semantic_summary_smoke_review import (
+        review_semantic_summary_smoke,
+    )
+
+    summary_path = storage.semantic_summary_asset_path(
+        "gooaye", episode_ref, f"{episode_ref} Alpha"
+    )
+    if review_status == "failed":
+        summary_path.write_text("Buy ACME now", encoding="utf-8")
+    elif review_status == "blocked":
+        summary_path.write_bytes(b"\xff")
+    elif review_status != "passed":
+        # Deliberately malformed non-success fixture; authentic readers must
+        # schedule a real review rather than trust it.
+        _write_json(path, {"review_status": review_status})
+        return path
+    created = review_semantic_summary_smoke("gooaye", episode_ref)
+    if created.review_json_path != path:
+        created.review_markdown_path.replace(path.with_suffix(".md"))
+        created.review_json_path.replace(path)
     return path
 
 
@@ -366,6 +374,16 @@ def _setup_preview_state(monkeypatch, tmp_path: Path, state: str) -> None:
             tmp_path,
             raw_bytes=b"{not-json private review sentinel",
         )
+    elif state in {"stale_review", "forged_review"}:
+        review_path = _write_semantic_review(
+            monkeypatch, tmp_path, review_status="passed"
+        )
+        review_payload = json.loads(review_path.read_text(encoding="utf-8"))
+        if state == "stale_review":
+            review_payload["semantic_summary_sha256"] = "0" * 64
+        else:
+            review_payload["review_boundary"] = "forged-review-boundary"
+        review_path.write_text(json.dumps(review_payload), encoding="utf-8")
 
 
 @pytest.mark.parametrize(
@@ -380,6 +398,8 @@ def _setup_preview_state(monkeypatch, tmp_path: Path, state: str) -> None:
         ("blocked_review", "blocked", "blocked", True),
         ("unknown_review", "blocked", "blocked", True),
         ("unreadable_review", "blocked", "blocked", True),
+        ("stale_review", "blocked", "blocked", True),
+        ("forged_review", "blocked", "blocked", True),
     ],
 )
 def test_semantic_preview_state_table_is_strict_zero_file(
@@ -1116,18 +1136,17 @@ def test_runner_report_writer_failure_is_safe_nontransactional_and_no_cleanup_re
             evidence_count=1,
         )
 
-    real_write = getattr(runner, "_write_atomic_text", None)
-    calls = []
+    real_write_pair = runner.write_atomic_audit_report_pair
 
-    def fail_markdown(path: Path, text: str):
-        calls.append(path)
-        if path.suffix == ".md":
-            raise OSError("https://secret.invalid/?token=must-not-leak")
-        assert real_write is not None
-        return real_write(path, text)
+    def fail_commit_marker(json_path: Path, markdown_path: Path, payload: dict, markdown: str):
+        # The staged Markdown may have committed, but the JSON marker failure
+        # must leave no reader-acceptable pair.
+        markdown_path.parent.mkdir(parents=True, exist_ok=True)
+        markdown_path.write_text(markdown, encoding="utf-8")
+        raise OSError("https://secret.invalid/?token=must-not-leak")
 
     monkeypatch.setattr(runner, "semantic_summarize_episode", summary)
-    monkeypatch.setattr(runner, "_write_atomic_text", fail_markdown, raising=False)
+    monkeypatch.setattr(runner, "write_atomic_audit_report_pair", fail_commit_marker)
 
     with pytest.raises(CorpusSemanticRemediationRunnerFailedError) as exc_info:
         runner.run_corpus_semantic_remediation(
@@ -1139,10 +1158,15 @@ def test_runner_report_writer_failure_is_safe_nontransactional_and_no_cleanup_re
         )
 
     report_paths = runner.storage.corpus_semantic_remediation_run_asset_paths("gooaye")
+    from podcast_ingest_core.audit_report_pair import is_complete_audit_report_pair
+
     assert summary_calls == 1
     assert summary_path.exists()
-    assert report_paths.json_path.exists()
-    assert not report_paths.markdown_path.exists()
+    assert not report_paths.json_path.exists()
+    assert report_paths.markdown_path.exists()
+    assert not is_complete_audit_report_pair(
+        report_paths.json_path, report_paths.markdown_path
+    )
     assert not list(tmp_path.rglob("*.part"))
     assert "secret.invalid" not in str(exc_info.value)
     assert "token=" not in str(exc_info.value)
@@ -1786,6 +1810,55 @@ def test_semantic_remediation_cli_confirmed_review_bypasses_all_llm_resolution(
     assert captured.err == ""
     assert captured_kwargs["confirm"] is True
     assert captured_kwargs["action"] == "semantic_review"
+
+
+def test_015_stale_review_remains_manual_only_without_a_collision_rereview(
+    monkeypatch, tmp_path: Path
+):
+    """Only 018 owns automatic authenticity rereview; 015 remains terminal."""
+    from datetime import datetime as real_datetime
+    import podcast_ingest_core.corpus_semantic_remediation_runner as runner
+    import podcast_ingest_core.semantic_summary_smoke_review as semantic_review
+
+    _write_seed(monkeypatch, tmp_path)
+    _write_transcript(monkeypatch, tmp_path)
+    summary_path = _write_semantic_summary(
+        monkeypatch, tmp_path, body=_passing_semantic_review_body()
+    )
+
+    class FixedDateTime:
+        @classmethod
+        def now(cls):
+            return real_datetime(2026, 7, 22, 12, 0, 0)
+
+    monkeypatch.setattr(semantic_review, "datetime", FixedDateTime)
+
+    first = runner.run_corpus_semantic_remediation(
+        "gooaye", episode_ref="EP700", action="semantic_review", confirm=True
+    )
+    summary_path.write_text(
+        _passing_semantic_review_body() + "\nupdated safe statement",
+        encoding="utf-8",
+    )
+    second = runner.run_corpus_semantic_remediation(
+        "gooaye", episode_ref="EP700", action="semantic_review", confirm=True
+    )
+    final_preview = runner.run_corpus_semantic_remediation(
+        "gooaye", episode_ref="EP700", action="semantic_review", confirm=False
+    )
+
+    assert first.rows[0].status == "executed"
+    assert second.selected_action == "blocked"
+    assert second.executed_action is None
+    assert second.rows[0].status == "blocked"
+    review_names = sorted(
+        path.name
+        for path in (tmp_path / "evals" / "research-llm-smoke" / "reports").glob("*.json")
+    )
+    assert review_names == [
+        "20260722-120000__gooaye__EP700.semantic-review.json",
+    ]
+    assert final_preview.selected_action == "blocked"
 
 
 def test_semantic_remediation_cli_exit_and_error_no_leak_contract(

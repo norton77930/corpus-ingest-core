@@ -4,6 +4,8 @@ from dataclasses import dataclass
 from pathlib import Path
 from types import SimpleNamespace
 
+import pytest
+
 
 def test_to_jsonable_handles_dataclass_path_list_and_dict():
     from podcast_ingest_core.serialization import to_jsonable
@@ -1071,6 +1073,52 @@ def test_latest_deterministic_workflow_mcp_uses_bounded_envelopes(monkeypatch):
         "ok": False,
         "error_type": "CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError",
         "message": "corpus latest episode deterministic workflow command failed",
+    }
+
+
+def test_verified_research_report_workflow_mcp_uses_dry_run_envelope_and_early_guard(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    captured = {}
+    monkeypatch.setattr(
+        mcp_server.verified_research_report_workflow_runner,
+        "run_latest_episode_verified_research_report_workflow",
+        lambda podcast_id, **kwargs: captured.update({"podcast_id": podcast_id, **kwargs})
+        or SimpleNamespace(outcome="dry_run"),
+    )
+    monkeypatch.setattr(
+        mcp_server.verified_research_report_workflow_runner,
+        "result_to_dict",
+        lambda result: {"outcome": result.outcome},
+    )
+
+    preview = mcp_server.run_latest_episode_verified_research_report_workflow("gooaye")
+
+    assert preview == {
+        "ok": True,
+        "dry_run": True,
+        "requires_confirmation": True,
+        "data": {"outcome": "dry_run"},
+    }
+    assert captured["podcast_id"] == "gooaye"
+    assert captured["confirm"] is False
+
+    monkeypatch.setattr(
+        mcp_server.verified_research_report_workflow_runner,
+        "run_latest_episode_verified_research_report_workflow",
+        lambda *args, **kwargs: pytest.fail("invalid confirmation must not reach Core"),
+    )
+    rejected = mcp_server.run_latest_episode_verified_research_report_workflow(
+        "gooaye",
+        confirm=True,
+        expected_episode_ref="EP700",
+        api_cost_ack="wrong",
+    )
+
+    assert rejected == {
+        "ok": False,
+        "error_type": "LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError",
+        "message": "latest episode verified research report workflow command failed",
     }
 
 

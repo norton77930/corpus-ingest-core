@@ -233,24 +233,33 @@ def test_generate_stock_lens_report_without_match_states_no_direct_evidence(
     assert "no direct podcast evidence found" in markdown
 
 
-def test_generate_stock_lens_report_warns_when_external_boundary_missing(
+def test_generate_stock_lens_report_fails_when_external_boundary_missing(
     monkeypatch, tmp_path
 ):
+    """Identity-bound stock-lens lineage requires the mapping's boundary artifact."""
+
     import podcast_ingest_core.stock_lens as stock_lens
+    from podcast_ingest_core.errors import StockLensReportInputError
 
     _write_mapping(monkeypatch, tmp_path)
 
-    asset = stock_lens.generate_stock_lens_report("gooaye", "台積電")
-    payload = json.loads(asset.report_json_path.read_text(encoding="utf-8"))
+    with pytest.raises(StockLensReportInputError, match="external boundary missing"):
+        stock_lens.generate_stock_lens_report("gooaye", "台積電")
 
-    assert asset.report_status == "final"
-    assert "external boundary missing" in payload["warnings"][0]
-    assert payload["direct_podcast_evidence"][0]["external_boundary"] == {
-        "external_verification_status": "not_requested",
-        "source_status": "not_fetched",
-        "data_date": None,
-        "required_external_checks": [],
-    }
+
+def test_red_stock_lens_rejects_alpha_boundary_for_corrected_mapping(
+    monkeypatch, tmp_path
+):
+    """A same-episode lexical boundary is never a substitute for mapping title identity."""
+
+    import podcast_ingest_core.stock_lens as stock_lens
+    from podcast_ingest_core.errors import StockLensReportInputError
+
+    _write_mapping(monkeypatch, tmp_path, episode_ref="EP672", title="EP672 Corrected")
+    _write_external_boundary(monkeypatch, tmp_path, episode_ref="EP672", title="EP672 Alpha")
+
+    with pytest.raises(StockLensReportInputError, match="external boundary missing|identity"):
+        stock_lens.generate_stock_lens_report("gooaye", "台積電")
 
 
 def test_generate_stock_lens_report_handles_partial_matched_artifacts(

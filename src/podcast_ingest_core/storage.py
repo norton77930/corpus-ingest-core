@@ -17,6 +17,7 @@ EXTERNAL_DIR = DATA_DIR / "external"
 STOCK_LENS_DIR = DATA_DIR / "stock-lens"
 CACHE_DIR = DATA_DIR / "cache"
 CORPUS_DIR = DATA_DIR / "corpus"
+RESEARCH_REPORTS_DIR = DATA_DIR / "research-reports"
 _SAFE_SLUG_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 _SAFE_EPISODE_REF_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]*$")
 _WINDOWS_ILLEGAL_FILENAME_CHARS = re.compile(r'[<>:"/\\|?*]')
@@ -125,6 +126,17 @@ class CorpusEpisodeCompletionWorkflowRunAssetPaths:
 class CorpusLatestEpisodeDeterministicWorkflowRunAssetPaths:
     json_path: Path
     markdown_path: Path
+
+
+@dataclass(frozen=True)
+class LatestEpisodeVerifiedResearchReportPaths:
+    """Pure, deterministic paths for one versioned verified report bundle."""
+
+    bundle_dir: Path
+    report_json_path: Path
+    report_markdown_path: Path
+    manifest_path: Path
+    checkpoint_path: Path
 
 
 def audio_path(podcast_id: str, episode_ref: str) -> Path:
@@ -517,6 +529,38 @@ def corpus_latest_episode_deterministic_workflow_run_asset_paths(
     return CorpusLatestEpisodeDeterministicWorkflowRunAssetPaths(
         json_path=base_dir / "corpus-latest-episode-deterministic-workflow-run.json",
         markdown_path=base_dir / "corpus-latest-episode-deterministic-workflow-run.md",
+    )
+
+
+def latest_episode_verified_research_report_paths(
+    podcast_id: str,
+    episode_ref: str,
+    source_digest: str,
+) -> LatestEpisodeVerifiedResearchReportPaths:
+    """Return SPEC 018 report and checkpoint paths without creating directories."""
+
+    if not isinstance(source_digest, str) or not re.fullmatch(r"[a-f0-9]{64}", source_digest):
+        raise ValueError("source_digest must be a lowercase SHA-256 hex digest.")
+    safe_podcast_id = _safe_slug(podcast_id, "podcast_id")
+    safe_episode_ref = _safe_episode_ref(episode_ref)
+    bundle_dir = (
+        RESEARCH_REPORTS_DIR
+        / safe_podcast_id
+        / safe_episode_ref
+        / f"v1-{source_digest}"
+    )
+    checkpoint_path = (
+        CORPUS_DIR
+        / safe_podcast_id
+        / "verified-research"
+        / f"{safe_episode_ref}.checkpoint.json"
+    )
+    return LatestEpisodeVerifiedResearchReportPaths(
+        bundle_dir=bundle_dir,
+        report_json_path=bundle_dir / "report.json",
+        report_markdown_path=bundle_dir / "report.md",
+        manifest_path=bundle_dir / "manifest.json",
+        checkpoint_path=checkpoint_path,
     )
 
 

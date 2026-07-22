@@ -15,6 +15,7 @@ from .errors import (
 )
 from .models import AudioAsset, TranscriptAsset
 from .storage import transcript_asset_paths
+from .episode_claim import episode_writer_claimed
 from .validator import validate_transcript
 
 
@@ -22,6 +23,7 @@ DEFAULT_TRANSCRIPTION_MODEL = "tiny"
 PROGRESS_WRITE_INTERVAL = 25
 
 
+@episode_writer_claimed
 def transcribe_episode(
     podcast_id: str,
     episode_ref: str,

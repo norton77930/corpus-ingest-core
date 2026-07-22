@@ -166,10 +166,12 @@ def test_run_validation_checks_completion_tool_skill_and_early_guard(tmp_path, m
 
     checks = {check["name"]: check for check in result["checks"]}
     assert checks["completion_tool_registry"]["ok"] is True
-    assert checks["completion_tool_registry"]["tool_count"] == 14
+    assert checks["completion_tool_registry"]["tool_count"] == 15
     assert checks["latest_deterministic_skill_metadata"]["ok"] is True
     assert checks["completion_skill_metadata"]["ok"] is True
     assert checks["completion_confirmed_next_guard"]["ok"] is True
+    assert checks["verified_research_report_skill_metadata"]["ok"] is True
+    assert checks["verified_research_report_confirmed_guard"]["ok"] is True
 
 
 def test_validate_mcp_setup_main_outputs_json(monkeypatch, capsys, tmp_path):

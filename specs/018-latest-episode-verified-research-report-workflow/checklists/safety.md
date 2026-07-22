@@ -1,0 +1,23 @@
+# Safety Checklist: SPEC 018
+
+- [x] Preview is strict zero-write: no checkpoint, staging directory, bundle, child stage, environment/provider, or external verification access.
+- [x] Confirmed `expected_episode_ref` and exact `api_cost_ack` are validated before RSS, environment/provider, writer, or child-stage access.
+- [x] Latest is pinned once and 017 public contract remains unchanged.
+- [x] Semantic review must be exact `passed` in a timestamped artifact whose additive `semantic_summary_sha256` equals the current summary bytes; missing/stale/spoofed review requires safe re-review or fails closed, while failed/blocked/unknown/unreadable states stop before research/publication.
+- [x] Research options disallow force, partial work, nested semantic summary, and stock synthesis; only local fixture verification is optional.
+- [x] Timestamp provenance requires valid timestamp plus segment ID.
+- [x] Source digest includes canonical fixture-verification option and every source's canonical normalized path; path-distinct authentic semantic re-reviews retain manifest provenance and publish a new auditable version. Exact three-file bundle, deterministic report/Markdown bytes, complete manifest, source mutation before rename, and destination-race conflict/reuse behavior are tested.
+- [x] Adoption requires valid transcript plus TXT/SRT/JSON and identity; checkpoints are validated/merged metadata with unique temporary names, terminal outcome, and bundle references while artifact truth remains authoritative.
+- [x] No raw transcript, credential, AWS secret assignment, private key, token/password/credential assignment, URI query/fragment, traceback, scheduler, retry, automatic cache rebuild, or investment advice enters output; source safety violations prohibit final publication, there is no live market API, and no investment advice.
+- [x] Stage boundary failures return bounded category-only metadata; published bundle success is retained with warning when only checkpoint persistence fails.
+- [x] Exact `api_cost_ack` and `expected_episode_ref` remain approval controls, not report content.
+- [x] Every source is parsed, safety-scanned, review-hash-bound, rendered, and digested from one immutable byte snapshot; disk bytes are revalidated before publish, reuse, and destination-race success is returned.
+- [x] Semantic review authenticity uses a neutral shared domain: canonical/collision filename parser, timestamp/collision ordering, identity/current hash, fixed mode/boundary, complete expected check set, and derived status/counts. Timestamped matching-hash forged `passed` JSON fails closed.
+- [x] Quoted JSON/YAML password/token assignments are blocked in deterministic review and 018 source safety. Stock-lens appendix preserves readable sanitized structured external-check fields rather than serializing dictionaries as strings.
+- [x] Intermediate checkpoint writes preserve validated digest/version/bundle references; all confirmed canonical terminal outcomes use common finalization, with failed checkpoint persistence reduced to a bounded warning.
+- [x] Semantic review uses one neutral immutable-byte evaluator; a correct hash/mode/boundary cannot authenticate forged all-pass checks, and summary identity is transcript-title canonical.
+- [x] Case-insensitive `Bearer <token>` source text is blocked. Per-bundle review/reuse and per-checkpoint claims prevent same-second artifact collision and lost-update/downgrade races; final success revalidates bundle bytes, manifest, and source snapshots.
+- [x] Approval-boundary latest drift makes zero writes for either episode; no checkpoint/claim/staging/bundle is created, and the terminal finalizer distinguishes this rejection from persisted terminal outcomes.
+- [x] Lockfiles are stable addresses for process-lifetime OS locks, not stale liveness records: Windows byte-range and POSIX advisory locks release on close/crash, and spawned recovery proves checkpoint and bundle writers resume without timestamp deletion.
+- [x] After drift approval, the checkpoint OS claim atomically reserves a monotonic `invocation_generation`; every confirmed write carries it, so an older successful finalizer cannot overwrite a higher-generation digest/version/references and may only preserve bounded history. Legacy checkpoints without it read as generation zero.
+- [x] Neutral semantic review and assembly import only lower-level safety/storage code; the shared guard blocks direct personalized English/Chinese buy/sell/hold advice while allowing only explicitly attributed quote-delimited historical references, without provider, LLM, or stock-lens dependencies in the deterministic review boundary.

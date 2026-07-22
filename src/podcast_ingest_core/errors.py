@@ -84,6 +84,16 @@ class CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError(
     """Latest deterministic episode workflow validation or execution failed."""
 
 
+class LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
+    PodcastIngestCoreError
+):
+    """Latest verified research report workflow validation or execution failed."""
+
+
+class VerifiedResearchReportInputError(PodcastIngestCoreError):
+    """Verified research source artifacts or report publication are invalid."""
+
+
 class LLMProviderConfigError(PodcastIngestCoreError):
     """LLM provider 設定不完整或不合法。"""
 

@@ -257,10 +257,10 @@ def test_corpus_runtime_lifecycle_status_matches_registry_and_roadmap():
     roadmap = _read(DOCS / "roadmap.md")
     assert (
         "Latest implemented corpus package is "
-        "**017-corpus-latest-episode-deterministic-workflow**"
+        "**018-latest-episode-verified-research-report-workflow**"
     ) in roadmap
     assert "SPEC 017 is Implemented" in roadmap
-    assert "next unused feature package number is **018**" in roadmap
+    assert "next unused feature package number is **019**" in roadmap
 
 def test_014_stabilization_docs_define_strict_zero_file_dry_run():
     feature = ROOT / "specs" / "014-corpus-fresh-episode-workflow-runner"
@@ -343,7 +343,7 @@ def test_015_semantic_remediation_docs_and_registry_contract():
     assert "015-corpus-semantic-remediation-runner" in handoff
     assert "015-corpus-semantic-remediation-runner" in roadmap
     assert "016" in roadmap
-    assert "specs/017-corpus-latest-episode-deterministic-workflow/plan.md" in agents
+    assert "specs/018-latest-episode-verified-research-report-workflow/plan.md" in agents
 
 
 def test_016_completion_workflow_docs_and_agent_surface_contract():
@@ -388,7 +388,7 @@ def test_016_completion_workflow_docs_and_agent_surface_contract():
     assert "test_corpus_episode_completion_skill.py" in verification
     assert "run_corpus_episode_completion_workflow" in mcp_usage
     assert "corpus-episode-completion" in mcp_usage
-    assert "specs/017-corpus-latest-episode-deterministic-workflow/plan.md" in agents
+    assert "specs/018-latest-episode-verified-research-report-workflow/plan.md" in agents
 
 
 def test_017_latest_episode_deterministic_workflow_docs_and_agent_surface_contract():
@@ -474,7 +474,7 @@ def test_017_latest_episode_deterministic_workflow_docs_and_agent_surface_contra
     assert "test_corpus_latest_episode_deterministic_workflow_runner.py" in verification
     assert "run_corpus_latest_episode_deterministic_workflow" in mcp_usage
     assert "corpus-latest-episode-processing" in mcp_usage
-    assert "specs/017-corpus-latest-episode-deterministic-workflow/plan.md" in agents
+    assert "specs/018-latest-episode-verified-research-report-workflow/plan.md" in agents
     for text in (
         quickstart,
         readme,
@@ -491,7 +491,67 @@ def test_017_latest_episode_deterministic_workflow_docs_and_agent_surface_contra
     assert "Do not call with `confirm=false` before the confirmed call" in skill
     assert "Do not call this tool more than once" in skill
     assert "Do not call with `confirm=true`" not in skill
-    assert "next unused feature package number is **018**" in roadmap
+    assert "next unused feature package number is **019**" in roadmap
+
+
+def test_018_verified_research_report_docs_and_agent_surface_contract():
+    feature = ROOT / "specs" / "018-latest-episode-verified-research-report-workflow"
+    spec = _read(feature / "spec.md")
+    plan = _read(feature / "plan.md")
+    data_model = _read(feature / "data-model.md")
+    design = _read(feature / "design.md")
+    quickstart = _read(feature / "quickstart.md")
+    requirements = _read(feature / "checklists" / "requirements.md")
+    safety = _read(feature / "checklists" / "safety.md")
+    contract = _read(feature / "contracts" / "latest-episode-verified-research-report-workflow.md")
+    readme = _read(ROOT / "README.md")
+    architecture = _read(DOCS / "architecture.md")
+    handoff = _read(DOCS / "agent-handoff.md")
+    roadmap = _read(DOCS / "roadmap.md")
+    registry = _read(ROOT / "specs" / "README.md")
+    verification = _read(DOCS / "verification-matrix.md")
+    mcp_usage = _read(DOCS / "mcp-usage.md")
+    agents = _read(ROOT / "AGENTS.md")
+
+    for relative_path in (
+        "spec.md",
+        "plan.md",
+        "research.md",
+        "data-model.md",
+        "design.md",
+        "quickstart.md",
+        "tasks.md",
+        "contracts/latest-episode-verified-research-report-workflow.md",
+        "checklists/requirements.md",
+        "checklists/safety.md",
+    ):
+        assert (feature / relative_path).is_file()
+
+    for text in (spec, plan, data_model, design, quickstart, requirements, safety, contract):
+        assert "expected_episode_ref" in text
+        assert "exact `api_cost_ack`" in text
+        assert "no live market API" in text
+        assert "no investment advice" in text
+    assert "strict zero-write" in spec
+    assert "semantic review" in spec
+    assert "atomic" in design
+    assert "source digest" in data_model
+    assert "checkpoint" in plan
+    assert "report.json" in contract
+    assert "manifest.json" in contract
+    assert "run_latest_episode_verified_research_report_workflow" in readme
+    assert "run_latest_episode_verified_research_report_workflow.py" in readme
+    assert "latest_episode_verified_research_report_workflow_runner.py" in architecture
+    assert "exact 15 tools" in architecture
+    assert "018-latest-episode-verified-research-report-workflow" in handoff
+    assert "15 reviewed tools" in handoff
+    assert "018-latest-episode-verified-research-report-workflow" in roadmap
+    assert "018-latest-episode-verified-research-report-workflow" in registry
+    assert "run_latest_episode_verified_research_report_workflow.py" in registry
+    assert "test_latest_episode_verified_research_report_workflow_runner.py" in verification
+    assert "run_latest_episode_verified_research_report_workflow" in mcp_usage
+    assert "latest-episode-verified-research-report" in mcp_usage
+    assert "specs/018-latest-episode-verified-research-report-workflow/plan.md" in agents
 
 
 def test_readme_lists_current_corpus_workflow_surfaces_in_their_sections():
