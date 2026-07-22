@@ -27,6 +27,7 @@ semantic work, and exposes one reviewed MCP tool plus a portable Skill. SPEC 017
 The 2026-07-17 `seeded`/`downloaded` mapping gap is a resolved
 historical blocker; the recorded metadata-only EP679 outcome is
 `ready_for_semantic_summary`. Package `018` is the implemented latest-episode verified research report workflow: it has strict zero-write preview, exact episode-scoped `expected_episode_ref` plus exact `api_cost_ack` before protected access, pinned 017 deterministic preparation, semantic review exact `passed` gate, fixed-safe deterministic research, checkpoint/artifact-driven resumption, and atomic source-digest report bundle publication. It exposes one appended reviewed MCP tool and a portable approval Skill; it has no live market API or investment advice.
+Package `019` is the **implemented** explicit-episode verified research report workflow: preview local readiness for a named `episode_ref` (including historical episodes), then confirm-only assemble/publish or reuse an 018-equivalent digest bundle when lineage and review already pass—no LLM, RSS, download, or `api_cost_ack`; MCP tool 16 and portable Skill.
 
 Workflow record: constitution reviewed, no amendment. The backfill follows
 `$speckit-constitution`, `$speckit-specify`, `$speckit-clarify`,
@@ -78,6 +79,7 @@ commit a fixed selector that makes one package appear uniquely active.
 - `016-corpus-episode-completion-workflow-runner`: human-controlled strict-zero-file completion workflow, one MCP tool, and portable Skill.
 - `017-corpus-latest-episode-deterministic-workflow`: implemented request-bounded latest-episode processing through local deterministic readiness, one MCP tool, and portable Skill.
 - `018-latest-episode-verified-research-report-workflow`: implemented strict-zero-write preview and episode-scoped verified research report workflow, source-digest atomic bundle, one appended MCP tool, and portable Skill.
+- `019-episode-verified-research-report-workflow`: implemented explicit-episode (historical) verified research report assemble/publish workflow; 018-equivalent bundle; no upstream stages/LLM/ack; MCP tool 16 + Skill.
 
 ## roadmap phase Mapping
 

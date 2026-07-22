@@ -38,6 +38,14 @@ VERIFIED_RESEARCH_REPORT_SKILL_PATH = (
     / "latest-episode-verified-research-report"
     / "SKILL.md"
 )
+EPISODE_VERIFIED_RESEARCH_REPORT_TOOL_NAME = "run_episode_verified_research_report_workflow"
+EPISODE_VERIFIED_RESEARCH_REPORT_SKILL_PATH = (
+    PROJECT_ROOT
+    / ".agents"
+    / "skills"
+    / "episode-verified-research-report"
+    / "SKILL.md"
+)
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -234,12 +242,13 @@ def _check_completion_surface(checks: list[dict[str, Any]], mcp_server) -> None:
         _add_check(
             checks,
             "completion_tool_registry",
-            len(tool_names) == 15
+            len(tool_names) == 16
             and COMPLETION_TOOL_NAME in tool_names
             and LATEST_DETERMINISTIC_TOOL_NAME in tool_names
-            and VERIFIED_RESEARCH_REPORT_TOOL_NAME in tool_names,
+            and VERIFIED_RESEARCH_REPORT_TOOL_NAME in tool_names
+            and EPISODE_VERIFIED_RESEARCH_REPORT_TOOL_NAME in tool_names,
             tool_count=len(tool_names),
-            tool=VERIFIED_RESEARCH_REPORT_TOOL_NAME,
+            tool=EPISODE_VERIFIED_RESEARCH_REPORT_TOOL_NAME,
         )
     except Exception:
         _add_check(
@@ -321,6 +330,22 @@ def _check_completion_surface(checks: list[dict[str, Any]], mcp_server) -> None:
         )
 
     try:
+        skill_text = EPISODE_VERIFIED_RESEARCH_REPORT_SKILL_PATH.read_text(encoding="utf-8")
+        _add_check(
+            checks,
+            "episode_verified_research_report_skill_metadata",
+            _has_episode_verified_research_report_skill_metadata(skill_text),
+            path=str(EPISODE_VERIFIED_RESEARCH_REPORT_SKILL_PATH),
+        )
+    except OSError:
+        _add_check(
+            checks,
+            "episode_verified_research_report_skill_metadata",
+            False,
+            message="episode verified research report skill metadata is unavailable.",
+        )
+
+    try:
         rejected = mcp_server.run_latest_episode_verified_research_report_workflow(
             podcast_id="unsafe/podcast",
             confirm=True,
@@ -376,6 +401,18 @@ def _has_verified_research_report_skill_metadata(skill_text: str) -> bool:
         and lines[1] == "name: latest-episode-verified-research-report"
         and lines[2]
         == "description: Preview and, after explicit episode-scoped approval plus exact acknowledgement, complete one latest verified research report workflow through one MCP call."
+        and lines[3] == "---"
+    )
+
+
+def _has_episode_verified_research_report_skill_metadata(skill_text: str) -> bool:
+    lines = skill_text.splitlines()
+    return (
+        len(lines) >= 4
+        and lines[0] == "---"
+        and lines[1] == "name: episode-verified-research-report"
+        and lines[2]
+        == "description: Preview and, after explicit episode_ref approval, publish one verified research report for a named episode through one MCP call (assemble/publish only; no api_cost_ack)."
         and lines[3] == "---"
     )
 

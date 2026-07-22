@@ -21,8 +21,8 @@ constitution -> specify -> clarify -> plan -> checklist -> tasks -> analyze -> i
 ```
 
 <!-- SPECKIT START -->
-For the active Latest Episode Verified Research Report Workflow feature, read
-[`specs/018-latest-episode-verified-research-report-workflow/plan.md`](specs/018-latest-episode-verified-research-report-workflow/plan.md)
+For the active Episode Verified Research Report Workflow feature, read
+[`specs/019-episode-verified-research-report-workflow/plan.md`](specs/019-episode-verified-research-report-workflow/plan.md)
 for technologies, project structure, shell commands, approval boundaries, and implementation context.
 <!-- SPECKIT END -->
 

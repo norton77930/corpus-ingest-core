@@ -102,6 +102,12 @@ terminal、scheduler 或 retry。
 
 Use the portable `latest-episode-verified-research-report` Skill for this human-controlled protocol. It must not substitute CLI, terminal, retry, scheduler, fallback, or another side-effect tool.
 
+### Explicit Episode Verified Research Report Tool
+
+- `run_episode_verified_research_report_workflow`
+
+019 tool is for a **named** `episode_ref` (including historical episodes), not latest-only. Preview with `confirm=false` and an explicit episode reference; it returns readiness (`ready`/`blocked`) and missing/stale roles with zero writes. Confirm with the same exact `episode_ref` only when local artifacts and lineage already pass: it assembles and atomically publishes (or reuses) an 018-equivalent digest bundle. It does **not** require `api_cost_ack`, does not call LLM providers, does not download/transcribe, and does not chain 015–017. Reserved selectors `latest`/`next` are rejected. Use the portable `episode-verified-research-report` Skill: preview → explicit approval of `episode_ref` → one confirmed MCP call → stop.
+
 ## Safety
 
 MCP tools 不接受任意本機檔案路徑，也不構成投資建議。

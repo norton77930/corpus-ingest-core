@@ -1164,6 +1164,30 @@ class LatestEpisodeVerifiedResearchReportWorkflowRunResult:
 
 
 @dataclass(frozen=True)
+class EpisodeVerifiedResearchReportWorkflowRunResult:
+    """Dry-run or confirmed explicit-episode verified research report result."""
+
+    podcast_id: str
+    episode_ref: str
+    confirm: bool
+    outcome: str
+    ready: bool
+    missing_roles: list[str]
+    stale_roles: list[str]
+    failed_gates: list[str]
+    report_version: str | None
+    source_digest: str | None
+    bundle_dir: Path | None
+    report_json_path: Path | None
+    report_markdown_path: Path | None
+    manifest_path: Path | None
+    stock_query: str | None
+    include_fixture_verification: bool
+    warnings: list[str]
+    not_investment_advice: bool
+
+
+@dataclass(frozen=True)
 class ResearchWorkflowStep:
     """Research workflow 中單一步驟的計畫或執行結果。"""
 

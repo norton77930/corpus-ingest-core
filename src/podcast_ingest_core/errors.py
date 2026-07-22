@@ -90,6 +90,10 @@ class LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
     """Latest verified research report workflow validation or execution failed."""
 
 
+class EpisodeVerifiedResearchReportWorkflowRunnerFailedError(PodcastIngestCoreError):
+    """Explicit-episode verified research report workflow validation failed."""
+
+
 class VerifiedResearchReportInputError(PodcastIngestCoreError):
     """Verified research source artifacts or report publication are invalid."""
 

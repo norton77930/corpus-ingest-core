@@ -11,6 +11,7 @@ from .errors import (
     CorpusEpisodeCompletionWorkflowRunnerFailedError,
     CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError,
     LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError,
+    EpisodeVerifiedResearchReportWorkflowRunnerFailedError,
     VerifiedResearchReportInputError,
     CorpusSemanticRemediationRunnerFailedError,
     CorpusLocalTranscriptionRunnerFailedError,
@@ -68,6 +69,10 @@ from .latest_episode_verified_research_report_workflow_runner import (
     result_to_dict as latest_episode_verified_research_report_workflow_result_to_dict,
     run_latest_episode_verified_research_report_workflow,
 )
+from .episode_verified_research_report_workflow_runner import (
+    result_to_dict as episode_verified_research_report_workflow_result_to_dict,
+    run_episode_verified_research_report_workflow,
+)
 from .entity_extractor import extract_mentions
 from .episode_intelligence import generate_episode_intelligence_report
 from .external_data_boundary import generate_external_data_boundary
@@ -117,6 +122,7 @@ from .models import (
     LatestEpisodeVerifiedResearchReportWorkflowRunResult,
     LatestEpisodeVerifiedResearchReportWorkflowStep,
     LatestEpisodeVerifiedResearchReportWorkflowWarning,
+    EpisodeVerifiedResearchReportWorkflowRunResult,
     CorpusSemanticRemediationRunCounts,
     CorpusSemanticRemediationRunFilter,
     CorpusSemanticRemediationRunResult,
@@ -199,6 +205,8 @@ __all__ = [
     "LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError",
     "LatestEpisodeVerifiedResearchReportWorkflowStep",
     "LatestEpisodeVerifiedResearchReportWorkflowWarning",
+    "EpisodeVerifiedResearchReportWorkflowRunResult",
+    "EpisodeVerifiedResearchReportWorkflowRunnerFailedError",
     "VerifiedResearchReportInputError",
     "CorpusSemanticRemediationRunAssetPaths",
     "CorpusSemanticRemediationRunCounts",
@@ -214,6 +222,7 @@ __all__ = [
     "corpus_latest_episode_deterministic_workflow_run_asset_paths",
     "corpus_latest_episode_deterministic_workflow_result_to_dict",
     "latest_episode_verified_research_report_workflow_result_to_dict",
+    "episode_verified_research_report_workflow_result_to_dict",
     "latest_episode_verified_research_report_paths",
     "corpus_episode_completion_workflow_result_to_dict",
     "corpus_episode_seed_asset_path",
@@ -281,6 +290,7 @@ __all__ = [
     "run_corpus_episode_completion_workflow",
     "run_corpus_latest_episode_deterministic_workflow",
     "run_latest_episode_verified_research_report_workflow",
+    "run_episode_verified_research_report_workflow",
     "run_corpus_semantic_remediation",
     "run_corpus_remediation",
     "run_corpus_local_transcription",

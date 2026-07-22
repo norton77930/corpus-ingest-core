@@ -11,6 +11,7 @@ from . import cache as cache_module
 from . import corpus_episode_completion_workflow_runner as completion_workflow_runner
 from . import corpus_latest_episode_deterministic_workflow_runner as latest_deterministic_workflow_runner
 from . import latest_episode_verified_research_report_workflow_runner as verified_research_report_workflow_runner
+from . import mcp_episode_verified_research_report
 from . import downloader
 from . import entity_extractor
 from . import feed_reader
@@ -725,6 +726,25 @@ def run_latest_episode_verified_research_report_workflow(
             semantic_max_segments_per_chunk=semantic_max_segments_per_chunk,
         ),
         confirm=confirm,
+    )
+
+
+@mcp.tool()
+def run_episode_verified_research_report_workflow(
+    podcast_id: str,
+    episode_ref: str,
+    confirm: bool = False,
+    stock_query: str | None = None,
+    include_fixture_verification: bool = False,
+) -> dict[str, Any]:
+    """Preview or publish one explicit-episode verified research report (assemble only)."""
+
+    return mcp_episode_verified_research_report.dispatch(
+        podcast_id=podcast_id,
+        episode_ref=episode_ref,
+        confirm=confirm,
+        stock_query=stock_query,
+        include_fixture_verification=include_fixture_verification,
     )
 
 
