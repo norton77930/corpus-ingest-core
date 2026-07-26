@@ -13,6 +13,7 @@ from .errors import (
     LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError,
     EpisodeVerifiedResearchReportWorkflowRunnerFailedError,
     VerifiedResearchReportInputError,
+    VerifiedResearchReportCatalogInputError,
     CorpusSemanticRemediationRunnerFailedError,
     CorpusLocalTranscriptionRunnerFailedError,
     CorpusIndexFailedError,
@@ -72,6 +73,12 @@ from .latest_episode_verified_research_report_workflow_runner import (
 from .episode_verified_research_report_workflow_runner import (
     result_to_dict as episode_verified_research_report_workflow_result_to_dict,
     run_episode_verified_research_report_workflow,
+)
+from .verified_research_report_catalog import (
+    inspect_verified_research_report,
+    list_verified_research_reports,
+    result_to_dict as verified_research_report_catalog_result_to_dict,
+    search_verified_research_reports,
 )
 from .entity_extractor import extract_mentions
 from .episode_intelligence import generate_episode_intelligence_report
@@ -147,6 +154,9 @@ from .models import (
     CorpusRemediationRunRow,
     CorpusRemediationRunWarning,
     CorpusRemediationWarning,
+    VerifiedResearchReportCatalogInspection,
+    VerifiedResearchReportCatalogItem,
+    VerifiedResearchReportCatalogPage,
 )
 from .storage import (
     CorpusEpisodeCompletionWorkflowRunAssetPaths,
@@ -208,6 +218,10 @@ __all__ = [
     "EpisodeVerifiedResearchReportWorkflowRunResult",
     "EpisodeVerifiedResearchReportWorkflowRunnerFailedError",
     "VerifiedResearchReportInputError",
+    "VerifiedResearchReportCatalogInputError",
+    "VerifiedResearchReportCatalogItem",
+    "VerifiedResearchReportCatalogPage",
+    "VerifiedResearchReportCatalogInspection",
     "CorpusSemanticRemediationRunAssetPaths",
     "CorpusSemanticRemediationRunCounts",
     "CorpusSemanticRemediationRunFilter",
@@ -273,6 +287,10 @@ __all__ = [
     "load_gooaye_lens_model",
     "load_llm_profile",
     "list_episodes",
+    "inspect_verified_research_report",
+    "list_verified_research_reports",
+    "search_verified_research_reports",
+    "verified_research_report_catalog_result_to_dict",
     "LLMProviderConfigError",
     "LLMProviderRequestError",
     "MentionExtractionFailedError",

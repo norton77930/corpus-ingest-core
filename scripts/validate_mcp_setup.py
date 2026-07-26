@@ -242,7 +242,8 @@ def _check_completion_surface(checks: list[dict[str, Any]], mcp_server) -> None:
         _add_check(
             checks,
             "completion_tool_registry",
-            len(tool_names) == 16
+            len(tool_names) == 17
+            and "query_verified_research_report_catalog" in tool_names
             and COMPLETION_TOOL_NAME in tool_names
             and LATEST_DETERMINISTIC_TOOL_NAME in tool_names
             and VERIFIED_RESEARCH_REPORT_TOOL_NAME in tool_names

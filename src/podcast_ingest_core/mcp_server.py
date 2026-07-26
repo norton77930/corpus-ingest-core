@@ -12,6 +12,7 @@ from . import corpus_episode_completion_workflow_runner as completion_workflow_r
 from . import corpus_latest_episode_deterministic_workflow_runner as latest_deterministic_workflow_runner
 from . import latest_episode_verified_research_report_workflow_runner as verified_research_report_workflow_runner
 from . import mcp_episode_verified_research_report
+from . import mcp_verified_research_report_catalog
 from . import downloader
 from . import entity_extractor
 from . import feed_reader
@@ -745,6 +746,28 @@ def run_episode_verified_research_report_workflow(
         confirm=confirm,
         stock_query=stock_query,
         include_fixture_verification=include_fixture_verification,
+    )
+
+
+@mcp.tool()
+def query_verified_research_report_catalog(
+    action: str = "list",
+    podcast_id: str | None = None,
+    episode_ref: str | None = None,
+    source_digest: str | None = None,
+    query: str | None = None,
+    limit: int = 50,
+) -> dict[str, Any]:
+    """List, search, or inspect read-only verified research report bundles."""
+
+    return mcp_verified_research_report_catalog.dispatch(
+        success=tool_success,
+        action=action,
+        podcast_id=podcast_id,
+        episode_ref=episode_ref,
+        source_digest=source_digest,
+        query=query,
+        limit=limit,
     )
 
 

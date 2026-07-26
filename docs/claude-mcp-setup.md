@@ -39,6 +39,9 @@ Read / query tools 可直接查詢既有 metadata 與 SQLite cache：
 - `search_transcripts`
 - `search_mentions`
 - `rebuild_cache`
+- `query_verified_research_report_catalog` (Tool 17)
+
+The local reviewed registry has exactly 17 tools. Tool 17 is append-only: Tools 1–16 keep their contracts/order. It is an offline read-only manifest-first list/search/inspect query, not a side-effect: no `confirm` or acknowledgement is required. It has no body search, raw manifest, absolute paths, export, DB/FTS/vector/cache, network/LLM, or latest/currentness claim; inspect fixes `source_currentness_status=not_evaluated`.
 
 Local side-effect tools 預設 `confirm=false`，只回傳 dry-run action plan：
 

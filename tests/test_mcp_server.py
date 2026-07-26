@@ -1122,6 +1122,87 @@ def test_verified_research_report_workflow_mcp_uses_dry_run_envelope_and_early_g
     }
 
 
+def test_catalog_mcp_tool_delegates_once_and_returns_success_envelope(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    adapter = mcp_server.mcp_verified_research_report_catalog
+    calls = []
+    monkeypatch.setattr(
+        adapter.core,
+        "search_verified_research_reports",
+        lambda query, **kwargs: calls.append((query, kwargs)) or object(),
+    )
+    monkeypatch.setattr(adapter.core, "result_to_dict", lambda result: {"items": [], "safe": True})
+    envelopes = []
+    monkeypatch.setattr(
+        mcp_server,
+        "tool_success",
+        lambda payload: envelopes.append(payload) or {"ok": True, "data": payload},
+    )
+
+    response = mcp_server.query_verified_research_report_catalog(
+        action="search", query="TSMC", podcast_id="gooaye", limit=7
+    )
+
+    assert calls == [("TSMC", {"podcast_id": "gooaye", "episode_ref": None, "limit": 7})]
+    assert envelopes == [{"items": [], "safe": True}]
+    assert response == {"ok": True, "data": {"items": [], "safe": True}}
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"action": "list", "query": "forbidden"},
+        {"action": "list", "source_digest": "a" * 64},
+        {"action": "search", "query": "   "},
+        {"action": "search", "query": "query", "source_digest": "a" * 64},
+        {"action": "inspect", "podcast_id": "gooaye", "episode_ref": "EP672", "source_digest": "a" * 64, "query": "forbidden"},
+        {"action": "inspect", "podcast_id": "gooaye", "episode_ref": "EP672", "source_digest": "a" * 64, "limit": 7},
+        {"action": "inspect", "podcast_id": None, "episode_ref": "EP672", "source_digest": "a" * 64},
+        {"action": "unknown"},
+    ],
+)
+def test_catalog_mcp_action_matrix_rejects_invalid_envelopes_before_core(monkeypatch, kwargs):
+    from podcast_ingest_core import mcp_server
+
+    adapter = mcp_server.mcp_verified_research_report_catalog
+    for seam in (
+        "list_verified_research_reports",
+        "search_verified_research_reports",
+        "inspect_verified_research_report",
+    ):
+        monkeypatch.setattr(adapter.core, seam, lambda *args, **kwargs: pytest.fail("invalid request reached Core"))
+
+    response = mcp_server.query_verified_research_report_catalog(**kwargs)
+
+    assert response == {
+        "ok": False,
+        "error_type": "VerifiedResearchReportCatalogInputError",
+        "message": "verified research report catalog query failed",
+    }
+
+
+def test_catalog_mcp_core_failure_is_generic_without_path_or_traceback(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    adapter = mcp_server.mcp_verified_research_report_catalog
+    monkeypatch.setattr(
+        adapter.core,
+        "list_verified_research_reports",
+        lambda **kwargs: (_ for _ in ()).throw(RuntimeError(r"D:\private\manifest.json traceback")),
+    )
+
+    response = mcp_server.query_verified_research_report_catalog()
+
+    assert response == {
+        "ok": False,
+        "error_type": "VerifiedResearchReportCatalogInputError",
+        "message": "verified research report catalog query failed",
+    }
+    assert "private" not in str(response)
+    assert "traceback" not in str(response).lower()
+
+
 def _workflow_result(*, dry_run=True, requires_api_cost_ack=False, stock_query="台積電"):
     from podcast_ingest_core.models import ResearchWorkflowResult, ResearchWorkflowStep
 

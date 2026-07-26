@@ -4,6 +4,7 @@ data/summaries/
 data/mentions/
 data/cache/
 data/reports/
+data/research-reports/
 data/mappings/
 data/external/
 data/stock-lens/
@@ -23,3 +24,4 @@ __pycache__/
 .pytest-tmp/
 .tmp/
 *.pyc
+*.egg-info/

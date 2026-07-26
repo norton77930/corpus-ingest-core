@@ -42,6 +42,7 @@ VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL = "run_latest_episode_verified_research_r
 EPISODE_VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL = (
     "run_episode_verified_research_report_workflow"
 )
+VERIFIED_RESEARCH_REPORT_CATALOG_TOOL = "query_verified_research_report_catalog"
 LEGACY_TOOL_ORDER = [
     "list_episodes",
     "get_episode",
@@ -68,6 +69,7 @@ EXPECTED_TOOLS = LEGACY_EXPECTED_TOOLS | {
     LATEST_DETERMINISTIC_WORKFLOW_TOOL,
     VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL,
     EPISODE_VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL,
+    VERIFIED_RESEARCH_REPORT_CATALOG_TOOL,
 }
 
 
@@ -80,7 +82,7 @@ def _registered_tool_names() -> set[str]:
 
 def test_mcp_registry_exposes_exactly_the_reviewed_tool_set():
     actual = _registered_tool_names()
-    assert len(actual) == 16
+    assert len(actual) == 17
     assert actual == EXPECTED_TOOLS
     assert LEGACY_EXPECTED_TOOLS <= actual
 
@@ -96,6 +98,7 @@ def test_workflow_tools_are_appended_after_the_preserved_twelve_tool_order():
         LATEST_DETERMINISTIC_WORKFLOW_TOOL,
         VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL,
         EPISODE_VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL,
+        VERIFIED_RESEARCH_REPORT_CATALOG_TOOL,
     ]
 
 
@@ -250,5 +253,36 @@ def test_latest_deterministic_workflow_tool_exposes_only_local_inputs():
         "retry",
         "scheduler",
         "progress_callback",
+    ):
+        assert forbidden not in signature.parameters
+
+
+def test_catalog_tool_is_read_only_and_exposes_only_bounded_query_inputs():
+    from podcast_ingest_core import mcp_server
+
+    signature = inspect.signature(mcp_server.query_verified_research_report_catalog)
+    assert list(signature.parameters) == [
+        "action",
+        "podcast_id",
+        "episode_ref",
+        "source_digest",
+        "query",
+        "limit",
+    ]
+    assert signature.parameters["action"].default == "list"
+    assert signature.parameters["podcast_id"].default is None
+    assert signature.parameters["episode_ref"].default is None
+    assert signature.parameters["source_digest"].default is None
+    assert signature.parameters["query"].default is None
+    assert signature.parameters["limit"].default == 50
+    assert VERIFIED_RESEARCH_REPORT_CATALOG_TOOL not in SIDE_EFFECT_TOOLS
+    for forbidden in (
+        "confirm",
+        "ack",
+        "path",
+        "output",
+        "export",
+        "provider",
+        "network",
     ):
         assert forbidden not in signature.parameters

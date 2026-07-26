@@ -38,8 +38,9 @@ args = ["D:/path/to/podcast-ingest-core/scripts/run_mcp_server.py"]
 - `search_transcripts`
 - `search_mentions`
 - `rebuild_cache`
+- `query_verified_research_report_catalog`
 
-`rebuild_cache` 是 maintenance tool，只索引既有 artifacts，不會下載音檔、轉錄、摘要或抽 mentions。Search tools 不會自動 rebuild cache；如果 cache 不存在，請先執行 `rebuild_cache`。
+`rebuild_cache` 是 maintenance tool，只索引既有 artifacts，不會下載音檔、轉錄、摘要或抽 mentions。Search tools 不會自動 rebuild cache；如果 cache 不存在，請先執行 `rebuild_cache`。`query_verified_research_report_catalog` 是 Tool 17 appended-only 的 read-query tool，不是 side-effect：不需要 `confirm` 或 acknowledgement，且不會寫入、匯出、重建 cache 或重新發布報告。
 
 ### Confirmed Local Side-Effect Tools
 
@@ -107,6 +108,22 @@ Use the portable `latest-episode-verified-research-report` Skill for this human-
 - `run_episode_verified_research_report_workflow`
 
 019 tool is for a **named** `episode_ref` (including historical episodes), not latest-only. Preview with `confirm=false` and an explicit episode reference; it returns readiness (`ready`/`blocked`) and missing/stale roles with zero writes. Confirm with the same exact `episode_ref` only when local artifacts and lineage already pass: it assembles and atomically publishes (or reuses) an 018-equivalent digest bundle. It does **not** require `api_cost_ack`, does not call LLM providers, does not download/transcribe, and does not chain 015–017. Reserved selectors `latest`/`next` are rejected. Use the portable `episode-verified-research-report` Skill: preview → explicit approval of `episode_ref` → one confirmed MCP call → stop.
+
+### Verified Research Report Catalog Query Tool
+
+- `query_verified_research_report_catalog` (Tool 17)
+
+Tool 17 is append-only: reviewed Tools 1–16 keep their contracts and order. It is an offline read-only manifest-first query, not a side-effect tool, so it has no `confirm` or acknowledgement parameter. Use `action=list` with optional exact `podcast_id` / `episode_ref`, `action=search` with a nonblank safe-metadata query, or `action=inspect` with exact `podcast_id`, `episode_ref`, and lowercase 64-hex `source_digest`.
+
+It reads only canonical local report-bundle metadata. It provides no body search, raw manifest, source or absolute paths, export/copy/zip/republish, DB/FTS/vector/cache, RSS/HTTP/network, LLM, `.env`, download, transcription, remediation, or latest/currentness claim. Inspect verifies local bundle self-consistency only and always returns `source_currentness_status=not_evaluated`. Boundary shorthand: no raw manifest; no DB/FTS/vector/cache; no RSS/HTTP/LLM/.env/download/transcription/remediation; no latest selector.
+
+The equivalent thin CLI is `scripts/query_verified_research_report_catalog.py`:
+
+```powershell
+python scripts/query_verified_research_report_catalog.py list --podcast-id gooaye --limit 50
+python scripts/query_verified_research_report_catalog.py search "EP672" --podcast-id gooaye
+python scripts/query_verified_research_report_catalog.py inspect gooaye EP672 <lowercase-64-hex-source-digest>
+```
 
 ## Safety
 

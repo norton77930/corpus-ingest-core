@@ -208,3 +208,68 @@ def test_result_to_dict_is_metadata_only(monkeypatch, tmp_path):
     assert "private transcript sentinel" not in serialized
     assert "api_key" not in serialized.casefold()
     assert isinstance(payload.get("bundle_dir"), str)
+
+
+@pytest.mark.parametrize(
+    ("confirm", "with_lineage", "expected_outcome"),
+    (
+        (False, True, "ready"),
+        (True, False, "blocked"),
+        (True, True, "completed"),
+    ),
+)
+def test_all_terminal_paths_do_not_dispatch_upstream_workflows(
+    monkeypatch, tmp_path, confirm, with_lineage, expected_outcome
+):
+    """019 only reads verified inputs, then optionally publishes its own bundle."""
+
+    import test_latest_episode_verified_research_report_workflow_runner as t018
+    from podcast_ingest_core import run_episode_verified_research_report_workflow
+    import podcast_ingest_core.cache as cache
+    import podcast_ingest_core.corpus_episode_completion_workflow_runner as completion
+    import podcast_ingest_core.corpus_episode_workflow_runner as episode_workflow
+    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as latest_deterministic
+    import podcast_ingest_core.corpus_remediation_runner as remediation
+    import podcast_ingest_core.corpus_semantic_remediation_runner as semantic_remediation
+    import podcast_ingest_core.downloader as downloader
+    import podcast_ingest_core.feed_reader as feed_reader
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as latest_verified
+    import podcast_ingest_core.llm_provider as llm_provider
+    import podcast_ingest_core.research_workflow as research_workflow
+    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+    import podcast_ingest_core.stock_lens_synthesis as stock_lens_synthesis
+    import podcast_ingest_core.transcriber as transcriber
+
+    t018._write_completed_artifacts(monkeypatch, tmp_path, with_lineage=with_lineage)
+
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError("SPEC 019 must not dispatch an upstream workflow")
+
+    # These are observable outbound safety boundaries, rather than private
+    # readiness helpers. They must remain untouched in every terminal mode.
+    monkeypatch.setattr(feed_reader.feedparser, "parse", fail_if_called)
+    monkeypatch.setattr(llm_provider, "create_provider", fail_if_called)
+    monkeypatch.setattr(semantic_summarizer, "create_provider", fail_if_called)
+    monkeypatch.setattr(stock_lens_synthesis, "create_provider", fail_if_called)
+    monkeypatch.setattr(downloader, "download_audio", fail_if_called)
+    monkeypatch.setattr(transcriber, "transcribe_episode", fail_if_called)
+    monkeypatch.setattr(semantic_summarizer, "semantic_summarize_episode", fail_if_called)
+    monkeypatch.setattr(semantic_remediation, "run_corpus_semantic_remediation", fail_if_called)
+    monkeypatch.setattr(remediation, "run_corpus_remediation", fail_if_called)
+    monkeypatch.setattr(episode_workflow, "run_corpus_episode_workflow", fail_if_called)
+    monkeypatch.setattr(completion, "run_corpus_episode_completion_workflow", fail_if_called)
+    monkeypatch.setattr(
+        latest_deterministic, "run_corpus_latest_episode_deterministic_workflow", fail_if_called
+    )
+    monkeypatch.setattr(
+        latest_verified, "run_latest_episode_verified_research_report_workflow", fail_if_called
+    )
+    monkeypatch.setattr(research_workflow, "run_research_workflow", fail_if_called)
+    monkeypatch.setattr(cache, "rebuild_cache", fail_if_called)
+
+    result = run_episode_verified_research_report_workflow(
+        "gooaye", "EP700", confirm=confirm
+    )
+
+    assert result.outcome == expected_outcome
+    assert result.confirm is confirm

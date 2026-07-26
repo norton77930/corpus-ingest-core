@@ -1250,6 +1250,44 @@ class CacheRebuildResult:
 
 
 @dataclass(frozen=True)
+class VerifiedResearchReportCatalogItem:
+    """Sanitized manifest-derived summary for one canonical report bundle."""
+
+    podcast_id: str
+    episode_ref: str
+    report_version: str
+    source_digest: str
+    schema_version: str
+    include_fixture_verification: bool
+    stock_query_present: bool
+    semantic_review_status: str
+    not_investment_advice: bool
+
+
+@dataclass(frozen=True)
+class VerifiedResearchReportCatalogPage:
+    """A bounded page of sanitized verified research report summaries."""
+
+    items: list[VerifiedResearchReportCatalogItem]
+    limit: int
+    returned_count: int
+    catalog_root_status: str
+    traversal_status: str
+
+
+@dataclass(frozen=True)
+class VerifiedResearchReportCatalogInspection:
+    """Bounded self-consistency verdict for one exact report bundle."""
+
+    locator: dict[str, str]
+    bundle_self_consistency_status: str
+    checks: dict[str, bool | str]
+    source_currentness_status: str
+    safe_metadata: VerifiedResearchReportCatalogItem | None
+    not_investment_advice: bool | None
+
+
+@dataclass(frozen=True)
 class TranscriptSearchResult:
     """SQLite cache 中的逐字稿搜尋結果。"""
 

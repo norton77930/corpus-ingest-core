@@ -27,7 +27,7 @@ semantic work, and exposes one reviewed MCP tool plus a portable Skill. SPEC 017
 The 2026-07-17 `seeded`/`downloaded` mapping gap is a resolved
 historical blocker; the recorded metadata-only EP679 outcome is
 `ready_for_semantic_summary`. Package `018` is the implemented latest-episode verified research report workflow: it has strict zero-write preview, exact episode-scoped `expected_episode_ref` plus exact `api_cost_ack` before protected access, pinned 017 deterministic preparation, semantic review exact `passed` gate, fixed-safe deterministic research, checkpoint/artifact-driven resumption, and atomic source-digest report bundle publication. It exposes one appended reviewed MCP tool and a portable approval Skill; it has no live market API or investment advice.
-Package `019` is the **implemented** explicit-episode verified research report workflow: preview local readiness for a named `episode_ref` (including historical episodes), then confirm-only assemble/publish or reuse an 018-equivalent digest bundle when lineage and review already pass—no LLM, RSS, download, or `api_cost_ack`; MCP tool 16 and portable Skill.
+Package `019` is the **implemented** explicit-episode verified research report workflow: preview local readiness for a named `episode_ref` (including historical episodes), then confirm-only assemble/publish or reuse an 018-equivalent digest bundle when lineage and review already pass—no LLM, RSS, download, or `api_cost_ack`; MCP tool 16 and portable Skill. Package `020` is the **implemented** offline read-only manifest-first verified research report catalog: bounded list/search safe metadata and exact-bundle self-consistency inspection. It appends MCP Tool 17 as a read-query only; no body search/raw manifest/absolute paths/export/DB/cache/network/LLM/latest-currentness claim, and inspect fixes `source_currentness_status=not_evaluated`.
 
 Workflow record: constitution reviewed, no amendment. The backfill follows
 `$speckit-constitution`, `$speckit-specify`, `$speckit-clarify`,
@@ -80,6 +80,7 @@ commit a fixed selector that makes one package appear uniquely active.
 - `017-corpus-latest-episode-deterministic-workflow`: implemented request-bounded latest-episode processing through local deterministic readiness, one MCP tool, and portable Skill.
 - `018-latest-episode-verified-research-report-workflow`: implemented strict-zero-write preview and episode-scoped verified research report workflow, source-digest atomic bundle, one appended MCP tool, and portable Skill.
 - `019-episode-verified-research-report-workflow`: implemented explicit-episode (historical) verified research report assemble/publish workflow; 018-equivalent bundle; no upstream stages/LLM/ack; MCP tool 16 + Skill.
+- `020-verified-research-report-catalog`: implemented offline read-only manifest-first catalog list/search/inspect; append-only MCP Tool 17 read-query; self-consistency only, `source_currentness_status=not_evaluated`.
 
 ## roadmap phase Mapping
 
@@ -140,6 +141,8 @@ commit a fixed selector that makes one package appear uniquely active.
 - `016`: `run_corpus_episode_completion_workflow.py`, `validate_mcp_setup.py`.
 - `017`: `run_corpus_latest_episode_deterministic_workflow.py`, `validate_mcp_setup.py`.
 - `018`: `run_latest_episode_verified_research_report_workflow.py`, `validate_mcp_setup.py`.
+- `019`: `run_episode_verified_research_report_workflow.py`, `validate_mcp_setup.py`.
+- `020`: `query_verified_research_report_catalog.py`, `validate_mcp_setup.py`.
 
 ## tests Mapping
 

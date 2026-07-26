@@ -114,6 +114,9 @@ IGNORED_LOCAL_ONLY_PATHS = [
     "data/external/gooaye/EP1.external-boundary.json",
     "data/stock-lens/gooaye/q.stock-lens.json",
     "data/notes/gooaye/EP1-analysis.md",
+    "data/research-reports/gooaye/EP1/manifest.json",
+    # locally generated package metadata
+    "src/podcast_ingest_core.egg-info/PKG-INFO",
 ]
 
 COMMITTED_TEMPLATE_PATHS = [

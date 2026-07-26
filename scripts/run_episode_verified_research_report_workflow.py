@@ -13,11 +13,28 @@ from podcast_ingest_core.episode_verified_research_report_workflow_runner import
     result_to_dict,
     run_episode_verified_research_report_workflow,
 )
-from podcast_ingest_core.errors import PodcastIngestCoreError
+
+
+_FAILURE_ENVELOPE = {
+    "ok": False,
+    "error_type": "episode_verified_research_report_workflow_failed",
+}
+
+
+class _BoundedArgumentParser(argparse.ArgumentParser):
+    """Convert parser failures into a caller-owned bounded JSON response."""
+
+    def error(self, message: str) -> None:
+        del message
+        raise argparse.ArgumentError(None, "invalid arguments")
+
+    def exit(self, status: int = 0, message: str | None = None) -> None:
+        del status, message
+        raise argparse.ArgumentError(None, "invalid arguments")
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
+    parser = _BoundedArgumentParser(
         description="Preview or publish a verified research report for one explicit episode."
     )
     parser.add_argument("podcast_id", help="Configured podcast id")
@@ -37,8 +54,8 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
 
 
 def main(argv: list[str] | None = None) -> int:
-    args = parse_args(argv)
     try:
+        args = parse_args(argv)
         result = run_episode_verified_research_report_workflow(
             args.podcast_id,
             args.episode_ref,
@@ -46,10 +63,11 @@ def main(argv: list[str] | None = None) -> int:
             stock_query=args.stock_query,
             include_fixture_verification=args.include_fixture_verification,
         )
-    except PodcastIngestCoreError as exc:
-        print(json.dumps({"ok": False, "error": str(exc), "error_type": type(exc).__name__}))
+        payload = {"ok": True, "data": result_to_dict(result)}
+    except Exception:
+        print(json.dumps(_FAILURE_ENVELOPE))
         return 1
-    print(json.dumps({"ok": True, "data": result_to_dict(result)}, ensure_ascii=False, indent=2))
+    print(json.dumps(payload, ensure_ascii=False, indent=2))
     return 0
 
 

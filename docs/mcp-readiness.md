@@ -90,6 +90,10 @@ semantic review has no LLM configuration. The tool writes a metadata-only
 latest 016 report only after a valid confirmed action, and does not rebuild
 index, plan, or SQLite cache automatically.
 
+## 020 Read-Only Verified Report Catalog Tool
+
+The current registry has exactly 17 reviewed tools. Tool 17, `query_verified_research_report_catalog`, is appended after unchanged Tools 1–16 and is a read-query, not a side-effect: it requires no `confirm` or acknowledgement. It provides only offline manifest-first `list`, safe-metadata `search`, and exact-bundle `inspect`; no body search, raw manifest, absolute paths, export, DB/FTS/vector/cache, RSS/HTTP/network, LLM, `.env`, or latest/currentness claim. Inspect always reports `source_currentness_status=not_evaluated`.
+
 ## 對 MCP 友善的設計
 
 - deterministic path：工具可用 `podcast_id` 與 `episode_ref` 找到對應檔案。

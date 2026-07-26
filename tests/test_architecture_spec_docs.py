@@ -257,11 +257,12 @@ def test_corpus_runtime_lifecycle_status_matches_registry_and_roadmap():
     roadmap = _read(DOCS / "roadmap.md")
     assert (
         "Latest implemented corpus package is "
-        "**019-episode-verified-research-report-workflow**"
+        "**020-verified-research-report-catalog**"
     ) in roadmap
     assert "SPEC 017 is Implemented" in roadmap
     assert "SPEC 019 is Implemented" in roadmap
-    assert "next unused feature package number is **020**" in roadmap
+    assert "SPEC 020 is **Implemented**" in roadmap
+    assert "next unused feature package number is **021**" in roadmap
 
 def test_014_stabilization_docs_define_strict_zero_file_dry_run():
     feature = ROOT / "specs" / "014-corpus-fresh-episode-workflow-runner"
@@ -492,7 +493,7 @@ def test_017_latest_episode_deterministic_workflow_docs_and_agent_surface_contra
     assert "Do not call with `confirm=false` before the confirmed call" in skill
     assert "Do not call this tool more than once" in skill
     assert "Do not call with `confirm=true`" not in skill
-    assert "next unused feature package number is **020**" in roadmap
+    assert "next unused feature package number is **021**" in roadmap
 
 
 def test_018_verified_research_report_docs_and_agent_surface_contract():
@@ -543,9 +544,9 @@ def test_018_verified_research_report_docs_and_agent_surface_contract():
     assert "run_latest_episode_verified_research_report_workflow" in readme
     assert "run_latest_episode_verified_research_report_workflow.py" in readme
     assert "latest_episode_verified_research_report_workflow_runner.py" in architecture
-    assert "exact 16 tools" in architecture
+    assert "exact 17 tools" in architecture
     assert "018-latest-episode-verified-research-report-workflow" in handoff
-    assert "16 reviewed tools" in handoff
+    assert "17 reviewed tools" in handoff
     assert "018-latest-episode-verified-research-report-workflow" in roadmap
     assert "018-latest-episode-verified-research-report-workflow" in registry
     assert "run_latest_episode_verified_research_report_workflow.py" in registry
