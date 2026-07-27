@@ -1288,6 +1288,20 @@ class VerifiedResearchReportCatalogInspection:
 
 
 @dataclass(frozen=True)
+class VerifiedResearchReportSourceRevalidation:
+    """Bounded local source-currentness verdict for one exact report bundle."""
+
+    locator: dict[str, str]
+    bundle_self_consistency_status: str
+    lineage_revalidation_status: str
+    source_currentness_status: str
+    checks: dict[str, str]
+    failed_roles: list[str]
+    safe_metadata: VerifiedResearchReportCatalogItem | None
+    not_investment_advice: bool | None
+
+
+@dataclass(frozen=True)
 class TranscriptSearchResult:
     """SQLite cache 中的逐字稿搜尋結果。"""
 

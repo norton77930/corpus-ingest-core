@@ -718,6 +718,7 @@ MCP server 使用官方 Python MCP SDK 的 FastMCP 與 stdio transport，適合 
 - `search_mentions`
 - `rebuild_cache`
 - `query_verified_research_report_catalog`（Tool 17；offline read-only manifest-first list/search/inspect）
+- `revalidate_verified_research_report_sources`（Tool 18；exact-locator offline source revalidation）
 
 Side-effect tools 是：
 
@@ -732,7 +733,7 @@ Side-effect tools 是：
 - `run_latest_episode_verified_research_report_workflow`
 - `run_episode_verified_research_report_workflow`
 
-本機 reviewed stdio registry 共 17 個 tools。Tool 17 `query_verified_research_report_catalog` is append-only；既有 Tools 1–16 contracts/order 不變。它是 read-query，不是 side-effect，不需 `confirm` 或 acknowledgement：只對 local canonical bundles 作 offline manifest-first list/search/inspect，不提供 body search、raw manifest、absolute paths、export、DB/FTS/vector/cache、network/LLM、latest/currentness claim；inspect 固定 `source_currentness_status=not_evaluated`。上述 side-effect tools 預設 `confirm=false`，只回傳 dry-run action plan，不會下載、轉錄或寫檔；確認 action plan 後才使用 `confirm=true`。`run_corpus_episode_completion_workflow` 維持 preview → human approval → one explicit action，`run_corpus_latest_episode_deterministic_workflow` 只處理 latest episode 的本機 deterministic stages 並在 semantic summary 前停止。`run_latest_episode_verified_research_report_workflow` 必須先 preview，再由使用者給出相同 canonical `expected_episode_ref` 與 exact `api_cost_ack` 後只 confirmed 呼叫一次。`run_episode_verified_research_report_workflow` 以明確 `episode_ref`（可為歷史集）做 readiness preview，確認後僅 assemble/publish 同等 digest bundle，不需 `api_cost_ack`、不呼叫 LLM。所有 side-effect tools 完成後都不會自動 rebuild SQLite cache，且不提供投資建議。例如：
+本機 reviewed stdio registry 共 18 個 tools。Tool 18 `revalidate_verified_research_report_sources` append-only；Tools 1–17 contracts/order 不變。它是 read-query，不是 side-effect，不需 `confirm` 或 acknowledgement，只接受 exact `podcast_id`、`episode_ref`、lowercase 64-hex `source_digest`，離線重新驗證一個既有 bundle 的安全 source metadata；不接受 path/output/latest/limit/query/provider/network 輸入，且不寫入。Tool 17 `query_verified_research_report_catalog` 保留既有 append-only list/search/inspect 契約。上述 side-effect tools 預設 `confirm=false`，只回傳 dry-run action plan，不會下載、轉錄或寫檔；確認 action plan 後才使用 `confirm=true`。`run_corpus_episode_completion_workflow` 維持 preview → human approval → one explicit action，`run_corpus_latest_episode_deterministic_workflow` 只處理 latest episode 的本機 deterministic stages 並在 semantic summary 前停止。`run_latest_episode_verified_research_report_workflow` 必須先 preview，再由使用者給出相同 canonical `expected_episode_ref` 與 exact `api_cost_ack` 後只 confirmed 呼叫一次。`run_episode_verified_research_report_workflow` 以明確 `episode_ref`（可為歷史集）做 readiness preview，確認後僅 assemble/publish 同等 digest bundle，不需 `api_cost_ack`、不呼叫 LLM。所有 side-effect tools 完成後都不會自動 rebuild SQLite cache，且不提供投資建議。例如：
 
 ```text
 Call transcribe_episode with confirm=false first to review the action plan.

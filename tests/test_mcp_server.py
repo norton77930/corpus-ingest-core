@@ -1499,3 +1499,86 @@ def test_to_jsonable_handles_semantic_summary_asset():
     assert jsonable["provider"] == "openai-compatible"
     assert jsonable["model"] == "test-model"
     assert jsonable["chunk_count"] == 2
+
+
+def test_source_revalidation_mcp_tool_delegates_once_and_returns_safe_envelope(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    adapter = mcp_server.mcp_verified_research_report_source_revalidation
+    calls = []
+    monkeypatch.setattr(
+        adapter.core,
+        "revalidate_verified_research_report_sources",
+        lambda podcast_id, episode_ref, source_digest: calls.append(
+            (podcast_id, episode_ref, source_digest)
+        )
+        or object(),
+    )
+    monkeypatch.setattr(
+        adapter.core,
+        "result_to_dict",
+        lambda result: {"safe": True, "not_investment_advice": True},
+    )
+
+    response = mcp_server.revalidate_verified_research_report_sources(
+        "gooaye", "EP672", "a" * 64
+    )
+
+    assert calls == [("gooaye", "EP672", "a" * 64)]
+    assert response == {
+        "ok": True,
+        "data": {"safe": True, "not_investment_advice": True},
+    }
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        (" ", "EP672", "a" * 64),
+        ("gooaye", None, "a" * 64),
+        ("gooaye", "EP672", "A" * 64),
+        ("p" * 129, "EP672", "a" * 64),
+        ("gooaye", "E" * 129, "a" * 64),
+    ],
+)
+def test_source_revalidation_mcp_rejects_invalid_input_before_core(monkeypatch, args):
+    from podcast_ingest_core import mcp_server
+
+    adapter = mcp_server.mcp_verified_research_report_source_revalidation
+    monkeypatch.setattr(
+        adapter.core,
+        "revalidate_verified_research_report_sources",
+        lambda *args: pytest.fail("invalid request reached Core"),
+    )
+
+    response = mcp_server.revalidate_verified_research_report_sources(*args)
+
+    assert response == {
+        "ok": False,
+        "error_type": "VerifiedResearchReportSourceRevalidationInputError",
+        "message": "verified research report source revalidation failed",
+    }
+
+
+def test_source_revalidation_mcp_core_failure_is_fixed_and_private_detail_free(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    adapter = mcp_server.mcp_verified_research_report_source_revalidation
+    monkeypatch.setattr(
+        adapter.core,
+        "revalidate_verified_research_report_sources",
+        lambda *args: (_ for _ in ()).throw(RuntimeError(r"D:\\private\\body.txt traceback")),
+    )
+
+    response = mcp_server.revalidate_verified_research_report_sources(
+        "gooaye", "EP672", "a" * 64
+    )
+
+    assert response == {
+        "ok": False,
+        "error_type": "VerifiedResearchReportSourceRevalidationInputError",
+        "message": "verified research report source revalidation failed",
+    }
+    assert "private" not in str(response)
+    assert "body" not in str(response)
+    assert "traceback" not in str(response).casefold()

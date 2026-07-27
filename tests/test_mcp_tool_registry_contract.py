@@ -43,6 +43,7 @@ EPISODE_VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL = (
     "run_episode_verified_research_report_workflow"
 )
 VERIFIED_RESEARCH_REPORT_CATALOG_TOOL = "query_verified_research_report_catalog"
+SOURCE_REVALIDATION_TOOL = "revalidate_verified_research_report_sources"
 LEGACY_TOOL_ORDER = [
     "list_episodes",
     "get_episode",
@@ -70,6 +71,7 @@ EXPECTED_TOOLS = LEGACY_EXPECTED_TOOLS | {
     VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL,
     EPISODE_VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL,
     VERIFIED_RESEARCH_REPORT_CATALOG_TOOL,
+    SOURCE_REVALIDATION_TOOL,
 }
 
 
@@ -82,7 +84,7 @@ def _registered_tool_names() -> set[str]:
 
 def test_mcp_registry_exposes_exactly_the_reviewed_tool_set():
     actual = _registered_tool_names()
-    assert len(actual) == 17
+    assert len(actual) == 18
     assert actual == EXPECTED_TOOLS
     assert LEGACY_EXPECTED_TOOLS <= actual
 
@@ -99,7 +101,42 @@ def test_workflow_tools_are_appended_after_the_preserved_twelve_tool_order():
         VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL,
         EPISODE_VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL,
         VERIFIED_RESEARCH_REPORT_CATALOG_TOOL,
+        SOURCE_REVALIDATION_TOOL,
     ]
+
+
+def test_tools_one_through_seventeen_preserve_exact_signature_order_and_defaults():
+    from podcast_ingest_core import mcp_server
+
+    required = "<required>"
+    expected = {
+        "list_episodes": [("podcast_id", "gooaye"), ("limit", 10)],
+        "get_episode": [("podcast_id", "gooaye"), ("episode_ref", "latest")],
+        "validate_transcript": [("podcast_id", "gooaye"), ("episode_ref", "latest")],
+        "search_transcripts": [("query", required), ("podcast_id", "gooaye"), ("limit", 10), ("search_mode", "auto"), ("context_segments", 0), ("case_sensitive", False)],
+        "search_mentions": [("query", required), ("podcast_id", "gooaye"), ("mention_type", None), ("limit", 10), ("case_sensitive", False)],
+        "rebuild_cache": [("podcast_id", None), ("force", False)],
+        "download_audio": [("podcast_id", "gooaye"), ("episode_ref", "latest"), ("confirm", False), ("force", False)],
+        "summarize_episode_extractive": [("podcast_id", "gooaye"), ("episode_ref", "latest"), ("confirm", False), ("force", False), ("allow_partial", False), ("max_quotes", 10), ("window_seconds", 300)],
+        "extract_mentions": [("podcast_id", "gooaye"), ("episode_ref", "latest"), ("confirm", False), ("force", False), ("allow_partial", False), ("max_evidence_per_mention", 5)],
+        "transcribe_episode": [("podcast_id", "gooaye"), ("episode_ref", "latest"), ("confirm", False), ("model", "tiny"), ("device", "cpu"), ("compute_type", "int8"), ("vad_filter", False), ("force", False)],
+        "semantic_summarize_episode": [("podcast_id", "gooaye"), ("episode_ref", "latest"), ("confirm", False), ("api_cost_ack", ""), ("provider", "openai-compatible"), ("model", None), ("base_url", None), ("api_key_env", "OPENAI_API_KEY"), ("force", False), ("chunk_seconds", 600), ("max_segments_per_chunk", 120), ("allow_partial", False)],
+        "run_research_workflow": [("podcast_id", "gooaye"), ("episode_ref", "latest"), ("stock_query", None), ("confirm", False), ("force", False), ("allow_partial", False), ("include_semantic_summary", False), ("include_stock_lens_synthesis", False), ("api_cost_ack", ""), ("semantic_provider", "openai-compatible"), ("semantic_model", None), ("semantic_base_url", None), ("semantic_api_key_env", "OPENAI_API_KEY"), ("semantic_chunk_seconds", 600), ("semantic_max_segments_per_chunk", 120), ("synthesis_provider", "openai-compatible"), ("synthesis_model", None), ("synthesis_base_url", None), ("synthesis_api_key_env", "OPENAI_API_KEY"), ("synthesis_max_prompt_chars", 24000), ("max_evidence_per_mention", 5), ("report_window_seconds", 300), ("max_evidence_per_section", 5), ("max_candidates_per_node", 5), ("max_evidence_per_candidate", 5), ("max_stock_evidence_items", 10)],
+        "run_corpus_episode_completion_workflow": [("podcast_id", required), ("episode_ref", "latest"), ("action", "next"), ("confirm", False), ("api_cost_ack", ""), ("transcription_model", None), ("transcription_device", "cpu"), ("transcription_compute_type", "int8"), ("transcription_vad_filter", False), ("semantic_provider", "openai-compatible"), ("semantic_model", None), ("semantic_base_url", None), ("semantic_api_key_env", "OPENAI_API_KEY"), ("semantic_chunk_seconds", 600), ("semantic_max_segments_per_chunk", 120)],
+        "run_corpus_latest_episode_deterministic_workflow": [("podcast_id", required), ("confirm", False), ("transcription_model", None), ("transcription_device", "cpu"), ("transcription_compute_type", "int8"), ("transcription_vad_filter", False)],
+        "run_latest_episode_verified_research_report_workflow": [("podcast_id", required), ("confirm", False), ("expected_episode_ref", None), ("api_cost_ack", ""), ("stock_query", None), ("include_fixture_verification", False), ("transcription_model", None), ("transcription_device", "cpu"), ("transcription_compute_type", "int8"), ("transcription_vad_filter", False), ("semantic_provider", "openai-compatible"), ("semantic_model", None), ("semantic_chunk_seconds", 600), ("semantic_max_segments_per_chunk", 120)],
+        "run_episode_verified_research_report_workflow": [("podcast_id", required), ("episode_ref", required), ("confirm", False), ("stock_query", None), ("include_fixture_verification", False)],
+        "query_verified_research_report_catalog": [("action", "list"), ("podcast_id", None), ("episode_ref", None), ("source_digest", None), ("query", None), ("limit", 50)],
+    }
+
+    actual = {
+        name: [
+            (parameter.name, required if parameter.default is inspect.Parameter.empty else parameter.default)
+            for parameter in inspect.signature(getattr(mcp_server, name)).parameters.values()
+        ]
+        for name in expected
+    }
+    assert actual == expected
 
 
 def test_side_effect_tools_default_to_dry_run_confirm_false():
@@ -164,6 +201,22 @@ def test_readme_and_mcp_usage_doc_list_every_registered_tool():
     for name in sorted(EXPECTED_TOOLS):
         assert f"`{name}`" in readme, f"README.md must document MCP tool {name}"
         assert f"`{name}`" in usage, f"docs/mcp-usage.md must document MCP tool {name}"
+
+
+def test_each_client_setup_doc_locks_the_current_registry_contract():
+    for filename in ("claude-mcp-setup.md", "codex-mcp-setup.md"):
+        setup = (ROOT / "docs" / filename).read_text(encoding="utf-8")
+        assert "exactly 18 tools" in setup
+        assert "`revalidate_verified_research_report_sources`" in setup
+        assert "Tools 1–17" in setup
+        assert "現在有 exact 13 個 reviewed tools" not in setup
+        assert "current registry has exactly 17" not in setup
+
+    framework = (ROOT / "docs" / "ai-development-framework.md").read_text(
+        encoding="utf-8"
+    )
+    assert "恰 14 個" not in framework
+    assert "恰 18 個" in framework
 
 
 def test_mcp_workflow_tool_exposes_deliberate_core_parameter_subset():
@@ -282,6 +335,26 @@ def test_catalog_tool_is_read_only_and_exposes_only_bounded_query_inputs():
         "path",
         "output",
         "export",
+        "provider",
+        "network",
+    ):
+        assert forbidden not in signature.parameters
+
+
+def test_source_revalidation_tool_is_read_only_and_exposes_only_exact_locator_inputs():
+    from podcast_ingest_core import mcp_server
+
+    signature = inspect.signature(mcp_server.revalidate_verified_research_report_sources)
+    assert list(signature.parameters) == ["podcast_id", "episode_ref", "source_digest"]
+    assert SOURCE_REVALIDATION_TOOL not in SIDE_EFFECT_TOOLS
+    for forbidden in (
+        "confirm",
+        "ack",
+        "path",
+        "output",
+        "latest",
+        "limit",
+        "query",
         "provider",
         "network",
     ):

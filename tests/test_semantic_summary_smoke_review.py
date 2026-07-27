@@ -497,3 +497,38 @@ def test_red_explicit_quote_attribution_subjects_remain_historical_exceptions(te
     from podcast_ingest_core.report_safety import matched_investment_advice_guard
 
     assert matched_investment_advice_guard(text) is None
+
+
+def test_single_review_inspector_rejects_valid_external_review_path(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A caller-provided file path must not authorize an arbitrary review directory."""
+    import podcast_ingest_core.semantic_review_artifact as artifact
+    import podcast_ingest_core.semantic_summary_smoke_review as smoke_review
+
+    trusted_reports = tmp_path / "trusted-reports"
+    external_reports = tmp_path / "external-reports"
+    external_reports.mkdir()
+    summary_path = tmp_path / "summaries" / "show" / "EP1.semantic.md"
+    summary_bytes = b"Summary mode: semantic-llm\nProvider: local\nModel: fixture\nTranscript status: valid\n## Chunk Summaries\n[00:00:00 - 00:00:01]"
+    payload, evaluation = artifact.semantic_review_payload(
+        podcast_id="show",
+        episode_ref="EP1",
+        semantic_summary_path=summary_path,
+        semantic_summary_bytes=summary_bytes,
+    )
+    assert evaluation.review_status == "passed"
+    external_path = external_reports / "20260101-000000__show__EP1.semantic-review.json"
+    external_path.write_text(json.dumps(payload), encoding="utf-8")
+    monkeypatch.setattr(smoke_review, "REPORTS_DIR", trusted_reports)
+
+    inspection = artifact.inspect_semantic_review_file(
+        "show",
+        "EP1",
+        semantic_summary_path=summary_path,
+        review_path=external_path,
+        semantic_summary_bytes=summary_bytes,
+    )
+
+    assert inspection.review_status == "needs_review"
+    assert inspection.review_payload is None

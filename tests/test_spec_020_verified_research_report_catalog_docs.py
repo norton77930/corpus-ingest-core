@@ -110,8 +110,8 @@ def test_spec_020_implemented_docs_and_handoff_keep_current_contracts() -> None:
     assert 'search "gooaye EP650"' not in quickstart
     assert "Do not change runtime/CLI/MCP in this specification-delivery phase." not in spec
     assert "This package documents a future implementation" not in plan
-    assert "stdio-only MCP server（恰好 17 個 reviewed tools）" in handoff
-    assert "stdio-only MCP server（17 tools）" in handoff
-    assert "恰好 17 個 reviewed tools" in handoff
+    assert "stdio-only MCP server（恰好 18 個 reviewed tools）" in handoff
+    assert "stdio-only MCP server（18 tools）" in handoff
+    assert "恰好 18 個 reviewed tools" in handoff
     assert "MCP tool 16 + portable Skill" not in handoff
     assert "historically MCP Tool 16" in handoff

@@ -39,8 +39,9 @@ args = ["D:/path/to/podcast-ingest-core/scripts/run_mcp_server.py"]
 - `search_mentions`
 - `rebuild_cache`
 - `query_verified_research_report_catalog`
+- `revalidate_verified_research_report_sources`
 
-`rebuild_cache` 是 maintenance tool，只索引既有 artifacts，不會下載音檔、轉錄、摘要或抽 mentions。Search tools 不會自動 rebuild cache；如果 cache 不存在，請先執行 `rebuild_cache`。`query_verified_research_report_catalog` 是 Tool 17 appended-only 的 read-query tool，不是 side-effect：不需要 `confirm` 或 acknowledgement，且不會寫入、匯出、重建 cache 或重新發布報告。
+`rebuild_cache` 是 maintenance tool，只索引既有 artifacts，不會下載音檔、轉錄、摘要或抽 mentions。Search tools 不會自動 rebuild cache；如果 cache 不存在，請先執行 `rebuild_cache`。`query_verified_research_report_catalog` 是 Tool 17 appended-only 的 read-query tool，不是 side-effect：不需要 `confirm` 或 acknowledgement，且不會寫入、匯出、重建 cache 或重新發布報告。`revalidate_verified_research_report_sources` 是 Tool 18 appended-only 的 exact-locator read-query：Tools 1–17 unchanged，不需要 `confirm` 或 acknowledgement，只接受 `podcast_id`、`episode_ref` 與 lowercase 64-hex `source_digest`；不接受 path/output/latest/limit/query/provider/network，離線、零寫入且不提供投資建議。
 
 ### Confirmed Local Side-Effect Tools
 
@@ -123,6 +124,18 @@ The equivalent thin CLI is `scripts/query_verified_research_report_catalog.py`:
 python scripts/query_verified_research_report_catalog.py list --podcast-id gooaye --limit 50
 python scripts/query_verified_research_report_catalog.py search "EP672" --podcast-id gooaye
 python scripts/query_verified_research_report_catalog.py inspect gooaye EP672 <lowercase-64-hex-source-digest>
+```
+
+### Verified Research Report Source Revalidation Tool
+
+- `revalidate_verified_research_report_sources` (Tool 18)
+
+Tool 18 appends after unchanged Tools 1–17. It is a read-query with no `confirm` or acknowledgement and accepts exactly `podcast_id`, `episode_ref`, and lowercase 64-hex `source_digest`. It revalidates one local bundle offline without writes; it has no path/output/latest/limit/query/provider/network input and returns no raw manifest, source path, or body.
+
+The equivalent thin CLI accepts the same three positional locators only:
+
+```powershell
+python scripts/revalidate_verified_research_report_sources.py gooaye EP672 <lowercase-64-hex-source-digest>
 ```
 
 ## Safety

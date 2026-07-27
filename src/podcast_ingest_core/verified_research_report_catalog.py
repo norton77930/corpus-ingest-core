@@ -19,6 +19,7 @@ from .models import (
     VerifiedResearchReportCatalogItem,
     VerifiedResearchReportCatalogPage,
 )
+from .secure_local_snapshot import secure_directory_names
 from .verified_research_report import REPORT_SCHEMA_VERSION
 
 
@@ -47,9 +48,28 @@ class _CatalogRoot:
 
 
 @dataclass(frozen=True)
+class _VerifiedDirectory:
+    """An exact child selected from verified names and bound to one identity."""
+
+    path: Path
+    identity: _PathIdentity
+
+
+@dataclass(frozen=True)
 class _SecureSnapshot:
     raw: bytes
     identity: _PathIdentity
+
+
+@dataclass(frozen=True)
+class _ExactBundleEvidence:
+    """Securely snapshotted exact-bundle evidence; never a public payload."""
+
+    locator: dict[str, str]
+    status: str
+    checks: dict[str, bool]
+    manifest: dict[str, Any] | None
+    safe_metadata: VerifiedResearchReportCatalogItem | None
 
 
 def list_verified_research_reports(
@@ -116,87 +136,74 @@ def inspect_verified_research_report(
 ) -> VerifiedResearchReportCatalogInspection:
     """Inspect one exact bundle's local self-consistency, never source freshness."""
 
-    normalized_podcast_id = _validate_required_identifier(podcast_id, "podcast_id")
-    normalized_episode_ref = _validate_required_identifier(episode_ref, "episode_ref")
-    normalized_digest = _validate_source_digest(source_digest)
-    locator = {
-        "podcast_id": normalized_podcast_id,
-        "episode_ref": normalized_episode_ref,
-        "source_digest": normalized_digest,
-    }
+    locator = _validated_locator(podcast_id, episode_ref, source_digest)
+    evidence = _exact_bundle_evidence(locator)
+    return _inspection(
+        evidence.locator,
+        evidence.status,
+        evidence.checks,
+        evidence.safe_metadata,
+    )
+
+
+def _exact_bundle_evidence(locator: dict[str, str]) -> _ExactBundleEvidence:
+    """Return secure exact-bundle snapshots without dereferencing manifest paths."""
+
     checks = _inspection_checks()
     root, root_status = _catalog_root()
     if root is None:
-        return _inspection(locator, "not_found" if root_status == "missing" else "invalid", checks)
-
-    podcast_dir, podcast_state = _exact_directory_child(root.path, normalized_podcast_id)
+        return _evidence(locator, "not_found" if root_status == "missing" else "invalid", checks)
+    root_directory = _VerifiedDirectory(root.path, root.identity)
+    podcast_dir, podcast_state = _exact_directory_child(root, root_directory, locator["podcast_id"])
     if podcast_dir is None:
-        return _inspection(locator, "not_found" if podcast_state == "missing" else "invalid", checks)
-    if not _safe_directory(root, podcast_dir):
-        return _inspection(locator, "invalid", checks)
-    episode_dir, episode_state = _exact_directory_child(podcast_dir, normalized_episode_ref)
+        return _evidence(locator, "not_found" if podcast_state == "missing" else "invalid", checks)
+    episode_dir, episode_state = _exact_directory_child(root, podcast_dir, locator["episode_ref"])
     if episode_dir is None:
-        return _inspection(locator, "not_found" if episode_state == "missing" else "invalid", checks)
-    if not _safe_directory(root, episode_dir):
-        return _inspection(locator, "invalid", checks)
-    expected_version = f"v1-{normalized_digest}"
-    bundle_dir, version_state = _exact_directory_child(episode_dir, expected_version)
+        return _evidence(locator, "not_found" if episode_state == "missing" else "invalid", checks)
+    expected_version = f"v1-{locator['source_digest']}"
+    bundle_dir, version_state = _exact_directory_child(root, episode_dir, expected_version)
     if bundle_dir is None:
-        return _inspection(locator, "not_found" if version_state == "missing" else "invalid", checks)
-    if not _safe_directory(root, bundle_dir):
-        return _inspection(locator, "invalid", checks)
+        return _evidence(locator, "not_found" if version_state == "missing" else "invalid", checks)
     checks["containment"] = True
-    checks["canonical_version"] = bundle_dir.name == expected_version
-
-    entries = _exact_bundle_entries(root, bundle_dir)
+    checks["canonical_version"] = bundle_dir.path.name == expected_version
+    entries = _exact_bundle_entries(root, bundle_dir.path)
     if entries is None:
-        return _inspection(locator, "invalid", checks)
+        return _evidence(locator, "invalid", checks)
     checks["exact_file_set"] = True
-
-    manifest_snapshot = _secure_snapshot(
-        root,
-        bundle_dir / "manifest.json",
-        entries["manifest.json"],
-        max_bytes=_MAX_MANIFEST_BYTES,
-    )
+    manifest_snapshot = _secure_snapshot(root, bundle_dir.path / "manifest.json", entries["manifest.json"], max_bytes=_MAX_MANIFEST_BYTES)
     manifest = _manifest_from_snapshot(manifest_snapshot)
     if manifest is None:
-        return _inspection(locator, "invalid", checks)
+        return _evidence(locator, "invalid", checks)
     checks["manifest_schema"] = manifest.get("schema_version") == REPORT_SCHEMA_VERSION
     checks["identity"] = _manifest_identity_is_consistent(manifest, locator)
-    summary = _safe_projection(
-        manifest,
-        podcast_id=normalized_podcast_id,
-        episode_ref=normalized_episode_ref,
-        source_digest=normalized_digest,
-    )
-
-    report_json_snapshot = _secure_snapshot(
-        root,
-        bundle_dir / "report.json",
-        entries["report.json"],
-        max_bytes=_MAX_REPORT_BYTES,
-    )
-    report_markdown_snapshot = _secure_snapshot(
-        root,
-        bundle_dir / "report.md",
-        entries["report.md"],
-        max_bytes=_MAX_REPORT_BYTES,
-    )
-    checks["report_json_integrity"] = _report_json_is_consistent(
-        report_json_snapshot.raw if report_json_snapshot is not None else None,
-        manifest,
-        locator,
-    )
-    checks["report_markdown_integrity"] = _file_matches_manifest(
-        report_markdown_snapshot.raw if report_markdown_snapshot is not None else None,
-        manifest,
-        "report.md",
-    )
-    if not _exact_bundle_entries_match(root, bundle_dir, entries):
+    summary = _safe_projection(manifest, **locator)
+    report_json_snapshot = _secure_snapshot(root, bundle_dir.path / "report.json", entries["report.json"], max_bytes=_MAX_REPORT_BYTES)
+    report_markdown_snapshot = _secure_snapshot(root, bundle_dir.path / "report.md", entries["report.md"], max_bytes=_MAX_REPORT_BYTES)
+    checks["report_json_integrity"] = _report_json_is_consistent(report_json_snapshot.raw if report_json_snapshot is not None else None, manifest, locator)
+    checks["report_markdown_integrity"] = _file_matches_manifest(report_markdown_snapshot.raw if report_markdown_snapshot is not None else None, manifest, "report.md")
+    if not _exact_bundle_entries_match(root, bundle_dir.path, entries):
         checks["exact_file_set"] = False
-    status = "valid" if all(checks.values()) else "invalid"
-    return _inspection(locator, status, checks, summary)
+    if not _verified_directory_chain_is_stable(
+        root, (root_directory, podcast_dir, episode_dir, bundle_dir)
+    ):
+        checks["containment"] = False
+    return _evidence(locator, "valid" if all(checks.values()) else "invalid", checks, manifest, summary)
+
+
+def _evidence(
+    locator: dict[str, str], status: str, checks: dict[str, bool],
+    manifest: dict[str, Any] | None = None,
+    safe_metadata: VerifiedResearchReportCatalogItem | None = None,
+) -> _ExactBundleEvidence:
+    return _ExactBundleEvidence(locator, status, checks, manifest, safe_metadata)
+
+
+def _validated_locator(podcast_id: str, episode_ref: str, source_digest: str) -> dict[str, str]:
+    return {
+        "podcast_id": _validate_required_identifier(podcast_id, "podcast_id"),
+        "episode_ref": _validate_required_identifier(episode_ref, "episode_ref"),
+        "source_digest": _validate_source_digest(source_digest),
+    }
 
 
 def _discover_summaries(
@@ -251,20 +258,39 @@ def _discover_summaries(
 
 
 def _catalog_root() -> tuple[_CatalogRoot | None, str]:
-    root = Path(storage.RESEARCH_REPORTS_DIR)
+    # Prove the complete lexical chain before any resolve can dereference a
+    # hostile root or ancestor.  The lexical root remains the containment anchor.
+    root = Path(os.path.abspath(str(storage.RESEARCH_REPORTS_DIR)))
     try:
         root_stat = root.lstat()
     except FileNotFoundError:
         return None, "missing"
     except OSError:
         return None, "invalid"
-    if _is_reparse(root, root_stat) or not stat.S_ISDIR(root_stat.st_mode):
+    if (
+        _is_reparse(root, root_stat)
+        or not stat.S_ISDIR(root_stat.st_mode)
+        or not _safe_root_ancestor_chain(root)
+    ):
         return None, "invalid"
-    try:
-        resolved = root.resolve(strict=True)
-    except OSError:
-        return None, "invalid"
-    return _CatalogRoot(resolved, _path_identity(root_stat)), "available"
+    return _CatalogRoot(root, _path_identity(root_stat)), "available"
+
+
+def _safe_root_ancestor_chain(root: Path) -> bool:
+    """Reject every lexical reparse ancestor, including Windows junctions."""
+
+    current = root
+    while True:
+        try:
+            current_stat = current.lstat()
+        except OSError:
+            return False
+        if _is_reparse(current, current_stat) or not stat.S_ISDIR(current_stat.st_mode):
+            return False
+        parent = current.parent
+        if parent == current:
+            return True
+        current = parent
 
 
 def _bounded_children(directory: Path) -> tuple[list[Path] | None, bool]:
@@ -659,16 +685,63 @@ def _inspection(
     )
 
 
-def _exact_directory_child(directory: Path, expected_name: str) -> tuple[Path | None, str]:
-    children, capped = _bounded_children(directory)
-    if capped:
-        return None, "entry_cap"
-    if children is None:
+def _exact_directory_child(
+    root: _CatalogRoot,
+    directory: _VerifiedDirectory,
+    expected_name: str,
+) -> tuple[_VerifiedDirectory | None, str]:
+    """Select an exact child from handle-verified names and bind its identity."""
+
+    names = secure_directory_names(root.path, directory.path, max_entries=_ENTRY_CAP)
+    if names is None:
         return None, "directory_read"
-    for child in children:
-        if child.name == expected_name:
-            return child, "found"
-    return None, "missing"
+    if not _verified_directory_is_stable(root, directory):
+        return None, "invalid"
+    if expected_name not in names:
+        return None, "missing"
+    candidate = directory.path / expected_name
+    try:
+        before = candidate.lstat()
+    except OSError:
+        return None, "invalid"
+    if _is_reparse(candidate, before) or not stat.S_ISDIR(before.st_mode):
+        return None, "invalid"
+    identity = _path_identity(before)
+    if not _safe_directory(root, candidate):
+        return None, "invalid"
+    # Catch a replacement after pathname validation and before later traversal.
+    try:
+        after = candidate.lstat()
+    except OSError:
+        return None, "invalid"
+    if (
+        _is_reparse(candidate, after)
+        or not stat.S_ISDIR(after.st_mode)
+        or _path_identity(after) != identity
+        or not _verified_directory_is_stable(root, directory)
+    ):
+        return None, "invalid"
+    return _VerifiedDirectory(candidate, identity), "found"
+
+
+def _verified_directory_is_stable(root: _CatalogRoot, directory: _VerifiedDirectory) -> bool:
+    try:
+        current = directory.path.lstat()
+    except OSError:
+        return False
+    return (
+        not _is_reparse(directory.path, current)
+        and stat.S_ISDIR(current.st_mode)
+        and _path_identity(current) == directory.identity
+        and _root_is_stable(root)
+        and _is_contained(root.path, directory.path)
+    )
+
+
+def _verified_directory_chain_is_stable(
+    root: _CatalogRoot, directories: tuple[_VerifiedDirectory, ...]
+) -> bool:
+    return all(_verified_directory_is_stable(root, directory) for directory in directories)
 
 
 def _manifest_identity_is_consistent(manifest: dict[str, Any], locator: dict[str, str]) -> bool:

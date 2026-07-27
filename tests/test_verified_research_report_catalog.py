@@ -617,6 +617,69 @@ def test_list_rejects_symlinked_catalog_root(
     assert page.traversal_status == "incomplete_catalog_root"
 
 
+def test_catalog_root_rejects_mocked_reparse_ancestor_before_root_resolve(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """A hostile lexical ancestor is rejected without resolving the root candidate."""
+    from podcast_ingest_core import list_verified_research_reports
+    from podcast_ingest_core import verified_research_report_catalog as catalog
+
+    root = _use_catalog_root(monkeypatch, tmp_path)
+    root.mkdir()
+    ancestor = root.parent
+    original_is_reparse = catalog._is_reparse
+    original_resolve = Path.resolve
+
+    def mocked_is_reparse(path: Path, value: object) -> bool:
+        return path == ancestor or original_is_reparse(path, value)
+
+    def reject_root_resolve(path: Path, *args: object, **kwargs: object) -> Path:
+        if path == root:
+            raise AssertionError("hostile root candidate was resolved")
+        return original_resolve(path, *args, **kwargs)
+
+    monkeypatch.setattr(catalog, "_is_reparse", mocked_is_reparse)
+    monkeypatch.setattr(Path, "resolve", reject_root_resolve)
+
+    page = list_verified_research_reports()
+
+    assert page.items == []
+    assert page.catalog_root_status == "invalid"
+    assert page.traversal_status == "incomplete_catalog_root"
+
+
+def test_inspect_fails_closed_when_verified_bundle_directory_is_replaced(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Exact inspection cannot use an identically shaped replacement directory."""
+    from podcast_ingest_core import inspect_verified_research_report
+    from podcast_ingest_core import verified_research_report_catalog as catalog
+
+    root = _use_catalog_root(monkeypatch, tmp_path)
+    bundle = _write_inspectable_bundle(root, "show", "EP1", _DIGEST_A)
+    replacement = _write_inspectable_bundle(tmp_path / "replacement", "show", "EP1", _DIGEST_A)
+    retired = tmp_path / "retired-bundle"
+    original_safe_directory = catalog._safe_directory
+    replaced = False
+
+    def validate_then_replace(checked_root: object, candidate: Path) -> bool:
+        nonlocal replaced
+        valid = original_safe_directory(checked_root, candidate)
+        if valid and candidate == bundle and not replaced:
+            replaced = True
+            bundle.rename(retired)
+            replacement.rename(bundle)
+        return valid
+
+    monkeypatch.setattr(catalog, "_safe_directory", validate_then_replace)
+
+    inspection = inspect_verified_research_report("show", "EP1", _DIGEST_A)
+
+    assert replaced is True
+    assert inspection.bundle_self_consistency_status == "invalid"
+    assert inspection.checks["containment"] is False
+
+
 def test_list_fails_closed_when_catalog_root_cannot_be_lstatd(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:

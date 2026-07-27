@@ -13,6 +13,7 @@ from . import corpus_latest_episode_deterministic_workflow_runner as latest_dete
 from . import latest_episode_verified_research_report_workflow_runner as verified_research_report_workflow_runner
 from . import mcp_episode_verified_research_report
 from . import mcp_verified_research_report_catalog
+from . import mcp_verified_research_report_source_revalidation
 from . import downloader
 from . import entity_extractor
 from . import feed_reader
@@ -768,6 +769,22 @@ def query_verified_research_report_catalog(
         source_digest=source_digest,
         query=query,
         limit=limit,
+    )
+
+
+@mcp.tool()
+def revalidate_verified_research_report_sources(
+    podcast_id: str,
+    episode_ref: str,
+    source_digest: str,
+) -> dict[str, Any]:
+    """Revalidate one exact verified-report bundle's local source metadata."""
+
+    return mcp_verified_research_report_source_revalidation.dispatch(
+        success=tool_success,
+        podcast_id=podcast_id,
+        episode_ref=episode_ref,
+        source_digest=source_digest,
     )
 
 

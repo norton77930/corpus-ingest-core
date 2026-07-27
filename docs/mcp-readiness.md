@@ -92,7 +92,7 @@ index, plan, or SQLite cache automatically.
 
 ## 020 Read-Only Verified Report Catalog Tool
 
-The current registry has exactly 17 reviewed tools. Tool 17, `query_verified_research_report_catalog`, is appended after unchanged Tools 1–16 and is a read-query, not a side-effect: it requires no `confirm` or acknowledgement. It provides only offline manifest-first `list`, safe-metadata `search`, and exact-bundle `inspect`; no body search, raw manifest, absolute paths, export, DB/FTS/vector/cache, RSS/HTTP/network, LLM, `.env`, or latest/currentness claim. Inspect always reports `source_currentness_status=not_evaluated`.
+The current registry has exactly 18 reviewed tools. Tool 18, `revalidate_verified_research_report_sources`, is appended after unchanged Tools 1–17 and is a read-query, not a side-effect: it requires no `confirm` or acknowledgement. It accepts only the exact `podcast_id`, `episode_ref`, and lowercase 64-hex `source_digest` locator; it has no path/output/latest/limit/query/provider/network input, does no write, and returns safe metadata only. Tool 17 retains its offline manifest-first `list`, safe-metadata `search`, and exact-bundle `inspect` contract; inspect always reports `source_currentness_status=not_evaluated`.
 
 ## 對 MCP 友善的設計
 

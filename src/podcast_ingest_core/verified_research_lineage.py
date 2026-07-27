@@ -10,6 +10,7 @@ meaningful output.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 import hashlib
 import json
 from pathlib import Path
@@ -25,6 +26,10 @@ from .canonical_transcript import (
 from .errors import VerifiedResearchReportInputError
 from .external_data_verification import VERIFICATION_MODE
 from .semantic_review_artifact import REVIEW_BOUNDARY, REVIEW_MODE, inspect_semantic_review
+from .secure_local_snapshot import secure_read_bytes
+
+
+_MAX_LINEAGE_INPUT_BYTES = 64 * 1024 * 1024
 
 
 LINEAGE_SCHEMA_VERSION = "latest-episode-verified-research-lineage-v2"
@@ -38,6 +43,14 @@ _BASE_ROLES = (
     "industry_mapping",
     "external_boundary",
 )
+
+
+@dataclass(frozen=True)
+class _CurrentVerifiedResearchLineageEvidence:
+    """Split persisted publisher lineage from fresh Core-derived I/O records."""
+
+    publisher_manifest: dict[str, Any]
+    current_artifacts: dict[str, dict[str, Any]]
 
 
 def lineage_path(podcast_id: str, episode_ref: str) -> Path:
@@ -216,12 +229,67 @@ def validate_current_verified_research_lineage(
             raise VerifiedResearchReportInputError(
                 f"verified report {role.replace('_', ' ')} lineage is stale or invalid"
             )
+    # Publisher compatibility intentionally exposes the persisted v2 shape.
+    # It remains comparison-only; fresh artifact records are available only via
+    # the private evidence seam below and are the sole later I/O authority.
     return {
         "schema_version": LINEAGE_SCHEMA_VERSION,
         "quality_gate": LINEAGE_QUALITY_GATE,
         "sidecar_path": _canonical_path(path),
         "artifacts": {role: artifacts[role] for role in sorted(requested)},
     }
+
+
+def _current_verified_research_lineage_evidence(
+    podcast_id: str,
+    episode_ref: str,
+    *,
+    stock_query: str | None,
+    include_fixture_verification: bool,
+    summary_options: dict[str, Any] | None = None,
+    roles: Iterable[str] | None = None,
+    require_generation_proofs: bool = True,
+) -> _CurrentVerifiedResearchLineageEvidence:
+    """Return old publisher manifest plus fresh Core-derived current records.
+
+    Persisted entries validate compatibility and equality only.  Their paths are
+    never returned as a read selector: the second calculation re-derives every
+    expected source path from the locator and fixed Core storage roots.
+    """
+
+    publisher_manifest = validate_current_verified_research_lineage(
+        podcast_id,
+        episode_ref,
+        stock_query=stock_query,
+        include_fixture_verification=include_fixture_verification,
+        summary_options=summary_options,
+        roles=roles,
+        require_generation_proofs=require_generation_proofs,
+    )
+    artifacts = publisher_manifest["artifacts"]
+    requested = set(artifacts)
+    effective_summary_options = summary_options
+    if effective_summary_options is None:
+        recorded_summary = artifacts.get("semantic_summary")
+        effective_summary_options = (
+            recorded_summary.get("options") if isinstance(recorded_summary, dict) else None
+        )
+    try:
+        current = _current_artifacts(
+            podcast_id,
+            episode_ref,
+            stock_query=stock_query,
+            include_fixture_verification=include_fixture_verification,
+            summary_options=effective_summary_options,
+            roles=requested,
+        )
+    except CanonicalTranscriptResolutionError as exc:
+        raise VerifiedResearchReportInputError("verified report canonical transcript is ambiguous") from exc
+    except VerifiedResearchReportInputError:
+        raise
+    except Exception as exc:  # pragma: no cover - bounded final defensive gate.
+        raise VerifiedResearchReportInputError("verified report lineage inspection failed") from exc
+    return _CurrentVerifiedResearchLineageEvidence(publisher_manifest, current)
 
 
 def _current_artifacts(
@@ -242,6 +310,8 @@ def _current_artifacts(
 
     required = set(roles)
     if "fixture" in required:
+        required.add("external_boundary")
+    if "stock_lens" in required:
         required.add("external_boundary")
     if "external_boundary" in required:
         required.add("industry_mapping")
@@ -288,7 +358,9 @@ def _current_artifacts(
 
     if "semantic_review" in required:
         summary_entry = current["semantic_summary"]
-        summary_path = Path(summary_entry["path"])
+        assert title is not None
+        # Re-derive the expected source location; never re-open a metadata path.
+        summary_path = storage.semantic_summary_asset_path(podcast_id, episode_ref, title)
         summary_raw = _read_bytes(summary_path, "semantic summary")
         review = inspect_semantic_review(
             podcast_id,
@@ -397,7 +469,9 @@ def _current_artifacts(
         )
 
     if "fixture" in required:
-        current["fixture"] = _fixture_entry(current["external_boundary"], boundary)
+        current["fixture"] = _fixture_entry(
+            current["external_boundary"], boundary, boundary_raw=boundary_raw
+        )
 
     if "stock_lens" in required:
         if stock_query is None:
@@ -410,7 +484,15 @@ def _current_artifacts(
         current["stock_lens"] = _entry(
             stock_path,
             stock_raw,
-            upstream={"corpus_input_set": _stock_lens_input_set(stock)},
+            upstream={
+                "corpus_input_set": _stock_lens_input_set(
+                    stock,
+                    expected_inputs={
+                        "industry_mapping": current["industry_mapping"]["path"],
+                        "external_boundary": current["external_boundary"]["path"],
+                    },
+                )
+            },
             options={
                 "report_mode": _required_mode(stock, "report_mode", "stock lens"),
                 "max_evidence_items": _artifact_positive_option(
@@ -422,7 +504,9 @@ def _current_artifacts(
     return current
 
 
-def _fixture_entry(boundary_entry: dict[str, Any], boundary: dict[str, Any]) -> dict[str, Any]:
+def _fixture_entry(
+    boundary_entry: dict[str, Any], boundary: dict[str, Any], *, boundary_raw: bytes | None = None
+) -> dict[str, Any]:
     marker = boundary.get("external_data_verification")
     if not isinstance(marker, dict) or marker.get("verification_mode") != VERIFICATION_MODE:
         raise VerifiedResearchReportInputError("verified report fixture verification marker is missing")
@@ -442,13 +526,16 @@ def _fixture_entry(boundary_entry: dict[str, Any], boundary: dict[str, Any]) -> 
             snapshot_path,
             snapshot_sha,
         )
-    ):
+    ) or not _is_sha256(boundary_input_sha):
         raise VerifiedResearchReportInputError("verified report fixture verification marker is invalid")
-    fixture = Path(fixture_path)
-    fixture_raw = _read_bytes(fixture, "fixture")
-    if _canonical_path(fixture) != _canonical_path(_default_fixture_path()) or _sha256(fixture_raw) != fixture_sha:
+    # Marker paths are hostile metadata.  Establish Core-derived canonical paths
+    # before any fixture/snapshot read, then compare the marker strings only.
+    expected_fixture = _default_fixture_path()
+    if fixture_path != _canonical_path(expected_fixture):
         raise VerifiedResearchReportInputError("verified report fixture lineage is stale")
-    snapshot = Path(snapshot_path)
+    expected_boundary_path = boundary_entry.get("path")
+    if not isinstance(expected_boundary_path, str) or boundary_input_path != expected_boundary_path:
+        raise VerifiedResearchReportInputError("verified report fixture lineage is stale")
     snapshot_episode_slug = storage.title_slug(str(boundary["episode_ref"]), "episode")
     expected_snapshot = (
         storage.CORPUS_DIR
@@ -457,12 +544,13 @@ def _fixture_entry(boundary_entry: dict[str, Any], boundary: dict[str, Any]) -> 
         / "preverification-boundaries"
         / f"{snapshot_episode_slug}-{boundary_input_sha}.json"
     )
-    snapshot_raw = _read_bytes(snapshot, "preverification external boundary")
-    if (
-        _canonical_path(snapshot) != _canonical_path(expected_snapshot)
-        or snapshot_sha != boundary_input_sha
-        or _sha256(snapshot_raw) != boundary_input_sha
-    ):
+    if snapshot_path != _canonical_path(expected_snapshot):
+        raise VerifiedResearchReportInputError("verified report preverification boundary snapshot is stale")
+    fixture_raw = _read_bytes(expected_fixture, "fixture")
+    if _sha256(fixture_raw) != fixture_sha:
+        raise VerifiedResearchReportInputError("verified report fixture lineage is stale")
+    snapshot_raw = _read_bytes(expected_snapshot, "preverification external boundary")
+    if snapshot_sha != boundary_input_sha or _sha256(snapshot_raw) != boundary_input_sha:
         raise VerifiedResearchReportInputError("verified report preverification boundary snapshot is stale")
     snapshot_boundary = _read_json(snapshot_raw, "preverification external boundary")
     if (
@@ -471,56 +559,66 @@ def _fixture_entry(boundary_entry: dict[str, Any], boundary: dict[str, Any]) -> 
         or snapshot_boundary.get("title") != boundary.get("title")
     ):
         raise VerifiedResearchReportInputError("verified report preverification boundary snapshot is invalid")
-    return _entry(
-        Path(boundary_entry["path"]),
-        _read_bytes(Path(boundary_entry["path"]), "external boundary"),
-        upstream={
+    # ``boundary_entry`` was built from the current, securely captured boundary
+    # bytes in this invocation.  Do not convert its metadata path back into an
+    # I/O authority merely to construct the fixture's provenance record.
+    if boundary_raw is None:
+        raise VerifiedResearchReportInputError("verified report external boundary lineage is unreadable")
+    return {
+        "path": expected_boundary_path,
+        "sha256": _sha256(boundary_raw),
+        "upstream": {
             "external_boundary_input": {
-                "path": _canonical_path(Path(boundary_input_path)),
+                "path": expected_boundary_path,
                 "sha256": boundary_input_sha,
             },
             "preverification_boundary_snapshot": {
-                "path": _canonical_path(snapshot),
+                "path": _canonical_path(expected_snapshot),
                 "sha256": boundary_input_sha,
             },
         },
-        options={
+        "options": {
             "verification_mode": VERIFICATION_MODE,
-            "fixture_path": _canonical_path(fixture),
+            "fixture_path": _canonical_path(expected_fixture),
             "fixture_sha256": fixture_sha,
         },
-    )
+    }
 
 
-def _stock_lens_input_set(stock: dict[str, Any]) -> list[dict[str, str]]:
-    """Use the exact mapping/boundary paths the stock writer recorded as inputs."""
+def _stock_lens_input_set(
+    stock: dict[str, Any], *, expected_inputs: dict[str, str]
+) -> list[dict[str, str]]:
+    """Compare hostile stock metadata against Core-derived inputs before reads."""
 
+    expected_roles = {"industry_mapping", "external_boundary"}
+    if set(expected_inputs) != expected_roles or not all(
+        isinstance(path, str) and path for path in expected_inputs.values()
+    ):
+        raise VerifiedResearchReportInputError("verified report stock lens input set is invalid")
     raw_inputs = stock.get("input_set_lineage")
-    if not isinstance(raw_inputs, list) or not raw_inputs:
+    if not isinstance(raw_inputs, list) or len(raw_inputs) != len(expected_roles):
         raise VerifiedResearchReportInputError("verified report stock lens input set is missing")
     inputs: list[dict[str, str]] = []
-    seen: set[tuple[str, str]] = set()
+    seen: set[str] = set()
     for item in raw_inputs:
         if (
             not isinstance(item, dict)
             or set(item) != {"role", "path", "sha256"}
-            or item.get("role") not in {"industry_mapping", "external_boundary"}
+            or item.get("role") not in expected_roles
             or not isinstance(item.get("path"), str)
             or not _is_sha256(item.get("sha256"))
         ):
             raise VerifiedResearchReportInputError("verified report stock lens input set is invalid")
-        path = Path(item["path"])
-        canonical = _canonical_path(path)
-        key = (item["role"], canonical)
-        if key in seen or canonical != item["path"]:
+        role = item["role"]
+        if role in seen or item["path"] != expected_inputs[role]:
             raise VerifiedResearchReportInputError("verified report stock lens input set is invalid")
-        seen.add(key)
-        raw = _read_bytes(path, item["role"])
+        seen.add(role)
+        # Read only after the recorded string exactly matches Core's canonical path.
+        raw = _read_bytes(Path(expected_inputs[role]), role)
         if _sha256(raw) != item["sha256"]:
             raise VerifiedResearchReportInputError("verified report stock lens input set is stale")
-        inputs.append({"role": item["role"], "path": canonical, "sha256": item["sha256"]})
-    roles = {item["role"] for item in inputs}
-    if roles != {"industry_mapping", "external_boundary"}:
+        inputs.append({"role": role, "path": expected_inputs[role], "sha256": item["sha256"]})
+    if seen != expected_roles:
         raise VerifiedResearchReportInputError("verified report stock lens input set is invalid")
     return sorted(inputs, key=lambda item: (item["role"], item["path"]))
 
@@ -747,10 +845,10 @@ def _artifact_positive_option(payload: dict[str, Any], key: str, default: int) -
 
 
 def _config_identity(path: Path) -> dict[str, str | None]:
-    try:
-        raw = path.read_bytes()
-    except OSError:
-        raw = None
+    # Config locations are imported Core constants.  Their parent is therefore
+    # the narrow allowed root; a missing safety proof is represented as absent
+    # identity rather than following a link or reopening an untrusted location.
+    raw = secure_read_bytes(path.parent, path, max_bytes=_MAX_LINEAGE_INPUT_BYTES)
     return {
         "path": _canonical_path(path),
         "sha256": _sha256(raw) if raw is not None else None,
@@ -805,18 +903,49 @@ def _read_json(raw: bytes, role: str) -> dict[str, Any]:
 
 
 def _read_bytes(path: Path, role: str) -> bytes:
-    try:
-        return path.read_bytes()
-    except OSError as exc:
-        raise VerifiedResearchReportInputError(f"verified report {role} lineage is unreadable") from exc
+    """Read only a current Core-derived artifact through the snapshot boundary."""
+
+    root = _lineage_allowed_root(path)
+    raw = secure_read_bytes(root, path, max_bytes=_MAX_LINEAGE_INPUT_BYTES)
+    if raw is None:
+        raise VerifiedResearchReportInputError(f"verified report {role} lineage is unreadable")
+    return raw
+
+
+def _lineage_allowed_root(path: Path) -> Path:
+    """Choose a fixed Core storage root, never a root inferred from metadata."""
+
+    roots = (
+        storage.TRANSCRIPTS_DIR,
+        storage.SUMMARIES_DIR,
+        storage.MENTIONS_DIR,
+        storage.REPORTS_DIR,
+        storage.MAPPINGS_DIR,
+        storage.EXTERNAL_DIR,
+        storage.STOCK_LENS_DIR,
+        storage.CORPUS_DIR,
+        _semantic_review_reports_dir(),
+        _default_fixture_path().parent,
+    )
+    candidate = Path(path).absolute()
+    for root in roots:
+        checked_root = Path(root).absolute()
+        try:
+            candidate.relative_to(checked_root)
+        except ValueError:
+            continue
+        return checked_root
+    # Keep the final check deliberately disjoint from any unknown candidate.
+    return Path(storage.CORPUS_DIR)
 
 
 def _load_existing_sidecar(path: Path, podcast_id: str, episode_ref: str) -> dict[str, Any] | None:
-    if not path.exists():
+    raw = secure_read_bytes(storage.CORPUS_DIR, path, max_bytes=_MAX_LINEAGE_INPUT_BYTES)
+    if raw is None:
         return None
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        payload = json.loads(raw.decode("utf-8"))
+    except (UnicodeDecodeError, json.JSONDecodeError):
         return None
     if (
         not isinstance(payload, dict)

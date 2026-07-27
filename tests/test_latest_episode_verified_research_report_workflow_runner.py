@@ -643,6 +643,101 @@ def test_bundle_reuses_identical_digest_and_fails_closed_on_conflicting_final(mo
     assert not list((storage.RESEARCH_REPORTS_DIR / "gooaye" / "EP700").glob("*.staging"))
 
 
+def test_bundle_reuses_legacy_canonical_manifest_source_paths(
+    monkeypatch, tmp_path
+):
+    """Core-derived relative and canonical source strings denote one bundle."""
+    import os
+
+    from podcast_ingest_core.verified_research_report import (
+        assemble_verified_research_report,
+        publish_verified_research_report_bundle,
+    )
+
+    _write_completed_artifacts(monkeypatch, tmp_path)
+    assembly = assemble_verified_research_report("gooaye", "EP700", stock_query=None)
+    assembly = replace(
+        assembly,
+        source_artifacts=[
+            replace(source, path=Path(os.path.relpath(source.path)))
+            for source in assembly.source_artifacts
+        ],
+    )
+    canonical_paths = {
+        source.role: source.path.resolve().as_posix() for source in assembly.source_artifacts
+    }
+    bundle = publish_verified_research_report_bundle(assembly)
+    manifest = json.loads(bundle.manifest_path.read_text(encoding="utf-8"))
+    for source in manifest["source_artifacts"]:
+        source["path"] = canonical_paths[source["role"]]
+    bundle.manifest_path.write_bytes(
+        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8")
+    )
+
+    reused = publish_verified_research_report_bundle(assembly)
+
+    assert reused.reused is True
+    persisted = json.loads(bundle.manifest_path.read_text(encoding="utf-8"))
+    assert {item["role"]: item["path"] for item in persisted["source_artifacts"]} == canonical_paths
+
+
+def test_bundle_reuse_never_resolves_persisted_source_path(monkeypatch, tmp_path):
+    """A hostile manifest path is comparison data, never a Path/resolve authority."""
+    from podcast_ingest_core import VerifiedResearchReportInputError
+    from podcast_ingest_core.verified_research_report import (
+        assemble_verified_research_report,
+        publish_verified_research_report_bundle,
+    )
+
+    _write_completed_artifacts(monkeypatch, tmp_path)
+    assembly = assemble_verified_research_report("gooaye", "EP700", stock_query=None)
+    bundle = publish_verified_research_report_bundle(assembly)
+    manifest = json.loads(bundle.manifest_path.read_text(encoding="utf-8"))
+    hostile = "HOSTILE-PERSISTED-MANIFEST-PATH"
+    manifest["source_artifacts"][0]["path"] = hostile
+    bundle.manifest_path.write_bytes(
+        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8")
+    )
+    original_resolve = Path.resolve
+
+    def reject_hostile_resolve(path: Path, *args: object, **kwargs: object) -> Path:
+        if str(path) == hostile:
+            raise AssertionError("persisted manifest path was resolved")
+        return original_resolve(path, *args, **kwargs)
+
+    monkeypatch.setattr(Path, "resolve", reject_hostile_resolve)
+
+    with pytest.raises(VerifiedResearchReportInputError):
+        publish_verified_research_report_bundle(assembly)
+
+
+@pytest.mark.parametrize("cardinality", ("missing", "extra"))
+def test_bundle_reuse_rejects_manifest_source_artifact_cardinality_mismatch(
+    monkeypatch, tmp_path, cardinality
+):
+    """Malformed persisted cardinality fails as the bounded public conflict."""
+    from podcast_ingest_core import VerifiedResearchReportInputError
+    from podcast_ingest_core.verified_research_report import (
+        assemble_verified_research_report,
+        publish_verified_research_report_bundle,
+    )
+
+    _write_completed_artifacts(monkeypatch, tmp_path)
+    assembly = assemble_verified_research_report("gooaye", "EP700", stock_query=None)
+    bundle = publish_verified_research_report_bundle(assembly)
+    manifest = json.loads(bundle.manifest_path.read_text(encoding="utf-8"))
+    if cardinality == "missing":
+        manifest["source_artifacts"].pop()
+    else:
+        manifest["source_artifacts"].append(dict(manifest["source_artifacts"][0]))
+    bundle.manifest_path.write_bytes(
+        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8")
+    )
+
+    with pytest.raises(VerifiedResearchReportInputError, match="conflicts with source digest"):
+        publish_verified_research_report_bundle(assembly)
+
+
 def test_assembler_rejects_timestampless_verified_evidence_and_source_mutation(monkeypatch, tmp_path):
     from podcast_ingest_core.verified_research_report import (
         VerifiedResearchReportInputError,

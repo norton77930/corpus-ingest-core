@@ -9,6 +9,7 @@ not sufficient evidence.
 from __future__ import annotations
 
 from dataclasses import dataclass
+import fnmatch
 import hashlib
 import json
 from pathlib import Path
@@ -17,6 +18,10 @@ from typing import Any
 
 from . import storage
 from .report_safety import contains_sensitive_text, matched_investment_advice_guard
+from .secure_local_snapshot import secure_directory_names, secure_read_bytes
+
+
+_MAX_REVIEW_BYTES = 64 * 1024 * 1024
 
 
 REVIEW_MODE = "semantic-summary-smoke-review-v1"
@@ -235,11 +240,17 @@ def semantic_review_candidates(
 
     safe_podcast = storage.title_slug(podcast_id, "podcast")
     safe_episode = storage.title_slug(episode_ref, "episode")
-    if not reports_dir.exists():
-        return [], []
     parsed: list[SemanticReviewFilename] = []
     rejected: list[Path] = []
-    for path in sorted(reports_dir.glob(f"*__{safe_podcast}__{safe_episode}.semantic-review*.json")):
+    names = secure_directory_names(reports_dir, reports_dir, max_entries=4_096)
+    if names is None:
+        return [], []
+    paths = [
+        reports_dir / name
+        for name in names
+        if fnmatch.fnmatchcase(name, f"*__{safe_podcast}__{safe_episode}.semantic-review*.json")
+    ]
+    for path in paths:
         candidate = parse_semantic_review_filename(path, podcast_id, episode_ref)
         if candidate is None:
             rejected.append(path)
@@ -261,10 +272,9 @@ def inspect_semantic_review(
 
     summary_raw = semantic_summary_bytes
     if summary_raw is None:
-        try:
-            summary_raw = semantic_summary_path.read_bytes()
-        except OSError:
-            summary_raw = None
+        summary_raw = secure_read_bytes(
+            storage.SUMMARIES_DIR, semantic_summary_path, max_bytes=_MAX_REVIEW_BYTES
+        )
     if summary_raw is None:
         return SemanticReviewInspection("missing", None, None, "missing", None, None)
     try:
@@ -288,6 +298,7 @@ def inspect_semantic_review(
             episode_ref,
             semantic_summary_path=semantic_summary_path,
             review_path=review_path,
+            review_reports_dir=review_reports_dir,
             semantic_summary_bytes=summary_raw,
         )
         if inspection.review_status == "needs_review":
@@ -314,16 +325,22 @@ def inspect_semantic_review_file(
     *,
     semantic_summary_path: Path,
     review_path: Path,
+    review_reports_dir: Path | None = None,
     semantic_summary_bytes: bytes | None = None,
 ) -> SemanticReviewInspection:
-    """Inspect one claimed report path; used by the writer before success returns."""
+    """Inspect one claimed report path beneath a Core-derived trusted report root."""
 
+    if review_reports_dir is None:
+        # Avoid a module cycle while retaining the writer's fixed Core-owned root
+        # for direct inspector callers.
+        from .semantic_summary_smoke_review import REPORTS_DIR
+
+        review_reports_dir = REPORTS_DIR
     summary_raw = semantic_summary_bytes
     if summary_raw is None:
-        try:
-            summary_raw = semantic_summary_path.read_bytes()
-        except OSError:
-            summary_raw = None
+        summary_raw = secure_read_bytes(
+            storage.SUMMARIES_DIR, semantic_summary_path, max_bytes=_MAX_REVIEW_BYTES
+        )
     if summary_raw is None:
         return SemanticReviewInspection("missing", None, None, "missing", None, None)
     try:
@@ -333,10 +350,14 @@ def inspect_semantic_review_file(
     if not summary_raw.strip():
         return SemanticReviewInspection("unavailable", semantic_summary_path, None, "missing", None, None, summary_raw)
     summary_sha256 = hashlib.sha256(summary_raw).hexdigest()
+    review_raw = secure_read_bytes(
+        review_reports_dir, review_path, max_bytes=_MAX_REVIEW_BYTES
+    )
     try:
-        review_raw = review_path.read_bytes()
-        payload = json.loads(review_raw.decode("utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        payload = json.loads(review_raw.decode("utf-8")) if review_raw is not None else None
+    except (UnicodeDecodeError, json.JSONDecodeError):
+        return SemanticReviewInspection("available", semantic_summary_path, summary_sha256, "needs_review", review_path, None, summary_raw)
+    if review_raw is None:
         return SemanticReviewInspection("available", semantic_summary_path, summary_sha256, "needs_review", review_path, None, summary_raw)
     if not _is_authentic_review_payload(
         payload,

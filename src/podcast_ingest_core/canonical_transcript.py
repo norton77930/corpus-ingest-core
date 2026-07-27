@@ -11,6 +11,7 @@ glob result.
 from __future__ import annotations
 
 from contextlib import contextmanager
+import fnmatch
 from contextvars import ContextVar
 from dataclasses import dataclass
 import hashlib
@@ -19,6 +20,10 @@ from pathlib import Path
 from typing import Iterator
 
 from . import storage
+from .secure_local_snapshot import secure_directory_names, secure_read_bytes
+
+
+_MAX_TRANSCRIPT_BYTES = 64 * 1024 * 1024
 
 
 class CanonicalTranscriptResolutionError(ValueError):
@@ -58,9 +63,14 @@ def resolve_canonical_transcript_asset_paths(
         return scoped.paths
 
     transcript_dir = storage.TRANSCRIPTS_DIR / podcast_id
-    if not transcript_dir.exists():
+    names = secure_directory_names(storage.TRANSCRIPTS_DIR, transcript_dir, max_entries=4_096)
+    if names is None:
         return None
-    raw_candidates = sorted(transcript_dir.glob(f"{episode_ref}__*.json"))
+    raw_candidates = [
+        transcript_dir / name
+        for name in names
+        if fnmatch.fnmatchcase(name, f"{episode_ref}__*.json")
+    ]
     candidates = [
         paths
         for path in raw_candidates
@@ -98,11 +108,13 @@ def resolve_canonical_transcript_identity(
     paths = resolve_canonical_transcript_asset_paths(podcast_id, episode_ref)
     if paths is None:
         return None
+    raw = secure_read_bytes(storage.TRANSCRIPTS_DIR, paths.json_path, max_bytes=_MAX_TRANSCRIPT_BYTES)
     try:
-        raw = paths.json_path.read_bytes()
-        payload = json.loads(raw.decode("utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
+        payload = json.loads(raw.decode("utf-8")) if raw is not None else None
+    except (UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise CanonicalTranscriptResolutionError("canonical transcript is unreadable") from exc
+    if raw is None:
+        raise CanonicalTranscriptResolutionError("canonical transcript is unreadable")
     if not isinstance(payload, dict):
         raise CanonicalTranscriptResolutionError("canonical transcript identity is invalid")
     title = payload.get("title")
@@ -147,9 +159,10 @@ def _identity_valid_paths(
     podcast_id: str,
     episode_ref: str,
 ) -> storage.TranscriptAssetPaths | None:
+    raw = secure_read_bytes(storage.TRANSCRIPTS_DIR, json_path, max_bytes=_MAX_TRANSCRIPT_BYTES)
     try:
-        payload = json.loads(json_path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        payload = json.loads(raw.decode("utf-8")) if raw is not None else None
+    except (UnicodeDecodeError, json.JSONDecodeError):
         return None
     if not isinstance(payload, dict):
         return None
@@ -191,9 +204,10 @@ def _seed_selected_path(
 
 
 def _trusted_seed_title(path: Path, podcast_id: str, episode_ref: str) -> str | None:
+    raw = secure_read_bytes(storage.CORPUS_DIR, path, max_bytes=_MAX_TRANSCRIPT_BYTES)
     try:
-        payload = json.loads(path.read_text(encoding="utf-8"))
-    except (OSError, UnicodeDecodeError, json.JSONDecodeError):
+        payload = json.loads(raw.decode("utf-8")) if raw is not None else None
+    except (UnicodeDecodeError, json.JSONDecodeError):
         return None
     if not isinstance(payload, dict):
         return None
@@ -213,10 +227,12 @@ def _validate_scoped_identity(identity: CanonicalTranscriptIdentity) -> None:
 
     if not _identity_valid_paths(identity.paths.json_path, identity.podcast_id, identity.episode_ref):
         raise CanonicalTranscriptResolutionError("canonical transcript identity is no longer valid")
-    try:
-        current_sha256 = hashlib.sha256(identity.paths.json_path.read_bytes()).hexdigest()
-    except OSError as exc:
-        raise CanonicalTranscriptResolutionError("canonical transcript is unreadable") from exc
+    raw = secure_read_bytes(
+        storage.TRANSCRIPTS_DIR, identity.paths.json_path, max_bytes=_MAX_TRANSCRIPT_BYTES
+    )
+    if raw is None:
+        raise CanonicalTranscriptResolutionError("canonical transcript is unreadable")
+    current_sha256 = hashlib.sha256(raw).hexdigest()
     if current_sha256 != identity.json_sha256:
         raise CanonicalTranscriptResolutionError("canonical transcript changed during invocation")
 

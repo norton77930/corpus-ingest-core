@@ -59,6 +59,7 @@ def review_semantic_summary_smoke(
                 episode_ref,
                 semantic_summary_path=summary_path,
                 review_path=report_json_path,
+                review_reports_dir=REPORTS_DIR,
             )
             if (
                 inspection.review_path != report_json_path

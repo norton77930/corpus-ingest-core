@@ -14,6 +14,7 @@ from .errors import (
     EpisodeVerifiedResearchReportWorkflowRunnerFailedError,
     VerifiedResearchReportInputError,
     VerifiedResearchReportCatalogInputError,
+    VerifiedResearchReportSourceRevalidationInputError,
     CorpusSemanticRemediationRunnerFailedError,
     CorpusLocalTranscriptionRunnerFailedError,
     CorpusIndexFailedError,
@@ -79,6 +80,10 @@ from .verified_research_report_catalog import (
     list_verified_research_reports,
     result_to_dict as verified_research_report_catalog_result_to_dict,
     search_verified_research_reports,
+)
+from .verified_research_report_source_revalidation import (
+    revalidate_verified_research_report_sources,
+    result_to_dict as verified_research_report_source_revalidation_result_to_dict,
 )
 from .entity_extractor import extract_mentions
 from .episode_intelligence import generate_episode_intelligence_report
@@ -156,6 +161,7 @@ from .models import (
     CorpusRemediationWarning,
     VerifiedResearchReportCatalogInspection,
     VerifiedResearchReportCatalogItem,
+    VerifiedResearchReportSourceRevalidation,
     VerifiedResearchReportCatalogPage,
 )
 from .storage import (
@@ -219,7 +225,9 @@ __all__ = [
     "EpisodeVerifiedResearchReportWorkflowRunnerFailedError",
     "VerifiedResearchReportInputError",
     "VerifiedResearchReportCatalogInputError",
+    "VerifiedResearchReportSourceRevalidationInputError",
     "VerifiedResearchReportCatalogItem",
+    "VerifiedResearchReportSourceRevalidation",
     "VerifiedResearchReportCatalogPage",
     "VerifiedResearchReportCatalogInspection",
     "CorpusSemanticRemediationRunAssetPaths",
@@ -288,6 +296,8 @@ __all__ = [
     "load_llm_profile",
     "list_episodes",
     "inspect_verified_research_report",
+    "revalidate_verified_research_report_sources",
+    "verified_research_report_source_revalidation_result_to_dict",
     "list_verified_research_reports",
     "search_verified_research_reports",
     "verified_research_report_catalog_result_to_dict",

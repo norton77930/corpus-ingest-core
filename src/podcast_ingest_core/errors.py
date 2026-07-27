@@ -102,6 +102,10 @@ class VerifiedResearchReportCatalogInputError(PodcastIngestCoreError):
     """Verified research report catalog input is invalid."""
 
 
+class VerifiedResearchReportSourceRevalidationInputError(PodcastIngestCoreError):
+    """Verified research report source revalidation input is invalid."""
+
+
 class LLMProviderConfigError(PodcastIngestCoreError):
     """LLM provider 設定不完整或不合法。"""
 

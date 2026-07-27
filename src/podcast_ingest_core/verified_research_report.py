@@ -27,6 +27,7 @@ from .semantic_review_artifact import (
     inspect_semantic_review as _inspect_semantic_review_artifact,
 )
 from .semantic_summary_identity import canonical_semantic_summary_path_for_title
+from .secure_local_snapshot import secure_read_bytes
 from .canonical_transcript import (
     CanonicalTranscriptResolutionError,
     resolve_canonical_transcript_asset_paths,
@@ -34,6 +35,7 @@ from .canonical_transcript import (
 from .verified_research_lineage import (
     LINEAGE_QUALITY_GATE,
     LINEAGE_SCHEMA_VERSION,
+    _current_verified_research_lineage_evidence,
     validate_current_verified_research_lineage,
 )
 
@@ -71,6 +73,14 @@ class VerifiedResearchSourceArtifact:
 
 
 @dataclass(frozen=True)
+class _CurrentVerifiedResearchSourceSnapshot:
+    """Current canonical lineage and one immutable byte snapshot per source."""
+
+    lineage_manifest: dict[str, Any]
+    source_artifacts: list[VerifiedResearchSourceArtifact]
+
+
+@dataclass(frozen=True)
 class VerifiedResearchReportAssembly:
     """A deterministic report payload with immutable source snapshots."""
 
@@ -99,6 +109,55 @@ class VerifiedResearchReportBundle:
     reused: bool
 
 
+def _current_verified_research_source_snapshot(
+    podcast_id: str,
+    episode_ref: str,
+    *,
+    stock_query: str | None,
+    include_fixture_verification: bool,
+    summary_options: dict[str, Any] | None = None,
+) -> _CurrentVerifiedResearchSourceSnapshot:
+    """Read canonical current sources once after trusted lineage validation.
+
+    This seam never assembles, renders, publishes, claims, or writes a report.
+    Every pathname used for a read came from the lineage validator's canonical
+    current-artifact calculation, not from a published bundle manifest.
+    """
+
+    lineage_evidence = _current_verified_research_lineage_evidence(
+        podcast_id,
+        episode_ref,
+        stock_query=stock_query,
+        include_fixture_verification=include_fixture_verification,
+        summary_options=summary_options,
+        require_generation_proofs=True,
+    )
+    lineage_manifest = lineage_evidence.publisher_manifest
+    expected_roles = [
+        "transcript", "semantic_summary", "semantic_review", "mentions",
+        "intelligence", "industry_mapping", "external_boundary",
+    ]
+    if include_fixture_verification:
+        expected_roles.append("fixture")
+    if stock_query is not None:
+        expected_roles.append("stock_lens")
+    artifacts = lineage_evidence.current_artifacts
+    if not isinstance(artifacts, dict) or set(artifacts) != set(expected_roles):
+        raise VerifiedResearchReportInputError("verified report current lineage role set is invalid")
+    snapshots: list[VerifiedResearchSourceArtifact] = []
+    for role in expected_roles:
+        entry = artifacts.get(role)
+        path = entry.get("path") if isinstance(entry, dict) else None
+        expected_sha = entry.get("sha256") if isinstance(entry, dict) else None
+        if not isinstance(path, str) or not _is_sha256(expected_sha):
+            raise VerifiedResearchReportInputError("verified report current lineage source metadata is invalid")
+        source = _source_artifact(role, Path(path), True)
+        if source.sha256 != expected_sha:
+            raise VerifiedResearchReportInputError("verified report current source changed during snapshot")
+        snapshots.append(source)
+    return _CurrentVerifiedResearchSourceSnapshot(lineage_manifest, snapshots)
+
+
 def assemble_verified_research_report(
     podcast_id: str,
     episode_ref: str,
@@ -124,105 +183,48 @@ def assemble_verified_research_report(
         for path in (transcript_paths.json_path, transcript_paths.text_path, transcript_paths.srt_path)
     ):
         raise VerifiedResearchReportInputError("verified report transcript artifact contract is invalid")
-    lineage_manifest = validate_current_verified_research_lineage(
+    snapshot = _current_verified_research_source_snapshot(
         podcast_id,
         episode_ref,
         stock_query=normalized_stock_query,
         include_fixture_verification=include_fixture_verification,
         summary_options=summary_options,
-        require_generation_proofs=True,
     )
-    transcript_source = _source_artifact("transcript", transcript_paths.json_path, True)
+    lineage_manifest = snapshot.lineage_manifest
+    sources_by_role = {source.role: source for source in snapshot.source_artifacts}
+    transcript_source = sources_by_role["transcript"]
+    summary_source = sources_by_role["semantic_summary"]
+    review_source = sources_by_role["semantic_review"]
+    mentions_source = sources_by_role["mentions"]
+    intelligence_source = sources_by_role["intelligence"]
+    mapping_source = sources_by_role["industry_mapping"]
+    boundary_source = sources_by_role["external_boundary"]
     transcript = _json_from_source(transcript_source, "transcript")
     title = _identity_title(transcript, podcast_id, episode_ref, "transcript")
     _assert_safe_source_bytes(transcript_source, "transcript")
     _validate_transcript_snapshot(transcript)
-
-    semantic_summary_path = canonical_semantic_summary_path_for_title(
-        podcast_id, episode_ref, title
-    )
-    if semantic_summary_path is None:
-        raise VerifiedResearchReportInputError("verified report semantic summary identity is invalid")
-    summary_source = _source_artifact("semantic_summary", semantic_summary_path, True)
     semantic_summary = _text_from_source(summary_source, "semantic summary")
     _assert_safe_source_bytes(summary_source, "semantic summary")
-    inspection = inspect_semantic_review(
-        podcast_id,
-        episode_ref,
-        semantic_summary_path=semantic_summary_path,
-        semantic_summary_bytes=summary_source.raw_bytes,
-    )
-    if (
-        inspection.summary_status != "available"
-        or inspection.review_status != "passed"
-        or inspection.review_path is None
-        or inspection.review_payload is None
-        or inspection.review_bytes is None
-    ):
-        raise VerifiedResearchReportInputError("verified report semantic review is not current and passed")
-    review_source = _source_artifact_from_bytes(
-        "semantic_review", inspection.review_path, inspection.review_bytes, True
-    )
     _assert_safe_source_bytes(review_source, "semantic review")
-
-    mentions_paths = storage.mention_asset_paths(podcast_id, episode_ref, title)
-    intelligence_paths = storage.episode_intelligence_report_asset_paths(
-        podcast_id, episode_ref, title
-    )
-    mapping_paths = storage.industry_chain_mapping_asset_paths(podcast_id, episode_ref, title)
-    boundary_paths = storage.external_data_boundary_asset_paths(podcast_id, episode_ref, title)
-    mentions_source = _source_artifact("mentions", mentions_paths.json_path, True)
-    intelligence_source = _source_artifact("intelligence", intelligence_paths.json_path, True)
-    mapping_source = _source_artifact("industry_mapping", mapping_paths.json_path, True)
-    boundary_source = _source_artifact("external_boundary", boundary_paths.json_path, True)
     mentions = _identified_json_from_source(mentions_source, podcast_id, episode_ref, "mentions")
-    intelligence = _identified_json_from_source(
-        intelligence_source, podcast_id, episode_ref, "intelligence"
-    )
-    mapping = _identified_json_from_source(
-        mapping_source, podcast_id, episode_ref, "industry mapping"
-    )
-    boundary = _identified_json_from_source(
-        boundary_source, podcast_id, episode_ref, "external boundary"
-    )
+    intelligence = _identified_json_from_source(intelligence_source, podcast_id, episode_ref, "intelligence")
+    mapping = _identified_json_from_source(mapping_source, podcast_id, episode_ref, "industry mapping")
+    boundary = _identified_json_from_source(boundary_source, podcast_id, episode_ref, "external boundary")
     _require_exact_status(intelligence, "report_status", "final", "intelligence")
     _require_exact_status(mapping, "mapping_status", "final", "industry mapping")
     _require_exact_status(boundary, "boundary_status", "final", "external boundary")
-    for source, role in (
-        (mentions_source, "mentions"),
-        (intelligence_source, "intelligence"),
-        (mapping_source, "industry mapping"),
-        (boundary_source, "external boundary"),
-    ):
+    for source, role in ((mentions_source, "mentions"), (intelligence_source, "intelligence"), (mapping_source, "industry mapping"), (boundary_source, "external boundary")):
         _assert_safe_source_bytes(source, role)
-
-    source_artifacts = [
-        transcript_source,
-        summary_source,
-        review_source,
-        mentions_source,
-        intelligence_source,
-        mapping_source,
-        boundary_source,
-    ]
+    source_artifacts = snapshot.source_artifacts
     if include_fixture_verification:
-        fixture_entry = lineage_manifest["artifacts"].get("fixture")
-        fixture_options = fixture_entry.get("options") if isinstance(fixture_entry, dict) else None
-        fixture_path = fixture_options.get("fixture_path") if isinstance(fixture_options, dict) else None
-        if not isinstance(fixture_path, str):
-            raise VerifiedResearchReportInputError("verified report fixture lineage is invalid")
-        fixture_source = _source_artifact("fixture", Path(fixture_path), True)
-        _assert_safe_source_bytes(fixture_source, "fixture")
-        source_artifacts.append(fixture_source)
+        _assert_safe_source_bytes(sources_by_role["fixture"], "fixture")
     stock_lens: dict[str, Any] | None = None
     if normalized_stock_query is not None:
-        stock_paths = storage.stock_lens_report_asset_paths(podcast_id, normalized_stock_query)
-        stock_source = _source_artifact("stock_lens", stock_paths.json_path, True)
+        stock_source = sources_by_role["stock_lens"]
         stock_lens = _json_from_source(stock_source, "stock lens")
         if stock_lens.get("podcast_id") != podcast_id or stock_lens.get("stock_query") != normalized_stock_query:
             raise VerifiedResearchReportInputError("stock lens identity is invalid")
         _assert_safe_source_bytes(stock_source, "stock lens")
-        source_artifacts.append(stock_source)
 
     source_digest = _source_digest(
         podcast_id=podcast_id,
@@ -569,15 +571,47 @@ def _require_exact_status(
         )
 
 
+def _core_source_root(path: Path) -> Path:
+    """Return the Core-owned storage root containing an expected source path."""
+
+    from .external_data_verification import DEFAULT_EXTERNAL_MARKET_DATA_FIXTURE_PATH
+    from .semantic_summary_smoke_review import REPORTS_DIR as semantic_review_reports_dir
+
+    roots = (
+        storage.TRANSCRIPTS_DIR,
+        storage.SUMMARIES_DIR,
+        storage.MENTIONS_DIR,
+        storage.REPORTS_DIR,
+        storage.MAPPINGS_DIR,
+        storage.EXTERNAL_DIR,
+        storage.STOCK_LENS_DIR,
+        storage.CORPUS_DIR,
+        semantic_review_reports_dir,
+        Path(DEFAULT_EXTERNAL_MARKET_DATA_FIXTURE_PATH).parent,
+    )
+    candidate = Path(path).absolute()
+    for root in roots:
+        checked_root = Path(root).absolute()
+        try:
+            candidate.relative_to(checked_root)
+        except ValueError:
+            continue
+        return checked_root
+    # This is fail-closed at secure_read_bytes's lexical containment check.  It
+    # cannot grant a persisted or out-of-policy source an ambient storage root.
+    return storage.CORPUS_DIR
+
+
 def _source_artifact(
     role: str, path: Path, identity_valid: bool
 ) -> VerifiedResearchSourceArtifact:
-    try:
-        raw = path.read_bytes()
-    except OSError as exc:
+    """Capture a report source through the Core-owned snapshot boundary."""
+
+    raw = secure_read_bytes(_core_source_root(path), path, max_bytes=64 * 1024 * 1024)
+    if raw is None:
         raise VerifiedResearchReportInputError(
             f"verified report {role} artifact is unreadable"
-        ) from exc
+        )
     return _source_artifact_from_bytes(role, path, raw, identity_valid)
 
 
@@ -592,6 +626,10 @@ def _source_artifact_from_bytes(
         identity_valid=identity_valid,
         raw_bytes=raw,
     )
+
+
+def _is_sha256(value: object) -> bool:
+    return isinstance(value, str) and re.fullmatch(r"[a-f0-9]{64}", value) is not None
 
 
 def _source_digest(
@@ -1162,13 +1200,74 @@ def _bundle_matches_expected(
             return False
         manifest = json.loads(manifest_bytes.decode("utf-8"))
         expected_manifest = _expected_manifest_payload(assembly)
-        if manifest != expected_manifest:
+        if manifest != expected_manifest and not _legacy_source_paths_match(
+            manifest, expected_manifest, assembly
+        ):
             return False
+        # A legacy path representation may be equivalent, but the persisted
+        # manifest still must be its own canonical byte encoding.  Reuse never
+        # rewrites that historical identity.
         return manifest_bytes == json.dumps(
-            expected_manifest, ensure_ascii=False, indent=2, sort_keys=True
+            manifest, ensure_ascii=False, indent=2, sort_keys=True
         ).encode("utf-8")
     except (OSError, UnicodeDecodeError, json.JSONDecodeError):
         return False
+
+
+def _legacy_source_paths_match(
+    manifest: object,
+    expected_manifest: dict[str, Any],
+    assembly: VerifiedResearchReportAssembly,
+) -> bool:
+    """Accept only Core-derived safe or canonical representations of current sources.
+
+    Persisted paths remain opaque comparison metadata: this function never
+    parses, resolves, opens, or otherwise uses their text as a path authority.
+    A matching legacy manifest is not rewritten during reuse.
+    """
+
+    if not isinstance(manifest, dict):
+        return False
+    expected_sources = expected_manifest.get("source_artifacts")
+    actual_sources = manifest.get("source_artifacts")
+    if (
+        not isinstance(expected_sources, list)
+        or not isinstance(actual_sources, list)
+        or not (
+            len(actual_sources)
+            == len(expected_sources)
+            == len(assembly.source_artifacts)
+        )
+    ):
+        return False
+    if (
+        {key: value for key, value in manifest.items() if key != "source_artifacts"}
+        != {key: value for key, value in expected_manifest.items() if key != "source_artifacts"}
+    ):
+        return False
+    for actual, expected, source in zip(
+        actual_sources, expected_sources, assembly.source_artifacts, strict=True
+    ):
+        if not isinstance(actual, dict) or not isinstance(expected, dict):
+            return False
+        if (
+            {key: value for key, value in actual.items() if key != "path"}
+            != {key: value for key, value in expected.items() if key != "path"}
+        ):
+            return False
+        raw_path = actual.get("path")
+        if not isinstance(raw_path, str):
+            return False
+        try:
+            accepted_paths = {
+                _safe_path(source.path),
+                _canonical_source_path(source.path),
+            }
+        except OSError:
+            return False
+        if raw_path not in accepted_paths:
+            return False
+    return True
 
 
 def _bundle_from_paths(

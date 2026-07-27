@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import argparse
 import asyncio
+import inspect
 import json
 from pathlib import Path
 import platform
@@ -122,6 +123,7 @@ def run_validation(podcast_id: str = "gooaye", query: str = DEFAULT_QUERY) -> di
         _add_check(checks, "side_effect_dry_run_protection", False, message="mcp_server import failed.")
         _add_check(checks, "semantic_ack_guard", False, message="mcp_server import failed.")
         _add_check(checks, "completion_tool_registry", False, message="mcp_server import failed.")
+        _add_check(checks, "source_revalidation_tool_registry", False, message="mcp_server import failed.")
         _add_check(checks, "completion_skill_metadata", False, message="mcp_server import failed.")
         _add_check(
             checks,
@@ -242,8 +244,9 @@ def _check_completion_surface(checks: list[dict[str, Any]], mcp_server) -> None:
         _add_check(
             checks,
             "completion_tool_registry",
-            len(tool_names) == 17
+            len(tool_names) == 18
             and "query_verified_research_report_catalog" in tool_names
+            and "revalidate_verified_research_report_sources" in tool_names
             and COMPLETION_TOOL_NAME in tool_names
             and LATEST_DETERMINISTIC_TOOL_NAME in tool_names
             and VERIFIED_RESEARCH_REPORT_TOOL_NAME in tool_names
@@ -257,6 +260,27 @@ def _check_completion_surface(checks: list[dict[str, Any]], mcp_server) -> None:
             "completion_tool_registry",
             False,
             message="completion tool registry discovery failed.",
+        )
+
+    try:
+        signature = inspect.signature(mcp_server.revalidate_verified_research_report_sources)
+        missing_root = mcp_server.revalidate_verified_research_report_sources(
+            "setup-validator-missing-root", "EP1", "a" * 64
+        )
+        _add_check(
+            checks,
+            "source_revalidation_tool_registry",
+            list(signature.parameters) == ["podcast_id", "episode_ref", "source_digest"]
+            and missing_root.get("ok") is True
+            and set(missing_root) == {"ok", "data"},
+            tool="revalidate_verified_research_report_sources",
+        )
+    except Exception:
+        _add_check(
+            checks,
+            "source_revalidation_tool_registry",
+            False,
+            message="source revalidation tool check failed.",
         )
 
     try:
