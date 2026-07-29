@@ -186,12 +186,13 @@
 ### 已完成到哪
 
 - 最高完成功能階段為 **Phase 6V.1（Review Gate Boundary Alignment）**；上方 Phase 0 → 6V.1 的功能階段皆已落地，並由 `tests/` 對應守衛測試鎖定。
-- Latest implemented corpus package is **020-verified-research-report-catalog**. It follows **019-episode-verified-research-report-workflow**, **018-latest-episode-verified-research-report-workflow**, **017-corpus-latest-episode-deterministic-workflow**, **016-corpus-episode-completion-workflow-runner**, and **015-corpus-semantic-remediation-runner**. Packages `008` through `020` cover index, planning, bounded stage runners, fresh workflow, semantic remediation, completion, verified-report publication, and offline read-only manifest-first verified-report catalog list/search/inspect.
+- Latest implemented corpus package is **021-verified-research-report-source-revalidation**. It follows **020-verified-research-report-catalog**, **019-episode-verified-research-report-workflow**, **018-latest-episode-verified-research-report-workflow**, **017-corpus-latest-episode-deterministic-workflow**, **016-corpus-episode-completion-workflow-runner**, and **015-corpus-semantic-remediation-runner**. Packages `008` through `021` cover index, planning, bounded stage runners, fresh workflow, semantic remediation, completion, verified-report publication, offline read-only catalog list/search/inspect, and exact-locator offline source revalidation with bundle/currentness separation.
 - SPEC 017 is Implemented. The 2026-07-17 confirmed EP679 stop at `blocked` before audio download, caused by the `seeded`/`downloaded` child-outcome mapping gap, is a resolved historical blocker. The final metadata-only confirmed report is `episode_ref=EP679`, `outcome=ready_for_semantic_summary`, `ready_count=1`, `blocked_count=0`, and `failed_count=0`; no semantic stage ran.
 - SPEC 018 is Implemented. It adds strict zero-write preview, exact `expected_episode_ref` plus exact acknowledgement before protected access, one pinned latest episode, semantic review exact `passed` gate, fixed-safe deterministic research, checkpoint/resume metadata, and content-digest JSON/Markdown/manifest bundle publication with atomic reuse/fail-closed behavior. It adds the fifteenth reviewed MCP tool and a portable preview → explicit approval → one confirmed call Skill; no live market API, automatic cache rebuild, retry/scheduler, or investment advice is added.
 - SPEC 019 is Implemented. It adds explicit-`episode_ref` verified research report assemble/publish (including historical episodes): strict zero-write readiness preview, no `api_cost_ack`, no LLM/RSS/download/015–017 chaining, blocked inventory of missing/stale roles, and 018-equivalent atomic digest bundle publish/reuse. It adds the sixteenth reviewed MCP tool and a portable Skill.
 - SPEC 020 is **Implemented**: offline read-only manifest-first catalog list/search/inspect for canonical verified research report bundles. Tool 17 is append-only and read-query only; it has no body search/raw manifest/absolute paths/export/DB/cache/network/LLM/latest-currentness claim, and inspect fixes `source_currentness_status=not_evaluated`. Final repository verification passed with **1084 tests passed, 3 platform-capability skips**, successful `compileall`, and clean `git diff --check`.
-- The next unused feature package number is **021**.
+- SPEC 021 is **Implemented**: exact-locator offline source revalidation through Core, a thin CLI, and appended MCP Tool 18. It separates bundle self-consistency from source currentness, rejects hostile paths before dereference, performs no writes/network/LLM/cache/publish work, and preserves Tools 1–17 unchanged.
+- The next unused feature package number is **022**.
 - 其後為 audit-remediation 硬化（**非編號功能階段，不進 Phase 序列**），對應目前 HEAD：
   - **Batch 2**：安全/契約守衛測試（secret boundary、gitignore policy、MCP tool registry、LLM ack 契約、LLM CLI no-leak、manual cache rebuild）。
   - **Batch 2.5**：AI handoff governance docs 守衛。
@@ -203,6 +204,10 @@
 
 - 上方 **Phase 7A / 7C / 7D.1** 段落收尾提到「Phase 6U semantic summary smoke 仍是下一個可能功能階段」等文字，是**撰寫當時的歷史規劃註記**。**6U/6U.1 已完成**（見上方 Phase 6U、6U.1、6V、6V.1 段落），因此那些指標**不再代表目前的下一步**，僅保留為歷史紀錄。
 - 本 repo 已是多個 as-built backfilled package 的狀態，**目前不預設單一 active 的 next feature**。下一個功能性工作由使用者指定，並依 constitution 走 full Spec Kit flow、於下一個未佔用編號建立新的 `specs/<feature>` package。
+
+### 021 之前的歷史狀態快照
+
+- Historical snapshot before SPEC 021: Latest implemented corpus package is **020-verified-research-report-catalog**; the next unused feature package number is **021**. These statements describe the pre-021 snapshot and are not the current status above.
 
 ### 編號註記
 
