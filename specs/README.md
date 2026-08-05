@@ -102,6 +102,9 @@ commit a fixed selector that makes one package appear uniquely active.
 - Corpus episode completion workflow runner runtime work maps to `016-corpus-episode-completion-workflow-runner`.
 - Corpus latest deterministic workflow runtime work maps to `017-corpus-latest-episode-deterministic-workflow`.
 - Latest verified research report runtime work maps to `018-latest-episode-verified-research-report-workflow`.
+- Explicit-episode verified research report runtime work maps to `019-episode-verified-research-report-workflow`.
+- Verified research report catalog runtime work maps to `020-verified-research-report-catalog`.
+- Verified research report source revalidation runtime work maps to `021-verified-research-report-source-revalidation`.
 
 ## core modules Mapping
 
@@ -122,6 +125,9 @@ commit a fixed selector that makes one package appear uniquely active.
 - `016`: `corpus_episode_completion_workflow_runner.py`, `corpus_episode_intake.py`, `corpus_episode_workflow_runner.py`, `corpus_semantic_remediation_runner.py`, `mcp_server.py`, `storage.py`, `models.py`, `errors.py`, and `.agents/skills/corpus-episode-completion/SKILL.md`.
 - `017`: `corpus_latest_episode_deterministic_workflow_runner.py`, `corpus_episode_intake.py`, `corpus_episode_workflow_runner.py`, `mcp_server.py`, `storage.py`, `models.py`, `errors.py`, and `.agents/skills/corpus-latest-episode-processing/SKILL.md`.
 - `018`: `latest_episode_verified_research_report_workflow_runner.py`, `verified_research_report.py`, `corpus_latest_episode_deterministic_workflow_runner.py`, `research_workflow.py`, `mcp_server.py`, `storage.py`, `models.py`, `errors.py`, and `.agents/skills/latest-episode-verified-research-report/SKILL.md`.
+- `019`: `episode_verified_research_report_workflow_runner.py`, `verified_research_report.py`, `verified_research_lineage.py`, `mcp_episode_verified_research_report.py`, `mcp_server.py`, `storage.py`, `models.py`, `errors.py`, and `.agents/skills/episode-verified-research-report/SKILL.md`.
+- `020`: `verified_research_report_catalog.py`, `mcp_verified_research_report_catalog.py`, `secure_local_snapshot.py`, `mcp_server.py`, `storage.py`, `models.py`, `errors.py`.
+- `021`: `verified_research_report_source_revalidation.py`, `mcp_verified_research_report_source_revalidation.py`, `verified_research_lineage.py`, `verified_research_report.py`, `secure_local_snapshot.py`, `mcp_server.py`, `storage.py`, `models.py`, `errors.py`.
 
 ## CLI/scripts Mapping
 
@@ -144,6 +150,7 @@ commit a fixed selector that makes one package appear uniquely active.
 - `018`: `run_latest_episode_verified_research_report_workflow.py`, `validate_mcp_setup.py`.
 - `019`: `run_episode_verified_research_report_workflow.py`, `validate_mcp_setup.py`.
 - `020`: `query_verified_research_report_catalog.py`, `validate_mcp_setup.py`.
+- `021`: `revalidate_verified_research_report_sources.py`, `validate_mcp_setup.py`.
 
 ## tests Mapping
 
@@ -164,6 +171,9 @@ commit a fixed selector that makes one package appear uniquely active.
 - `016`: `test_corpus_episode_completion_workflow_runner.py` covers strict-zero-file previews, fresh confirmed one-action dispatch, reports, acknowledgement/no-leak boundaries, and CLI; `test_mcp_server.py`, `test_mcp_tool_registry_contract.py`, `test_mcp_setup_validation.py`, and `test_corpus_episode_completion_skill.py` cover the reviewed MCP and portable Skill surfaces.
 - `017`: `test_corpus_latest_episode_deterministic_workflow_runner.py` covers latest pinning, deterministic stage ordering, stop/resume/noop, reports, and thin CLI; `test_mcp_server.py`, `test_mcp_tool_registry_contract.py`, `test_repository_secret_boundary.py`, and `test_corpus_latest_episode_processing_skill.py` cover the reviewed MCP and portable Skill surfaces.
 - `018`: `test_latest_episode_verified_research_report_workflow_runner.py` covers approval ordering, strict zero-write preview, pinned helper reuse, semantic/research gates, provenance, digest bundle publication/reuse/conflict; `test_latest_episode_verified_research_report_skill.py`, `test_mcp_server.py`, `test_mcp_tool_registry_contract.py`, and `test_mcp_setup_validation.py` cover CLI, MCP, setup-validator, and portable Skill surfaces.
+- `019`: `test_episode_verified_research_report_workflow_runner.py` covers explicit-episode preview/confirm, reserved selector rejection, blocked inventory, assemble/publish/reuse/conflict, and no LLM/RSS/015–017 chaining; `test_episode_verified_research_report_workflow_cli.py`, `test_episode_verified_research_report_skill.py`, `test_mcp_server.py`, `test_mcp_tool_registry_contract.py`, and `test_mcp_setup_validation.py` cover CLI, MCP, and portable Skill surfaces.
+- `020`: `test_verified_research_report_catalog.py` covers bounded list/search/inspect, body-read guards, containment/reparse, and `source_currentness_status=not_evaluated`; `test_verified_research_report_catalog_cli.py`, `test_spec_020_verified_research_report_catalog_docs.py`, `test_mcp_server.py`, and `test_mcp_tool_registry_contract.py` cover CLI, docs, and append-only Tool 17.
+- `021`: `test_verified_research_report_source_revalidation.py` covers exact locator, bundle/currentness separation, hostile-path sentinels, lineage/digest reuse, and zero-write offline matrix; `test_verified_research_report_source_revalidation_cli.py`, `test_spec_021_verified_research_report_source_revalidation_docs.py`, `test_mcp_server.py`, and `test_mcp_tool_registry_contract.py` cover CLI, docs, and append-only Tool 18.
 
 ## Classification
 
@@ -179,9 +189,12 @@ commit a fixed selector that makes one package appear uniquely active.
 - human-controlled episode completion workflow runner: package `016`.
 - latest-episode deterministic workflow runner: implemented package `017`.
 - latest-episode verified research report workflow: implemented package `018`.
+- explicit-episode verified research report workflow: implemented package `019`.
+- verified research report catalog (read-only): implemented package `020`.
+- verified research report source revalidation (read-only): implemented package `021`.
 - optional LLM: packages `005` and `006`.
 - local fixture: package `004` and workflow integration in `005`.
-- MCP exposed: packages `003`, `005`, `016`, `017`, and `018`.
+- MCP exposed: packages `003`, `005`, `016`, `017`, `018`, `019`, `020`, and `021`.
 - eval/review only: packages `003`, `006`, and `007`.
 
 ## Safety Boundaries
@@ -198,6 +211,9 @@ commit a fixed selector that makes one package appear uniquely active.
 - corpus episode completion is human-controlled: strict-zero-file preview uses one in-memory snapshot, confirmed rejects `next`/`latest` and drift before one explicit runner dispatch, exact summary acknowledgement precedes profile/`.env`/provider work, and the reviewed local stdio MCP registry has exact 13 tools. The portable Skill has no CLI/terminal fallback, retry, scheduler, or automatic second action.
 - corpus latest deterministic workflow is request-bounded: confirmed mode resolves latest once, then runs only deterministic intake/download/transcription/remediation stages until `ready_for_semantic_summary`; it has no semantic/LLM/provider/env work, retry, scheduler, batch, cache rebuild, or automatic second MCP call. The reviewed local stdio MCP registry had exact 14 tools before 018.
 - latest verified research report workflow is episode-scoped: preview is strict zero-write, confirmed mode checks exact `expected_episode_ref` and exact `api_cost_ack` before protected access, reuses pinned deterministic preparation, requires review exact `passed`, invokes fixed-safe research, and atomically publishes/reuses/fails closed a source-digest JSON/Markdown/manifest bundle. It uses no live market API, no retry/scheduler/cache rebuild, and no investment advice; the reviewed local stdio MCP registry has exact 15 tools.
+- explicit-episode verified research report workflow (019) is assemble/publish only for a named `episode_ref`: preview is strict zero-write, confirm requires local lineage/review readiness, rejects `latest`/`next`, uses no `api_cost_ack`/LLM/RSS/download/015–017 chaining, and reuses the 018 digest bundle publisher. Historical registry size after 019 was exact 16 tools.
+- verified research report catalog (020) is offline read-only and manifest-first: bounded list/search over safe metadata only, exact-locator inspect for self-consistency with fixed `source_currentness_status=not_evaluated`, no body search/raw manifest/absolute paths/export/DB/cache/network/LLM. Tool 17 is append-only read-query; historical registry size after 020 was exact 17 tools.
+- verified research report source revalidation (021) is exact-locator, offline, zero-write: separates bundle self-consistency from source currentness, never dereferences hostile paths, shares 018 lineage/digest rules without publish/repair, and appends Tool 18 as read-query. **Current reviewed local stdio MCP registry has exact 18 tools**; Tools 1–17 remain unchanged.
 - no investment advice: no buy/sell/hold, target price, guaranteed return, or personalized recommendation.
 
 ## Batch Guard Tests（audit hardening）
