@@ -92,7 +92,7 @@ index, plan, or SQLite cache automatically.
 
 ## 020 Read-Only Verified Report Catalog Tool
 
-The current registry has exactly 18 reviewed tools. Tool 18, `revalidate_verified_research_report_sources`, is appended after unchanged Tools 1–17 and is a read-query, not a side-effect: it requires no `confirm` or acknowledgement. It accepts only the exact `podcast_id`, `episode_ref`, and lowercase 64-hex `source_digest` locator; it has no path/output/latest/limit/query/provider/network input, does no write, and returns safe metadata only. Tool 17 retains its offline manifest-first `list`, safe-metadata `search`, and exact-bundle `inspect` contract; inspect always reports `source_currentness_status=not_evaluated`.
+The current registry has exactly 19 reviewed tools. Tool 19, `query_verified_research_report_coverage`, is appended after unchanged Tools 1–18 and is a read-query coverage join (exact `podcast_id`, optional `has_bundle`/`limit`; no confirm/ack; no body reads; zero writes). Tool 18, `revalidate_verified_research_report_sources`, remains exact-locator offline revalidation. Tool 17 retains its offline manifest-first `list`, safe-metadata `search`, and exact-bundle `inspect` contract; inspect always reports `source_currentness_status=not_evaluated`.
 
 ## 對 MCP 友善的設計
 

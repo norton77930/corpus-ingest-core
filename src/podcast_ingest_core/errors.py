@@ -106,6 +106,10 @@ class VerifiedResearchReportSourceRevalidationInputError(PodcastIngestCoreError)
     """Verified research report source revalidation input is invalid."""
 
 
+class VerifiedResearchReportCoverageInputError(PodcastIngestCoreError):
+    """Verified research report coverage index input is invalid."""
+
+
 class LLMProviderConfigError(PodcastIngestCoreError):
     """LLM provider 設定不完整或不合法。"""
 

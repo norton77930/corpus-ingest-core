@@ -62,7 +62,7 @@ default_tools_approval_mode = "prompt"
 - 不要把 user-level config commit 到 repo。
 - 如果需要 API key，請使用本機環境變數，不要寫進 config。
 - `semantic_summarize_episode` 即使出現在 MCP tools 中，也仍需要 `confirm=true` 與 exact `api_cost_ack`。
-- The local reviewed registry has exactly 18 tools. Tool 18, `revalidate_verified_research_report_sources`, is append-only after unchanged Tools 1–17 and is a read-query, not a side-effect: it needs neither `confirm` nor acknowledgement. It accepts only `podcast_id`, `episode_ref`, and lowercase 64-hex `source_digest`; no path/output/latest/limit/query/provider/network input, report/transcript body, raw manifest, absolute path, export, DB/FTS/vector/cache, network/LLM, or write behavior. Tool 17, `query_verified_research_report_catalog`, retains its offline manifest-first list/search/inspect contract and `source_currentness_status=not_evaluated` inspect result.
+- The local reviewed registry has exactly 19 tools. Tool 19, `query_verified_research_report_coverage`, is append-only after unchanged Tools 1–18 and is a read-query coverage join: exact `podcast_id`, optional `has_bundle` and `limit`; no confirm/ack, no body reads, no writes. Tool 18, `revalidate_verified_research_report_sources`, remains exact-locator offline revalidation. Tool 17, `query_verified_research_report_catalog`, retains its offline manifest-first list/search/inspect contract and `source_currentness_status=not_evaluated` inspect result.
 
 ## 4. Codex CLI Command 範例
 
@@ -113,7 +113,7 @@ codex mcp add podcast-ingest-core -- python D:/path/to/podcast-ingest-core/scrip
 
 SPEC 016 完成當時，本機 stdio registry 歷史上達到 exact 13 個 reviewed tools；
 `run_corpus_episode_completion_workflow` 是當時新增的 human-controlled completion
-tool。目前 registry 已由後續 packages append 到 exact 18，且該 completion
+tool。目前 registry 已由後續 packages append 到 exact 19，且該 completion
 workflow 的人類控制契約維持不變。若要讓 Codex 按人類確認流程操作，讓 repository 的 portable
 `corpus-episode-completion` Skill 可見；它是 client-neutral instructions，不需
 把個人 Codex 設定或任何 Skill copy commit 到 repository。

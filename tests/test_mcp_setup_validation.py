@@ -166,7 +166,7 @@ def test_run_validation_checks_completion_tool_skill_and_early_guard(tmp_path, m
 
     checks = {check["name"]: check for check in result["checks"]}
     assert checks["completion_tool_registry"]["ok"] is True
-    assert checks["completion_tool_registry"]["tool_count"] == 18
+    assert checks["completion_tool_registry"]["tool_count"] == 19
     assert checks["source_revalidation_tool_registry"]["ok"] is True
     assert checks["latest_deterministic_skill_metadata"]["ok"] is True
     assert checks["completion_skill_metadata"]["ok"] is True

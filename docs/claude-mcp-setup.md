@@ -41,8 +41,9 @@ Read / query tools 可直接查詢既有 metadata 與 SQLite cache：
 - `rebuild_cache`
 - `query_verified_research_report_catalog` (Tool 17)
 - `revalidate_verified_research_report_sources` (Tool 18)
+- `query_verified_research_report_coverage` (Tool 19)
 
-The local reviewed registry has exactly 18 tools. Tool 18 is append-only: Tools 1–17 keep their contracts/order. It is an offline read-only exact-locator source-revalidation query, not a side-effect: no `confirm` or acknowledgement is required. It accepts only `podcast_id`, `episode_ref`, and lowercase 64-hex `source_digest`; it has no path/output/latest/limit/query/provider/network input and performs no writes. Tool 17 retains its offline read-only manifest-first list/search/inspect contract, including `source_currentness_status=not_evaluated` for inspect.
+The local reviewed registry has exactly 19 tools. Tool 19 is append-only: Tools 1–18 keep their contracts/order. It is an offline read-only episode-centric coverage query (`podcast_id`, optional `has_bundle`, optional `limit`); no `confirm` or acknowledgement. Tool 18 remains exact-locator source revalidation. Tool 17 retains its offline read-only manifest-first list/search/inspect contract, including `source_currentness_status=not_evaluated` for inspect.
 
 Local side-effect tools 預設 `confirm=false`，只回傳 dry-run action plan：
 

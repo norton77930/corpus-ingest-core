@@ -27,7 +27,7 @@ semantic work, and exposes one reviewed MCP tool plus a portable Skill. SPEC 017
 The 2026-07-17 `seeded`/`downloaded` mapping gap is a resolved
 historical blocker; the recorded metadata-only EP679 outcome is
 `ready_for_semantic_summary`. Package `018` is the implemented latest-episode verified research report workflow: it has strict zero-write preview, exact episode-scoped `expected_episode_ref` plus exact `api_cost_ack` before protected access, pinned 017 deterministic preparation, semantic review exact `passed` gate, fixed-safe deterministic research, checkpoint/artifact-driven resumption, and atomic source-digest report bundle publication. It exposes one appended reviewed MCP tool and a portable approval Skill; it has no live market API or investment advice.
-Package `019` is the **implemented** explicit-episode verified research report workflow: preview local readiness for a named `episode_ref` (including historical episodes), then confirm-only assemble/publish or reuse an 018-equivalent digest bundle when lineage and review already pass—no LLM, RSS, download, or `api_cost_ack`; MCP tool 16 and portable Skill. Package `020` is the **implemented** offline read-only manifest-first verified research report catalog: bounded list/search safe metadata and exact-bundle self-consistency inspection. It appends MCP Tool 17 as a read-query only; no body search/raw manifest/absolute paths/export/DB/cache/network/LLM/latest-currentness claim, and inspect fixes `source_currentness_status=not_evaluated`. Package `021` is **Implemented** for its thin interfaces: exact-locator offline source revalidation through a bounded CLI and appended MCP Tool 18; Tools 1–17 remain unchanged. Core claim convergence remains recorded separately.
+Package `019` is the **implemented** explicit-episode verified research report workflow: preview local readiness for a named `episode_ref` (including historical episodes), then confirm-only assemble/publish or reuse an 018-equivalent digest bundle when lineage and review already pass—no LLM, RSS, download, or `api_cost_ack`; MCP tool 16 and portable Skill. Package `020` is the **implemented** offline read-only manifest-first verified research report catalog: bounded list/search safe metadata and exact-bundle self-consistency inspection. It appends MCP Tool 17 as a read-query only; no body search/raw manifest/absolute paths/export/DB/cache/network/LLM/latest-currentness claim, and inspect fixes `source_currentness_status=not_evaluated`. Package `021` is **Implemented** for its thin interfaces: exact-locator offline source revalidation through a bounded CLI and appended MCP Tool 18; Tools 1–17 remain unchanged. Package `022` is **Implemented**: offline episode-centric verified research report coverage (local inventory × 020-safe bundles), thin CLI, and append-only MCP Tool 19; Tools 1–18 unchanged.
 
 Workflow record: constitution reviewed, no amendment. The backfill follows
 `$speckit-constitution`, `$speckit-specify`, `$speckit-clarify`,
@@ -82,6 +82,7 @@ commit a fixed selector that makes one package appear uniquely active.
 - `019-episode-verified-research-report-workflow`: implemented explicit-episode (historical) verified research report assemble/publish workflow; 018-equivalent bundle; no upstream stages/LLM/ack; MCP tool 16 + Skill.
 - `020-verified-research-report-catalog`: implemented offline read-only manifest-first catalog list/search/inspect; append-only MCP Tool 17 read-query; self-consistency only, `source_currentness_status=not_evaluated`.
 - `021-verified-research-report-source-revalidation`: Implemented thin exact-locator CLI and append-only MCP Tool 18 source revalidation interface; Tools 1–17 unchanged, read-only/offline/zero-write.
+- `022-verified-research-report-coverage-index`: Implemented offline episode-centric coverage join; thin CLI and append-only MCP Tool 19; Tools 1–18 unchanged; read-only/offline/zero-write.
 
 ## roadmap phase Mapping
 
@@ -105,6 +106,7 @@ commit a fixed selector that makes one package appear uniquely active.
 - Explicit-episode verified research report runtime work maps to `019-episode-verified-research-report-workflow`.
 - Verified research report catalog runtime work maps to `020-verified-research-report-catalog`.
 - Verified research report source revalidation runtime work maps to `021-verified-research-report-source-revalidation`.
+- Verified research report coverage index runtime work maps to `022-verified-research-report-coverage-index`.
 
 ## core modules Mapping
 
@@ -128,6 +130,7 @@ commit a fixed selector that makes one package appear uniquely active.
 - `019`: `episode_verified_research_report_workflow_runner.py`, `verified_research_report.py`, `verified_research_lineage.py`, `mcp_episode_verified_research_report.py`, `mcp_server.py`, `storage.py`, `models.py`, `errors.py`, and `.agents/skills/episode-verified-research-report/SKILL.md`.
 - `020`: `verified_research_report_catalog.py`, `mcp_verified_research_report_catalog.py`, `secure_local_snapshot.py`, `mcp_server.py`, `storage.py`, `models.py`, `errors.py`.
 - `021`: `verified_research_report_source_revalidation.py`, `mcp_verified_research_report_source_revalidation.py`, `verified_research_lineage.py`, `verified_research_report.py`, `secure_local_snapshot.py`, `mcp_server.py`, `storage.py`, `models.py`, `errors.py`.
+- `022`: `verified_research_report_coverage.py`, `mcp_verified_research_report_coverage.py`, `corpus_index.py` (inventory discovery only), `verified_research_report_catalog.py` (safe summary discovery), `mcp_server.py`, `models.py`, `errors.py`.
 
 ## CLI/scripts Mapping
 
@@ -151,6 +154,7 @@ commit a fixed selector that makes one package appear uniquely active.
 - `019`: `run_episode_verified_research_report_workflow.py`, `validate_mcp_setup.py`.
 - `020`: `query_verified_research_report_catalog.py`, `validate_mcp_setup.py`.
 - `021`: `revalidate_verified_research_report_sources.py`, `validate_mcp_setup.py`.
+- `022`: `query_verified_research_report_coverage.py`, `validate_mcp_setup.py`.
 
 ## tests Mapping
 
@@ -174,6 +178,7 @@ commit a fixed selector that makes one package appear uniquely active.
 - `019`: `test_episode_verified_research_report_workflow_runner.py` covers explicit-episode preview/confirm, reserved selector rejection, blocked inventory, assemble/publish/reuse/conflict, and no LLM/RSS/015–017 chaining; `test_episode_verified_research_report_workflow_cli.py`, `test_episode_verified_research_report_skill.py`, `test_mcp_server.py`, `test_mcp_tool_registry_contract.py`, and `test_mcp_setup_validation.py` cover CLI, MCP, and portable Skill surfaces.
 - `020`: `test_verified_research_report_catalog.py` covers bounded list/search/inspect, body-read guards, containment/reparse, and `source_currentness_status=not_evaluated`; `test_verified_research_report_catalog_cli.py`, `test_spec_020_verified_research_report_catalog_docs.py`, `test_mcp_server.py`, and `test_mcp_tool_registry_contract.py` cover CLI, docs, and append-only Tool 17.
 - `021`: `test_verified_research_report_source_revalidation.py` covers exact locator, bundle/currentness separation, hostile-path sentinels, lineage/digest reuse, and zero-write offline matrix; `test_verified_research_report_source_revalidation_cli.py`, `test_spec_021_verified_research_report_source_revalidation_docs.py`, `test_mcp_server.py`, and `test_mcp_tool_registry_contract.py` cover CLI, docs, and append-only Tool 18.
+- `022`: `test_verified_research_report_coverage.py` covers inventory×bundle join, orphan rows, has_bundle filter, limits, and zero-write; `test_verified_research_report_coverage_cli.py`, `test_spec_022_verified_research_report_coverage_docs.py`, and `test_mcp_tool_registry_contract.py` cover CLI, docs, and append-only Tool 19.
 
 ## Classification
 
@@ -192,9 +197,10 @@ commit a fixed selector that makes one package appear uniquely active.
 - explicit-episode verified research report workflow: implemented package `019`.
 - verified research report catalog (read-only): implemented package `020`.
 - verified research report source revalidation (read-only): implemented package `021`.
+- verified research report coverage index (read-only): implemented package `022`.
 - optional LLM: packages `005` and `006`.
 - local fixture: package `004` and workflow integration in `005`.
-- MCP exposed: packages `003`, `005`, `016`, `017`, `018`, `019`, `020`, and `021`.
+- MCP exposed: packages `003`, `005`, `016`, `017`, `018`, `019`, `020`, `021`, and `022`.
 - eval/review only: packages `003`, `006`, and `007`.
 
 ## Safety Boundaries
@@ -213,7 +219,8 @@ commit a fixed selector that makes one package appear uniquely active.
 - latest verified research report workflow is episode-scoped: preview is strict zero-write, confirmed mode checks exact `expected_episode_ref` and exact `api_cost_ack` before protected access, reuses pinned deterministic preparation, requires review exact `passed`, invokes fixed-safe research, and atomically publishes/reuses/fails closed a source-digest JSON/Markdown/manifest bundle. It uses no live market API, no retry/scheduler/cache rebuild, and no investment advice; the reviewed local stdio MCP registry has exact 15 tools.
 - explicit-episode verified research report workflow (019) is assemble/publish only for a named `episode_ref`: preview is strict zero-write, confirm requires local lineage/review readiness, rejects `latest`/`next`, uses no `api_cost_ack`/LLM/RSS/download/015–017 chaining, and reuses the 018 digest bundle publisher. Historical registry size after 019 was exact 16 tools.
 - verified research report catalog (020) is offline read-only and manifest-first: bounded list/search over safe metadata only, exact-locator inspect for self-consistency with fixed `source_currentness_status=not_evaluated`, no body search/raw manifest/absolute paths/export/DB/cache/network/LLM. Tool 17 is append-only read-query; historical registry size after 020 was exact 17 tools.
-- verified research report source revalidation (021) is exact-locator, offline, zero-write: separates bundle self-consistency from source currentness, never dereferences hostile paths, shares 018 lineage/digest rules without publish/repair, and appends Tool 18 as read-query. **Current reviewed local stdio MCP registry has exact 18 tools**; Tools 1–17 remain unchanged.
+- verified research report source revalidation (021) is exact-locator, offline, zero-write: separates bundle self-consistency from source currentness, never dereferences hostile paths, shares 018 lineage/digest rules without publish/repair, and appends Tool 18 as read-query.
+- verified research report coverage (022) is episode-centric offline zero-write: joins local inventory discovery with 020-safe bundle summaries for one exact `podcast_id`, optional `has_bundle` filter, bounded digests, no body reads, and appends Tool 19 as read-query. **Current reviewed local stdio MCP registry has exact 19 tools**; Tools 1–18 remain unchanged.
 - no investment advice: no buy/sell/hold, target price, guaranteed return, or personalized recommendation.
 
 ## Batch Guard Tests（audit hardening）

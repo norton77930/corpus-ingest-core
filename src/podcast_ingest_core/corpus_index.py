@@ -53,9 +53,15 @@ def generate_corpus_index(podcast_id: str) -> CorpusIndexResult:
     return _persist_corpus_index_snapshot(_build_corpus_index_snapshot(podcast_id))
 
 
+def discover_local_episode_refs(podcast_id: str) -> list[str]:
+    """Return sorted local episode refs for one podcast without writing an index."""
+
+    return _discover_episode_refs(podcast_id)
+
+
 def _build_corpus_index_snapshot(podcast_id: str) -> _CorpusIndexSnapshot:
     paths = storage.corpus_index_asset_paths(podcast_id)
-    episode_refs = _discover_episode_refs(podcast_id)
+    episode_refs = discover_local_episode_refs(podcast_id)
     rows = [_build_episode_row(podcast_id, episode_ref) for episode_ref in episode_refs]
     family_counts = _artifact_family_counts(rows)
     warning_count = sum(len(row.warnings) for row in rows)

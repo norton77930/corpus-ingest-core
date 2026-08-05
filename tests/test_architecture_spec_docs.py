@@ -544,9 +544,9 @@ def test_018_verified_research_report_docs_and_agent_surface_contract():
     assert "run_latest_episode_verified_research_report_workflow" in readme
     assert "run_latest_episode_verified_research_report_workflow.py" in readme
     assert "latest_episode_verified_research_report_workflow_runner.py" in architecture
-    assert "exact 18 tools" in architecture
+    assert "exact 19 tools" in architecture
     assert "018-latest-episode-verified-research-report-workflow" in handoff
-    assert "18 reviewed tools" in handoff
+    assert "19 reviewed tools" in handoff
     assert "018-latest-episode-verified-research-report-workflow" in roadmap
     assert "018-latest-episode-verified-research-report-workflow" in registry
     assert "run_latest_episode_verified_research_report_workflow.py" in registry

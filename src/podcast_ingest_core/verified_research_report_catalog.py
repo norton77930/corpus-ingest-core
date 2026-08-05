@@ -72,6 +72,38 @@ class _ExactBundleEvidence:
     safe_metadata: VerifiedResearchReportCatalogItem | None
 
 
+def require_safe_podcast_id(value: str) -> str:
+    """Validate podcast_id with the same rules as catalog list/search/inspect."""
+
+    return _validate_required_identifier(value, "podcast_id")
+
+
+def discover_eligible_report_summaries(
+    *,
+    podcast_id: str | None = None,
+    episode_ref: str | None = None,
+) -> tuple[list[VerifiedResearchReportCatalogItem], str, str]:
+    """Discover eligible safe summaries without applying list/search limits.
+
+    Returns ``(summaries, catalog_root_status, traversal_status)``.
+    """
+
+    normalized_podcast_id = _validate_optional_identifier(podcast_id, "podcast_id")
+    normalized_episode_ref = _validate_optional_identifier(episode_ref, "episode_ref")
+    root, root_status = _catalog_root()
+    if root is None:
+        traversal_status = "complete" if root_status == "missing" else "incomplete_catalog_root"
+        return [], root_status, traversal_status
+    summaries, traversal_status = _discover_summaries(
+        root,
+        podcast_id=normalized_podcast_id,
+        episode_ref=normalized_episode_ref,
+    )
+    if traversal_status != "complete":
+        return [], root_status, traversal_status
+    return summaries, root_status, traversal_status
+
+
 def list_verified_research_reports(
     *,
     podcast_id: str | None = None,
@@ -80,22 +112,15 @@ def list_verified_research_reports(
 ) -> VerifiedResearchReportCatalogPage:
     """List bounded, manifest-derived summaries of canonical local bundles."""
 
-    normalized_podcast_id = _validate_optional_identifier(podcast_id, "podcast_id")
-    normalized_episode_ref = _validate_optional_identifier(episode_ref, "episode_ref")
     normalized_limit = _validate_limit(limit)
-    root, root_status = _catalog_root()
-    if root is None:
-        traversal_status = "complete" if root_status == "missing" else "incomplete_catalog_root"
-        return _page([], normalized_limit, root_status, traversal_status)
-
-    summaries, traversal_status = _discover_summaries(
-        root,
-        podcast_id=normalized_podcast_id,
-        episode_ref=normalized_episode_ref,
+    summaries, root_status, traversal_status = discover_eligible_report_summaries(
+        podcast_id=podcast_id,
+        episode_ref=episode_ref,
     )
-    if traversal_status != "complete":
-        summaries = []
-    summaries.sort(key=lambda item: (item.podcast_id, item.episode_ref, item.report_version))
+    summaries = sorted(
+        summaries,
+        key=lambda item: (item.podcast_id, item.episode_ref, item.report_version),
+    )
     return _page(summaries[:normalized_limit], normalized_limit, root_status, traversal_status)
 
 
@@ -109,21 +134,11 @@ def search_verified_research_reports(
     """Search only normalized safe locator metadata from eligible manifests."""
 
     normalized_query = _normalize_query(query)
-    normalized_podcast_id = _validate_optional_identifier(podcast_id, "podcast_id")
-    normalized_episode_ref = _validate_optional_identifier(episode_ref, "episode_ref")
     normalized_limit = _validate_limit(limit)
-    root, root_status = _catalog_root()
-    if root is None:
-        traversal_status = "complete" if root_status == "missing" else "incomplete_catalog_root"
-        return _page([], normalized_limit, root_status, traversal_status)
-
-    summaries, traversal_status = _discover_summaries(
-        root,
-        podcast_id=normalized_podcast_id,
-        episode_ref=normalized_episode_ref,
+    summaries, root_status, traversal_status = discover_eligible_report_summaries(
+        podcast_id=podcast_id,
+        episode_ref=episode_ref,
     )
-    if traversal_status != "complete":
-        summaries = []
     matches = [item for item in summaries if _matches_query(item, normalized_query)]
     matches.sort(key=lambda item: (item.podcast_id, item.episode_ref, item.report_version))
     return _page(matches[:normalized_limit], normalized_limit, root_status, traversal_status)

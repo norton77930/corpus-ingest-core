@@ -74,6 +74,8 @@ scripts/
   run_latest_episode_verified_research_report_workflow.py
   run_episode_verified_research_report_workflow.py
   query_verified_research_report_catalog.py
+  revalidate_verified_research_report_sources.py
+  query_verified_research_report_coverage.py
   extract_mentions.py
   rebuild_cache.py
   search_transcripts.py
@@ -326,6 +328,8 @@ run_episode_verified_research_report_workflow(
 
 SPEC 020 提供 `list_verified_research_reports(...)`、`search_verified_research_reports(...)` 與 `inspect_verified_research_report(...)` 的 offline read-only manifest-first catalog seams。它們列出、搜尋安全 manifest-derived metadata，或檢查 exact bundle 的 local self-consistency；不做 body search、不回 raw manifest 或 absolute paths、不匯出、不用 DB/FTS/vector/cache、不用 network/LLM，且不宣稱 source latest/currentness。Inspect 固定回傳 `source_currentness_status=not_evaluated`。
 
+SPEC 022 提供 `list_verified_research_report_coverage(podcast_id, *, has_bundle=None, limit=50)`：以 exact podcast 做本機 inventory × verified-report bundle 的 episode-centric coverage join，可選只列缺 bundle 或已有 bundle 的集數；offline / zero-write / 不讀 report body，也不做 source revalidation 或 currentness claim。
+
 `validate_transcript` 可用來確認逐字稿是完整、空白、部分完成、缺失或損壞。
 
 `run_corpus_episode_intake` 是 dry-run first 的 RSS episode bootstrap runner：dry-run 可解析 `latest` 或單一 explicit episode selector，但不寫檔、不下載、不轉錄、不碰 LLM/MCP/cache；confirmed execution 只寫安全 seed metadata 與 latest deterministic intake report，讓 008/009/012 可以接續發現、規劃與下載 audio。
@@ -485,6 +489,15 @@ python scripts/query_verified_research_report_catalog.py inspect gooaye EP672 <l
 ```
 
 這三個 subcommands 只讀 canonical local `data/research-reports` manifest-first bundles：`list` 可用 exact filters、`search` 只搜尋 safe metadata、`inspect` 只驗證一個 exact bundle 的 local self-consistency。它們不搜尋 report/transcript body、不回 raw manifest/absolute paths、不提供 export、也不用 DB/FTS/vector/cache、RSS/HTTP/network、LLM、`.env`、download、transcription 或 remediation；不接受 latest selector，也不做 source latest/currentness claim。`inspect` 固定 `source_currentness_status=not_evaluated`。Boundary shorthand: no raw manifest; no DB/FTS/vector/cache; no RSS/HTTP/LLM/.env/download/transcription/remediation; no latest selector.
+
+查詢 episode-centric verified research report coverage（SPEC 022）：
+
+```powershell
+python scripts/query_verified_research_report_coverage.py gooaye
+python scripts/query_verified_research_report_coverage.py gooaye --has-bundle false --limit 20
+```
+
+以本機 inventory 與 canonical bundles 做 join：找出缺 report 的集數或已有 digest 的集數。offline / zero-write / 不讀 report body；不重跑 021 revalidation，也不宣稱 source currentness。
 
 列出最新集數：
 
@@ -719,6 +732,7 @@ MCP server 使用官方 Python MCP SDK 的 FastMCP 與 stdio transport，適合 
 - `rebuild_cache`
 - `query_verified_research_report_catalog`（Tool 17；offline read-only manifest-first list/search/inspect）
 - `revalidate_verified_research_report_sources`（Tool 18；exact-locator offline source revalidation）
+- `query_verified_research_report_coverage`（Tool 19；episode-centric offline coverage join）
 
 Side-effect tools 是：
 
@@ -733,7 +747,7 @@ Side-effect tools 是：
 - `run_latest_episode_verified_research_report_workflow`
 - `run_episode_verified_research_report_workflow`
 
-本機 reviewed stdio registry 共 18 個 tools。Tool 18 `revalidate_verified_research_report_sources` append-only；Tools 1–17 contracts/order 不變。它是 read-query，不是 side-effect，不需 `confirm` 或 acknowledgement，只接受 exact `podcast_id`、`episode_ref`、lowercase 64-hex `source_digest`，離線重新驗證一個既有 bundle 的安全 source metadata；不接受 path/output/latest/limit/query/provider/network 輸入，且不寫入。Tool 17 `query_verified_research_report_catalog` 保留既有 append-only list/search/inspect 契約。上述 side-effect tools 預設 `confirm=false`，只回傳 dry-run action plan，不會下載、轉錄或寫檔；確認 action plan 後才使用 `confirm=true`。`run_corpus_episode_completion_workflow` 維持 preview → human approval → one explicit action，`run_corpus_latest_episode_deterministic_workflow` 只處理 latest episode 的本機 deterministic stages 並在 semantic summary 前停止。`run_latest_episode_verified_research_report_workflow` 必須先 preview，再由使用者給出相同 canonical `expected_episode_ref` 與 exact `api_cost_ack` 後只 confirmed 呼叫一次。`run_episode_verified_research_report_workflow` 以明確 `episode_ref`（可為歷史集）做 readiness preview，確認後僅 assemble/publish 同等 digest bundle，不需 `api_cost_ack`、不呼叫 LLM。所有 side-effect tools 完成後都不會自動 rebuild SQLite cache，且不提供投資建議。例如：
+本機 reviewed stdio registry 共 19 個 tools。Tool 19 `query_verified_research_report_coverage` append-only；Tools 1–18 contracts/order 不變。它是 episode-centric read-query，不需 `confirm` 或 acknowledgement，以 exact `podcast_id` 列出本機 inventory 與 verified-report bundle 覆蓋（可選 `has_bundle` 過濾），離線零寫入且不讀 report body。Tool 18 `revalidate_verified_research_report_sources` 仍為 exact-locator offline source revalidation。Tool 17 `query_verified_research_report_catalog` 保留既有 append-only list/search/inspect 契約。上述 side-effect tools 預設 `confirm=false`，只回傳 dry-run action plan，不會下載、轉錄或寫檔；確認 action plan 後才使用 `confirm=true`。`run_corpus_episode_completion_workflow` 維持 preview → human approval → one explicit action，`run_corpus_latest_episode_deterministic_workflow` 只處理 latest episode 的本機 deterministic stages 並在 semantic summary 前停止。`run_latest_episode_verified_research_report_workflow` 必須先 preview，再由使用者給出相同 canonical `expected_episode_ref` 與 exact `api_cost_ack` 後只 confirmed 呼叫一次。`run_episode_verified_research_report_workflow` 以明確 `episode_ref`（可為歷史集）做 readiness preview，確認後僅 assemble/publish 同等 digest bundle，不需 `api_cost_ack`、不呼叫 LLM。所有 side-effect tools 完成後都不會自動 rebuild SQLite cache，且不提供投資建議。例如：
 
 ```text
 Call transcribe_episode with confirm=false first to review the action plan.

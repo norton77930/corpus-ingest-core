@@ -1582,3 +1582,94 @@ def test_source_revalidation_mcp_core_failure_is_fixed_and_private_detail_free(m
     assert "private" not in str(response)
     assert "body" not in str(response)
     assert "traceback" not in str(response).casefold()
+
+
+def test_coverage_mcp_tool_delegates_once_and_returns_safe_envelope(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    adapter = mcp_server.mcp_verified_research_report_coverage
+    calls = []
+    monkeypatch.setattr(
+        adapter.core,
+        "list_verified_research_report_coverage",
+        lambda podcast_id, *, has_bundle=None, limit=50: calls.append(
+            (podcast_id, has_bundle, limit)
+        )
+        or object(),
+    )
+    monkeypatch.setattr(
+        adapter.core,
+        "result_to_dict",
+        lambda result: {
+            "podcast_id": "gooaye",
+            "returned_count": 0,
+            "not_investment_advice": True,
+        },
+    )
+
+    response = mcp_server.query_verified_research_report_coverage(
+        "gooaye", has_bundle=False, limit=20
+    )
+
+    assert calls == [("gooaye", False, 20)]
+    assert response == {
+        "ok": True,
+        "data": {
+            "podcast_id": "gooaye",
+            "returned_count": 0,
+            "not_investment_advice": True,
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"podcast_id": " ", "has_bundle": None, "limit": 50},
+        {"podcast_id": "gooaye", "has_bundle": "yes", "limit": 50},
+        {"podcast_id": "gooaye", "has_bundle": None, "limit": 0},
+        {"podcast_id": "gooaye", "has_bundle": None, "limit": 101},
+        {"podcast_id": "gooaye", "has_bundle": None, "limit": True},
+    ],
+)
+def test_coverage_mcp_rejects_invalid_input_before_core(monkeypatch, kwargs):
+    from podcast_ingest_core import mcp_server
+
+    adapter = mcp_server.mcp_verified_research_report_coverage
+    monkeypatch.setattr(
+        adapter.core,
+        "list_verified_research_report_coverage",
+        lambda *args, **kw: pytest.fail("invalid request reached Core"),
+    )
+
+    response = mcp_server.query_verified_research_report_coverage(**kwargs)
+
+    assert response == {
+        "ok": False,
+        "error_type": "VerifiedResearchReportCoverageInputError",
+        "message": "verified research report coverage query failed",
+    }
+
+
+def test_coverage_mcp_core_failure_is_fixed_and_private_detail_free(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    adapter = mcp_server.mcp_verified_research_report_coverage
+    monkeypatch.setattr(
+        adapter.core,
+        "list_verified_research_report_coverage",
+        lambda *args, **kw: (_ for _ in ()).throw(
+            RuntimeError(r"D:\\private\\report.json traceback")
+        ),
+    )
+
+    response = mcp_server.query_verified_research_report_coverage("gooaye")
+
+    assert response == {
+        "ok": False,
+        "error_type": "VerifiedResearchReportCoverageInputError",
+        "message": "verified research report coverage query failed",
+    }
+    assert "private" not in str(response)
+    assert "report.json" not in str(response)
+    assert "traceback" not in str(response).casefold()

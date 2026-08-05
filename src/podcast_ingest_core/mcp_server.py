@@ -13,6 +13,7 @@ from . import corpus_latest_episode_deterministic_workflow_runner as latest_dete
 from . import latest_episode_verified_research_report_workflow_runner as verified_research_report_workflow_runner
 from . import mcp_episode_verified_research_report
 from . import mcp_verified_research_report_catalog
+from . import mcp_verified_research_report_coverage
 from . import mcp_verified_research_report_source_revalidation
 from . import downloader
 from . import entity_extractor
@@ -785,6 +786,22 @@ def revalidate_verified_research_report_sources(
         podcast_id=podcast_id,
         episode_ref=episode_ref,
         source_digest=source_digest,
+    )
+
+
+@mcp.tool()
+def query_verified_research_report_coverage(
+    podcast_id: str,
+    has_bundle: bool | None = None,
+    limit: int = 50,
+) -> dict[str, Any]:
+    """List episode-centric coverage of local verified research report bundles."""
+
+    return mcp_verified_research_report_coverage.dispatch(
+        success=tool_success,
+        podcast_id=podcast_id,
+        has_bundle=has_bundle,
+        limit=limit,
     )
 
 

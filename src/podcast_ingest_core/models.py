@@ -1302,6 +1302,36 @@ class VerifiedResearchReportSourceRevalidation:
 
 
 @dataclass(frozen=True)
+class VerifiedResearchReportCoverageRow:
+    """Episode-centric join of local inventory presence and eligible report bundles."""
+
+    podcast_id: str
+    episode_ref: str
+    inventory_present: bool
+    has_bundle: bool
+    bundle_count: int
+    source_digests: list[str]
+
+
+@dataclass(frozen=True)
+class VerifiedResearchReportCoveragePage:
+    """Bounded coverage page with podcast-level join summary counts."""
+
+    podcast_id: str
+    items: list[VerifiedResearchReportCoverageRow]
+    limit: int
+    returned_count: int
+    inventory_episode_count: int
+    bundle_episode_count: int
+    with_bundle_count: int
+    without_bundle_count: int
+    orphan_bundle_episode_count: int
+    coverage_status: str
+    catalog_root_status: str
+    not_investment_advice: bool = True
+
+
+@dataclass(frozen=True)
 class TranscriptSearchResult:
     """SQLite cache 中的逐字稿搜尋結果。"""
 

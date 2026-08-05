@@ -15,6 +15,7 @@ from .errors import (
     VerifiedResearchReportInputError,
     VerifiedResearchReportCatalogInputError,
     VerifiedResearchReportSourceRevalidationInputError,
+    VerifiedResearchReportCoverageInputError,
     CorpusSemanticRemediationRunnerFailedError,
     CorpusLocalTranscriptionRunnerFailedError,
     CorpusIndexFailedError,
@@ -51,7 +52,7 @@ from .errors import (
     TranscriptionFailedError,
 )
 from .cache import initialize_cache, index_episode, rebuild_cache
-from .corpus_index import generate_corpus_index
+from .corpus_index import discover_local_episode_refs, generate_corpus_index
 from .corpus_remediation_plan import generate_corpus_remediation_plan
 from .corpus_remediation_runner import run_corpus_remediation
 from .corpus_local_transcription_runner import run_corpus_local_transcription
@@ -76,14 +77,20 @@ from .episode_verified_research_report_workflow_runner import (
     run_episode_verified_research_report_workflow,
 )
 from .verified_research_report_catalog import (
+    discover_eligible_report_summaries,
     inspect_verified_research_report,
     list_verified_research_reports,
+    require_safe_podcast_id,
     result_to_dict as verified_research_report_catalog_result_to_dict,
     search_verified_research_reports,
 )
 from .verified_research_report_source_revalidation import (
     revalidate_verified_research_report_sources,
     result_to_dict as verified_research_report_source_revalidation_result_to_dict,
+)
+from .verified_research_report_coverage import (
+    list_verified_research_report_coverage,
+    result_to_dict as verified_research_report_coverage_result_to_dict,
 )
 from .entity_extractor import extract_mentions
 from .episode_intelligence import generate_episode_intelligence_report
@@ -163,6 +170,8 @@ from .models import (
     VerifiedResearchReportCatalogItem,
     VerifiedResearchReportSourceRevalidation,
     VerifiedResearchReportCatalogPage,
+    VerifiedResearchReportCoverageRow,
+    VerifiedResearchReportCoveragePage,
 )
 from .storage import (
     CorpusEpisodeCompletionWorkflowRunAssetPaths,
@@ -226,10 +235,15 @@ __all__ = [
     "VerifiedResearchReportInputError",
     "VerifiedResearchReportCatalogInputError",
     "VerifiedResearchReportSourceRevalidationInputError",
+    "VerifiedResearchReportCoverageInputError",
     "VerifiedResearchReportCatalogItem",
     "VerifiedResearchReportSourceRevalidation",
     "VerifiedResearchReportCatalogPage",
     "VerifiedResearchReportCatalogInspection",
+    "VerifiedResearchReportCoverageRow",
+    "VerifiedResearchReportCoveragePage",
+    "list_verified_research_report_coverage",
+    "verified_research_report_coverage_result_to_dict",
     "CorpusSemanticRemediationRunAssetPaths",
     "CorpusSemanticRemediationRunCounts",
     "CorpusSemanticRemediationRunFilter",
@@ -282,7 +296,10 @@ __all__ = [
     "ExternalDataVerificationInputError",
     "extract_mentions",
     "generate_external_data_boundary",
+    "discover_local_episode_refs",
     "generate_corpus_index",
+    "discover_eligible_report_summaries",
+    "require_safe_podcast_id",
     "generate_corpus_remediation_plan",
     "generate_episode_intelligence_report",
     "generate_industry_chain_mapping",
