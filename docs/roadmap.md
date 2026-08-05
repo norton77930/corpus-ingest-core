@@ -196,6 +196,7 @@
 - SPEC 023 is **Implemented**: historical episode verified-report path — zero-write next-step suggestion Core/CLI/MCP Tool 20 plus portable one-confirm Skill; composes 019/016 previews only; Tools 1–19 unchanged.
 - SPEC 024 is **Implemented**: offline verified-report gap backlog (022 `has_bundle=false` projection) via Core, thin CLI, and MCP Tool 21; B-lite (no 023 suggest); Tools 1–20 unchanged.
 - The next unused feature package number is **025**.
+- Local epic closeout note (no remote yet): [`docs/epic-corpus-semantic-completion-closeout.md`](epic-corpus-semantic-completion-closeout.md) records the 015–024 operator loop, tool count, hygiene, and future PR skeleton.
 - 其後為 audit-remediation 硬化（**非編號功能階段，不進 Phase 序列**），對應目前 HEAD：
   - **Batch 2**：安全/契約守衛測試（secret boundary、gitignore policy、MCP tool registry、LLM ack 契約、LLM CLI no-leak、manual cache rebuild）。
   - **Batch 2.5**：AI handoff governance docs 守衛。
