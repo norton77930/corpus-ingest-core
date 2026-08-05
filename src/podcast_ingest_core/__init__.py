@@ -16,6 +16,7 @@ from .errors import (
     VerifiedResearchReportCatalogInputError,
     VerifiedResearchReportSourceRevalidationInputError,
     VerifiedResearchReportCoverageInputError,
+    HistoricalVerifiedReportPathInputError,
     CorpusSemanticRemediationRunnerFailedError,
     CorpusLocalTranscriptionRunnerFailedError,
     CorpusIndexFailedError,
@@ -91,6 +92,10 @@ from .verified_research_report_source_revalidation import (
 from .verified_research_report_coverage import (
     list_verified_research_report_coverage,
     result_to_dict as verified_research_report_coverage_result_to_dict,
+)
+from .historical_verified_report_path import (
+    suggest_historical_verified_report_next_step,
+    result_to_dict as historical_verified_report_path_result_to_dict,
 )
 from .entity_extractor import extract_mentions
 from .episode_intelligence import generate_episode_intelligence_report
@@ -172,6 +177,7 @@ from .models import (
     VerifiedResearchReportCatalogPage,
     VerifiedResearchReportCoverageRow,
     VerifiedResearchReportCoveragePage,
+    HistoricalVerifiedReportNextStep,
 )
 from .storage import (
     CorpusEpisodeCompletionWorkflowRunAssetPaths,
@@ -236,6 +242,10 @@ __all__ = [
     "VerifiedResearchReportCatalogInputError",
     "VerifiedResearchReportSourceRevalidationInputError",
     "VerifiedResearchReportCoverageInputError",
+    "HistoricalVerifiedReportPathInputError",
+    "HistoricalVerifiedReportNextStep",
+    "suggest_historical_verified_report_next_step",
+    "historical_verified_report_path_result_to_dict",
     "VerifiedResearchReportCatalogItem",
     "VerifiedResearchReportSourceRevalidation",
     "VerifiedResearchReportCatalogPage",

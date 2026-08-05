@@ -1673,3 +1673,87 @@ def test_coverage_mcp_core_failure_is_fixed_and_private_detail_free(monkeypatch)
     assert "private" not in str(response)
     assert "report.json" not in str(response)
     assert "traceback" not in str(response).casefold()
+
+
+def test_historical_path_mcp_tool_delegates_once_and_returns_safe_envelope(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    adapter = mcp_server.mcp_historical_verified_report_path
+    calls = []
+    monkeypatch.setattr(
+        adapter.core,
+        "suggest_historical_verified_report_next_step",
+        lambda podcast_id, episode_ref: calls.append((podcast_id, episode_ref))
+        or object(),
+    )
+    monkeypatch.setattr(
+        adapter.core,
+        "result_to_dict",
+        lambda result: {
+            "suggestion": "report_present",
+            "not_investment_advice": True,
+        },
+    )
+
+    response = mcp_server.suggest_historical_verified_report_next_step("gooaye", "EP1")
+
+    assert calls == [("gooaye", "EP1")]
+    assert response == {
+        "ok": True,
+        "data": {
+            "suggestion": "report_present",
+            "not_investment_advice": True,
+        },
+    }
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"podcast_id": " ", "episode_ref": "EP1"},
+        {"podcast_id": "gooaye", "episode_ref": " "},
+        {"podcast_id": "", "episode_ref": "EP1"},
+        {"podcast_id": "gooaye", "episode_ref": ""},
+    ],
+)
+def test_historical_path_mcp_rejects_invalid_input_before_core(monkeypatch, kwargs):
+    from podcast_ingest_core import mcp_server
+
+    adapter = mcp_server.mcp_historical_verified_report_path
+    monkeypatch.setattr(
+        adapter.core,
+        "suggest_historical_verified_report_next_step",
+        lambda *args, **kw: pytest.fail("invalid request reached Core"),
+    )
+
+    response = mcp_server.suggest_historical_verified_report_next_step(**kwargs)
+
+    assert response == {
+        "ok": False,
+        "error_type": "HistoricalVerifiedReportPathInputError",
+        "message": "historical verified report path suggestion failed",
+    }
+
+
+def test_historical_path_mcp_core_failure_is_fixed_and_private_detail_free(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    adapter = mcp_server.mcp_historical_verified_report_path
+    monkeypatch.setattr(
+        adapter.core,
+        "suggest_historical_verified_report_next_step",
+        lambda *args, **kw: (_ for _ in ()).throw(
+            RuntimeError(r"D:\\private\\seed.json traceback")
+        ),
+    )
+
+    response = mcp_server.suggest_historical_verified_report_next_step("gooaye", "EP1")
+
+    assert response == {
+        "ok": False,
+        "error_type": "HistoricalVerifiedReportPathInputError",
+        "message": "historical verified report path suggestion failed",
+    }
+    assert "private" not in str(response)
+    assert "seed.json" not in str(response)
+    assert "traceback" not in str(response).casefold()

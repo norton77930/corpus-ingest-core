@@ -13,6 +13,7 @@ from . import corpus_latest_episode_deterministic_workflow_runner as latest_dete
 from . import latest_episode_verified_research_report_workflow_runner as verified_research_report_workflow_runner
 from . import mcp_episode_verified_research_report
 from . import mcp_verified_research_report_catalog
+from . import mcp_historical_verified_report_path
 from . import mcp_verified_research_report_coverage
 from . import mcp_verified_research_report_source_revalidation
 from . import downloader
@@ -802,6 +803,20 @@ def query_verified_research_report_coverage(
         podcast_id=podcast_id,
         has_bundle=has_bundle,
         limit=limit,
+    )
+
+
+@mcp.tool()
+def suggest_historical_verified_report_next_step(
+    podcast_id: str,
+    episode_ref: str,
+) -> dict[str, Any]:
+    """Suggest one next human-gated step for a named historical episode."""
+
+    return mcp_historical_verified_report_path.dispatch(
+        success=tool_success,
+        podcast_id=podcast_id,
+        episode_ref=episode_ref,
     )
 
 

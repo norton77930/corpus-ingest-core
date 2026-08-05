@@ -110,6 +110,10 @@ class VerifiedResearchReportCoverageInputError(PodcastIngestCoreError):
     """Verified research report coverage index input is invalid."""
 
 
+class HistoricalVerifiedReportPathInputError(PodcastIngestCoreError):
+    """Historical verified-report path suggestion input is invalid."""
+
+
 class LLMProviderConfigError(PodcastIngestCoreError):
     """LLM provider 設定不完整或不合法。"""
 

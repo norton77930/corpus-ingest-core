@@ -1332,6 +1332,24 @@ class VerifiedResearchReportCoveragePage:
 
 
 @dataclass(frozen=True)
+class HistoricalVerifiedReportNextStep:
+    """Bounded zero-write next-step suggestion for one historical episode."""
+
+    podcast_id: str
+    episode_ref: str
+    suggestion: str
+    has_bundle: bool
+    source_digests: list[str]
+    publish_ready: bool
+    missing_roles: list[str]
+    stale_roles: list[str]
+    completion_action: str | None
+    recommended_mcp_tool: str | None
+    requires_api_cost_ack: bool
+    not_investment_advice: bool = True
+
+
+@dataclass(frozen=True)
 class TranscriptSearchResult:
     """SQLite cache 中的逐字稿搜尋結果。"""
 
