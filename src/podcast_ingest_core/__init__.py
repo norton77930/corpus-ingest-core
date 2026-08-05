@@ -17,6 +17,7 @@ from .errors import (
     VerifiedResearchReportSourceRevalidationInputError,
     VerifiedResearchReportCoverageInputError,
     HistoricalVerifiedReportPathInputError,
+    VerifiedReportGapBacklogInputError,
     CorpusSemanticRemediationRunnerFailedError,
     CorpusLocalTranscriptionRunnerFailedError,
     CorpusIndexFailedError,
@@ -96,6 +97,10 @@ from .verified_research_report_coverage import (
 from .historical_verified_report_path import (
     suggest_historical_verified_report_next_step,
     result_to_dict as historical_verified_report_path_result_to_dict,
+)
+from .verified_report_gap_backlog import (
+    list_verified_report_gap_backlog,
+    result_to_dict as verified_report_gap_backlog_result_to_dict,
 )
 from .entity_extractor import extract_mentions
 from .episode_intelligence import generate_episode_intelligence_report
@@ -178,6 +183,8 @@ from .models import (
     VerifiedResearchReportCoverageRow,
     VerifiedResearchReportCoveragePage,
     HistoricalVerifiedReportNextStep,
+    VerifiedReportGapBacklogRow,
+    VerifiedReportGapBacklogPage,
 )
 from .storage import (
     CorpusEpisodeCompletionWorkflowRunAssetPaths,
@@ -246,6 +253,11 @@ __all__ = [
     "HistoricalVerifiedReportNextStep",
     "suggest_historical_verified_report_next_step",
     "historical_verified_report_path_result_to_dict",
+    "VerifiedReportGapBacklogInputError",
+    "VerifiedReportGapBacklogRow",
+    "VerifiedReportGapBacklogPage",
+    "list_verified_report_gap_backlog",
+    "verified_report_gap_backlog_result_to_dict",
     "VerifiedResearchReportCatalogItem",
     "VerifiedResearchReportSourceRevalidation",
     "VerifiedResearchReportCatalogPage",

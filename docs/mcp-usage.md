@@ -42,6 +42,7 @@ args = ["D:/path/to/podcast-ingest-core/scripts/run_mcp_server.py"]
 - `revalidate_verified_research_report_sources`
 - `query_verified_research_report_coverage`
 - `suggest_historical_verified_report_next_step`
+- `list_verified_report_gap_backlog`
 
 `rebuild_cache` 是 maintenance tool，只索引既有 artifacts，不會下載音檔、轉錄、摘要或抽 mentions。Search tools 不會自動 rebuild cache；如果 cache 不存在，請先執行 `rebuild_cache`。`query_verified_research_report_catalog` 是 Tool 17 appended-only 的 read-query tool，不是 side-effect：不需要 `confirm` 或 acknowledgement，且不會寫入、匯出、重建 cache 或重新發布報告。`revalidate_verified_research_report_sources` 是 Tool 18 appended-only 的 exact-locator read-query：Tools 1–17 unchanged，不需要 `confirm` 或 acknowledgement，只接受 `podcast_id`、`episode_ref` 與 lowercase 64-hex `source_digest`；不接受 path/output/latest/limit/query/provider/network，離線、零寫入且不提供投資建議。`query_verified_research_report_coverage` 是 Tool 19 appended-only episode-centric coverage read-query：Tools 1–18 unchanged，不需 `confirm`/ack，以 exact `podcast_id` 回傳 inventory×bundle 覆蓋（可選 `has_bundle`、`limit`），不讀 report body、不寫入。`suggest_historical_verified_report_next_step` 是 Tool 20 appended-only read-query：Tools 1–19 unchanged，以 exact `podcast_id`+`episode_ref` 回傳 historical 下一動建議（zero-write preview composition）。
 
@@ -159,6 +160,16 @@ Tool 20 appends after unchanged Tools 1–19. It is a read-query with no `confir
 
 ```powershell
 python scripts/suggest_historical_verified_report_next_step.py gooaye EP672
+```
+
+### Verified Report Gap Backlog Tool
+
+- `list_verified_report_gap_backlog` (Tool 21)
+
+Tool 21 appends after unchanged Tools 1–20. Read-query only (`podcast_id`, optional `limit`). Lists inventory episodes missing a verified report bundle (022 `has_bundle=false` projection). Zero-write; does not call 023 suggest.
+
+```powershell
+python scripts/list_verified_report_gap_backlog.py gooaye --limit 20
 ```
 
 ## Safety

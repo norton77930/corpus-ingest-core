@@ -43,8 +43,9 @@ Read / query tools 可直接查詢既有 metadata 與 SQLite cache：
 - `revalidate_verified_research_report_sources` (Tool 18)
 - `query_verified_research_report_coverage` (Tool 19)
 - `suggest_historical_verified_report_next_step` (Tool 20)
+- `list_verified_report_gap_backlog` (Tool 21)
 
-The local reviewed registry has exactly 20 tools. Tool 20 is append-only: Tools 1–19 keep their contracts/order. It is an offline read-only next-step suggestion for one named historical `episode_ref` (`podcast_id`, `episode_ref`); no `confirm` or acknowledgement. Tool 19 remains coverage join. Tool 18 remains exact-locator source revalidation. Tool 17 retains its offline read-only manifest-first list/search/inspect contract, including `source_currentness_status=not_evaluated` for inspect.
+The local reviewed registry has exactly 21 tools. Tool 21 is append-only: Tools 1–20 keep their contracts/order. It is an offline read-only inventory gap backlog (`podcast_id`, optional `limit`); no `confirm` or acknowledgement. Tool 20 remains historical next-step suggestion. Tool 19 remains coverage join. Tool 18 remains exact-locator source revalidation. Tool 17 retains its offline read-only manifest-first list/search/inspect contract, including `source_currentness_status=not_evaluated` for inspect.
 
 Local side-effect tools 預設 `confirm=false`，只回傳 dry-run action plan：
 

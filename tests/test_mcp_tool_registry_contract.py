@@ -46,6 +46,7 @@ VERIFIED_RESEARCH_REPORT_CATALOG_TOOL = "query_verified_research_report_catalog"
 SOURCE_REVALIDATION_TOOL = "revalidate_verified_research_report_sources"
 COVERAGE_TOOL = "query_verified_research_report_coverage"
 HISTORICAL_PATH_TOOL = "suggest_historical_verified_report_next_step"
+GAP_BACKLOG_TOOL = "list_verified_report_gap_backlog"
 LEGACY_TOOL_ORDER = [
     "list_episodes",
     "get_episode",
@@ -76,6 +77,7 @@ EXPECTED_TOOLS = LEGACY_EXPECTED_TOOLS | {
     SOURCE_REVALIDATION_TOOL,
     COVERAGE_TOOL,
     HISTORICAL_PATH_TOOL,
+    GAP_BACKLOG_TOOL,
 }
 
 
@@ -88,7 +90,7 @@ def _registered_tool_names() -> set[str]:
 
 def test_mcp_registry_exposes_exactly_the_reviewed_tool_set():
     actual = _registered_tool_names()
-    assert len(actual) == 20
+    assert len(actual) == 21
     assert actual == EXPECTED_TOOLS
     assert LEGACY_EXPECTED_TOOLS <= actual
 
@@ -108,10 +110,11 @@ def test_workflow_tools_are_appended_after_the_preserved_twelve_tool_order():
         SOURCE_REVALIDATION_TOOL,
         COVERAGE_TOOL,
         HISTORICAL_PATH_TOOL,
+        GAP_BACKLOG_TOOL,
     ]
 
 
-def test_tools_one_through_twenty_preserve_exact_signature_order_and_defaults():
+def test_tools_one_through_twenty_one_preserve_exact_signature_order_and_defaults():
     from podcast_ingest_core import mcp_server
 
     required = "<required>"
@@ -136,6 +139,7 @@ def test_tools_one_through_twenty_preserve_exact_signature_order_and_defaults():
         "revalidate_verified_research_report_sources": [("podcast_id", required), ("episode_ref", required), ("source_digest", required)],
         "query_verified_research_report_coverage": [("podcast_id", required), ("has_bundle", None), ("limit", 50)],
         "suggest_historical_verified_report_next_step": [("podcast_id", required), ("episode_ref", required)],
+        "list_verified_report_gap_backlog": [("podcast_id", required), ("limit", 50)],
     }
 
     actual = {
@@ -215,9 +219,9 @@ def test_readme_and_mcp_usage_doc_list_every_registered_tool():
 def test_each_client_setup_doc_locks_the_current_registry_contract():
     for filename in ("claude-mcp-setup.md", "codex-mcp-setup.md"):
         setup = (ROOT / "docs" / filename).read_text(encoding="utf-8")
-        assert "exactly 20 tools" in setup
-        assert "`suggest_historical_verified_report_next_step`" in setup
-        assert "Tools 1–19" in setup
+        assert "exactly 21 tools" in setup
+        assert "`list_verified_report_gap_backlog`" in setup
+        assert "Tools 1–20" in setup
         assert "現在有 exact 13 個 reviewed tools" not in setup
         assert "current registry has exactly 17" not in setup
 
@@ -225,7 +229,7 @@ def test_each_client_setup_doc_locks_the_current_registry_contract():
         encoding="utf-8"
     )
     assert "恰 14 個" not in framework
-    assert "恰 20 個" in framework
+    assert "恰 21 個" in framework
 
 
 def test_mcp_workflow_tool_exposes_deliberate_core_parameter_subset():

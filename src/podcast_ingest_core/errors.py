@@ -114,6 +114,10 @@ class HistoricalVerifiedReportPathInputError(PodcastIngestCoreError):
     """Historical verified-report path suggestion input is invalid."""
 
 
+class VerifiedReportGapBacklogInputError(PodcastIngestCoreError):
+    """Verified report gap backlog input is invalid."""
+
+
 class LLMProviderConfigError(PodcastIngestCoreError):
     """LLM provider 設定不完整或不合法。"""
 

@@ -1350,6 +1350,30 @@ class HistoricalVerifiedReportNextStep:
 
 
 @dataclass(frozen=True)
+class VerifiedReportGapBacklogRow:
+    """One inventory episode lacking a verified research report bundle."""
+
+    podcast_id: str
+    episode_ref: str
+    inventory_present: bool
+
+
+@dataclass(frozen=True)
+class VerifiedReportGapBacklogPage:
+    """Bounded gap backlog page for one podcast."""
+
+    podcast_id: str
+    items: list[VerifiedReportGapBacklogRow]
+    limit: int
+    returned_count: int
+    gap_count: int
+    inventory_episode_count: int
+    coverage_status: str
+    catalog_root_status: str
+    not_investment_advice: bool = True
+
+
+@dataclass(frozen=True)
 class TranscriptSearchResult:
     """SQLite cache 中的逐字稿搜尋結果。"""
 

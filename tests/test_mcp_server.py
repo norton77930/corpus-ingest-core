@@ -1757,3 +1757,51 @@ def test_historical_path_mcp_core_failure_is_fixed_and_private_detail_free(monke
     assert "private" not in str(response)
     assert "seed.json" not in str(response)
     assert "traceback" not in str(response).casefold()
+
+
+def test_gap_backlog_mcp_tool_delegates_once_and_returns_safe_envelope(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    adapter = mcp_server.mcp_verified_report_gap_backlog
+    calls = []
+    monkeypatch.setattr(
+        adapter.core,
+        "list_verified_report_gap_backlog",
+        lambda podcast_id, *, limit=50: calls.append((podcast_id, limit)) or object(),
+    )
+    monkeypatch.setattr(
+        adapter.core,
+        "result_to_dict",
+        lambda result: {"gap_count": 0, "not_investment_advice": True},
+    )
+    response = mcp_server.list_verified_report_gap_backlog("gooaye", limit=7)
+    assert calls == [("gooaye", 7)]
+    assert response == {
+        "ok": True,
+        "data": {"gap_count": 0, "not_investment_advice": True},
+    }
+
+
+@pytest.mark.parametrize(
+    "kwargs",
+    [
+        {"podcast_id": " ", "limit": 50},
+        {"podcast_id": "gooaye", "limit": 0},
+        {"podcast_id": "gooaye", "limit": 101},
+    ],
+)
+def test_gap_backlog_mcp_rejects_invalid_input_before_core(monkeypatch, kwargs):
+    from podcast_ingest_core import mcp_server
+
+    adapter = mcp_server.mcp_verified_report_gap_backlog
+    monkeypatch.setattr(
+        adapter.core,
+        "list_verified_report_gap_backlog",
+        lambda *a, **k: pytest.fail("invalid request reached Core"),
+    )
+    response = mcp_server.list_verified_report_gap_backlog(**kwargs)
+    assert response == {
+        "ok": False,
+        "error_type": "VerifiedReportGapBacklogInputError",
+        "message": "verified report gap backlog query failed",
+    }

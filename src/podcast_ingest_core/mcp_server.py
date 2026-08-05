@@ -14,6 +14,7 @@ from . import latest_episode_verified_research_report_workflow_runner as verifie
 from . import mcp_episode_verified_research_report
 from . import mcp_verified_research_report_catalog
 from . import mcp_historical_verified_report_path
+from . import mcp_verified_report_gap_backlog
 from . import mcp_verified_research_report_coverage
 from . import mcp_verified_research_report_source_revalidation
 from . import downloader
@@ -817,6 +818,20 @@ def suggest_historical_verified_report_next_step(
         success=tool_success,
         podcast_id=podcast_id,
         episode_ref=episode_ref,
+    )
+
+
+@mcp.tool()
+def list_verified_report_gap_backlog(
+    podcast_id: str,
+    limit: int = 50,
+) -> dict[str, Any]:
+    """List inventory episodes missing a verified research report bundle."""
+
+    return mcp_verified_report_gap_backlog.dispatch(
+        success=tool_success,
+        podcast_id=podcast_id,
+        limit=limit,
     )
 
 
