@@ -114,7 +114,7 @@ Last full suite at 024 land: **1191 passed, 7 skipped** (platform capability ski
 ## 6. Recommended work *after* closeout (ordered)
 
 1. **When remote exists**: push `feat/corpus-semantic-completion-workflows` and open PR using this doc as the body skeleton.  
-2. **Batch 3C** (optional small hardening): runtime ban on direct `OpenAICompatibleProvider(...)`.  
+2. **Batch 3C** — **done** on this branch after epic closeout: runtime ban on direct `OpenAICompatibleProvider(...)` via private factory token.  
 3. **Engineering**: split `mcp_server.py` / `test_mcp_server.py` before Tool 22+.  
 4. **Product 025+** only with full Spec Kit and a real new capability (e.g. bounded gap+suggest backlog), not another coverage alias.
 

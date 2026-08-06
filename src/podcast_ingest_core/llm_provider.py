@@ -47,8 +47,18 @@ class SemanticSummaryProvider(Protocol):
         """執行 OpenAI-compatible chat completion。"""
 
 
+# Only create_provider may pass this token into OpenAICompatibleProvider.
+# Identity comparison closes the Batch 3C direct-construction ack bypass.
+_PROVIDER_FACTORY_TOKEN = object()
+
+
 class OpenAICompatibleProvider:
-    """使用 OpenAI-compatible chat completions API 的 provider。"""
+    """使用 OpenAI-compatible chat completions API 的 provider。
+
+    Construct only via :func:`create_provider` (Batch 3C). Direct construction
+    raises :class:`LLMProviderConfigError` so the exact ``api_cost_ack`` gate
+    cannot be skipped by calling this class.
+    """
 
     provider_name = "openai-compatible"
 
@@ -58,7 +68,15 @@ class OpenAICompatibleProvider:
         model: str | None = None,
         base_url: str | None = None,
         api_key_env: str = "OPENAI_API_KEY",
+        _factory_token: object | None = None,
     ) -> None:
+        if _factory_token is not _PROVIDER_FACTORY_TOKEN:
+            raise LLMProviderConfigError(
+                "OpenAICompatibleProvider must be constructed via create_provider "
+                "so the exact api_cost_ack gate is enforced; direct construction "
+                "is not allowed."
+            )
+
         api_key = os.environ.get(api_key_env, "").strip()
         resolved_model = (
             model or os.environ.get("MODEL") or os.environ.get("OPENAI_MODEL", "")
@@ -173,6 +191,7 @@ def create_provider(
         model=model,
         base_url=base_url,
         api_key_env=api_key_env,
+        _factory_token=_PROVIDER_FACTORY_TOKEN,
     )
 
 

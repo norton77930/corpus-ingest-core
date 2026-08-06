@@ -272,7 +272,7 @@ def test_semantic_summarizer_missing_api_key_raises_config_error(monkeypatch, tm
 
 def test_openai_provider_request_failure_raises_request_error(monkeypatch):
     from podcast_ingest_core.errors import LLMProviderRequestError
-    from podcast_ingest_core.llm_provider import OpenAICompatibleProvider
+    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
 
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
 
@@ -289,14 +289,19 @@ def test_openai_provider_request_failure_raises_request_error(monkeypatch):
     import podcast_ingest_core.llm_provider as llm_provider
 
     monkeypatch.setattr(llm_provider.requests, "post", fake_post)
-    provider = OpenAICompatibleProvider(model="test-model")
+    # Batch 3C: construct only via create_provider (exact ack + factory token).
+    provider = create_provider(
+        "openai-compatible",
+        model="test-model",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+    )
 
     with pytest.raises(LLMProviderRequestError, match="500"):
         provider.complete([{"role": "user", "content": "hi"}])
 
 
 def test_openai_provider_prefers_generic_model_and_base_url(monkeypatch):
-    from podcast_ingest_core.llm_provider import OpenAICompatibleProvider
+    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
 
     monkeypatch.setenv("API_KEY", "test-key")
     monkeypatch.setenv("MODEL", "generic-model")
@@ -304,14 +309,18 @@ def test_openai_provider_prefers_generic_model_and_base_url(monkeypatch):
     monkeypatch.setenv("OPENAI_MODEL", "legacy-model")
     monkeypatch.setenv("OPENAI_BASE_URL", "https://legacy.example.test/v1")
 
-    provider = OpenAICompatibleProvider(api_key_env="API_KEY")
+    provider = create_provider(
+        "openai-compatible",
+        api_key_env="API_KEY",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+    )
 
     assert provider.model == "generic-model"
     assert provider.base_url == "https://generic.example.test/v1"
 
 
 def test_openai_provider_falls_back_to_legacy_openai_model_and_base_url(monkeypatch):
-    from podcast_ingest_core.llm_provider import OpenAICompatibleProvider
+    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
 
     monkeypatch.setenv("API_KEY", "test-key")
     monkeypatch.delenv("MODEL", raising=False)
@@ -319,7 +328,11 @@ def test_openai_provider_falls_back_to_legacy_openai_model_and_base_url(monkeypa
     monkeypatch.setenv("OPENAI_MODEL", "legacy-model")
     monkeypatch.setenv("OPENAI_BASE_URL", "https://legacy.example.test/v1")
 
-    provider = OpenAICompatibleProvider(api_key_env="API_KEY")
+    provider = create_provider(
+        "openai-compatible",
+        api_key_env="API_KEY",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+    )
 
     assert provider.model == "legacy-model"
     assert provider.base_url == "https://legacy.example.test/v1"

@@ -227,12 +227,13 @@ commit a fixed selector that makes one package appear uniquely active.
 
 ## Batch Guard Tests（audit hardening）
 
-除了上方 capability packages 各自的 tests，另有一層 cross-cutting 的安全/契約守衛測試，來自 audit-remediation 的 Batch 2 / 2.5 / 3A / 3B（非編號功能階段）。它們正式追蹤於 `docs/agent-handoff.md` 與 `docs/verification-matrix.md`，並 cross-cut packages `003` / `005` / `006` / `007`：
+除了上方 capability packages 各自的 tests，另有一層 cross-cutting 的安全/契約守衛測試，來自 audit-remediation 的 Batch 2 / 2.5 / 3A / 3B / 3C（非編號功能階段）。它們正式追蹤於 `docs/agent-handoff.md` 與 `docs/verification-matrix.md`，並 cross-cut packages `003` / `005` / `006` / `007`：
 
 - **Batch 2**（安全/契約守衛）：`test_repository_secret_boundary.py`、`test_repository_gitignore_policy.py`、`test_mcp_tool_registry_contract.py`、`test_llm_ack_guard_contracts.py`、`test_llm_cli_no_leak.py`、`test_cache_rebuild_guard.py`。
 - **Batch 2.5**（AI handoff governance docs 守衛）：`test_ai_governance_docs.py`。
 - **Batch 3A**（exact `api_cost_ack` 下沉 core，provider 建構前先驗證）：`test_llm_ack_guard_contracts.py`。
 - **Batch 3B**（provider factory boundary：`OpenAICompatibleProvider` 只能於 `llm_provider.py` 內建構）：`test_llm_provider_factory_boundary.py`。
+- **Batch 3C**（runtime ban：constructor 只接受 `create_provider` 的 private factory token）：同 `test_llm_provider_factory_boundary.py`。
 
 ## When a New Spec Package Is Required
 

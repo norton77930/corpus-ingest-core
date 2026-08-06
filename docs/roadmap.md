@@ -202,7 +202,8 @@
   - **Batch 2.5**：AI handoff governance docs 守衛。
   - **Batch 3A**：把 exact `api_cost_ack` 守衛下沉到 core（`create_provider` / `semantic_summarize_episode`），provider 建構前先驗證。
   - **Batch 3B**：storage / `rebuild_cache` dead-code 清理，以及 provider factory boundary（`OpenAICompatibleProvider` 只能於 `llm_provider.py` 內建構）。
-- Batch 2/2.5/3A/3B 的正式追蹤在 `docs/agent-handoff.md` 與 `docs/verification-matrix.md`；其 guard-test 對應見 `specs/README.md` 的「Batch Guard Tests」。
+  - **Batch 3C**：runtime ban — `OpenAICompatibleProvider` constructor 僅接受 `create_provider` 傳入的 private factory token；bare / forged construction 以 `LLMProviderConfigError` fail closed。
+- Batch 2/2.5/3A/3B/3C 的正式追蹤在 `docs/agent-handoff.md` 與 `docs/verification-matrix.md`；其 guard-test 對應見 `specs/README.md` 的「Batch Guard Tests」。
 
 ### 關於「下一步」的澄清
 

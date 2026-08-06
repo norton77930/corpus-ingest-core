@@ -1,4 +1,4 @@
-"""Provider factory boundary guards (Batch 3B, B3B-T2).
+"""Provider factory boundary guards (Batch 3B static + Batch 3C runtime).
 
 Invariants protected:
 - ``llm_provider.create_provider`` is the ONLY sanctioned construction site for
@@ -8,26 +8,32 @@ Invariants protected:
   directly bypasses that gate.
 - No ``src/`` core module and no ``scripts/`` entry point constructs
   ``OpenAICompatibleProvider(...)`` directly. Only ``llm_provider.py`` (the
-  factory's own module) may. Unit tests may still construct the provider class
-  directly to exercise it in isolation, so ``tests/`` is intentionally not
-  scanned.
+  factory's own module) may. Tests exercise construction via ``create_provider``
+  (or by asserting that bare construction is refused).
 - ``create_provider`` keeps ``api_cost_ack`` as a keyword-only parameter that
   fails closed (empty default), so a caller can never accidentally skip the
   gate by passing arguments positionally.
+- Batch 3C: ``OpenAICompatibleProvider(...)`` refuses direct construction at
+  runtime unless the private factory token is supplied by ``create_provider``.
+  A wrong or missing token raises ``LLMProviderConfigError`` before env/model
+  resolution, so the constructor cannot be used as an ack bypass.
 
-Runtime refusal behaviour (missing / wrong ack raises before construction) is
-covered by ``tests/test_llm_ack_guard_contracts.py``; this module locks the
-static call-site boundary and the factory signature so a future ``src/`` change
-cannot silently reintroduce a direct-construction bypass.
+Runtime refusal behaviour for missing / wrong **ack** (before construction)
+is covered by ``tests/test_llm_ack_guard_contracts.py``; this module locks the
+static call-site boundary, the factory signature, and the constructor token
+gate so a future change cannot silently reintroduce a direct-construction
+bypass.
 
-No download / transcription / LLM call / market API access happens here: the
-tests only read source files and introspect a signature.
+No download / transcription / LLM call / market API access happens here
+beyond optional env setup for successful factory construction paths.
 """
 
 from __future__ import annotations
 
 import inspect
 from pathlib import Path
+
+import pytest
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -41,9 +47,8 @@ def _app_python_files():
     """Application code that must reach the provider through the factory.
 
     ``src/podcast_ingest_core/*.py`` core modules plus ``scripts/*.py`` entry
-    points (both are flat directories). ``tests/`` is excluded on purpose:
-    unit tests legitimately construct the provider class directly to exercise
-    it in isolation.
+    points (both are flat directories). ``tests/`` is excluded: tests assert the
+    runtime ban or go through ``create_provider``.
     """
 
     core_dir = ROOT / "src" / "podcast_ingest_core"
@@ -80,3 +85,44 @@ def test_create_provider_keeps_keyword_only_api_cost_ack():
     assert "api_cost_ack" in parameters
     assert parameters["api_cost_ack"].kind is inspect.Parameter.KEYWORD_ONLY
     assert parameters["api_cost_ack"].default == ""
+
+
+def test_direct_openai_compatible_provider_construction_is_rejected(monkeypatch):
+    """Batch 3C: bare constructor must not bypass create_provider + api_cost_ack."""
+    from podcast_ingest_core.errors import LLMProviderConfigError
+    from podcast_ingest_core.llm_provider import OpenAICompatibleProvider
+
+    # Env would be sufficient for a successful build if the token gate were
+    # missing — prove the refusal is about construction path, not config.
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    monkeypatch.setenv("OPENAI_MODEL", "test-model")
+
+    with pytest.raises(LLMProviderConfigError, match="create_provider"):
+        OpenAICompatibleProvider(model="test-model")
+
+
+def test_direct_construction_rejects_forged_factory_token(monkeypatch):
+    from podcast_ingest_core.errors import LLMProviderConfigError
+    from podcast_ingest_core.llm_provider import OpenAICompatibleProvider
+
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    monkeypatch.setenv("OPENAI_MODEL", "test-model")
+
+    with pytest.raises(LLMProviderConfigError, match="create_provider"):
+        OpenAICompatibleProvider(model="test-model", _factory_token=object())
+
+
+def test_create_provider_with_exact_ack_still_builds_provider(monkeypatch):
+    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
+
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    monkeypatch.setenv("OPENAI_MODEL", "test-model")
+
+    provider = create_provider(
+        "openai-compatible",
+        model="test-model",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+    )
+
+    assert provider.model == "test-model"
+    assert provider.provider_name == "openai-compatible"

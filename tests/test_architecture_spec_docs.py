@@ -227,11 +227,12 @@ def test_c1_docs_drift_remediation_current_status_and_batch_traceability():
     specs_readme = _read(ROOT / "specs" / "README.md")
 
     # roadmap gains an authoritative current-status/next section and records the
-    # post-6V.1 Batch 3A/3B hardening; the earlier Phase 7A/7C/7D.1 "6U is next"
+    # post-6V.1 Batch 3A/3B/3C hardening; the earlier Phase 7A/7C/7D.1 "6U is next"
     # pointers are historical planning notes because 6U/6U.1 已完成.
     assert "目前狀態與下一步" in roadmap
     assert "Batch 3A" in roadmap
     assert "Batch 3B" in roadmap
+    assert "Batch 3C" in roadmap
     assert "6U/6U.1 已完成" in roadmap
 
     # mvp-requirements is labelled a Phase 1-4A historical snapshot.

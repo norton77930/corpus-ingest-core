@@ -22,7 +22,7 @@ pytest 已在 `pyproject.toml` 設定 repo-local basetemp（`--basetemp=.pytest-
 | LLM ack guard 一致性 | `tests/test_llm_ack_guard_contracts.py` | CLI/MCP wrappers 在 confirmed LLM 執行前要求 exact `api_cost_ack`；ack 常數單一來源（定義於 `llm_provider`，經 `semantic_summarizer.SEMANTIC_API_COST_ACK` re-export）；core-level guard 已強制（audit F-03 resolved：`semantic_summarize_episode` 進入點與 `create_provider` 建 provider 前驗證） |
 | No raw transcript / no secret stdout | `tests/test_llm_cli_no_leak.py` | LLM-facing CLI 的 dry-run stdout/stderr 不含 transcript 原文、API key 值或 prompt 內容；semantic CLI stdout 為鎖定的 metadata-only JSON schema |
 | Cache 手動 rebuild | `tests/test_cache_rebuild_guard.py` | confirmed workflow 與 MCP side-effect tools 不自動 rebuild SQLite cache，只回 cache stale warning；`rebuild_cache` 引用僅限 reviewed modules（constitution 原則 VIII） |
-| Provider factory boundary | `tests/test_llm_provider_factory_boundary.py` | app code（`src/` 與 `scripts/`）不得直接建構 `OpenAICompatibleProvider(...)`，一律經 `create_provider` 以強制 exact `api_cost_ack` gate；`create_provider` 維持 keyword-only `api_cost_ack`（F-03 後續、Batch 3B） |
+| Provider factory boundary | `tests/test_llm_provider_factory_boundary.py` | app code（`src/` 與 `scripts/`）不得直接建構 `OpenAICompatibleProvider(...)`，一律經 `create_provider` 以強制 exact `api_cost_ack` gate；`create_provider` 維持 keyword-only `api_cost_ack`（Batch 3B）；runtime constructor 拒絕 bare / forged factory token（Batch 3C） |
 
 Targeted 指令（可合併執行）：
 
