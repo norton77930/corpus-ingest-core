@@ -110,8 +110,11 @@ def test_spec_020_implemented_docs_and_handoff_keep_current_contracts() -> None:
     assert 'search "gooaye EP650"' not in quickstart
     assert "Do not change runtime/CLI/MCP in this specification-delivery phase." not in spec
     assert "This package documents a future implementation" not in plan
-    assert "stdio-only MCP server（恰好 18 個 reviewed tools）" in handoff
+    # 025 doc-count consolidation: the stale "恰好 18 個" claims were synced to
+    # the live registry; the registry-derived checker
+    # (tests/test_docs_registry_count_consistency.py) now owns count drift.
+    assert "stdio-only MCP server（目前恰好 21 個 reviewed tools）" in handoff
     assert "stdio-only MCP server（21 tools）" in handoff
-    assert "恰好 18 個 reviewed tools" in handoff
+    assert "恰好 18 個 reviewed tools" not in handoff
     assert "MCP tool 16 + portable Skill" not in handoff
     assert "historically MCP Tool 16" in handoff

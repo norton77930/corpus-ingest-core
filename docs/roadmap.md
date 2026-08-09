@@ -195,7 +195,8 @@
 - SPEC 022 is **Implemented**: offline episode-centric verified-report coverage join (local inventory × 020-safe bundles) through Core, thin CLI, and appended MCP Tool 19. Optional `has_bundle` filter; zero-write; no body reads; Tools 1–18 unchanged.
 - SPEC 023 is **Implemented**: historical episode verified-report path — zero-write next-step suggestion Core/CLI/MCP Tool 20 plus portable one-confirm Skill; composes 019/016 previews only; Tools 1–19 unchanged.
 - SPEC 024 is **Implemented**: offline verified-report gap backlog (022 `has_bundle=false` projection) via Core, thin CLI, and MCP Tool 21; B-lite (no 023 suggest); Tools 1–20 unchanged.
-- The next unused feature package number is **025**.
+- `025-core-consolidation` is Implemented: a behavior-frozen internal consolidation (path-safety structure single-sourced, weak run-report writer deduplicated, `mcp_server.py` split into a facade over `mcp_runtime` + four `mcp_tools_*` groups, registry-derived docs-count checker, shared `tests/conftest.py` fixture with `PODCAST_INGEST_DATA_DIR` override). The registry keeps exact 21 tools with unchanged order.
+- The next unused feature package number is **026**.
 - Local epic closeout note (no remote yet): [`docs/epic-corpus-semantic-completion-closeout.md`](epic-corpus-semantic-completion-closeout.md) records the 015–024 operator loop, tool count, hygiene, and future PR skeleton.
 - 其後為 audit-remediation 硬化（**非編號功能階段，不進 Phase 序列**），對應目前 HEAD：
   - **Batch 2**：安全/契約守衛測試（secret boundary、gitignore policy、MCP tool registry、LLM ack 契約、LLM CLI no-leak、manual cache rebuild）。

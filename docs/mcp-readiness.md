@@ -69,7 +69,7 @@ Side-effect dry-run response：
 
 ## 016 Human-Controlled Completion Tool and Portable Skill
 
-016 makes the reviewed local stdio registry exact 13 tools by adding
+016 made the reviewed local stdio registry exact 13 tools at the time by adding
 `run_corpus_episode_completion_workflow`; the existing twelve tool signatures and envelopes remain
 unchanged. Its default is a strict-zero-file preview across intake, audio,
 transcription, deterministic remediation, semantic summary, and semantic

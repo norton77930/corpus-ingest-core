@@ -123,7 +123,7 @@ Phase 5D 只收緊 eval prompts、rubric 與 report capture 欄位，不新增 M
 
 ## 8. 016 Human-Controlled Completion Eval
 
-016 extends the reviewed local stdio registry to exact 13 tools with
+016 extended the reviewed local stdio registry to exact 13 tools at the time with
 `run_corpus_episode_completion_workflow`. Evaluate it through the repository
 portable `corpus-episode-completion` Skill, not through a CLI or terminal
 substitute. The required conversation is preview → explain → wait for explicit
