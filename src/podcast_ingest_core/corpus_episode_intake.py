@@ -8,6 +8,7 @@ from typing import Any
 
 from . import storage
 from .errors import EpisodeNotFoundError
+from .run_report_io import write_part_staged_markdown
 from .feed_reader import get_episode
 from .models import (
     Episode,
@@ -282,16 +283,7 @@ def _write_run_report(result: CorpusEpisodeIntakeRunResult) -> None:
         return
     payload = result_to_dict(result)
     _write_json(result.report_json_path, payload)
-    markdown_part = result.report_markdown_path.with_name(
-        f"{result.report_markdown_path.name}.part"
-    )
-    result.report_markdown_path.parent.mkdir(parents=True, exist_ok=True)
-    markdown_part.unlink(missing_ok=True)
-    try:
-        markdown_part.write_text(_render_markdown(payload), encoding="utf-8")
-        markdown_part.replace(result.report_markdown_path)
-    finally:
-        markdown_part.unlink(missing_ok=True)
+    write_part_staged_markdown(result.report_markdown_path, _render_markdown(payload))
 
 
 def _render_markdown(payload: dict[str, Any]) -> str:

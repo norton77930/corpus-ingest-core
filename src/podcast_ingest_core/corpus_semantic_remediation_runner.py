@@ -14,6 +14,7 @@ from .generation_proof import notify_child_artifact_committed
 from .corpus_index import _build_corpus_index_snapshot
 from .corpus_remediation_plan import _build_corpus_remediation_plan_snapshot
 from .errors import CorpusSemanticRemediationRunnerFailedError
+from .path_safety import is_safe_local_path_structure
 from .models import (
     CorpusSemanticRemediationRunCounts,
     CorpusSemanticRemediationRunFilter,
@@ -54,9 +55,6 @@ _SAFE_PROVIDER_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 _SAFE_MODEL_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
 _SAFE_API_KEY_ENV_PATTERN = re.compile(r"^[A-Z_][A-Z0-9_]{0,127}$")
 _SAFE_EXCEPTION_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_]{0,127}$")
-_URI_SCHEME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*://")
-_SAFE_FILENAME_PATTERN = re.compile(r"^[^<>:/\\|?*\x00-\x1f]+\.[A-Za-z0-9]{1,16}$")
-_SAFE_PATH_COMPONENT_PATTERN = re.compile(r"^[A-Za-z0-9._一-鿿-]+$")
 _QUERY_PATTERN = re.compile(r"\?[^\s|]+")
 _FORBIDDEN_TEXT_FRAGMENTS = (
     "http://",
@@ -976,36 +974,7 @@ def _safe_list(
 
 
 def _is_safe_local_path(value: str) -> bool:
-    if not value or value != value.strip() or len(value) > 1024:
-        return False
-    if _URI_SCHEME_PATTERN.match(value) or value.startswith(("\\\\", "//")):
-        return False
-    if "?" in value or "#" in value or "|" in value:
-        return False
-    if "/" not in value and "\\" not in value:
-        return False
-    if any(character.isspace() for character in value):
-        return False
-    if any(ord(character) < 32 or ord(character) == 127 for character in value):
-        return False
-    path_without_drive = value[2:] if re.match(r"^[A-Za-z]:[\\/]", value) else value
-    if ":" in path_without_drive:
-        return False
-    parts = re.split(r"[\\/]", value)
-    if re.match(r"^[A-Za-z]:[\\/]", value):
-        path_parts = parts[1:]
-    elif value.startswith("/"):
-        path_parts = parts[1:]
-    else:
-        path_parts = parts
-    if not path_parts or any(
-        not part
-        or part in {".", ".."}
-        or not _SAFE_PATH_COMPONENT_PATTERN.fullmatch(part)
-        for part in path_parts
-    ):
-        return False
-    return bool(_SAFE_FILENAME_PATTERN.fullmatch(path_parts[-1]))
+    return is_safe_local_path_structure(value, allow_absolute=True)
 
 
 def _sanitize_payload(value: Any) -> Any:

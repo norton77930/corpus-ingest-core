@@ -8,6 +8,7 @@ from typing import Any
 from . import storage
 from .corpus_remediation_plan import generate_corpus_remediation_plan
 from .errors import CorpusLocalTranscriptionRunnerFailedError
+from .run_report_io import write_part_staged_report_pair
 from .models import (
     CorpusLocalTranscriptionOutcomeCounts,
     CorpusLocalTranscriptionRunFilter,
@@ -471,29 +472,14 @@ def _write_run_report(result: CorpusLocalTranscriptionRunResult) -> None:
         return
     payload = result_to_dict(result)
     markdown = _render_markdown(payload)
-    json_part_path = result.report_json_path.with_name(
-        f"{result.report_json_path.name}.part"
-    )
-    markdown_part_path = result.report_markdown_path.with_name(
-        f"{result.report_markdown_path.name}.part"
-    )
     try:
-        result.report_json_path.parent.mkdir(parents=True, exist_ok=True)
-        json_part_path.unlink(missing_ok=True)
-        markdown_part_path.unlink(missing_ok=True)
-        json_part_path.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True),
-            encoding="utf-8",
+        write_part_staged_report_pair(
+            result.report_json_path,
+            result.report_markdown_path,
+            payload,
+            markdown,
         )
-        markdown_part_path.write_text(markdown, encoding="utf-8")
-        json_part_path.replace(result.report_json_path)
-        markdown_part_path.replace(result.report_markdown_path)
     except OSError as exc:
-        for part_path in (json_part_path, markdown_part_path):
-            try:
-                part_path.unlink(missing_ok=True)
-            except OSError:
-                pass
         raise CorpusLocalTranscriptionRunnerFailedError(
             f"failed to write corpus local transcription run report: {exc}"
         ) from exc

@@ -19,6 +19,7 @@ from .corpus_episode_workflow_runner import (
 from .corpus_local_transcription_runner import run_corpus_local_transcription
 from .corpus_remediation_runner import run_corpus_remediation
 from .errors import CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError
+from .path_safety import is_safe_local_path_structure
 from .canonical_transcript import (
     CanonicalTranscriptResolutionError,
     resolve_canonical_transcript_asset_paths,
@@ -49,9 +50,6 @@ _EXECUTABLE_STAGES = {
 _MAX_REMEDIATION_ACTIONS = 5
 _SAFE_IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]{0,127}$")
 _SAFE_ACTION_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9:_-]{0,255}$")
-_URI_SCHEME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*://")
-_SAFE_FILENAME_PATTERN = re.compile(r"^[^<>:/\\|?*\x00-\x1f]+\.[A-Za-z0-9]{1,16}$")
-_SAFE_PATH_COMPONENT_PATTERN = re.compile(r"^[A-Za-z0-9._一-鿿-]+$")
 _API_KEY_LIKE_PATTERN = re.compile(r"\bsk-[A-Za-z0-9_-]+", re.IGNORECASE)
 _SENSITIVE_ASSIGNMENT_PATTERN = re.compile(
     r"\b(?:api[_-]?key|token|password|authorization|cookie|"
@@ -735,25 +733,9 @@ def _safe_text_list(value: object) -> list[str]:
 def _is_safe_local_path(value: object) -> bool:
     if not isinstance(value, str):
         return False
-    if not value or value != value.strip() or len(value) > 1024:
-        return False
-    if _URI_SCHEME_PATTERN.match(value) or value.startswith(("/", "\\")):
-        return False
-    if ":" in value or "?" in value or "#" in value or "|" in value:
-        return False
-    if any(character.isspace() for character in value):
-        return False
-    if any(ord(character) < 32 or ord(character) == 127 for character in value):
-        return False
-    parts = re.split(r"[\\/]", value)
-    if not parts or any(
-        not part
-        or part in {".", ".."}
-        or not _SAFE_PATH_COMPONENT_PATTERN.fullmatch(part)
-        for part in parts
+    if not is_safe_local_path_structure(
+        value, allow_absolute=False, require_separator=False
     ):
-        return False
-    if not _SAFE_FILENAME_PATTERN.fullmatch(parts[-1]):
         return False
     lowered = value.lower()
     if any(fragment in lowered for fragment in _FORBIDDEN_PATH_FRAGMENTS):

@@ -24,6 +24,7 @@ from .corpus_semantic_remediation_runner import (
     run_corpus_semantic_remediation,
 )
 from .errors import CorpusEpisodeCompletionWorkflowRunnerFailedError
+from .path_safety import is_safe_local_path_structure
 from .models import (
     CorpusEpisodeCompletionWorkflowRunCounts,
     CorpusEpisodeCompletionWorkflowRunFilter,
@@ -54,11 +55,6 @@ _SAFE_ENVIRONMENT_PATTERN = re.compile(r"^[A-Z_][A-Z0-9_]{0,127}$")
 _SAFE_BASE_URL_PATTERN = re.compile(
     r"^https?://[A-Za-z0-9.-]+(?::[0-9]{1,5})?(?:/[A-Za-z0-9._~/-]*)?$"
 )
-_URI_SCHEME_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9+.-]*://")
-_SAFE_FILENAME_PATTERN = re.compile(
-    r"^[^<>:/\\|?*\x00-\x1f]+\.[A-Za-z0-9]{1,16}$"
-)
-_SAFE_PATH_COMPONENT_PATTERN = re.compile(r"^[A-Za-z0-9._一-鿿-]+$")
 _ALLOWED_PLANNED_READS = {"configured podcast RSS feed", "in-memory corpus snapshot"}
 _FORBIDDEN_OUTPUT_FRAGMENTS = (
     "http://",
@@ -1119,24 +1115,47 @@ def _validate_semantic_summary_settings(
         raise CorpusEpisodeCompletionWorkflowRunnerFailedError("semantic_api_key_env is invalid")
 
 
+CONFIRMED_ACTION_MUST_BE_EXPLICIT_MESSAGE = "confirmed action must be explicit"
+CONFIRMED_EPISODE_REF_MUST_BE_CANONICAL_MESSAGE = (
+    "confirmed episode_ref must be canonical"
+)
+SEMANTIC_SUMMARY_REQUIRES_EXACT_ACK_MESSAGE = (
+    "semantic_summary requires exact api_cost_ack"
+)
+
+
+def confirmed_request_rejection_reason(
+    *,
+    selector: str,
+    action: str,
+    api_cost_ack: str,
+) -> str | None:
+    """Single source of the confirmed-request rejection rules and messages.
+
+    specs/025-core-consolidation FR-006: the MCP early gate and the CLI reuse
+    this instead of re-implementing the predicate or re-typing the strings.
+    """
+
+    if action == ACTION_NEXT:
+        return CONFIRMED_ACTION_MUST_BE_EXPLICIT_MESSAGE
+    if selector.casefold() == DEFAULT_SELECTOR:
+        return CONFIRMED_EPISODE_REF_MUST_BE_CANONICAL_MESSAGE
+    if action == ACTION_SEMANTIC_SUMMARY and api_cost_ack != SEMANTIC_API_COST_ACK:
+        return SEMANTIC_SUMMARY_REQUIRES_EXACT_ACK_MESSAGE
+    return None
+
+
 def _require_confirmed_request(
     *,
     selector: str,
     action: str,
     api_cost_ack: str,
 ) -> None:
-    if action == ACTION_NEXT:
-        raise CorpusEpisodeCompletionWorkflowRunnerFailedError(
-            "confirmed action must be explicit"
-        )
-    if selector.casefold() == DEFAULT_SELECTOR:
-        raise CorpusEpisodeCompletionWorkflowRunnerFailedError(
-            "confirmed episode_ref must be canonical"
-        )
-    if action == ACTION_SEMANTIC_SUMMARY and api_cost_ack != SEMANTIC_API_COST_ACK:
-        raise CorpusEpisodeCompletionWorkflowRunnerFailedError(
-            "semantic_summary requires exact api_cost_ack"
-        )
+    reason = confirmed_request_rejection_reason(
+        selector=selector, action=action, api_cost_ack=api_cost_ack
+    )
+    if reason is not None:
+        raise CorpusEpisodeCompletionWorkflowRunnerFailedError(reason)
 
 
 def _safe_episode_ref(value: object) -> str | None:
@@ -1210,38 +1229,7 @@ def _safe_exception_category(value: object) -> str | None:
 def _is_safe_local_path(value: object) -> bool:
     if not isinstance(value, str):
         return False
-    if not value or value != value.strip() or len(value) > 1024:
-        return False
-    if _URI_SCHEME_PATTERN.match(value) or value.startswith(("\\\\", "//")):
-        return False
-    if "?" in value or "#" in value or "|" in value:
-        return False
-    if "/" not in value and "\\" not in value:
-        return False
-    if any(character.isspace() for character in value):
-        return False
-    if any(ord(character) < 32 or ord(character) == 127 for character in value):
-        return False
-    path_without_drive = (
-        value[2:] if re.match(r"^[A-Za-z]:[\\/]", value) else value
-    )
-    if ":" in path_without_drive:
-        return False
-    parts = re.split(r"[\\/]", value)
-    if re.match(r"^[A-Za-z]:[\\/]", value):
-        path_parts = parts[1:]
-    elif value.startswith("/"):
-        path_parts = parts[1:]
-    else:
-        path_parts = parts
-    if not path_parts or any(
-        not part
-        or part in {".", ".."}
-        or not _SAFE_PATH_COMPONENT_PATTERN.fullmatch(part)
-        for part in path_parts
-    ):
-        return False
-    if not _SAFE_FILENAME_PATTERN.fullmatch(path_parts[-1]):
+    if not is_safe_local_path_structure(value, allow_absolute=True):
         return False
     return _safe_output_text(value) == value
 

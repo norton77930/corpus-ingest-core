@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from dataclasses import asdict, replace
-import json
 from pathlib import Path
 import re
 from typing import Any
@@ -24,6 +23,8 @@ from .corpus_remediation_runner import (
 )
 from .errors import CorpusEpisodeWorkflowRunnerFailedError
 from .episode_claim import episode_writer_claimed
+from .path_safety import is_safe_local_path_structure
+from .run_report_io import write_part_staged_report_pair
 from .models import (
     CorpusEpisodeWorkflowRunCounts,
     CorpusEpisodeWorkflowRunFilter,
@@ -61,13 +62,6 @@ _EXECUTABLE_STAGES = {
 }
 _SAFE_EPISODE_REF_PATTERN = re.compile(r'^[A-Za-z0-9][A-Za-z0-9-]{0,127}$')
 _SAFE_STAGE_NAME_PATTERN = re.compile(r'^[a-z][a-z0-9_]{0,63}$')
-_URI_SCHEME_PATTERN = re.compile(r'^[A-Za-z][A-Za-z0-9+.-]*://')
-_SAFE_FILENAME_PATTERN = re.compile(
-    r'^[^<>:/\\|?*\x00-\x1f]+\.[A-Za-z0-9]{1,16}$'
-)
-# CJK Unified Ideographs (U+4E00-U+9FFF) are allowed to match storage.title_slug,
-# which deliberately preserves them; ASCII-only would drop legal CJK artifact paths.
-_SAFE_PATH_COMPONENT_PATTERN = re.compile(r'^[A-Za-z0-9._一-鿿-]+$')
 _WORKFLOW_ROW_REASONS = frozenset(
     {
         'episode selector could not be resolved',
@@ -943,29 +937,14 @@ def _write_run_report(result: CorpusEpisodeWorkflowRunResult) -> None:
     if result.report_json_path is None or result.report_markdown_path is None:
         return
     payload = result_to_dict(result)
-    json_part_path = result.report_json_path.with_name(
-        f"{result.report_json_path.name}.part"
-    )
-    markdown_part_path = result.report_markdown_path.with_name(
-        f"{result.report_markdown_path.name}.part"
-    )
     try:
-        result.report_json_path.parent.mkdir(parents=True, exist_ok=True)
-        json_part_path.unlink(missing_ok=True)
-        markdown_part_path.unlink(missing_ok=True)
-        json_part_path.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2, sort_keys=True),
-            encoding="utf-8",
+        write_part_staged_report_pair(
+            result.report_json_path,
+            result.report_markdown_path,
+            payload,
+            _render_markdown(payload),
         )
-        markdown_part_path.write_text(_render_markdown(payload), encoding="utf-8")
-        json_part_path.replace(result.report_json_path)
-        markdown_part_path.replace(result.report_markdown_path)
     except OSError as exc:
-        for part_path in (json_part_path, markdown_part_path):
-            try:
-                part_path.unlink(missing_ok=True)
-            except OSError:
-                pass
         raise CorpusEpisodeWorkflowRunnerFailedError(
             f"failed to write corpus episode workflow run report: {type(exc).__name__}"
         ) from exc
@@ -1119,38 +1098,7 @@ def _safe_list(
 def _is_safe_local_path(value: Any) -> bool:
     if not isinstance(value, str):
         return False
-    if not value or value != value.strip() or len(value) > 1024:
-        return False
-    if _URI_SCHEME_PATTERN.match(value) or value.startswith(('\\\\', '//')):
-        return False
-    if '?' in value or '#' in value or '|' in value:
-        return False
-    if '/' not in value and '\\' not in value:
-        return False
-    if any(character.isspace() for character in value):
-        return False
-    if any(ord(character) < 32 or ord(character) == 127 for character in value):
-        return False
-    path_without_drive = (
-        value[2:] if re.match(r'^[A-Za-z]:[\\/]', value) else value
-    )
-    if ':' in path_without_drive:
-        return False
-    parts = re.split(r'[\\/]', value)
-    if re.match(r'^[A-Za-z]:[\\/]', value):
-        path_parts = parts[1:]
-    elif value.startswith('/'):
-        path_parts = parts[1:]
-    else:
-        path_parts = parts
-    if not path_parts or any(
-        not part
-        or part in {'.', '..'}
-        or not _SAFE_PATH_COMPONENT_PATTERN.fullmatch(part)
-        for part in path_parts
-    ):
-        return False
-    if not _SAFE_FILENAME_PATTERN.fullmatch(path_parts[-1]):
+    if not is_safe_local_path_structure(value, allow_absolute=True):
         return False
     return _safe_message(value, '') == value
 
