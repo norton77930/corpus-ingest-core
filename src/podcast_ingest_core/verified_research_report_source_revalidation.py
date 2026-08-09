@@ -16,6 +16,7 @@ from .models import (
     VerifiedResearchReportSourceRevalidation,
 )
 from .verified_research_report import (
+    REPORT_SCHEMA_VERSION,
     _canonical_source_path,
     _current_verified_research_source_snapshot,
     _safe_path,
@@ -302,7 +303,7 @@ def _safe_serialized_metadata(value: object) -> VerifiedResearchReportCatalogIte
         return None
     if (
         value.report_version != f"v1-{locator['source_digest']}"
-        or value.schema_version != "latest-episode-verified-research-report-v1"
+        or value.schema_version != REPORT_SCHEMA_VERSION
         or not isinstance(value.include_fixture_verification, bool)
         or not isinstance(value.stock_query_present, bool)
         or value.semantic_review_status != "passed"

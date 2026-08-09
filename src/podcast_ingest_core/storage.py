@@ -2,11 +2,12 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from pathlib import Path
+import os
 import unicodedata
 import re
 
 
-DATA_DIR = Path("data")
+DATA_DIR = Path(os.environ.get("PODCAST_INGEST_DATA_DIR") or "data")
 AUDIO_DIR = DATA_DIR / "audio"
 TRANSCRIPTS_DIR = DATA_DIR / "transcripts"
 SUMMARIES_DIR = DATA_DIR / "summaries"
@@ -18,6 +19,9 @@ STOCK_LENS_DIR = DATA_DIR / "stock-lens"
 CACHE_DIR = DATA_DIR / "cache"
 CORPUS_DIR = DATA_DIR / "corpus"
 RESEARCH_REPORTS_DIR = DATA_DIR / "research-reports"
+# Repo-root-relative evals path (independent of DATA_DIR); the single defining
+# site — smoke-review and index modules re-export it under their local names.
+EVALS_RESEARCH_SMOKE_REPORTS_DIR = Path("evals") / "research-llm-smoke" / "reports"
 _SAFE_SLUG_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 _SAFE_EPISODE_REF_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]*$")
 _WINDOWS_ILLEGAL_FILENAME_CHARS = re.compile(r'[<>:"/\\|?*]')

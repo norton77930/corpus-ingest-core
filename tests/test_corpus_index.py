@@ -6,23 +6,7 @@ import sys
 from pathlib import Path
 
 
-def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> Path:
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_index as corpus_index
-
-    monkeypatch.setattr(storage, "AUDIO_DIR", tmp_path / "audio")
-    monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
-    monkeypatch.setattr(storage, "SUMMARIES_DIR", tmp_path / "summaries")
-    monkeypatch.setattr(storage, "MENTIONS_DIR", tmp_path / "mentions")
-    monkeypatch.setattr(storage, "REPORTS_DIR", tmp_path / "reports")
-    monkeypatch.setattr(storage, "MAPPINGS_DIR", tmp_path / "mappings")
-    monkeypatch.setattr(storage, "EXTERNAL_DIR", tmp_path / "external")
-    monkeypatch.setattr(storage, "CORPUS_DIR", tmp_path / "corpus", raising=False)
-    review_dir = tmp_path / "evals" / "research-llm-smoke" / "reports"
-    monkeypatch.setattr(
-        corpus_index, "SEMANTIC_REVIEW_REPORTS_DIR", review_dir, raising=False
-    )
-    return review_dir
+from conftest import use_tmp_data_dirs as _use_tmp_data_dirs
 
 
 def _write_json(path: Path, payload: dict) -> Path:

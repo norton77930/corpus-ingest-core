@@ -6,12 +6,7 @@ import sys
 
 import pytest
 
-
-def _use_tmp_data_dirs(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
-
-    monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
-    monkeypatch.setattr(storage, "SUMMARIES_DIR", tmp_path / "summaries")
+from conftest import use_tmp_data_dirs as _use_tmp_data_dirs
 
 
 def _write_transcript(

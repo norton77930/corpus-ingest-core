@@ -17,7 +17,7 @@ from .semantic_summary_identity import canonical_semantic_summary_path
 from . import storage
 
 
-REPORTS_DIR = Path("evals") / "research-llm-smoke" / "reports"
+from .storage import EVALS_RESEARCH_SMOKE_REPORTS_DIR as REPORTS_DIR
 
 
 def review_semantic_summary_smoke(

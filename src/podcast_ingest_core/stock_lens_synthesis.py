@@ -26,7 +26,7 @@ REVIEWED_SEMANTIC_INPUT_BOUNDARY = (
     "phase-6f-stock-lens-json-plus-reviewed-semantic-summary"
 )
 DEBUG_OUTPUT_PATH_ENV = "PODCAST_INGEST_STOCK_LENS_SYNTHESIS_DEBUG_OUTPUT_PATH"
-SEMANTIC_REVIEW_REPORTS_DIR = Path("evals") / "research-llm-smoke" / "reports"
+from .storage import EVALS_RESEARCH_SMOKE_REPORTS_DIR as SEMANTIC_REVIEW_REPORTS_DIR
 SEMANTIC_CONTEXT_TRUNCATION_MARKER = "\n[semantic context truncated]"
 _SECRET_LIKE_PATTERN = re.compile(r"\bsk-[A-Za-z0-9_-]{8,}\b")
 RISKS = [

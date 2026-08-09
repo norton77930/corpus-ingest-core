@@ -34,7 +34,7 @@ SUPPORTED_ARTIFACT_FAMILIES = (
     "industry_mapping",
     "external_boundary",
 )
-SEMANTIC_REVIEW_REPORTS_DIR = Path("evals") / "research-llm-smoke" / "reports"
+from .storage import EVALS_RESEARCH_SMOKE_REPORTS_DIR as SEMANTIC_REVIEW_REPORTS_DIR
 _AUDIO_SUFFIXES = {".mp3", ".m4a", ".wav", ".aac", ".flac"}
 _ARRAY_COUNTS_KEY = "__array_counts__"
 _SEMANTIC_SUMMARY_MAX_READ_BYTES = 2 * 1024 * 1024

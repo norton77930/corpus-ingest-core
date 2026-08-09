@@ -17,7 +17,7 @@ from .stock_lens_synthesis import (
 
 
 REVIEW_MODE = "research-llm-smoke-review-v1"
-REPORTS_DIR = Path("evals") / "research-llm-smoke" / "reports"
+from .storage import EVALS_RESEARCH_SMOKE_REPORTS_DIR as REPORTS_DIR
 _SECRET_PATTERN = re.compile(r"\bsk-[A-Za-z0-9_-]{8,}\b")
 _TRACEBACK_PATTERN = re.compile(r"Traceback\s+\(most recent call last\):")
 _RAW_TRANSCRIPT_LEAK_PATTERN = re.compile(
