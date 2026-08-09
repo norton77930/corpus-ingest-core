@@ -1134,8 +1134,10 @@ def test_catalog_mcp_tool_delegates_once_and_returns_success_envelope(monkeypatc
     )
     monkeypatch.setattr(adapter.core, "result_to_dict", lambda result: {"items": [], "safe": True})
     envelopes = []
+    # 025 facade split: the catalog tool resolves tool_success in its group
+    # module, so the white-box patch seam follows it there (via the facade).
     monkeypatch.setattr(
-        mcp_server,
+        mcp_server.mcp_tools_verified_report_queries,
         "tool_success",
         lambda payload: envelopes.append(payload) or {"ok": True, "data": payload},
     )

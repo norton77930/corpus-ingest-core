@@ -129,13 +129,24 @@ def test_mcp_confirmed_side_effect_tools_never_auto_rebuild_cache(monkeypatch):
 
 
 def test_rebuild_cache_references_stay_in_reviewed_modules():
-    # cache.py defines rebuild_cache; __init__.py re-exports it; mcp_server.py
-    # exposes the explicit maintenance tool; research_workflow.py only mentions
-    # it inside the CACHE_STALE_WARNING message string (the F-18 unused import
-    # was removed in Batch 3B, so the module stays allowlisted for that literal,
-    # not for any callable reference). Any other core module referencing
-    # rebuild_cache is an unreviewed auto-rebuild risk.
-    allowed = {"__init__.py", "cache.py", "mcp_server.py", "research_workflow.py"}
+    # cache.py defines rebuild_cache; __init__.py re-exports it; the mcp facade
+    # split (specs/025-core-consolidation) moved the explicit maintenance tool
+    # into mcp_tools_read.py with mcp_server.py re-exporting it; mcp_runtime.py
+    # and mcp_tools_side_effect.py mention rebuild_cache only inside stale-cache
+    # warning/hint strings; research_workflow.py only mentions it inside the
+    # CACHE_STALE_WARNING message string (the F-18 unused import was removed in
+    # Batch 3B, so the module stays allowlisted for that literal, not for any
+    # callable reference). Any other core module referencing rebuild_cache is an
+    # unreviewed auto-rebuild risk.
+    allowed = {
+        "__init__.py",
+        "cache.py",
+        "mcp_runtime.py",
+        "mcp_server.py",
+        "mcp_tools_read.py",
+        "mcp_tools_side_effect.py",
+        "research_workflow.py",
+    }
     src_dir = ROOT / "src" / "podcast_ingest_core"
     offenders = sorted(
         path.name

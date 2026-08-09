@@ -12,6 +12,11 @@ from podcast_ingest_core import (
     corpus_episode_completion_workflow_result_to_dict as result_to_dict,
     run_corpus_episode_completion_workflow,
 )
+from podcast_ingest_core.corpus_episode_completion_workflow_runner import (
+    CONFIRMED_ACTION_MUST_BE_EXPLICIT_MESSAGE,
+    CONFIRMED_EPISODE_REF_MUST_BE_CANONICAL_MESSAGE,
+    SEMANTIC_SUMMARY_REQUIRES_EXACT_ACK_MESSAGE,
+)
 from podcast_ingest_core.corpus_semantic_remediation_runner import (
     SEMANTIC_API_COST_ACK,
 )
@@ -46,17 +51,17 @@ def main(argv: list[str] | None = None) -> int:
     episode_ref = args.episode_ref.strip() if isinstance(args.episode_ref, str) else ""
 
     if args.confirm and action == "next":
-        print("confirmed action must be explicit", file=sys.stderr)
+        print(CONFIRMED_ACTION_MUST_BE_EXPLICIT_MESSAGE, file=sys.stderr)
         return 1
     if args.confirm and episode_ref == "latest":
-        print("confirmed episode_ref must be canonical", file=sys.stderr)
+        print(CONFIRMED_EPISODE_REF_MUST_BE_CANONICAL_MESSAGE, file=sys.stderr)
         return 1
     if (
         args.confirm
         and action == "semantic_summary"
         and args.api_cost_ack != SEMANTIC_API_COST_ACK
     ):
-        print("semantic_summary requires exact api_cost_ack", file=sys.stderr)
+        print(SEMANTIC_SUMMARY_REQUIRES_EXACT_ACK_MESSAGE, file=sys.stderr)
         return 1
     if args.confirm and action == "semantic_summary":
         try:
