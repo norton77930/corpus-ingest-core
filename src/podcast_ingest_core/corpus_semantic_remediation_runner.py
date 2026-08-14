@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import asdict, replace
+from dataclasses import asdict, dataclass, replace
 from pathlib import Path
 import json
 import re
@@ -9,8 +9,12 @@ from typing import Any
 
 from . import storage
 from .audit_report_pair import write_atomic_audit_report_pair
-from .episode_claim import episode_writer_claimed
-from .generation_proof import notify_child_artifact_committed
+from .episode_claim import (
+    _consume_controlled_regeneration_capability,
+    _ControlledRegenerationCapability,
+    episode_writer_claimed,
+)
+from .generation_proof import ChildArtifactCommit, notify_child_artifact_committed
 from .corpus_index import _build_corpus_index_snapshot
 from .corpus_remediation_plan import _build_corpus_remediation_plan_snapshot
 from .errors import CorpusSemanticRemediationRunnerFailedError
@@ -56,6 +60,19 @@ _SAFE_MODEL_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
 _SAFE_API_KEY_ENV_PATTERN = re.compile(r"^[A-Z_][A-Z0-9_]{0,127}$")
 _SAFE_EXCEPTION_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_]{0,127}$")
 _QUERY_PATTERN = re.compile(r"\?[^\s|]+")
+@dataclass(frozen=True)
+class _ControlledSemanticSummaryRegenerationResult:
+    """Parent-only child result for a single verified overwrite."""
+
+    podcast_id: str
+    episode_ref: str
+    summary_path: Path
+    generated: bool
+    already_exists: bool
+    provider: str | None
+    model: str | None
+
+
 _FORBIDDEN_TEXT_FRAGMENTS = (
     "http://",
     "https://",
@@ -85,6 +102,8 @@ def run_corpus_semantic_remediation(
     model: str | None = None,
     base_url: str | None = None,
     api_key_env: str = "OPENAI_API_KEY",
+    reasoning_effort: str | None = None,
+    read_timeout_seconds: int = 120,
     chunk_seconds: int = 600,
     max_segments_per_chunk: int = 120,
     progress_callback: Callable[..., None] | None = None,
@@ -94,6 +113,7 @@ def run_corpus_semantic_remediation(
     normalized_podcast_id = _normalize_podcast_id(podcast_id)
     normalized_episode_ref = _normalize_episode_ref(episode_ref)
     requested_action = _normalize_action(action)
+    _require_positive_int(read_timeout_seconds, "read_timeout_seconds", maximum=3_600)
     _require_positive_int(chunk_seconds, "chunk_seconds")
     _require_positive_int(max_segments_per_chunk, "max_segments_per_chunk")
     if confirm and requested_action == ACTION_NEXT:
@@ -112,9 +132,11 @@ def run_corpus_semantic_remediation(
 
     requested_provider: str | None = None
     requested_model: str | None = None
+    requested_reasoning_effort: str | None = None
     if confirm and requested_action == ACTION_SEMANTIC_SUMMARY:
         requested_provider = _normalize_provider(provider)
         requested_model = _normalize_model(model)
+        requested_reasoning_effort = _normalize_model(reasoning_effort)
         _normalize_api_key_env(api_key_env)
 
     row, selected_action, warnings = _preview_selection(
@@ -136,6 +158,7 @@ def run_corpus_semantic_remediation(
         if selected_action == ACTION_SEMANTIC_SUMMARY:
             requested_provider = _normalize_provider(provider)
             requested_model = _normalize_model(model)
+            requested_reasoning_effort = _normalize_model(reasoning_effort)
             row = replace(
                 row,
                 provider=requested_provider,
@@ -152,6 +175,8 @@ def run_corpus_semantic_remediation(
             warnings=warnings,
             provider=requested_provider,
             model=requested_model,
+            reasoning_effort=requested_reasoning_effort,
+            read_timeout_seconds=read_timeout_seconds,
             chunk_seconds=chunk_seconds,
             max_segments_per_chunk=max_segments_per_chunk,
         )
@@ -182,6 +207,8 @@ def run_corpus_semantic_remediation(
             model=requested_model,
             base_url=base_url,
             api_key_env=api_key_env,
+            reasoning_effort=requested_reasoning_effort,
+            read_timeout_seconds=read_timeout_seconds,
             chunk_seconds=chunk_seconds,
             max_segments_per_chunk=max_segments_per_chunk,
             progress_callback=progress_callback,
@@ -209,6 +236,8 @@ def run_corpus_semantic_remediation(
         warnings=warnings,
         provider=requested_provider,
         model=requested_model,
+        reasoning_effort=requested_reasoning_effort,
+        read_timeout_seconds=read_timeout_seconds,
         chunk_seconds=chunk_seconds,
         max_segments_per_chunk=max_segments_per_chunk,
         report_json_path=report_paths.json_path,
@@ -241,6 +270,8 @@ def _build_result(
     warnings: list[CorpusSemanticRemediationRunWarning],
     provider: str | None,
     model: str | None,
+    reasoning_effort: str | None,
+    read_timeout_seconds: int,
     chunk_seconds: int,
     max_segments_per_chunk: int,
     report_json_path: Path | None = None,
@@ -262,6 +293,8 @@ def _build_result(
             action=requested_action,
             provider=provider,
             model=model,
+            reasoning_effort=reasoning_effort,
+            read_timeout_seconds=read_timeout_seconds,
             chunk_seconds=chunk_seconds,
             max_segments_per_chunk=max_segments_per_chunk,
         ),
@@ -283,6 +316,8 @@ def _execute_semantic_summary(
     model: str | None,
     base_url: str | None,
     api_key_env: str,
+    reasoning_effort: str | None,
+    read_timeout_seconds: int,
     chunk_seconds: int,
     max_segments_per_chunk: int,
     progress_callback: Callable[..., None] | None,
@@ -296,6 +331,8 @@ def _execute_semantic_summary(
             model=model,
             base_url=base_url,
             api_key_env=api_key_env,
+            reasoning_effort=reasoning_effort,
+            read_timeout_seconds=read_timeout_seconds,
             chunk_seconds=chunk_seconds,
             max_segments_per_chunk=max_segments_per_chunk,
             progress_callback=progress_callback,
@@ -341,6 +378,83 @@ def _execute_semantic_summary(
         model=_safe_dependency_identifier(getattr(summary, "model", None), model),
         failure_category=None,
         warnings=[],
+    )
+
+
+def _run_controlled_semantic_summary_regeneration(
+    podcast_id: str,
+    episode_ref: str,
+    *,
+    authorization: _ControlledRegenerationCapability,
+    expected_summary_path: Path,
+    api_cost_ack: str,
+    provider: str,
+    model: str | None,
+    base_url: str | None,
+    api_key_env: str,
+    reasoning_effort: str | None,
+    read_timeout_seconds: int,
+    chunk_seconds: int,
+    max_segments_per_chunk: int,
+) -> _ControlledSemanticSummaryRegenerationResult:
+    """Overwrite one summary only for the claimed latest-workflow transaction.
+
+    This is deliberately not a public remediation action: its only production
+    caller owns the confirmed episode claim and captures the commit notification.
+    """
+
+    try:
+        _consume_controlled_regeneration_capability(
+            authorization, podcast_id, episode_ref
+        )
+    except ValueError as exc:
+        raise CorpusSemanticRemediationRunnerFailedError(
+            "controlled semantic regeneration authorization is invalid"
+        ) from exc
+
+    summary = semantic_summarize_episode(
+        podcast_id,
+        episode_ref,
+        api_cost_ack=api_cost_ack,
+        provider=provider,
+        model=model,
+        base_url=base_url,
+        api_key_env=api_key_env,
+        reasoning_effort=reasoning_effort,
+        read_timeout_seconds=read_timeout_seconds,
+        force=True,
+        chunk_seconds=chunk_seconds,
+        max_segments_per_chunk=max_segments_per_chunk,
+    )
+    actual_path = Path(str(getattr(summary, "summary_path", "")))
+    if (
+        getattr(summary, "podcast_id", None) != podcast_id
+        or getattr(summary, "episode_ref", None) != episode_ref
+        or actual_path.resolve(strict=False) != expected_summary_path.resolve(strict=False)
+        or getattr(summary, "generated", None) is not True
+        or getattr(summary, "already_exists", None) is not False
+    ):
+        raise CorpusSemanticRemediationRunnerFailedError(
+            "controlled semantic regeneration child result is invalid"
+        )
+    notify_child_artifact_committed(
+        "semantic_summary",
+        expected_summary_path,
+        generated=True,
+        metadata={
+            "provider": getattr(summary, "provider", None),
+            "model": getattr(summary, "model", None),
+            "summary_mode": getattr(summary, "summary_mode", None),
+        },
+    )
+    return _ControlledSemanticSummaryRegenerationResult(
+        podcast_id=podcast_id,
+        episode_ref=episode_ref,
+        summary_path=expected_summary_path,
+        generated=True,
+        already_exists=False,
+        provider=getattr(summary, "provider", None),
+        model=getattr(summary, "model", None),
     )
 
 
@@ -472,6 +586,8 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         f"- Filter action: {filters['action']}",
         f"- Provider: {filters['provider'] or 'none'}",
         f"- Model: {filters['model'] or 'none'}",
+        f"- Reasoning effort: {filters['reasoning_effort'] or 'none'}",
+        f"- Read timeout seconds: {filters['read_timeout_seconds']}",
         f"- Chunk seconds: {filters['chunk_seconds']}",
         f"- Max segments per chunk: {filters['max_segments_per_chunk']}",
         "",
@@ -882,8 +998,15 @@ def _normalize_action(value: str) -> str:
     return normalized
 
 
-def _require_positive_int(value: int, field_name: str) -> None:
-    if isinstance(value, bool) or not isinstance(value, int) or value < 1:
+def _require_positive_int(
+    value: int, field_name: str, *, maximum: int | None = None
+) -> None:
+    if (
+        isinstance(value, bool)
+        or not isinstance(value, int)
+        or value < 1
+        or (maximum is not None and value > maximum)
+    ):
         raise CorpusSemanticRemediationRunnerFailedError(f"invalid {field_name}")
 
 

@@ -291,10 +291,14 @@ def test_public_contract_models_and_safe_parameter_surface():
         "semantic_model",
         "semantic_base_url",
         "semantic_api_key_env",
+        "semantic_reasoning_effort",
+        "semantic_read_timeout_seconds",
         "semantic_chunk_seconds",
         "semantic_max_segments_per_chunk",
+        "publish_report",
     ]
     assert signature.parameters["confirm"].default is False
+    assert signature.parameters["publish_report"].default is True
     assert signature.parameters["expected_episode_ref"].default is None
     assert signature.parameters["api_cost_ack"].default == ""
     assert core.LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
@@ -335,6 +339,320 @@ def test_storage_paths_are_pure_and_preview_is_strict_zero_write(monkeypatch, tm
     assert result.bundle_dir is None and result.checkpoint_path is None
     assert _manifest(tmp_path) == before
     assert not list(tmp_path.rglob("*.part"))
+
+
+def test_no_publish_preview_is_strict_zero_write_and_omits_publication(monkeypatch, tmp_path):
+    from podcast_ingest_core import storage
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    _use_tmp_dirs(monkeypatch, tmp_path)
+    monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *_: ("EP700", None))
+    monkeypatch.setattr(
+        runner,
+        "_run_pinned_deterministic_workflow",
+        lambda *args, **kwargs: pytest.fail("preview dispatched child"),
+    )
+    before = _manifest(tmp_path)
+
+    result = runner.run_latest_episode_verified_research_report_workflow(
+        "gooaye", publish_report=False
+    )
+
+    assert result.outcome == "dry_run"
+    assert [step.stage for step in result.stage_plan] == [
+        "deterministic_processing",
+        "semantic_summary",
+        "semantic_review",
+        "research",
+        "lineage_validation",
+    ]
+    assert _manifest(tmp_path) == before
+
+
+@pytest.mark.parametrize("publish_report", (0, None, "false"))
+def test_publish_report_requires_a_strict_bool_before_latest_resolution(
+    monkeypatch, publish_report
+):
+    from podcast_ingest_core import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    monkeypatch.setattr(
+        runner,
+        "_resolve_latest_episode",
+        lambda *_: pytest.fail("invalid publish_report must not resolve latest"),
+    )
+
+    with pytest.raises(LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError):
+        runner.run_latest_episode_verified_research_report_workflow(
+            "gooaye", publish_report=publish_report
+        )
+
+
+def test_confirmed_no_publish_completes_current_lineage_without_bundle(monkeypatch, tmp_path):
+    from podcast_ingest_core import storage
+    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    _write_completed_artifacts(monkeypatch, tmp_path)
+    _record_current_018_lineage()
+    checkpoint_path = storage.latest_episode_verified_research_report_paths(
+        "gooaye", "EP700", "0" * 64
+    ).checkpoint_path
+    previous_digest = "a" * 64
+    previous_references = {
+        "bundle_dir": "data/research-reports/gooaye/EP700/v1-" + previous_digest,
+        "report_json_path": "data/research-reports/gooaye/EP700/v1-" + previous_digest + "/report.json",
+        "report_markdown_path": "data/research-reports/gooaye/EP700/v1-" + previous_digest + "/report.md",
+        "manifest_path": "data/research-reports/gooaye/EP700/v1-" + previous_digest + "/manifest.json",
+    }
+    runner._write_checkpoint(
+        checkpoint_path,
+        "gooaye",
+        "EP700",
+        [{"stage": "publish", "status": "completed"}],
+        source_digest=previous_digest,
+        report_version="v1-" + previous_digest,
+        terminal_outcome="completed",
+        bundle_references=previous_references,
+    )
+    monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *_: ("EP700", None))
+    monkeypatch.setattr(
+        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
+    )
+    for name in (
+        "_adopt_complete_bundle",
+        "assemble_verified_research_report",
+        "publish_verified_research_report_bundle",
+    ):
+        monkeypatch.setattr(
+            runner,
+            name,
+            lambda *args, _name=name, **kwargs: pytest.fail(f"{_name} must not run"),
+        )
+    monkeypatch.setattr(
+        runner,
+        "run_research_workflow",
+        lambda *args, **kwargs: SimpleNamespace(workflow_status="completed"),
+    )
+
+    result = runner.run_latest_episode_verified_research_report_workflow(
+        "gooaye",
+        confirm=True,
+        expected_episode_ref="EP700",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+        publish_report=False,
+    )
+
+    assert result.outcome == "ready"
+    assert [(step.stage, step.status) for step in result.stage_plan][-2:] == [
+        ("research", "completed"),
+        ("lineage_validation", "completed"),
+    ]
+    assert (
+        result.report_version,
+        result.source_digest,
+        result.bundle_dir,
+        result.report_json_path,
+        result.report_markdown_path,
+        result.manifest_path,
+    ) == (None, None, None, None, None, None)
+    checkpoint = json.loads(result.checkpoint_path.read_text(encoding="utf-8"))
+    assert checkpoint["terminal_outcome"] == "completed"
+    assert checkpoint["source_digest"] == previous_digest
+    assert checkpoint["report_version"] == "v1-" + previous_digest
+    assert checkpoint["bundle_references"] == previous_references
+    assert {"stage": "lineage_validation", "status": "completed"} in checkpoint[
+        "stage_history"
+    ]
+
+
+def test_no_publish_rereviews_a_current_passed_review_and_blocks_failed_review(
+    monkeypatch, tmp_path
+):
+    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    _write_completed_artifacts(monkeypatch, tmp_path)
+    _record_current_018_lineage()
+    monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *_: ("EP700", None))
+    monkeypatch.setattr(
+        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
+    )
+    review_calls = []
+    monkeypatch.setattr(
+        runner,
+        "_run_018_authenticity_rereview",
+        lambda *args: review_calls.append(args)
+        or SimpleNamespace(episode_ref="EP700", review_status="failed"),
+    )
+    for name in (
+        "run_research_workflow",
+        "assemble_verified_research_report",
+        "publish_verified_research_report_bundle",
+    ):
+        monkeypatch.setattr(
+            runner,
+            name,
+            lambda *args, _name=name, **kwargs: pytest.fail(f"{_name} must not run"),
+        )
+
+    result = runner.run_latest_episode_verified_research_report_workflow(
+        "gooaye",
+        confirm=True,
+        expected_episode_ref="EP700",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+        publish_report=False,
+    )
+
+    assert len(review_calls) == 1
+    assert result.outcome == "blocked"
+    assert result.stage_plan[-1].stage == "semantic_review"
+    assert result.stage_plan[-1].status == "blocked"
+
+
+def test_no_publish_rejects_stock_query_before_latest_or_claim(monkeypatch):
+    from podcast_ingest_core import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
+    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    for name in ("_resolve_latest_episode", "_acquire_episode_workflow_claim"):
+        monkeypatch.setattr(
+            runner,
+            name,
+            lambda *args, _name=name, **kwargs: pytest.fail(f"{_name} must not run"),
+        )
+
+    with pytest.raises(LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError):
+        runner.run_latest_episode_verified_research_report_workflow(
+            "gooaye",
+            confirm=True,
+            expected_episode_ref="EP700",
+            api_cost_ack=SEMANTIC_API_COST_ACK,
+            stock_query="NVDA",
+            publish_report=False,
+        )
+
+
+@pytest.mark.parametrize("terminal_outcome", ("in_progress", "failed", "manual"))
+def test_manual_checkpoint_clears_non_success_bundle_references(tmp_path, terminal_outcome):
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    checkpoint_path = tmp_path / "EP700.checkpoint.json"
+    digest = "a" * 64
+    references = {"bundle_dir": "data/research-reports/gooaye/EP700/v1-" + digest}
+    runner._write_checkpoint(
+        checkpoint_path,
+        "gooaye",
+        "EP700",
+        [{"stage": "research", "status": "completed"}],
+        source_digest=digest,
+        report_version="v1-" + digest,
+        terminal_outcome=terminal_outcome,
+        bundle_references=references,
+    )
+    runner._write_checkpoint(
+        checkpoint_path,
+        "gooaye",
+        "EP700",
+        [{"stage": "lineage_validation", "status": "completed"}],
+        terminal_outcome="manual",
+    )
+
+    checkpoint = json.loads(checkpoint_path.read_text(encoding="utf-8"))
+    assert checkpoint["terminal_outcome"] == "manual"
+    assert checkpoint["source_digest"] is None
+    assert checkpoint["report_version"] is None
+    assert checkpoint["bundle_references"] == {}
+
+
+@pytest.mark.parametrize("failure_stage", ("semantic_review", "research", "lineage_validation"))
+def test_no_publish_failures_never_assemble_publish_or_return_ready(
+    monkeypatch, tmp_path, failure_stage
+):
+    from podcast_ingest_core import storage
+    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    _write_completed_artifacts(monkeypatch, tmp_path)
+    _record_current_018_lineage()
+    checkpoint_path = storage.latest_episode_verified_research_report_paths(
+        "gooaye", "EP700", "0" * 64
+    ).checkpoint_path
+    stale_digest = "b" * 64
+    runner._write_checkpoint(
+        checkpoint_path,
+        "gooaye",
+        "EP700",
+        [{"stage": "publish", "status": "failed"}],
+        source_digest=stale_digest,
+        report_version="v1-" + stale_digest,
+        terminal_outcome="failed",
+        bundle_references={
+            "bundle_dir": "data/research-reports/gooaye/EP700/v1-" + stale_digest
+        },
+    )
+    monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *_: ("EP700", None))
+    monkeypatch.setattr(
+        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
+    )
+    for name in ("assemble_verified_research_report", "publish_verified_research_report_bundle"):
+        monkeypatch.setattr(
+            runner,
+            name,
+            lambda *args, _name=name, **kwargs: pytest.fail(f"{_name} must not run"),
+        )
+    lineage_calls: list[None] = []
+    if failure_stage == "semantic_review":
+        monkeypatch.setattr(
+            runner,
+            "_run_018_authenticity_rereview",
+            lambda *args: SimpleNamespace(episode_ref="EP700", review_status="failed"),
+        )
+        monkeypatch.setattr(
+            runner,
+            "run_research_workflow",
+            lambda *args, **kwargs: pytest.fail("research must not run after review failure"),
+        )
+    elif failure_stage == "research":
+        monkeypatch.setattr(
+            runner,
+            "run_research_workflow",
+            lambda *args, **kwargs: SimpleNamespace(workflow_status="failed"),
+        )
+    else:
+        # Only the no-publish final validation may fail here.  It is the last of
+        # the three `_lineage_is_current` call sites on this path (early
+        # snapshot, post-research gate, final validation); the consumed count is
+        # asserted below so a changed call site fails loudly rather than
+        # silently letting the run reach "ready".
+        def lineage_is_current(*args):
+            lineage_calls.append(None)
+            return len(lineage_calls) < 3
+
+        monkeypatch.setattr(runner, "_lineage_is_current", lineage_is_current)
+        monkeypatch.setattr(
+            runner,
+            "run_research_workflow",
+            lambda *args, **kwargs: SimpleNamespace(workflow_status="completed"),
+        )
+
+    result = runner.run_latest_episode_verified_research_report_workflow(
+        "gooaye",
+        confirm=True,
+        expected_episode_ref="EP700",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+        publish_report=False,
+    )
+
+    assert result.outcome == "blocked"
+    assert result.outcome != "ready"
+    assert result.stage_plan[-1].stage == failure_stage
+    if failure_stage == "lineage_validation":
+        assert len(lineage_calls) == 3
+    checkpoint = json.loads(result.checkpoint_path.read_text(encoding="utf-8"))
+    assert checkpoint["source_digest"] is None
+    assert checkpoint["report_version"] is None
+    assert checkpoint["bundle_references"] == {}
 
 
 def test_invalid_ack_blocks_rss_env_provider_writer_and_child_stages(monkeypatch):
@@ -1919,6 +2237,836 @@ def test_red_018_rereview_converges_past_future_forged_and_rejected_candidates(
     assert next(
         item["path"] for item in manifest["source_artifacts"] if item["role"] == "semantic_review"
     ) == after.review_path.as_posix()
+
+
+def test_red_confirmed_existing_summary_without_lineage_uses_private_regeneration(
+    monkeypatch, tmp_path
+):
+    from types import SimpleNamespace
+
+    from podcast_ingest_core import storage
+    from podcast_ingest_core.episode_claim import (
+        _ControlledRegenerationCapability,
+        _episode_writer_claim_is_held,
+    )
+    from podcast_ingest_core.generation_proof import notify_child_artifact_committed
+    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    _write_completed_artifacts(monkeypatch, tmp_path, with_lineage=False)
+    summary_path = storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha")
+    monkeypatch.setattr(runner, "_adopt_complete_bundle", lambda *args: None)
+    monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *args: ("EP700", None))
+    monkeypatch.setattr(
+        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
+    )
+    calls = []
+
+    def regenerate(*args, **kwargs):
+        calls.append((args, kwargs))
+        assert isinstance(kwargs["authorization"], _ControlledRegenerationCapability)
+        assert _episode_writer_claim_is_held("gooaye", "EP700")
+        summary_path.write_text(
+            summary_path.read_text(encoding="utf-8") + "\ncontrolled regeneration",
+            encoding="utf-8",
+        )
+        notify_child_artifact_committed("semantic_summary", summary_path, generated=True)
+        return SimpleNamespace(
+            podcast_id="gooaye",
+            episode_ref="EP700",
+            summary_path=summary_path,
+            generated=True,
+            already_exists=False,
+        )
+
+    monkeypatch.setattr(runner, "_run_controlled_semantic_summary_regeneration", regenerate)
+    def public_remediation(*args, **kwargs):
+        assert kwargs["action"] == "semantic_review"
+        assert "force" not in kwargs
+        return SimpleNamespace(episode_ref="EP700", rows=[SimpleNamespace(status="blocked")])
+
+    monkeypatch.setattr(runner, "run_corpus_semantic_remediation", public_remediation)
+    monkeypatch.setattr(
+        runner,
+        "_run_018_authenticity_rereview",
+        lambda *args, **kwargs: SimpleNamespace(episode_ref="EP700", review_status="failed"),
+    )
+    monkeypatch.setattr(
+        runner, "run_research_workflow", lambda *args, **kwargs: pytest.fail("research must not run")
+    )
+
+    result = runner.run_latest_episode_verified_research_report_workflow(
+        "gooaye",
+        confirm=True,
+        expected_episode_ref="EP700",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+    )
+
+    assert len(calls) == 1
+    assert result.outcome == "blocked"
+    assert [(step.stage, step.status) for step in result.stage_plan] == [
+        ("deterministic_processing", "completed"),
+        ("semantic_summary", "completed"),
+        ("semantic_review", "blocked"),
+    ]
+
+
+def test_red_regeneration_provider_failure_reports_substage_category(monkeypatch, tmp_path):
+    from podcast_ingest_core import storage
+    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    _write_completed_artifacts(monkeypatch, tmp_path, with_lineage=False)
+    summary_path = storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha")
+    summary_before = summary_path.read_bytes()
+    monkeypatch.setattr(runner, "_adopt_complete_bundle", lambda *args: None)
+    monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *args: ("EP700", None))
+    monkeypatch.setattr(
+        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
+    )
+
+    def regenerate(*args, **kwargs):
+        raise TimeoutError(
+            "read timed out for http://127.0.0.1:8317/v1 key=not-a-real-secret"
+        )
+
+    monkeypatch.setattr(runner, "_run_controlled_semantic_summary_regeneration", regenerate)
+
+    result = runner.run_latest_episode_verified_research_report_workflow(
+        "gooaye",
+        confirm=True,
+        expected_episode_ref="EP700",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+    )
+
+    assert result.outcome == "failed"
+    assert (result.stage_plan[-1].stage, result.stage_plan[-1].status) == (
+        "semantic_summary",
+        "failed",
+    )
+    assert (
+        result.stage_plan[-1].failure_category
+        == "controlled_regeneration_provider_generation"
+    )
+    serialized = json.dumps(runner.result_to_dict(result))
+    assert "not-a-real-secret" not in serialized
+    assert "8317" not in serialized
+    assert "Traceback" not in serialized
+    assert summary_path.read_bytes() == summary_before
+
+
+def test_parent_regeneration_transaction_rejects_missing_authority_before_child(monkeypatch):
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from podcast_ingest_core import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
+
+    calls = []
+    monkeypatch.setattr(
+        runner,
+        "_run_controlled_semantic_summary_regeneration",
+        lambda *args, **kwargs: calls.append((args, kwargs)),
+    )
+    filters = runner._filters(
+        expected_episode_ref="EP700",
+        stock_query=None,
+        include_fixture_verification=False,
+        transcription_model=None,
+        transcription_device="cpu",
+        transcription_compute_type="int8",
+        transcription_vad_filter=False,
+        semantic_provider="openai-compatible",
+        semantic_model=None,
+        semantic_base_url_identity_sha256=None,
+        semantic_chunk_seconds=600,
+        semantic_max_segments_per_chunk=120,
+    )
+
+    with pytest.raises(LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError):
+        runner._controlled_summary_regeneration_transaction(
+            "gooaye",
+            "EP700",
+            title="fixture",
+            authorization=None,
+            api_cost_ack="ack",
+            filters=filters,
+            semantic_base_url=None,
+            semantic_api_key_env="OPENAI_API_KEY",
+        )
+
+    assert calls == []
+
+
+def test_red_restore_attempts_lineage_after_summary_restore_failure(monkeypatch, tmp_path):
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from podcast_ingest_core import storage
+
+    _use_tmp_dirs(monkeypatch, tmp_path)
+    summary = tmp_path / "summaries" / "gooaye" / "EP700.semantic.md"
+    sidecar = tmp_path / "corpus" / "gooaye" / "verified-research" / "EP700.lineage.json"
+    calls = []
+
+    def fail_summary_only(root, path, raw, maximum):
+        calls.append((root, path))
+        return root != storage.SUMMARIES_DIR
+
+    monkeypatch.setattr(runner, "_restore_exact_bytes", fail_summary_only)
+
+    assert runner._restore_regeneration_prestate(summary, b"summary", sidecar, b"lineage") is False
+    assert calls == [
+        (storage.SUMMARIES_DIR, summary),
+        (storage.CORPUS_DIR, sidecar),
+    ]
+
+
+@pytest.mark.parametrize(
+    ("child_mode", "expected_category"),
+    (
+        ("unchanged_bytes", "controlled_regeneration_changed_sha_proof"),
+        ("wrong_identity", "controlled_regeneration_child_identity"),
+    ),
+)
+def test_red_regeneration_proof_failures_report_distinct_substages(
+    monkeypatch, tmp_path, child_mode, expected_category
+):
+    from types import SimpleNamespace
+
+    from podcast_ingest_core import storage
+    from podcast_ingest_core.errors import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
+    from podcast_ingest_core.generation_proof import notify_child_artifact_committed
+    from podcast_ingest_core.episode_claim import (
+        _mint_controlled_regeneration_capability,
+        episode_writer_claim,
+    )
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    _write_completed_artifacts(monkeypatch, tmp_path)
+    summary_path = storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha")
+    summary_before = summary_path.read_bytes()
+    filters = runner._filters(
+        expected_episode_ref="EP700",
+        stock_query=None,
+        include_fixture_verification=False,
+        transcription_model=None,
+        transcription_device="cpu",
+        transcription_compute_type="int8",
+        transcription_vad_filter=False,
+        semantic_provider="openai-compatible",
+        semantic_model=None,
+        semantic_base_url_identity_sha256=None,
+        semantic_chunk_seconds=600,
+        semantic_max_segments_per_chunk=120,
+    )
+
+    def regenerate(*args, **kwargs):
+        if child_mode == "wrong_identity":
+            summary_path.write_bytes(summary_before + b"\nreplacement")
+        notify_child_artifact_committed("semantic_summary", summary_path, generated=True)
+        return SimpleNamespace(
+            podcast_id="gooaye",
+            episode_ref="EP999" if child_mode == "wrong_identity" else "EP700",
+            summary_path=summary_path,
+            generated=True,
+            already_exists=False,
+        )
+
+    monkeypatch.setattr(runner, "_run_controlled_semantic_summary_regeneration", regenerate)
+
+    with episode_writer_claim("gooaye", "EP700"):
+        authorization = _mint_controlled_regeneration_capability("gooaye", "EP700")
+        with pytest.raises(
+            LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
+        ) as excinfo:
+            runner._controlled_summary_regeneration_transaction(
+                "gooaye",
+                "EP700",
+                title="EP700 Alpha",
+                authorization=authorization,
+                api_cost_ack="fixture acknowledgement",
+                filters=filters,
+                semantic_base_url=None,
+                semantic_api_key_env="OPENAI_API_KEY",
+            )
+
+    assert runner._safe_failure_category(excinfo.value) == expected_category
+    assert summary_path.read_bytes() == summary_before
+
+
+@pytest.mark.parametrize(
+    ("mode", "expected_category"),
+    (
+        ("authority", "controlled_regeneration_authority"),
+        ("pre_state", "controlled_regeneration_pre_state"),
+        ("transcript_source", "controlled_regeneration_transcript_source"),
+        ("lineage_record", "controlled_regeneration_lineage_record"),
+        ("lineage_post_validation", "controlled_regeneration_lineage_post_validation"),
+        ("rollback", "controlled_regeneration_rollback"),
+    ),
+)
+def test_red_regeneration_transaction_substages_are_allowlisted_constants(
+    monkeypatch, tmp_path, mode, expected_category
+):
+    from types import SimpleNamespace
+
+    from podcast_ingest_core import storage
+    from podcast_ingest_core.errors import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
+    from podcast_ingest_core.generation_proof import notify_child_artifact_committed
+    from podcast_ingest_core.episode_claim import (
+        _mint_controlled_regeneration_capability,
+        episode_writer_claim,
+    )
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    _write_completed_artifacts(monkeypatch, tmp_path)
+    summary_path = storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha")
+    summary_before = summary_path.read_bytes()
+    filters = runner._filters(
+        expected_episode_ref="EP700",
+        stock_query=None,
+        include_fixture_verification=False,
+        transcription_model=None,
+        transcription_device="cpu",
+        transcription_compute_type="int8",
+        transcription_vad_filter=False,
+        semantic_provider="openai-compatible",
+        semantic_model=None,
+        semantic_base_url_identity_sha256=None,
+        semantic_chunk_seconds=600,
+        semantic_max_segments_per_chunk=120,
+    )
+    child_calls = []
+
+    def regenerate(*args, **kwargs):
+        child_calls.append(True)
+        summary_path.write_bytes(summary_before + b"\nreplacement")
+        notify_child_artifact_committed("semantic_summary", summary_path, generated=True)
+        return SimpleNamespace(
+            podcast_id="gooaye",
+            episode_ref="EP700",
+            summary_path=summary_path,
+            generated=True,
+            already_exists=False,
+        )
+
+    monkeypatch.setattr(runner, "_run_controlled_semantic_summary_regeneration", regenerate)
+    if mode == "pre_state":
+        summary_path.unlink()
+    if mode == "transcript_source":
+        monkeypatch.setattr(
+            runner, "resolve_canonical_transcript_asset_paths", lambda *args, **kwargs: None
+        )
+    if mode in {"lineage_record", "rollback"}:
+        monkeypatch.setattr(
+            runner,
+            "record_current_verified_research_lineage",
+            lambda *args, **kwargs: (_ for _ in ()).throw(OSError("injected")),
+        )
+    if mode == "lineage_post_validation":
+        monkeypatch.setattr(
+            runner,
+            "validate_current_verified_research_lineage",
+            lambda *args, **kwargs: (_ for _ in ()).throw(OSError("injected")),
+        )
+    if mode == "rollback":
+        monkeypatch.setattr(runner, "_restore_regeneration_prestate", lambda *args: False)
+
+    with episode_writer_claim("gooaye", "EP700"):
+        authorization = (
+            None if mode == "authority" else _mint_controlled_regeneration_capability("gooaye", "EP700")
+        )
+        with pytest.raises(
+            LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
+        ) as excinfo:
+            runner._controlled_summary_regeneration_transaction(
+                "gooaye",
+                "EP700",
+                title="EP700 Alpha",
+                authorization=authorization,
+                api_cost_ack="fixture acknowledgement",
+                filters=filters,
+                semantic_base_url=None,
+                semantic_api_key_env="OPENAI_API_KEY",
+            )
+
+    assert runner._safe_failure_category(excinfo.value) == expected_category
+    assert expected_category.removeprefix("controlled_regeneration_") in (
+        runner._CONTROLLED_REGENERATION_SUBSTAGES
+    )
+    assert "injected" not in str(excinfo.value)
+    if mode in {"authority", "pre_state"}:
+        assert child_calls == []
+    if mode not in {"pre_state", "rollback"}:
+        assert summary_path.read_bytes() == summary_before
+    assert not list(tmp_path.rglob("*.restore.part"))
+
+
+@pytest.mark.parametrize("failure_stage", ("record", "post_validation"))
+def test_controlled_regeneration_rolls_back_summary_and_lineage_on_failure(
+    monkeypatch, tmp_path, failure_stage
+):
+    from types import SimpleNamespace
+
+    from podcast_ingest_core import storage
+    from podcast_ingest_core.errors import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
+    from podcast_ingest_core.generation_proof import notify_child_artifact_committed
+    from podcast_ingest_core.episode_claim import (
+        _mint_controlled_regeneration_capability,
+        episode_writer_claim,
+    )
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    _write_completed_artifacts(monkeypatch, tmp_path)
+    summary_path = storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha")
+    sidecar_path = storage.CORPUS_DIR / "gooaye" / "verified-research" / "EP700.lineage.json"
+    summary_before = summary_path.read_bytes()
+    sidecar_before = sidecar_path.read_bytes()
+    filters = runner._filters(
+        expected_episode_ref="EP700",
+        stock_query=None,
+        include_fixture_verification=False,
+        transcription_model=None,
+        transcription_device="cpu",
+        transcription_compute_type="int8",
+        transcription_vad_filter=False,
+        semantic_provider="openai-compatible",
+        semantic_model=None,
+        semantic_base_url_identity_sha256=None,
+        semantic_chunk_seconds=600,
+        semantic_max_segments_per_chunk=120,
+    )
+
+    def regenerate(*args, **kwargs):
+        summary_path.write_bytes(summary_before + b"\nreplacement")
+        notify_child_artifact_committed("semantic_summary", summary_path, generated=True)
+        return SimpleNamespace(
+            podcast_id="gooaye",
+            episode_ref="EP700",
+            summary_path=summary_path,
+            generated=True,
+            already_exists=False,
+        )
+
+    monkeypatch.setattr(runner, "_run_controlled_semantic_summary_regeneration", regenerate)
+    monkeypatch.setattr(
+        runner,
+        (
+            "record_current_verified_research_lineage"
+            if failure_stage == "record"
+            else "validate_current_verified_research_lineage"
+        ),
+        lambda *args, **kwargs: (_ for _ in ()).throw(OSError("injected")),
+    )
+
+    with episode_writer_claim("gooaye", "EP700"):
+        authorization = _mint_controlled_regeneration_capability("gooaye", "EP700")
+        with pytest.raises(LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError):
+            runner._controlled_summary_regeneration_transaction(
+                "gooaye",
+                "EP700",
+                title="EP700 Alpha",
+                authorization=authorization,
+                api_cost_ack="fixture acknowledgement",
+                filters=filters,
+                semantic_base_url=None,
+                semantic_api_key_env="OPENAI_API_KEY",
+            )
+
+    assert summary_path.read_bytes() == summary_before
+    assert sidecar_path.read_bytes() == sidecar_before
+    assert not list(tmp_path.rglob("*.restore.part"))
+
+
+def test_red_latest_semantic_effort_and_timeout_are_lineage_request_identity():
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    filters = runner._filters(
+        expected_episode_ref="EP700",
+        stock_query=None,
+        include_fixture_verification=False,
+        transcription_model=None,
+        transcription_device="cpu",
+        transcription_compute_type="int8",
+        transcription_vad_filter=False,
+        semantic_provider="openai-compatible",
+        semantic_model="safe-model",
+        semantic_base_url_identity_sha256="a" * 64,
+        semantic_reasoning_effort="medium",
+        semantic_read_timeout_seconds=600,
+        semantic_chunk_seconds=600,
+        semantic_max_segments_per_chunk=120,
+    )
+
+    assert runner._summary_lineage_options(filters) == {
+        "summary_mode": "semantic-llm",
+        "requested_provider": "openai-compatible",
+        "requested_model": "safe-model",
+        "requested_base_url_identity_sha256": "a" * 64,
+        "requested_reasoning_effort": "medium",
+        "requested_read_timeout_seconds": 600,
+        "requested_chunk_seconds": 600,
+        "requested_max_segments_per_chunk": 120,
+    }
+
+
+def test_red_regenerated_semantic_summary_proof_records_and_resumes(monkeypatch, tmp_path):
+    """Only a real replacement of the canonical summary may use regenerated."""
+    from podcast_ingest_core import storage
+    from podcast_ingest_core.verified_research_lineage import (
+        record_current_verified_research_lineage,
+        validate_current_verified_research_lineage,
+    )
+
+    _write_completed_artifacts(monkeypatch, tmp_path)
+    transcript = storage.transcript_asset_paths("gooaye", "EP700", "EP700 Alpha")
+    summary = storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha")
+    previous_sha256 = hashlib.sha256(summary.read_bytes()).hexdigest()
+    summary.write_text(summary.read_text(encoding="utf-8") + "\nregenerated fixture", encoding="utf-8")
+    current_sha256 = hashlib.sha256(summary.read_bytes()).hexdigest()
+    options = {
+        "summary_mode": "semantic-llm",
+        "requested_provider": "openai-compatible",
+        "requested_model": None,
+        "requested_base_url_identity_sha256": None,
+        "requested_chunk_seconds": 600,
+        "requested_max_segments_per_chunk": 120,
+    }
+
+    record_current_verified_research_lineage(
+        "gooaye",
+        "EP700",
+        stock_query=None,
+        include_fixture_verification=False,
+        summary_options=options,
+        roles=("transcript", "semantic_summary"),
+        generation_proofs={
+            "transcript": {
+                "expected_path": transcript.json_path.resolve().as_posix(),
+                "pre_sha256": None,
+                "post_sha256": hashlib.sha256(transcript.json_path.read_bytes()).hexdigest(),
+                "execution": "external_selector",
+            },
+            "semantic_summary": {
+                "expected_path": summary.resolve().as_posix(),
+                "pre_sha256": previous_sha256,
+                "post_sha256": current_sha256,
+                "execution": "regenerated",
+            },
+        },
+    )
+
+    resumed = validate_current_verified_research_lineage(
+        "gooaye",
+        "EP700",
+        stock_query=None,
+        include_fixture_verification=False,
+        summary_options=options,
+        roles=("semantic_summary",),
+    )
+
+    assert resumed["artifacts"]["semantic_summary"]["generation_proof"]["execution"] == "regenerated"
+
+
+@pytest.mark.parametrize(
+    ("lineage_roles", "expected_force"),
+    (
+        (("transcript", "semantic_summary", "semantic_review"), True),
+        (None, False),
+    ),
+)
+def test_red_research_is_forced_when_its_lineage_roles_are_not_current(
+    monkeypatch, tmp_path, lineage_roles, expected_force
+):
+    from types import SimpleNamespace
+
+    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    _write_completed_artifacts(monkeypatch, tmp_path, with_lineage=False)
+    _record_current_018_lineage(roles=lineage_roles)
+    monkeypatch.setattr(runner, "_adopt_complete_bundle", lambda *args: None)
+    monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *args: ("EP700", None))
+    monkeypatch.setattr(
+        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
+    )
+    monkeypatch.setattr(
+        runner,
+        "_run_controlled_semantic_summary_regeneration",
+        lambda *args, **kwargs: pytest.fail("regeneration must not run"),
+    )
+    captured = []
+
+    def research(*args, **kwargs):
+        captured.append(kwargs)
+        return SimpleNamespace(workflow_status="completed", steps=[])
+
+    monkeypatch.setattr(runner, "run_research_workflow", research)
+
+    runner.run_latest_episode_verified_research_report_workflow(
+        "gooaye",
+        confirm=True,
+        expected_episode_ref="EP700",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+        publish_report=False,
+    )
+
+    assert len(captured) == 1
+    assert captured[0]["force"] is expected_force
+
+
+def _unproven_research_scenario(monkeypatch, tmp_path):
+    """EP687-shaped state: artifacts on disk, lineage covering only the semantics."""
+
+    from podcast_ingest_core import storage
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    _write_completed_artifacts(monkeypatch, tmp_path, with_lineage=False)
+    _record_current_018_lineage(roles=("transcript", "semantic_summary", "semantic_review"))
+    monkeypatch.setattr(runner, "_adopt_complete_bundle", lambda *args: None)
+    monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *args: ("EP700", None))
+    monkeypatch.setattr(
+        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
+    )
+    monkeypatch.setattr(
+        runner,
+        "_run_controlled_semantic_summary_regeneration",
+        lambda *args, **kwargs: pytest.fail("regeneration must not run"),
+    )
+    return {
+        "mentions": storage.mention_asset_paths("gooaye", "EP700", "EP700 Alpha").json_path,
+        "intelligence": storage.episode_intelligence_report_asset_paths(
+            "gooaye", "EP700", "EP700 Alpha"
+        ).json_path,
+        "industry_mapping": storage.industry_chain_mapping_asset_paths(
+            "gooaye", "EP700", "EP700 Alpha"
+        ).json_path,
+        "external_boundary": storage.external_data_boundary_asset_paths(
+            "gooaye", "EP700", "EP700 Alpha"
+        ).json_path,
+    }
+
+
+def test_red_unproven_research_artifacts_are_cleared_before_the_child_runs(
+    monkeypatch, tmp_path
+):
+    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    paths = _unproven_research_scenario(monkeypatch, tmp_path)
+    assert all(path.exists() for path in paths.values())
+    observed: dict[str, bool] = {}
+
+    def research(*args, **kwargs):
+        observed.update({role: path.exists() for role, path in paths.items()})
+        raise RuntimeError("stop after observation")
+
+    monkeypatch.setattr(runner, "run_research_workflow", research)
+
+    runner.run_latest_episode_verified_research_report_workflow(
+        "gooaye",
+        confirm=True,
+        expected_episode_ref="EP700",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+        publish_report=False,
+    )
+
+    assert observed == {role: False for role in paths}
+
+
+def test_cleared_research_artifacts_are_restored_byte_exactly_when_the_child_fails(
+    monkeypatch, tmp_path
+):
+    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    paths = _unproven_research_scenario(monkeypatch, tmp_path)
+    before = {role: path.read_bytes() for role, path in paths.items()}
+
+    def research(*args, **kwargs):
+        # A partially written replacement must not survive the rollback either.
+        paths["mentions"].write_bytes(b'{"partial": true}')
+        raise RuntimeError("child failed")
+
+    monkeypatch.setattr(runner, "run_research_workflow", research)
+
+    result = runner.run_latest_episode_verified_research_report_workflow(
+        "gooaye",
+        confirm=True,
+        expected_episode_ref="EP700",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+        publish_report=False,
+    )
+
+    assert result.outcome == "failed"
+    assert result.stage_plan[-1].stage == "research"
+    assert {role: path.read_bytes() for role, path in paths.items()} == before
+    assert not list(tmp_path.rglob("*.restore.part"))
+
+
+def test_regenerated_research_artifacts_survive_a_successful_stage(monkeypatch, tmp_path):
+    import hashlib
+    from types import SimpleNamespace
+
+    from podcast_ingest_core.generation_proof import notify_child_artifact_committed
+    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    paths = _unproven_research_scenario(monkeypatch, tmp_path)
+    before = {role: path.read_bytes() for role, path in paths.items()}
+
+    def research(*args, **kwargs):
+        for role, path in paths.items():
+            assert not path.exists()
+            path.write_bytes(before[role] + b"\n")
+            notify_child_artifact_committed(role, path, generated=True)
+        return SimpleNamespace(workflow_status="completed")
+
+    monkeypatch.setattr(runner, "run_research_workflow", research)
+
+    result = runner.run_latest_episode_verified_research_report_workflow(
+        "gooaye",
+        confirm=True,
+        expected_episode_ref="EP700",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+        publish_report=False,
+    )
+
+    for role, path in paths.items():
+        assert path.read_bytes() == before[role] + b"\n"
+    assert not list(tmp_path.rglob("*.restore.part"))
+    assert not list(tmp_path.rglob("*.superseded"))
+    audit = [
+        warning
+        for warning in result.warnings
+        if warning.message.startswith("superseded unproven research artifacts:")
+    ]
+    assert len(audit) == 1
+    for role in paths:
+        assert f"{role}={hashlib.sha256(before[role]).hexdigest()}" in audit[0].message
+
+
+def test_interrupted_clearing_restores_every_already_moved_artifact(monkeypatch, tmp_path):
+    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    paths = _unproven_research_scenario(monkeypatch, tmp_path)
+    before = {role: path.read_bytes() for role, path in paths.items()}
+    research_paths = {str(path) for path in paths.values()}
+    real_snapshot = runner.secure_snapshot
+    seen: list[str] = []
+
+    def interrupted_snapshot(root, path, *, max_bytes):
+        if str(path) in research_paths:
+            seen.append(str(path))
+            if len(seen) == 3:
+                raise KeyboardInterrupt("interrupted mid-clearing")
+        return real_snapshot(root, path, max_bytes=max_bytes)
+
+    monkeypatch.setattr(runner, "secure_snapshot", interrupted_snapshot)
+    monkeypatch.setattr(
+        runner,
+        "run_research_workflow",
+        lambda *args, **kwargs: pytest.fail("child must not run"),
+    )
+
+    with pytest.raises(KeyboardInterrupt):
+        runner.run_latest_episode_verified_research_report_workflow(
+            "gooaye",
+            confirm=True,
+            expected_episode_ref="EP700",
+            api_cost_ack=SEMANTIC_API_COST_ACK,
+            publish_report=False,
+        )
+
+    assert {role: path.read_bytes() for role, path in paths.items()} == before
+    assert not list(tmp_path.rglob("*.superseded"))
+
+
+def test_incomplete_research_child_restores_the_superseded_artifacts(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+
+    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    paths = _unproven_research_scenario(monkeypatch, tmp_path)
+    before = {role: path.read_bytes() for role, path in paths.items()}
+
+    def research(*args, **kwargs):
+        paths["mentions"].write_bytes(b'{"partial": true}')
+        return SimpleNamespace(workflow_status="failed")
+
+    monkeypatch.setattr(runner, "run_research_workflow", research)
+
+    result = runner.run_latest_episode_verified_research_report_workflow(
+        "gooaye",
+        confirm=True,
+        expected_episode_ref="EP700",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+        publish_report=False,
+    )
+
+    assert result.outcome == "blocked"
+    assert result.stage_plan[-1].stage == "research"
+    assert {role: path.read_bytes() for role, path in paths.items()} == before
+    assert not list(tmp_path.rglob("*.superseded"))
+
+
+def test_red_research_completed_without_proof_coverage_restores_the_artifacts(
+    monkeypatch, tmp_path
+):
+    from types import SimpleNamespace
+
+    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    paths = _unproven_research_scenario(monkeypatch, tmp_path)
+    before = {role: path.read_bytes() for role, path in paths.items()}
+
+    def research(*args, **kwargs):
+        # Claims success while bypassing the controlled commit seam entirely.
+        for role, path in paths.items():
+            path.write_bytes(before[role] + b"\nunproven")
+        return SimpleNamespace(workflow_status="completed")
+
+    monkeypatch.setattr(runner, "run_research_workflow", research)
+
+    result = runner.run_latest_episode_verified_research_report_workflow(
+        "gooaye",
+        confirm=True,
+        expected_episode_ref="EP700",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+        publish_report=False,
+    )
+
+    assert result.outcome == "blocked"
+    assert result.stage_plan[-1].stage == "research"
+    assert {role: path.read_bytes() for role, path in paths.items()} == before
+    assert not list(tmp_path.rglob("*.superseded"))
+    assert not [
+        warning
+        for warning in result.warnings
+        if warning.message.startswith("superseded unproven research artifacts:")
+    ]
+
+
+def test_aliased_research_roles_are_cleared_and_restored_exactly_once(monkeypatch, tmp_path):
+    from podcast_ingest_core import storage
+    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+
+    _use_tmp_dirs(monkeypatch, tmp_path)
+    boundary = storage.EXTERNAL_DIR / "gooaye" / "EP700__EP700.external-boundary.json"
+    boundary.parent.mkdir(parents=True, exist_ok=True)
+    boundary.write_bytes(b'{"boundary": true}')
+    before = boundary.read_bytes()
+    targets = {
+        "external_boundary": (storage.EXTERNAL_DIR, boundary),
+        "fixture": (storage.EXTERNAL_DIR, boundary),
+    }
+
+    with runner._unproven_research_artifacts_cleared(targets) as clearing:
+        assert not boundary.exists()
+        assert list(clearing.roles) == ["external_boundary"]
+        assert len(list(tmp_path.rglob("*.superseded"))) == 1
+
+    assert boundary.read_bytes() == before
+    assert not list(tmp_path.rglob("*.superseded"))
 
 
 def _record_current_018_lineage(

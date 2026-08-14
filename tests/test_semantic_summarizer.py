@@ -110,6 +110,32 @@ def test_semantic_summarizer_calls_validation_before_provider(monkeypatch, tmp_p
     assert len(provider.chunk_calls) == 3
 
 
+def test_semantic_summarizer_forwards_reasoning_effort_to_provider(
+    monkeypatch, tmp_path
+):
+    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+
+    _write_transcript(monkeypatch, tmp_path)
+    provider = FakeProvider()
+    captured = {}
+
+    def fake_build_provider(**kwargs):
+        captured.update(kwargs)
+        return provider
+
+    monkeypatch.setattr(semantic_summarizer, "_build_provider", fake_build_provider)
+
+    semantic_summarizer.semantic_summarize_episode(
+        "gooaye",
+        "EP672",
+        api_cost_ack=semantic_summarizer.SEMANTIC_API_COST_ACK,
+        model="test-model",
+        reasoning_effort="max",
+    )
+
+    assert captured["reasoning_effort"] == "max"
+
+
 def test_semantic_summarizer_chunks_segments_by_time(monkeypatch, tmp_path):
     import podcast_ingest_core.semantic_summarizer as semantic_summarizer
 
@@ -300,6 +326,109 @@ def test_openai_provider_request_failure_raises_request_error(monkeypatch):
         provider.complete([{"role": "user", "content": "hi"}])
 
 
+def test_openai_provider_omits_reasoning_effort_by_default(monkeypatch):
+    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
+
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    captured = {}
+
+    class Response:
+        status_code = 200
+        text = "ok"
+
+        def json(self):
+            return {"choices": [{"message": {"content": "done"}}]}
+
+    def fake_post(*args, **kwargs):
+        captured["json"] = kwargs["json"]
+        captured["timeout"] = kwargs["timeout"]
+        return Response()
+
+    import podcast_ingest_core.llm_provider as llm_provider
+
+    monkeypatch.setattr(llm_provider.requests, "post", fake_post)
+    messages = [{"role": "user", "content": "hi"}]
+    provider = create_provider(
+        "openai-compatible",
+        model="test-model",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+    )
+
+    assert provider.complete(messages) == "done"
+    assert captured["json"] == {
+        "model": "test-model",
+        "messages": messages,
+    }
+    assert captured["timeout"] == (10, 120)
+
+
+def test_openai_provider_uses_requested_read_timeout(monkeypatch):
+    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
+
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    captured = {}
+
+    class Response:
+        status_code = 200
+        text = "ok"
+
+        def json(self):
+            return {"choices": [{"message": {"content": "done"}}]}
+
+    def fake_post(*args, **kwargs):
+        captured["timeout"] = kwargs["timeout"]
+        return Response()
+
+    import podcast_ingest_core.llm_provider as llm_provider
+
+    monkeypatch.setattr(llm_provider.requests, "post", fake_post)
+    provider = create_provider(
+        "openai-compatible",
+        model="test-model",
+        read_timeout_seconds=600,
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+    )
+
+    assert provider.complete([{"role": "user", "content": "hi"}]) == "done"
+    assert captured["timeout"] == (10, 600)
+
+
+def test_openai_provider_sends_reasoning_effort_when_requested(monkeypatch):
+    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
+
+    monkeypatch.setenv("OPENAI_API_KEY", "test-key")
+    captured = {}
+
+    class Response:
+        status_code = 200
+        text = "ok"
+
+        def json(self):
+            return {"choices": [{"message": {"content": "done"}}]}
+
+    def fake_post(*args, **kwargs):
+        captured["json"] = kwargs["json"]
+        return Response()
+
+    import podcast_ingest_core.llm_provider as llm_provider
+
+    monkeypatch.setattr(llm_provider.requests, "post", fake_post)
+    messages = [{"role": "user", "content": "hi"}]
+    provider = create_provider(
+        "openai-compatible",
+        model="test-model",
+        reasoning_effort="max",
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+    )
+
+    assert provider.complete(messages) == "done"
+    assert captured["json"] == {
+        "model": "test-model",
+        "messages": messages,
+        "reasoning_effort": "max",
+    }
+
+
 def test_openai_provider_prefers_generic_model_and_base_url(monkeypatch):
     from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
 
@@ -385,6 +514,10 @@ def test_summarize_cli_parses_semantic_options(monkeypatch, capsys, tmp_path):
             "https://example.test/v1",
             "--api-key-env",
             "TEST_API_KEY",
+            "--reasoning-effort",
+            "max",
+            "--read-timeout-seconds",
+            "600",
             "--chunk-seconds",
             "600",
             "--max-segments-per-chunk",
@@ -408,6 +541,8 @@ def test_summarize_cli_parses_semantic_options(monkeypatch, capsys, tmp_path):
         "model": "test-model",
         "base_url": "https://example.test/v1",
         "api_key_env": "TEST_API_KEY",
+        "reasoning_effort": "max",
+        "read_timeout_seconds": 600,
         "force": True,
         "chunk_seconds": 600,
         "max_segments_per_chunk": 120,

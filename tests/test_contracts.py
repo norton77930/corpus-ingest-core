@@ -55,6 +55,8 @@ def test_package_exports_required_core_functions():
             "model",
             "base_url",
             "api_key_env",
+            "reasoning_effort",
+            "read_timeout_seconds",
             "force",
             "chunk_seconds",
             "max_segments_per_chunk",

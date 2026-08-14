@@ -860,6 +860,8 @@ class CorpusSemanticRemediationRunFilter:
     action: str
     provider: str | None
     model: str | None
+    reasoning_effort: str | None
+    read_timeout_seconds: int
     chunk_seconds: int
     max_segments_per_chunk: int
 
@@ -1106,6 +1108,8 @@ class LatestEpisodeVerifiedResearchReportWorkflowRunFilter:
     semantic_provider: str | None
     semantic_model: str | None
     semantic_base_url_identity_sha256: str | None
+    semantic_reasoning_effort: str | None
+    semantic_read_timeout_seconds: int
     semantic_chunk_seconds: int
     semantic_max_segments_per_chunk: int
 

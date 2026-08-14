@@ -46,6 +46,152 @@ def _tree_manifest(root: Path) -> dict[str, tuple[str, int, int]]:
     return manifest
 
 
+def test_red_private_regeneration_executor_rejects_missing_authority_before_summarizer(
+    monkeypatch, tmp_path
+):
+    import podcast_ingest_core.corpus_semantic_remediation_runner as runner
+    from podcast_ingest_core import CorpusSemanticRemediationRunnerFailedError
+
+    calls = []
+    monkeypatch.setattr(
+        runner,
+        "semantic_summarize_episode",
+        lambda *args, **kwargs: calls.append((args, kwargs)),
+    )
+
+    with pytest.raises(CorpusSemanticRemediationRunnerFailedError):
+        runner._run_controlled_semantic_summary_regeneration(
+            "gooaye",
+            "EP700",
+            authorization=None,
+            expected_summary_path=tmp_path / "EP700.semantic.md",
+            api_cost_ack="ack",
+            provider="openai-compatible",
+            model="fixture-model",
+            base_url=None,
+            api_key_env="OPENAI_API_KEY",
+            reasoning_effort="medium",
+            read_timeout_seconds=600,
+            chunk_seconds=600,
+            max_segments_per_chunk=120,
+        )
+
+    assert calls == []
+
+
+def test_private_regeneration_capability_rejects_wrong_episode_and_reuse(
+    monkeypatch, tmp_path
+):
+    from types import SimpleNamespace
+
+    import podcast_ingest_core.corpus_semantic_remediation_runner as runner
+    from podcast_ingest_core import CorpusSemanticRemediationRunnerFailedError
+    from podcast_ingest_core.episode_claim import (
+        _mint_controlled_regeneration_capability,
+        episode_writer_claim,
+    )
+
+    expected = tmp_path / "EP700.semantic.md"
+    calls = []
+
+    def fake_summarize(*args, **kwargs):
+        calls.append((args, kwargs))
+        expected.write_text("replacement", encoding="utf-8")
+        return SimpleNamespace(
+            podcast_id="gooaye",
+            episode_ref="EP700",
+            summary_path=expected,
+            generated=True,
+            already_exists=False,
+        )
+
+    monkeypatch.setattr(runner, "semantic_summarize_episode", fake_summarize)
+    common = {
+        "expected_summary_path": expected,
+        "api_cost_ack": "ack",
+        "provider": "openai-compatible",
+        "model": "fixture-model",
+        "base_url": None,
+        "api_key_env": "OPENAI_API_KEY",
+        "reasoning_effort": None,
+        "read_timeout_seconds": 120,
+        "chunk_seconds": 600,
+        "max_segments_per_chunk": 120,
+    }
+    with episode_writer_claim("gooaye", "EP700"):
+        wrong_episode = _mint_controlled_regeneration_capability("gooaye", "EP700")
+        with pytest.raises(CorpusSemanticRemediationRunnerFailedError):
+            runner._run_controlled_semantic_summary_regeneration(
+                "gooaye", "EP701", authorization=wrong_episode, **common
+            )
+        authorization = _mint_controlled_regeneration_capability("gooaye", "EP700")
+        runner._run_controlled_semantic_summary_regeneration(
+            "gooaye", "EP700", authorization=authorization, **common
+        )
+        with pytest.raises(CorpusSemanticRemediationRunnerFailedError):
+            runner._run_controlled_semantic_summary_regeneration(
+                "gooaye", "EP700", authorization=authorization, **common
+            )
+
+    assert len(calls) == 1
+
+
+def test_red_private_regeneration_executor_forces_exact_canonical_child(monkeypatch, tmp_path):
+    from types import SimpleNamespace
+
+    import podcast_ingest_core.corpus_semantic_remediation_runner as runner
+    from podcast_ingest_core.episode_claim import (
+        _mint_controlled_regeneration_capability,
+        episode_writer_claim,
+    )
+    from podcast_ingest_core.generation_proof import controlled_child_commit_scope
+
+    expected = tmp_path / "EP700.semantic.md"
+    expected.write_text("old", encoding="utf-8")
+    commits = []
+
+    def fake_summarize(*args, **kwargs):
+        assert kwargs["force"] is True
+        assert kwargs["reasoning_effort"] == "medium"
+        assert kwargs["read_timeout_seconds"] == 600
+        expected.write_text("new", encoding="utf-8")
+        return SimpleNamespace(
+            podcast_id="gooaye",
+            episode_ref="EP700",
+            summary_path=expected,
+            generated=True,
+            already_exists=False,
+            provider="fixture",
+            model="fixture-model",
+        )
+
+    monkeypatch.setattr(runner, "semantic_summarize_episode", fake_summarize)
+    with episode_writer_claim("gooaye", "EP700"):
+        authorization = _mint_controlled_regeneration_capability("gooaye", "EP700")
+        with controlled_child_commit_scope(commits.append):
+            result = runner._run_controlled_semantic_summary_regeneration(
+                "gooaye",
+                "EP700",
+                authorization=authorization,
+                expected_summary_path=expected,
+                api_cost_ack="ack",
+                provider="openai-compatible",
+                model="fixture-model",
+                base_url=None,
+                api_key_env="OPENAI_API_KEY",
+                reasoning_effort="medium",
+                read_timeout_seconds=600,
+                chunk_seconds=600,
+                max_segments_per_chunk=120,
+            )
+
+    assert result.episode_ref == "EP700"
+    assert result.generated is True
+    assert [(commit.role, commit.path, commit.generated) for commit in commits] == [
+        ("semantic_summary", expected, True)
+    ]
+
+
 def test_semantic_remediation_public_signature_and_exports():
     import podcast_ingest_core as core
 
@@ -59,6 +205,8 @@ def test_semantic_remediation_public_signature_and_exports():
         "model",
         "base_url",
         "api_key_env",
+        "reasoning_effort",
+        "read_timeout_seconds",
         "chunk_seconds",
         "max_segments_per_chunk",
         "progress_callback",
@@ -74,6 +222,8 @@ def test_semantic_remediation_public_signature_and_exports():
     assert signature.parameters["model"].default is None
     assert signature.parameters["base_url"].default is None
     assert signature.parameters["api_key_env"].default == "OPENAI_API_KEY"
+    assert signature.parameters["reasoning_effort"].default is None
+    assert signature.parameters["read_timeout_seconds"].default == 120
     assert signature.parameters["chunk_seconds"].default == 600
     assert signature.parameters["max_segments_per_chunk"].default == 120
     assert signature.parameters["progress_callback"].default is None
@@ -96,6 +246,8 @@ def test_semantic_remediation_model_field_contracts():
         "action",
         "provider",
         "model",
+        "reasoning_effort",
+        "read_timeout_seconds",
         "chunk_seconds",
         "max_segments_per_chunk",
     ]
@@ -838,6 +990,8 @@ def test_confirmed_summary_uses_real_semantic_core_with_mock_provider_once(
         model,
         base_url,
         api_key_env,
+        reasoning_effort,
+        read_timeout_seconds,
         api_cost_ack,
     ):
         provider_calls.append(
@@ -1730,6 +1884,10 @@ def test_semantic_remediation_cli_confirmed_summary_resolves_controlled_options_
             SEMANTIC_API_COST_ACK,
             "--llm-profile",
             "controlled",
+            "--reasoning-effort",
+            "medium",
+            "--read-timeout-seconds",
+            "600",
         ],
     )
 
@@ -1746,6 +1904,8 @@ def test_semantic_remediation_cli_confirmed_summary_resolves_controlled_options_
     assert captured_call[1]["model"] == "safe-model"
     assert captured_call[1]["base_url"] == "https://private.invalid/v1"
     assert captured_call[1]["api_key_env"] == "OPENAI_API_KEY"
+    assert captured_call[1]["reasoning_effort"] == "medium"
+    assert captured_call[1]["read_timeout_seconds"] == 600
     assert payload["run_mode"] == "dry_run"
     assert "private.invalid" not in json.dumps(payload)
 

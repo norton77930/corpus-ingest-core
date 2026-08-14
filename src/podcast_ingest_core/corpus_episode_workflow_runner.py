@@ -539,7 +539,7 @@ def _semantic_handoff_result_is_invalid(
             return True
     if saw_target_row:
         return False
-    if rows or not isinstance(plan_payload, dict):
+    if not isinstance(plan_payload, dict):
         return True
     episodes = plan_payload.get("episodes")
     if not isinstance(episodes, list):

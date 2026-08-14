@@ -41,6 +41,8 @@ def semantic_summarize_episode(
     model: str | None = None,
     base_url: str | None = None,
     api_key_env: str = "OPENAI_API_KEY",
+    reasoning_effort: str | None = None,
+    read_timeout_seconds: int = 120,
     force: bool = False,
     chunk_seconds: int = 600,
     max_segments_per_chunk: int = 120,
@@ -137,6 +139,8 @@ def semantic_summarize_episode(
         model=model,
         base_url=base_url,
         api_key_env=api_key_env,
+        reasoning_effort=reasoning_effort,
+        read_timeout_seconds=read_timeout_seconds,
         api_cost_ack=api_cost_ack,
     )
     try:
@@ -205,6 +209,8 @@ def _build_provider(
     model: str | None,
     base_url: str | None,
     api_key_env: str,
+    reasoning_effort: str | None,
+    read_timeout_seconds: int,
     api_cost_ack: str,
 ) -> SemanticSummaryProvider:
     return create_provider(
@@ -212,6 +218,8 @@ def _build_provider(
         model=model,
         base_url=base_url,
         api_key_env=api_key_env,
+        reasoning_effort=reasoning_effort,
+        read_timeout_seconds=read_timeout_seconds,
         api_cost_ack=api_cost_ack,
     )
 

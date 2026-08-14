@@ -7,6 +7,7 @@ from pathlib import Path
 import uuid
 
 from .artifact_lock import exclusive_artifact_claim
+from .episode_claim import episode_writer_claimed
 from .generation_proof import notify_child_artifact_committed
 from .models import SemanticSummarySmokeReviewResult
 from .semantic_review_artifact import (
@@ -20,6 +21,7 @@ from . import storage
 from .storage import EVALS_RESEARCH_SMOKE_REPORTS_DIR as REPORTS_DIR
 
 
+@episode_writer_claimed
 def review_semantic_summary_smoke(
     podcast_id: str,
     episode_ref: str,

@@ -205,6 +205,28 @@ def test_rebuild_cache_scans_fixture_artifacts(monkeypatch, tmp_path):
     assert result.skipped_episode_count == 0
 
 
+def test_red_rebuild_cache_ignores_transient_artifact_siblings(monkeypatch, tmp_path):
+    from podcast_ingest_core import storage
+    from podcast_ingest_core.cache import rebuild_cache
+
+    transcript = _write_transcript(monkeypatch, tmp_path)
+    _write_mentions(monkeypatch, tmp_path)
+    # Crash leftovers from the compensating writers: same directory, same
+    # "<ref>__<slug>" stem, but never an artifact the cache should index.
+    for leftover in (
+        transcript.json_path.with_name(f".{transcript.json_path.name}.deadbeef.superseded"),
+        transcript.json_path.with_name(f".{transcript.json_path.name}.deadbeef.restore.part"),
+        (storage.MENTIONS_DIR / "gooaye" / "EP672__EP672-title.mentions.json.deadbeef.part"),
+    ):
+        leftover.write_bytes(b"{}")
+
+    result = rebuild_cache(podcast_id="gooaye", force=True, db_path=tmp_path / "cache.sqlite3")
+
+    assert result.indexed_episode_count == 1
+    assert result.skipped_episode_count == 0
+    assert result.problems == []
+
+
 def test_rebuild_cache_does_not_fail_when_fts5_unavailable(monkeypatch, tmp_path):
     from podcast_ingest_core import cache
 

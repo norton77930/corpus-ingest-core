@@ -68,6 +68,8 @@ class OpenAICompatibleProvider:
         model: str | None = None,
         base_url: str | None = None,
         api_key_env: str = "OPENAI_API_KEY",
+        reasoning_effort: str | None = None,
+        read_timeout_seconds: int = 120,
         _factory_token: object | None = None,
     ) -> None:
         if _factory_token is not _PROVIDER_FACTORY_TOKEN:
@@ -96,6 +98,8 @@ class OpenAICompatibleProvider:
         self.api_key = api_key
         self.model = resolved_model
         self.base_url = resolved_base_url.rstrip("/")
+        self.reasoning_effort = reasoning_effort
+        self.read_timeout_seconds = read_timeout_seconds
 
     def summarize_chunk(self, chunk: dict[str, Any]) -> str:
         messages = [
@@ -142,6 +146,13 @@ class OpenAICompatibleProvider:
         return self.complete(messages)
 
     def complete(self, messages: list[dict[str, str]]) -> str:
+        payload: dict[str, Any] = {
+            "model": self.model,
+            "messages": messages,
+        }
+        if self.reasoning_effort is not None:
+            payload["reasoning_effort"] = self.reasoning_effort
+
         try:
             response = requests.post(
                 f"{self.base_url}/chat/completions",
@@ -149,11 +160,8 @@ class OpenAICompatibleProvider:
                     "Authorization": f"Bearer {self.api_key}",
                     "Content-Type": "application/json",
                 },
-                json={
-                    "model": self.model,
-                    "messages": messages,
-                },
-                timeout=(10, 120),
+                json=payload,
+                timeout=(10, self.read_timeout_seconds),
             )
         except requests.RequestException as exc:
             raise LLMProviderRequestError(f"LLM provider request failed：{exc}") from exc
@@ -180,6 +188,8 @@ def create_provider(
     model: str | None = None,
     base_url: str | None = None,
     api_key_env: str = "OPENAI_API_KEY",
+    reasoning_effort: str | None = None,
+    read_timeout_seconds: int = 120,
     api_cost_ack: str = "",
 ) -> SemanticSummaryProvider:
     """依 provider 名稱建立語意摘要 provider。"""
@@ -191,6 +201,8 @@ def create_provider(
         model=model,
         base_url=base_url,
         api_key_env=api_key_env,
+        reasoning_effort=reasoning_effort,
+        read_timeout_seconds=read_timeout_seconds,
         _factory_token=_PROVIDER_FACTORY_TOKEN,
     )
 

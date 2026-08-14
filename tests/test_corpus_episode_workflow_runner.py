@@ -1275,6 +1275,56 @@ def test_semantic_handoff_validator_requires_well_formed_canonical_target_eviden
     ) is expected_invalid
 
 
+def test_snapshot_semantic_handoff_accepts_explicit_empty_target_actions_with_unrelated_rows(
+    monkeypatch,
+    tmp_path,
+):
+    import podcast_ingest_core.corpus_episode_workflow_runner as workflow
+
+    monkeypatch.setattr(
+        workflow,
+        "_preview_corpus_audio_download_from_plan",
+        lambda *args, **kwargs: _audio_result(tmp_path, status="skipped"),
+    )
+    monkeypatch.setattr(
+        workflow,
+        "_preview_corpus_local_transcription_from_plan",
+        lambda *args, **kwargs: _transcription_result(tmp_path, status="skipped"),
+    )
+    unrelated = _remediation_result(
+        tmp_path,
+        episode_ref="EP676",
+        family="semantic_summary",
+        status="skipped",
+    )
+    monkeypatch.setattr(
+        workflow,
+        "_preview_corpus_remediation_from_plan",
+        lambda *args, **kwargs: unrelated,
+    )
+
+    result = workflow._preview_corpus_episode_workflow_from_snapshot(
+        "gooaye",
+        episode_ref="EP677",
+        plan_result=object(),
+        plan_payload={
+            "episodes": [
+                {
+                    "episode_ref": "EP677",
+                    "actions": [],
+                    "artifact_status": {"transcript": {"status": "valid"}},
+                }
+            ]
+        },
+        max_actions=None,
+        allow_semantic_handoff=True,
+    )
+
+    assert result["selected_stage"] == "completed"
+    assert result["episode_ref"] == "EP677"
+    assert result["rows"][-1].status == "completed"
+
+
 @pytest.mark.parametrize(
     "semantic_status",
     (

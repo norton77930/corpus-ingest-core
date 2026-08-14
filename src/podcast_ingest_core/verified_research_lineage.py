@@ -114,7 +114,7 @@ def record_current_verified_research_lineage(
     )
     for role in requested:
         entry = current[role]
-        proof = _validated_generation_proof(entry, proofs[role])
+        proof = _validated_generation_proof(role, entry, proofs[role])
         if (
             proof["execution"] == "generated"
             and proof["pre_sha256"] is not None
@@ -131,11 +131,11 @@ def record_current_verified_research_lineage(
             if not isinstance(existing_entry, dict):
                 raise VerifiedResearchReportInputError("verified report reused lineage proof is invalid")
             existing_proof = existing_entry.get("generation_proof")
-            existing_current = dict(existing_entry)
+            existing_current = _normalized_current_entry(role, existing_entry)
             existing_current.pop("generation_proof", None)
             if (
                 existing_current != entry
-                or not _generation_proof_matches_current(entry, existing_proof)
+                or not _generation_proof_matches_current(role, entry, existing_proof)
             ):
                 raise VerifiedResearchReportInputError("verified report reused lineage proof is invalid")
         artifacts[role] = {**entry, "generation_proof": proof}
@@ -212,12 +212,12 @@ def validate_current_verified_research_lineage(
                 f"verified report {role.replace('_', ' ')} lineage is stale or invalid"
             )
         proof = recorded.get("generation_proof")
-        recorded_current = dict(recorded)
+        recorded_current = _normalized_current_entry(role, recorded)
         recorded_current.pop("generation_proof", None)
         if recorded_current != current[role] or (
             require_generation_proofs
             and (
-                not _generation_proof_matches_current(current[role], proof)
+                not _generation_proof_matches_current(role, current[role], proof)
                 or (
                     isinstance(proof, dict)
                     and proof.get("execution") == "generated"
@@ -644,8 +644,8 @@ def _is_in_place_fixture_commit(
     ):
         return False
     try:
-        checked_boundary = _validated_generation_proof(boundary, boundary_proof)
-        checked_fixture = _validated_generation_proof(fixture, fixture_proof)
+        checked_boundary = _validated_generation_proof("external_boundary", boundary, boundary_proof)
+        checked_fixture = _validated_generation_proof("fixture", fixture, fixture_proof)
     except VerifiedResearchReportInputError:
         return False
     old_proof = old_boundary.get("generation_proof")
@@ -660,7 +660,7 @@ def _is_in_place_fixture_commit(
         and checked_boundary["post_sha256"] == checked_fixture["post_sha256"]
         and checked_boundary["expected_path"] == checked_fixture["expected_path"]
         and old_entry.get("sha256") == checked_boundary["pre_sha256"]
-        and _generation_proof_matches_current(old_entry, old_proof)
+        and _generation_proof_matches_current("external_boundary", old_entry, old_proof)
         and isinstance(fixture_input, dict)
         and fixture_input.get("sha256") == checked_boundary["pre_sha256"]
         and isinstance(snapshot, dict)
@@ -682,8 +682,10 @@ def _is_recorded_in_place_fixture_proof(role: str, artifacts: dict[str, Any]) ->
         boundary_proof = boundary_entry.pop("generation_proof")
         fixture_entry = dict(fixture)
         fixture_proof = fixture_entry.pop("generation_proof")
-        checked_boundary = _validated_generation_proof(boundary_entry, boundary_proof)
-        checked_fixture = _validated_generation_proof(fixture_entry, fixture_proof)
+        checked_boundary = _validated_generation_proof(
+            "external_boundary", boundary_entry, boundary_proof
+        )
+        checked_fixture = _validated_generation_proof("fixture", fixture_entry, fixture_proof)
     except (KeyError, VerifiedResearchReportInputError):
         return False
     fixture_input = fixture_entry.get("upstream", {}).get("external_boundary_input")
@@ -702,9 +704,9 @@ def _is_recorded_in_place_fixture_proof(role: str, artifacts: dict[str, Any]) ->
 
 
 def _validated_generation_proof(
-    entry: dict[str, Any], proof: dict[str, Any],
+    role: str, entry: dict[str, Any], proof: dict[str, Any],
 ) -> dict[str, Any]:
-    """Accept only a concrete controlled-write proof for this exact output."""
+    """Accept only a role-bound controlled-write proof for this exact output."""
 
     if not isinstance(proof, dict) or set(proof) != {
         "expected_path", "pre_sha256", "post_sha256", "execution"
@@ -721,7 +723,17 @@ def _validated_generation_proof(
         or not isinstance(post_sha256, str)
         or post_sha256 != entry["sha256"]
         or not isinstance(execution, str)
-        or execution not in {"generated", "external_selector", "reused_current_lineage"}
+        or execution not in {
+            "generated", "external_selector", "reused_current_lineage", "regenerated"
+        }
+        or (
+            execution == "regenerated"
+            and (
+                role != "semantic_summary"
+                or not isinstance(pre_sha256, str)
+                or pre_sha256 == post_sha256
+            )
+        )
     ):
         raise VerifiedResearchReportInputError("verified report generation proof is invalid")
     return {
@@ -732,9 +744,11 @@ def _validated_generation_proof(
     }
 
 
-def _generation_proof_matches_current(entry: dict[str, Any], proof: object) -> bool:
+def _generation_proof_matches_current(
+    role: str, entry: dict[str, Any], proof: object
+) -> bool:
     try:
-        _validated_generation_proof(entry, proof)  # type: ignore[arg-type]
+        _validated_generation_proof(role, entry, proof)  # type: ignore[arg-type]
     except VerifiedResearchReportInputError:
         return False
     return True
@@ -766,11 +780,15 @@ def _reference(entry: dict[str, Any]) -> dict[str, str]:
 
 
 def _summary_options(value: dict[str, Any] | None) -> dict[str, Any]:
-    """Validate request identity without allowing artifact metadata to replace it."""
+    """Validate and normalize semantic request identity without endpoint secrets.
+
+    Sidecars recorded before controlled regeneration omitted the two Luna request
+    controls.  They are read as the original defaults, rather than rewritten.
+    """
 
     if not isinstance(value, dict):
         raise VerifiedResearchReportInputError("verified report semantic summary lineage options are missing")
-    requested_keys = {
+    legacy_requested_keys = {
         "summary_mode",
         "requested_provider",
         "requested_model",
@@ -778,37 +796,82 @@ def _summary_options(value: dict[str, Any] | None) -> dict[str, Any]:
         "requested_chunk_seconds",
         "requested_max_segments_per_chunk",
     }
+    new_requested_keys = {
+        "requested_reasoning_effort", "requested_read_timeout_seconds"
+    }
+    requested_keys = legacy_requested_keys | new_requested_keys
     actual_keys = {"actual_provider", "actual_model"}
-    if set(value) != requested_keys and set(value) != requested_keys | actual_keys:
-        raise VerifiedResearchReportInputError("verified report semantic summary lineage options are invalid")
+    actual_present = actual_keys & set(value)
+    supplied_requested = set(value) - actual_present
     if (
-        value.get("summary_mode") != "semantic-llm"
-        or not isinstance(value.get("requested_provider"), str)
-        or not value["requested_provider"]
+        actual_present not in (set(), actual_keys)
         or (
-            value.get("requested_model") is not None
-            and not isinstance(value.get("requested_model"), str)
-        )
-        or (
-            value.get("requested_base_url_identity_sha256") is not None
-            and not _is_sha256(value.get("requested_base_url_identity_sha256"))
-        )
-        or not isinstance(value.get("requested_chunk_seconds"), int)
-        or not isinstance(value.get("requested_max_segments_per_chunk"), int)
-        or value["requested_chunk_seconds"] < 1
-        or value["requested_max_segments_per_chunk"] < 1
-        or (
-            "actual_provider" in value
-            and (not isinstance(value["actual_provider"], str) or not value["actual_provider"])
-        )
-        or (
-            "actual_model" in value
-            and value["actual_model"] is not None
-            and not isinstance(value["actual_model"], str)
+            supplied_requested != legacy_requested_keys
+            and supplied_requested != requested_keys
         )
     ):
         raise VerifiedResearchReportInputError("verified report semantic summary lineage options are invalid")
-    return {key: value[key] for key in requested_keys}
+    normalized = {
+        **value,
+        "requested_reasoning_effort": value.get("requested_reasoning_effort", None),
+        "requested_read_timeout_seconds": value.get("requested_read_timeout_seconds", 120),
+    }
+    if (
+        normalized.get("summary_mode") != "semantic-llm"
+        or not isinstance(normalized.get("requested_provider"), str)
+        or not normalized["requested_provider"]
+        or (
+            normalized.get("requested_model") is not None
+            and not isinstance(normalized.get("requested_model"), str)
+        )
+        or (
+            normalized.get("requested_base_url_identity_sha256") is not None
+            and not _is_sha256(normalized.get("requested_base_url_identity_sha256"))
+        )
+        or (
+            normalized.get("requested_reasoning_effort") is not None
+            and (
+                not isinstance(normalized.get("requested_reasoning_effort"), str)
+                or not normalized["requested_reasoning_effort"]
+            )
+        )
+        or not isinstance(normalized.get("requested_read_timeout_seconds"), int)
+        or isinstance(normalized.get("requested_read_timeout_seconds"), bool)
+        or not 1 <= normalized["requested_read_timeout_seconds"] <= 3_600
+        or not isinstance(normalized.get("requested_chunk_seconds"), int)
+        or not isinstance(normalized.get("requested_max_segments_per_chunk"), int)
+        or normalized["requested_chunk_seconds"] < 1
+        or normalized["requested_max_segments_per_chunk"] < 1
+        or (
+            "actual_provider" in normalized
+            and (not isinstance(normalized["actual_provider"], str) or not normalized["actual_provider"])
+        )
+        or (
+            "actual_model" in normalized
+            and normalized["actual_model"] is not None
+            and not isinstance(normalized["actual_model"], str)
+        )
+    ):
+        raise VerifiedResearchReportInputError("verified report semantic summary lineage options are invalid")
+    return {key: normalized[key] for key in requested_keys}
+
+
+def _normalized_current_entry(role: str, entry: dict[str, Any]) -> dict[str, Any]:
+    """Normalize only legacy semantic options before immutable entry comparison."""
+
+    normalized = dict(entry)
+    if role == "semantic_summary" and isinstance(normalized.get("options"), dict):
+        raw_options = normalized["options"]
+        requested = _summary_options(raw_options)
+        normalized["options"] = {
+            **requested,
+            **{
+                key: raw_options[key]
+                for key in ("actual_provider", "actual_model")
+                if key in raw_options
+            },
+        }
+    return normalized
 
 
 def _semantic_summary_actual_dependency_identity(raw: bytes) -> dict[str, str | None]:

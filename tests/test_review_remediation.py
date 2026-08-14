@@ -4,6 +4,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 import json
 from pathlib import Path
+from threading import Event
 
 import pytest
 
@@ -173,6 +174,71 @@ def test_red_same_second_review_writers_claim_distinct_complete_artifacts(monkey
     assert all(result.review_json_path.exists() for result in results)
     assert all(result.review_markdown_path.exists() for result in results)
     assert not list(writer.REPORTS_DIR.glob("*.part"))
+
+
+def test_review_writer_holds_the_episode_claim_while_publishing(monkeypatch, tmp_path):
+    from podcast_ingest_core.episode_claim import _episode_writer_claim_is_held
+    from podcast_ingest_core import semantic_summary_smoke_review as writer
+
+    _write_transcript_and_summary(monkeypatch, tmp_path)
+    original_publish = writer._publish_review_artifacts
+    held = []
+
+    def publish(*args):
+        held.append(_episode_writer_claim_is_held("gooaye", "EP700"))
+        return original_publish(*args)
+
+    monkeypatch.setattr(writer, "_publish_review_artifacts", publish)
+
+    result = writer.review_semantic_summary_smoke("gooaye", "EP700")
+
+    assert result.review_json_path.exists()
+    assert held == [True]
+
+
+def test_review_writer_reenters_an_existing_same_episode_claim(monkeypatch, tmp_path):
+    from podcast_ingest_core.episode_claim import episode_writer_claim
+    from podcast_ingest_core import semantic_summary_smoke_review as writer
+
+    _write_transcript_and_summary(monkeypatch, tmp_path)
+
+    with episode_writer_claim("gooaye", "EP700"):
+        result = writer.review_semantic_summary_smoke("gooaye", "EP700")
+
+    assert result.review_json_path.exists()
+
+
+def test_review_writer_serializes_external_same_episode_writer(monkeypatch, tmp_path):
+    from podcast_ingest_core import semantic_summary_smoke_review as writer
+
+    _write_transcript_and_summary(monkeypatch, tmp_path)
+    original_publish = writer._publish_review_artifacts
+    first_started = Event()
+    release_first = Event()
+    second_started = Event()
+    publish_count = 0
+
+    def publish(*args):
+        nonlocal publish_count
+        publish_count += 1
+        if publish_count == 1:
+            first_started.set()
+            assert release_first.wait(timeout=5)
+        else:
+            second_started.set()
+        return original_publish(*args)
+
+    monkeypatch.setattr(writer, "_publish_review_artifacts", publish)
+    with ThreadPoolExecutor(max_workers=2) as executor:
+        first = executor.submit(writer.review_semantic_summary_smoke, "gooaye", "EP700")
+        assert first_started.wait(timeout=5)
+        second = executor.submit(writer.review_semantic_summary_smoke, "gooaye", "EP700")
+        assert not second_started.wait(timeout=0.2)
+        release_first.set()
+        first.result(timeout=5)
+        second.result(timeout=5)
+
+    assert publish_count == 2
 
 
 @pytest.mark.parametrize("selector", ["latest", "LATEST", "Latest"])

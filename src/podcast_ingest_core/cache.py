@@ -590,7 +590,20 @@ def _discover_episode_keys(podcast_id: str | None) -> set[tuple[str, str]]:
     return keys
 
 
+_ARTIFACT_NAME_SUFFIXES = (".json", ".md", ".srt", ".txt")
+
+
 def _episode_ref_from_artifact_name(name: str) -> str | None:
+    """Name an episode only from a real artifact, never a transient sibling.
+
+    Compensating writers stage and quarantine beside their target using a
+    leading dot and a trailing marker (``.part``, ``.superseded``).  Those share
+    the ``<ref>__<slug>`` stem, so matching on the stem alone would invent an
+    episode reference that no storage helper can resolve.
+    """
+
+    if name.startswith(".") or not name.endswith(_ARTIFACT_NAME_SUFFIXES):
+        return None
     if "__" not in name:
         return None
     prefix = name.split("__", 1)[0]

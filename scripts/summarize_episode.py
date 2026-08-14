@@ -36,6 +36,8 @@ def main() -> None:
     parser.add_argument("--model")
     parser.add_argument("--base-url")
     parser.add_argument("--api-key-env", default="API_KEY")
+    parser.add_argument("--reasoning-effort")
+    parser.add_argument("--read-timeout-seconds", type=int, default=120)
     parser.add_argument("--api-cost-ack", default="")
     parser.add_argument("--env-file", default=str(DEFAULT_LOCAL_ENV_PATH))
     parser.add_argument("--no-env-file", action="store_true")
@@ -65,6 +67,8 @@ def main() -> None:
                 model=args.model,
                 base_url=args.base_url,
                 api_key_env=args.api_key_env,
+                reasoning_effort=args.reasoning_effort,
+                read_timeout_seconds=args.read_timeout_seconds,
                 force=args.force,
                 chunk_seconds=args.chunk_seconds,
                 max_segments_per_chunk=args.max_segments_per_chunk,
