@@ -6,7 +6,7 @@ import sys
 
 import pytest
 
-from conftest import use_tmp_data_dirs as _use_tmp_data_dirs
+from tests.conftest import use_tmp_data_dirs as _use_tmp_data_dirs
 
 
 def _write_transcript(

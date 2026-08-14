@@ -6,7 +6,7 @@ import sys
 from pathlib import Path
 
 
-from conftest import use_tmp_data_dirs as _use_tmp_data_dirs
+from tests.conftest import use_tmp_data_dirs as _use_tmp_data_dirs
 
 
 def _write_json(path: Path, payload: dict) -> Path:

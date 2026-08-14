@@ -22,7 +22,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-import conftest
+from tests import conftest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 TESTS_DIR = REPO_ROOT / "tests"

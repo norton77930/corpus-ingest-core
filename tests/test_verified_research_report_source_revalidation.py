@@ -325,7 +325,7 @@ def test_current_source_snapshot_uses_fresh_evidence_not_persisted_lineage_paths
 def test_publisher_lineage_manifest_keeps_sidecar_and_generation_proofs(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from test_latest_episode_verified_research_report_workflow_runner import _write_completed_artifacts
+    from tests.test_latest_episode_verified_research_report_workflow_runner import _write_completed_artifacts
     from podcast_ingest_core.verified_research_report import assemble_verified_research_report
 
     _write_completed_artifacts(monkeypatch, tmp_path)
@@ -343,7 +343,7 @@ def test_publisher_lineage_manifest_keeps_sidecar_and_generation_proofs(
 def test_external_default_fixture_path_supports_public_assembly_and_revalidation(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from test_latest_episode_verified_research_report_workflow_runner import (
+    from tests.test_latest_episode_verified_research_report_workflow_runner import (
         _mark_boundary_fixture_verified,
         _record_current_018_lineage,
         _write_completed_artifacts,
@@ -373,7 +373,7 @@ def test_external_default_fixture_path_supports_public_assembly_and_revalidation
 def test_external_default_fixture_symlink_is_rejected_by_public_assembly(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from test_latest_episode_verified_research_report_workflow_runner import (
+    from tests.test_latest_episode_verified_research_report_workflow_runner import (
         _mark_boundary_fixture_verified,
         _record_current_018_lineage,
         _write_completed_artifacts,
@@ -401,7 +401,7 @@ def test_external_default_fixture_symlink_is_rejected_by_public_assembly(
 def test_public_revalidation_accepts_an_unchanged_publisher_bundle_without_writes(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from test_latest_episode_verified_research_report_workflow_runner import (
+    from tests.test_latest_episode_verified_research_report_workflow_runner import (
         _manifest,
         _write_completed_artifacts,
     )

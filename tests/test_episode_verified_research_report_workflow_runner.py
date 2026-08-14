@@ -18,7 +18,7 @@ def test_public_signature_requires_episode_ref_and_defaults_confirm_false():
 
 
 def test_preview_is_strict_zero_write(monkeypatch, tmp_path):
-    import test_latest_episode_verified_research_report_workflow_runner as t018
+    from tests import test_latest_episode_verified_research_report_workflow_runner as t018
     from podcast_ingest_core import run_episode_verified_research_report_workflow
 
     t018._write_completed_artifacts(monkeypatch, tmp_path)
@@ -50,7 +50,7 @@ def test_reserved_selectors_rejected(selector):
 
 
 def test_blocked_when_lineage_missing(monkeypatch, tmp_path):
-    import test_latest_episode_verified_research_report_workflow_runner as t018
+    from tests import test_latest_episode_verified_research_report_workflow_runner as t018
     from podcast_ingest_core import run_episode_verified_research_report_workflow
 
     t018._write_completed_artifacts(monkeypatch, tmp_path, with_lineage=False)
@@ -72,7 +72,7 @@ def test_blocked_when_lineage_missing(monkeypatch, tmp_path):
 
 
 def test_confirm_publishes_and_reuses_without_provider(monkeypatch, tmp_path):
-    import test_latest_episode_verified_research_report_workflow_runner as t018
+    from tests import test_latest_episode_verified_research_report_workflow_runner as t018
     from podcast_ingest_core import run_episode_verified_research_report_workflow
     import podcast_ingest_core.llm_provider as llm_provider
 
@@ -145,7 +145,7 @@ def test_owned_lineage_error_maps_to_structured_roles():
 def test_post_publish_source_mutation_blocks_stale_reuse(monkeypatch, tmp_path):
     """US3: mutating a lineage-bound source must not silently reuse the old bundle."""
 
-    import test_latest_episode_verified_research_report_workflow_runner as t018
+    from tests import test_latest_episode_verified_research_report_workflow_runner as t018
     from podcast_ingest_core import run_episode_verified_research_report_workflow, storage
 
     t018._write_completed_artifacts(monkeypatch, tmp_path)
@@ -189,7 +189,7 @@ def test_blank_episode_ref_rejected():
 
 def test_result_to_dict_is_metadata_only(monkeypatch, tmp_path):
     import json
-    import test_latest_episode_verified_research_report_workflow_runner as t018
+    from tests import test_latest_episode_verified_research_report_workflow_runner as t018
     from podcast_ingest_core.episode_verified_research_report_workflow_runner import (
         result_to_dict,
         run_episode_verified_research_report_workflow,
@@ -223,7 +223,7 @@ def test_all_terminal_paths_do_not_dispatch_upstream_workflows(
 ):
     """019 only reads verified inputs, then optionally publishes its own bundle."""
 
-    import test_latest_episode_verified_research_report_workflow_runner as t018
+    from tests import test_latest_episode_verified_research_report_workflow_runner as t018
     from podcast_ingest_core import run_episode_verified_research_report_workflow
     import podcast_ingest_core.cache as cache
     import podcast_ingest_core.corpus_episode_completion_workflow_runner as completion
