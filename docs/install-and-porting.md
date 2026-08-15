@@ -212,6 +212,7 @@ Spec 026–034 以 SHA-256 釘住檔案位元組。以下兩項變更是刻意�
 
 - **`SYNCED_SKILLS`**（讓第五個 Skill 隨 `apply` 同步）
 - **Tool 22 `generate_stock_lens_report`**（含用官方腳本 `scripts/export_spec029_tool_descriptor_snapshot.py` 重簽 descriptor 快照）
+- **把 Tool 22 補進 Spec 026 的 live harness**（否則新機器的授權 preflight 會判定 registry 不符而失敗）
 
 需要重建基準的檔案與**目前**的正確 digest：
 
@@ -220,12 +221,18 @@ Spec 026–034 以 SHA-256 釘住檔案位元組。以下兩項變更是刻意�
 | `deploy/hermes/README.md` | `e13769dd02fed7d38f91e49f24d716b27e6ab42cbec6bcc0218f48af72dc29e8` |
 | `deploy/hermes/spec029/contracts/mcp-tool-descriptor-snapshot.json` | `4c5a3b749c55f6a7949a9d0f6648d70dcc05fb75918b4a26e38fef578072c28c` |
 | `deploy/hermes/spec029/spec029_mcp_deny_adapter.py` | `994b13909b4035cd52a478758ca4ecff16960360489810ce747d288c5412c05a` |
+| `scripts/validate_hermes_integration.py` | `48e7afdb3209a66dd46668f793dd95a9ec26a228850a92cd0a4a423b3cf35e8f` |
+| `specs/027-.../contracts/skill-routing-and-protocol.md` | `b0c5622041102294bc976826f445c1f64fbdcd11b01e5cefdb6a839c97a0c097` |
 | `src/podcast_ingest_core/hermes_integration.py` | `311706a0d1d5b8d1a1cf719013d4720b62b61270941c5e69e10301b34cb29e43` |
 | `src/podcast_ingest_core/hermes_skill_protocol.py` | `a1b75d5184e3d20ac0d445f0df6d7d0b46efea2841318d07f3245ae47ad7c5f0` |
 | `src/podcast_ingest_core/mcp_server.py` | `ce672b51a355c1e65f63fcff55398bc058eff0b97f7673a05b949c401c4209b1` |
 | `tests/test_hermes_integration.py` | `e51321608916b5c2227b96e47237cf538124caf347fd51c038f70ef0cb771fac` |
+| `tests/test_hermes_live_smoke.py` | `7c4b5024b55959fcc528cefd7b746bda7a46570fbf3e6940ef5e3b5f217d4ae2` |
 | `tests/test_hermes_skill_protocol.py` | `43577f95d9b58ff3f60ae2abd055eda5cd690c388a33aa6e68d3a1c61f2eaced` |
+| `tests/test_spec_027_hermes_skill_protocol_docs.py` | `bd8e11ff9cfe4a97dfb99ff49122eba604820188185e75ea4966e6fec2337ae7` |
 | `tests/test_spec_029_offline.py` | `f12cddb4409e1856700e3bf0e27f5698195b4045b4a829458549b3c4c3035b1b` |
+
+110 個條目中 13 個需重建，其餘 97 個仍吻合。
 
 記錄基準的兩處：`specs/032-.../contracts/predecessor-digests.json`（110 個條目，其餘 101 個仍吻合）與 `tests/test_spec_030_g1r_offline_remediation.py::test_task42_deep_ledger_adapter_hash_and_verifier_guards`（測試內硬編 4 個）。
 

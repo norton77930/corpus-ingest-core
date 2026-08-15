@@ -39,6 +39,7 @@ EXPECTED_TOOL_ORDER = [
     "query_verified_research_report_coverage",
     "suggest_historical_verified_report_next_step",
     "list_verified_report_gap_backlog",
+    "generate_stock_lens_report",
 ]
 SURFACE_NAMES = (
     "podcast_data",
