@@ -33,6 +33,8 @@ FACADE_EXPORTS = (
     # runtime surface
     "mcp",
     "run",
+    "run_streamable_http",
+    "StreamableHttpConfig",
     "tool_success",
     "tool_error",
     "tool_action_plan",

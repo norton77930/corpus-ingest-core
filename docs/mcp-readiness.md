@@ -1,9 +1,11 @@
 # MCP Readiness
 
+> Spec 029 is **Offline Implemented** only: live preflight not run; G2-G3 not authorized; source contract remains `BLOCKED_RUNTIME_SEAM`. A future PASS is only an expected high-level MCP tool-call attempt policy-blocked before dispatch, not internal Skill selection, fallback, 019 outcome, or Core execution.
+
 ## 設計目標
 
-本專案先把核心能力設計成可被 MCP tools 直接包裝的 Python functions。Phase 4A 已建立 stdio-only MCP server skeleton；Phase 4B 新增 side-effect tools，全部採 dry-run first 與 explicit confirmation。Phase 4C 新增 semantic summary MCP tool，並加入外部 API、資料傳送與費用 acknowledgement gate。
-Phase 5A 補齊 Codex / Claude 類 MCP client setup 文件與本機 readiness validation script。
+本專案先把核心能力設計成可被 MCP tools 直接包裝的 Python functions。Phase 4A 建立 stdio MCP server skeleton；Phase 4B 新增 side-effect tools，全部採 dry-run first 與 explicit confirmation。Phase 4C 新增 semantic summary MCP tool，並加入外部 API、資料傳送與費用 acknowledgement gate。
+Phase 5A 補齊 Codex / Claude 類 MCP client setup 文件與本機 readiness validation script。Spec 026 保留 stdio，並以同一個 `FastMCP` instance 增加 loopback-only Streamable HTTP runner與 Hermes sidecar；direct MCP/config/Skills 已實機驗證，C6 boolean-only endpoint equality也已通過targeted tests、POSIX synthetic checks、兩位reviewers與唯一live v2 run，狀態為PASS-current。C7仍Blocked；Hermes v0.20.0 tag `v2026.8.3` hooks僅是未安裝、未runtime驗證的候選能力。Spec 027 contract layer is complete (offline assurance only); actual Hermes runtime routing is BLOCKED/not_evaluated and is not a runtime PASS.
 
 ## 可包裝的 Core Functions
 
@@ -107,7 +109,10 @@ The current registry has exactly 21 reviewed tools. Tool 21, `list_verified_repo
 
 ## 目前限制
 
-- MCP server 目前只支援本機 stdio transport。
+- Codex / Claude 類本機 client 使用 stdio；Hermes/OpenAB 只支援經核准的 host-network、loopback-only Streamable HTTP sidecar。沒有 bridge-network 變體、legacy SSE、port publication 或 automatic port fallback。
+- Direct validator 驗證 exact 21-tool registry、one read-only、one `confirm=false` preview，並要求 protocol success＋application envelope `ok=true`。v2僅在具備descriptor-only no-follow primitives的POSIX runtime執行；native Windows在protected path access前fail closed。它以opaque in-memory content tokens比較三個surfaces，只輸出before/after metadata/content endpoint equality booleans，對missing/malformed、`.env`/`.env.*`、symlink/reparse、special entries fail closed；不宣稱snapshot間無transient mutation。兩位reviewers與唯一live v2 run均通過，C6為PASS-current且不得重跑。
+- Hermes v0.19.0 safe CLI output 無法無歧義提供 one-call、actual confirm value、no-second-action、no-fallback 四項 structured evidence。v0.20.0 tag `v2026.8.3` hooks雖提供per-call tool name/arguments事件，但缺canonical fallback indicator且raw payload可能敏感；未有approved projection collector或runtime validation，因此C7仍是BLOCKED/FAIL。不得讀live config values/session dump、保存raw response、重跑inference、升級或啟用hooks。
+- Spec 028 capability gate is complete and correctly terminates at BLOCKED_CAPABILITY for Hermes v0.20.0 tag v2026.8.3; no upgrade, Skill sync, hooks, collector, inference, or runtime observation was performed. C6 remains PASS-current and was not rerun; actual Hermes Skill routing remains BLOCKED/not_run.
 - 尚未處理長時間任務的進度回報或取消機制。
 - Semantic summary MCP tool 已暴露，但需要 exact API-cost acknowledgement；尚未實作 rate limit、成本估算或 provider-level quota。
 - Phase 3B search 支援 optional SQLite FTS5，但中文搜尋仍保留 LIKE fallback；尚未做 embedding 或 vector search。
@@ -120,6 +125,10 @@ Codex / Claude 本機 MCP client 設定範例請見：
 - [codex-mcp-setup.md](codex-mcp-setup.md)
 - [claude-mcp-setup.md](claude-mcp-setup.md)
 - [mcp-troubleshooting.md](mcp-troubleshooting.md)
+- [Hermes sidecar deployment](../deploy/hermes/README.md)
+- [Spec 026 quickstart](../specs/026-hermes-mcp-integration/quickstart.md)
+- [Spec 027 offline Skill routing contracts](../specs/027-hermes-skill-routing-contracts/spec.md)
+- [Spec 028 offline runtime-observation capability gate](../specs/028-hermes-runtime-skill-routing-observation/spec.md)
 
 本機 setup validation：
 

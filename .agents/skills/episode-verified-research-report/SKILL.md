@@ -13,7 +13,8 @@ Skill for latest).
 
 1. Call `run_episode_verified_research_report_workflow` once with
    `confirm=false`, the operator-supplied `podcast_id`, and exact `episode_ref`.
-   Show readiness (`ready` / `blocked`), missing/stale roles, and risks.
+   Show readiness (`ready` / `blocked`), missing/stale roles, and risks. If preview
+   is `blocked`, list missing/stale roles and stop.
    Do not invent `latest` or substitute another episode.
 2. Ask for and wait for a new explicit approval of that exact `episode_ref`
    (and optional `stock_query` / fixture flag only if the user requested them).

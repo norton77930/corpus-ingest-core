@@ -1,0 +1,25 @@
+# Source-control and local environments
+.git/
+.venv/
+__pycache__/
+*.py[cod]
+
+# Secrets and machine-local configuration
+.env
+.env.*
+
+# Runtime artifacts and test state
+data/
+evals/
+.pytest-tmp/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Not required by the sidecar image
+.agents/
+.claude/
+docs/
+specs/
+tests/
+HANDOFF-*

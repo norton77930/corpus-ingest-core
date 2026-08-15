@@ -1,6 +1,8 @@
 # Podcast Ingestion Core
 
-Podcast Ingestion Core 是一個通用的 Podcast 擷取核心。目前已完成 RSS episode listing、episode lookup、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive Markdown 摘要、OpenAI-compatible LLM semantic summary pipeline、deterministic mention extraction、SQLite metadata cache / search，以及 stdio-only MCP server。Web UI、排程、embedding 與 vector search 仍未實作。
+> Spec034 Task #77 current terminal is **startup/plugin closed; credential_provider BLOCKED; overall BLOCKED**. Its H2-frozen exact 20-file official `NousResearch/hermes-agent` bundle is static/offline only: startup order and the fixed `security-guidance` plugin identity chain are closed, while credential/provider construction data flow, whole-program closure, dynamic/user/project/entry-point plugin paths, runtime/secret edges, and actual activation remain blocked or unobserved. `runtime_status=not_run`; `live_actions_authorized=false`. The fresh review-only bootstrap/final trust chain is reserved for Main after both reviews PASS and remains unrun.
+
+Podcast Ingestion Core 是一個通用的 Podcast 擷取核心。目前已完成 RSS episode listing、episode lookup、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive Markdown 摘要、OpenAI-compatible LLM semantic summary pipeline、deterministic mention extraction、SQLite metadata cache / search，以及共用同一個 `FastMCP` instance 的本機 stdio 與 loopback Streamable HTTP sidecar。Hermes direct MCP/config/Skills 接入已可運作；Spec 026 的 C6 before/after metadata/content endpoint equality 已經 required reviewers 與唯一 live v2 run 驗證為 PASS-current，且不宣稱 snapshots 間沒有 transient mutation。C7 仍缺安全 runtime evidence；v0.20.0 tag `v2026.8.3` hooks只是候選，整體狀態維持 Blocked。Web UI、排程、embedding 與 vector search 仍未實作。
 
 第一個 podcast profile 是 Gooaye 股癌，但核心程式不得寫死股癌。所有 podcast-specific 設定都放在 `config/podcasts.yaml`。
 
@@ -83,7 +85,12 @@ scripts/
   search_transcripts.py
   search_mentions.py
   validate_mcp_setup.py
+  validate_hermes_integration.py
+  manage_hermes_integration.py
   run_mcp_server.py
+  run_mcp_http_server.py
+deploy/
+  hermes/
 src/
   podcast_ingest_core/
 tests/
@@ -724,7 +731,7 @@ python scripts/search_transcripts.py --podcast gooaye --query 台積電 --limit 
 python scripts/run_mcp_server.py
 ```
 
-MCP server 使用官方 Python MCP SDK 的 FastMCP 與 stdio transport，適合 Codex / Claude 本機 MCP client。Read/query tools 是：
+MCP server 使用官方 Python MCP SDK 的單一 FastMCP instance。本機 Codex / Claude client 繼續使用 stdio；經 Spec 026 核准的 Hermes sidecar 以同一 registry 提供只綁定 `127.0.0.1:8767/mcp` 的 Streamable HTTP，不使用 legacy SSE、不 publish port。Read/query tools 是：
 
 - `list_episodes`
 - `get_episode`
@@ -772,11 +779,20 @@ Phase 6L 加入 `run_research_workflow` MCP exposure。這個 consolidated workf
 
 ## MCP Client Integration
 
-本專案 MCP server 使用 stdio transport：
+Codex / Claude 類本機 client 使用既有 stdio transport：
 
 ```powershell
 python scripts/run_mcp_server.py
 ```
+
+Hermes/OpenAB 使用獨立 sidecar 與同一個 exact 21-tool registry：
+
+```powershell
+wsl.exe -d UbuntuProd -u root bash scripts/build_hermes_sidecar.sh podcast-ingest-core-mcp:local
+docker compose -f deploy/hermes/docker-compose.sidecar.yml config --quiet
+```
+
+部署、config/Skill plan→apply→rollback、direct-safe validator 與移植方式見 [`deploy/hermes/README.md`](deploy/hermes/README.md) 與 [`specs/026-hermes-mcp-integration/quickstart.md`](specs/026-hermes-mcp-integration/quickstart.md)。Direct transport 已驗證可用；C6 的 boolean-only endpoint-equality validator 已通過 targeted tests、POSIX synthetic checks、兩位 reviewers 與唯一 live v2 run，狀態為 PASS-current且不得重跑。C7 仍 Blocked；Hermes v0.20.0 tag `v2026.8.3` hooks 只是未安裝、未實機驗證的候選能力。禁止讀取 live config values/session dump、保存 raw response、升級或啟用 hooks來補證。Spec 027 contract layer is complete (offline assurance only); actual Hermes runtime routing is BLOCKED/not_evaluated and is not a runtime PASS. Spec 028 capability gate is complete and correctly terminates at BLOCKED_CAPABILITY for Hermes v0.20.0 tag v2026.8.3; no upgrade, Skill sync, hooks, collector, inference, or runtime observation was performed. C6 remains PASS-current and was not rerun; actual Hermes Skill routing remains BLOCKED/not_run.
 
 接到 Codex / Claude 類 MCP client 前，建議先跑本機 readiness check：
 
@@ -866,3 +882,7 @@ python -m compileall src scripts
 ```powershell
 python -m pip install -e .[dev]
 ```
+
+### Spec034 Task #82 v8 review repair — current
+
+**startup/plugin closed; credential_provider BLOCKED; overall BLOCKED**. Spec034 remains offline/static-only with H2 exactly 20 upstream paths at H1 SHA-256 `90ba45ccf11bbcbf446f7d16904964073e84837a04aaaa0c6f4887d3ea75109d`; no 21st path is authorized. The isolated child accepts only a regular no-link/reparse-free project snapshot as its payload cwd, changes there before sentinel/Pytest/product import, and retains capability snapshot then project snapshot then stdlib only. Consequently C6's three relative config reads use snapshot-approved bytes even if original workspace configs change after snapshotting. Public receipt projection has no injected verifier; private issuance recomputes current canonical facts. AST proof follows one owner-local package spec/module/loader/return/register/context flow. Bundle rename parent fsync precedes the `bundle_renamed` journal with an explicit platform best-effort fallback, and exact nonce-bound both-missing recovery alone is retry-safe. Runner/journal/trust tests remain non-final. Every prior root is not approval evidence. Fresh code and architecture re-reviews remain required; Main alone may run the documented one-shot command after both PASS, and it is not run here.

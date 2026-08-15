@@ -1,0 +1,30 @@
+# Spec034: Hermes v0.19 Pinned Startup Source Graph Expansion
+
+## Current terminal (Task #82 v8 repair; re-review pending)
+
+**startup/plugin closed; credential_provider BLOCKED; overall BLOCKED**. The exact H2 authority remains 20 upstream files with H1 inventory SHA-256 `90ba45ccf11bbcbf446f7d16904964073e84837a04aaaa0c6f4887d3ea75109d`; no 21st upstream path is authorized. `whole_program_source_graph_closed=false`; `runtime_status=not_run`; `live_actions_authorized=false`. Config, credential, provider, unknown external-secret/runtime, user/project/pip/entry-point plugin paths remain non-runtime source classifications or `BLOCKED_SOURCE_GRAPH`/`BLOCKED_DYNAMIC_PLUGIN_TARGET`; no actual activation is claimed.
+
+## H1 scope
+
+1. Query only the official immutable commit/tree/blob identities for commit `b7a05b6b6f509d14f708a2fe7b7c1d3559396ef6` and tree `3ae46c7c1576f9a3450a64729be314ba8e853eac`.
+2. Prove three independent claim-scoped closures, not a whole-program import closure: (A) CLI/run-agent dotenv and startup ordering through plugin discovery/config/shell-hook registration; (B) runtime-provider/config/provider-specific credential resolver, credential-pool/secret-scope, and `agent_init` auto-detection, validation, and construction boundary; (C) `security-guidance` manifest/entrypoint/patterns plus Spec033 loader/context paths.
+3. Follow only literal Hermes-owned dependencies necessary to parse a claim's source-level precedence, registration, or construction predicate. Every other Hermes-owned import is an `out_of_claim_internal_leaf`; stdlib/third-party imports are outside this source closure.
+4. A wildcard/nonliteral dynamic/path escape/unresolved Hermes target blocks only if it is required by that claim's proof edge. Other dynamic behavior is a transparent `out_of_claim_dynamic_leaf` and is not proof.
+5. Stop at 96 files, 8 MiB, or 16 Hermes-owned import levels. Produce exact ordered path/blob/length/role/claim membership/introducer/depth inventory, per-claim roots/required edges/leaves/blocked reasons/verdict, union counts, and `whole_program_source_graph_closed=false`.
+6. For the fixed plugin, record literal hooks `pre_tool_call` and `transform_tool_result`, call-time env predicate names `SECURITY_GUIDANCE_BLOCK` and `SECURITY_GUIDANCE_DISABLE`, `conditional_registration_path_candidate`, and `actual_activation_observed=false` only.
+7. Stop for H2 human inventory freeze before publishing source bytes or implementing the graph analyzer. H2 remains pending and `h2_inventory_approved=false`.
+
+## Non-goals
+
+No clone, archive, floating ref, whole-repository snapshot, `.env`, config example, credential material, local Hermes state, upstream import/exec, Docker, WSL, MCP, provider, inference, C6, predecessor verifier, commit, stage, or push.
+
+## H1 terminal
+
+`SPEC034_H1_INVENTORY_PROPOSED` or `BLOCKED_SOURCE_GRAPH`; `runtime_status=not_run`; `live_actions_authorized=false`; `h2_inventory_approved=false`.
+
+## Task #75 repair constraints
+
+The final verifier accepts only its literal ordered reviewed-artifact tuple and matching count, schema, byte lengths, SHA-256 records, current regular/no-link identity, and a required Main-supplied H4 detached review-root bytes SHA-256. Its child payload's cwd must be the exact regular/no-link project snapshot root; after snapshot validation it changes there before sentinel, pytest, or product imports, so every relative C6 configuration read resolves against approved snapshot bytes. Empty, subset, duplicate, extra, reordered, repacked, linked, or mutated seals fail closed. The manifest/root exclude themselves solely to prevent a self-cycle; the final verifier is inside the manifest. `STATIC_ONLY` is the five sealed analyzer/acquirer/validator/sentinel/final-verifier artifacts.
+
+The acquirer recovers only its own valid lock plus a recognized rename-before-manifest 20-file partial state; its private complete-manifest validation requires exact lock schema, nonce, phase, bundle target, and manifest target. The public validator fails closed for every lock, including malformed or unknown locks. Unknown targets, malformed/stale locks, final manifests, and cleanup failures remain blocked without overwrite. Canonical validation rejects symlink/reparse/junction authorities and rereads regular identities before projection. The isolated test child uses `-I -S`; verified sentinel bytes install upstream-import/socket/subprocess guards before pytest import. A typed detached authority transaction retains one stable-read root/manifest byte pair, parsed records, approved root SHA-256, and manifest SHA-256; execution snapshot records use those approved detached bytes rather than post-authority pathname rereads. The parent creates the child environment from a minimal system-variable allowlist, explicitly removes `PYTEST_*` and startup/import/test-affecting `PYTHON*` values, and sets only `PYTEST_DISABLE_PLUGIN_AUTOLOAD=1`; the runner repeats that clear, passes `--noconftest -o addopts=`, and an in-memory sealed pytest plugin requires the final-verifier literal eight C0–C7 node IDs to collect and yield passed call reports. Thus collect-only, ignore, selection, skipped, or xfailed bypasses fail. The reviewer-approved `contracts/python-test-capability-manifest.json` fixes the local purelib distribution list, version, RECORD identity, and complete approved file records. The parent stable-reads those current purelib files against that manifest and copies only verified bytes into a separate protocol-owned capability snapshot. Child `sys.path` is capability snapshot, project `src`/root snapshot, then stdlib only; it rejects missing/extra/link/shadow files and revalidates both snapshots before import, after import, and after tests. C6 invokes the public verified-report assemble/publish workflow through one sealed synthetic shared helper that both final acceptance and non-final regression reuse; provider/external/market fail-if-called guards precede fixtures. This local offline verifier prerequisite is not a portable runtime or broad third-party-review claim.
+

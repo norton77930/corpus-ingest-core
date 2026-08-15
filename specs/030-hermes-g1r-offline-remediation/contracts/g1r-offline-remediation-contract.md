@@ -1,0 +1,5 @@
+# G1R Offline Remediation Contract
+
+The sole CLI mode is `offline-remediation-plan`; invalid argv exits 2 without echo. Its exact receipt is `PASS_OFFLINE_REMEDIATION` static-safe projection evidence, not runtime proof. `owner_ledger_present` refers only to a Spec030-owned opaque ledger, not a Spec029 ledger or runtime evidence. `rollback_plan_complete` means only static destruction/revocation intent completeness; it does not claim a rollback ran, runtime surfaces were destroyed, or writers may resume. It fixes `runtime_observation_status=not_run`, `docker_runtime_observed=false`, `credential_runtime_observed=false`, all G2/G3a/live authorization false, and the raw persistence scope.
+
+No Docker, Hermes, network, listener, MCP transport, inference, credential value, renderer, or executor is authorized.

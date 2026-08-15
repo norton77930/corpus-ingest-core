@@ -1,0 +1,11 @@
+services:
+  podcast-ingest-core-mcp:
+    image: podcast-ingest-core-mcp:local
+    container_name: podcast-ingest-core-mcp
+    network_mode: host
+    environment:
+      PODCAST_INGEST_DATA_DIR: /var/lib/podcast-ingest-core/data
+      PODCAST_INGEST_MCP_PORT: "8767"
+    volumes:
+      - ${PODCAST_INGEST_HOST_DATA_DIR:-../../data}:/var/lib/podcast-ingest-core/data
+    restart: unless-stopped

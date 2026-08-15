@@ -1,0 +1,3312 @@
+{
+  "authority": {
+    "pinned_commit": "b7a05b6b6f509d14f708a2fe7b7c1d3559396ef6",
+    "repository": "NousResearch/hermes-agent",
+    "retrieval_policy": "identity-checked Spec033 frozen roots plus explicitly named official immutable files; no repository enumeration",
+    "tree_sha": "3ae46c7c1576f9a3450a64729be314ba8e853eac"
+  },
+  "ceilings": {
+    "max_files": 96,
+    "max_internal_depth": 16,
+    "max_total_bytes": 8388608
+  },
+  "claim_order": [
+    "startup_source_ordering",
+    "credential_provider_boundary",
+    "security_guidance_plugin"
+  ],
+  "claims": {
+    "credential_provider_boundary": {
+      "blocked_reasons": [],
+      "out_of_claim_dynamic_leaves": [
+        {
+          "kind": "nonliteral_or_dynamic_loader",
+          "leaf_type": "out_of_claim_dynamic_leaf",
+          "mechanism": "exec_module",
+          "source": "providers/__init__.py"
+        },
+        {
+          "kind": "nonliteral_or_dynamic_loader",
+          "leaf_type": "out_of_claim_dynamic_leaf",
+          "mechanism": "import_module",
+          "source": "providers/__init__.py"
+        },
+        {
+          "kind": "nonliteral_or_dynamic_loader",
+          "leaf_type": "out_of_claim_dynamic_leaf",
+          "mechanism": "spec_from_file_location",
+          "source": "providers/__init__.py"
+        }
+      ],
+      "out_of_claim_internal_leaves": [
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "agent.anthropic_adapter"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "agent.auxiliary_client"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "agent.azure_identity_adapter"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "agent.context_compressor"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "agent.iteration_budget"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "agent.memory_manager"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "agent.moa_loop"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "agent.model_metadata"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "agent.process_bootstrap"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "agent.prompt_builder"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "agent.ssl_guard"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "agent.subdirectory_hints"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "agent.think_scrubber"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "agent.tool_guardrails"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "hermes_cli.auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "hermes_cli.config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "hermes_cli.model_normalize"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "hermes_cli.model_switch"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "hermes_cli.models"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "hermes_cli.plugins"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "hermes_cli.profiles"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "hermes_cli.providers"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "hermes_cli.route_identity"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "hermes_cli.timeouts"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "hermes_constants"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "plugins.context_engine"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "plugins.memory"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "run_agent"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "tools.checkpoint_manager"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "tools.env_probe"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "tools.memory_tool"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "tools.registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "tools.todo_tool"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/agent_init.py",
+          "target_module": "utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/credential_pool.py",
+          "target_module": "agent.anthropic_adapter"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/credential_pool.py",
+          "target_module": "agent.credential_persistence"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/credential_pool.py",
+          "target_module": "agent.secret_scope"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/credential_pool.py",
+          "target_module": "hermes_cli.auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/credential_pool.py",
+          "target_module": "hermes_cli.config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/credential_pool.py",
+          "target_module": "hermes_cli.copilot_auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/credential_pool.py",
+          "target_module": "hermes_cli.env_loader"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/credential_pool.py",
+          "target_module": "hermes_constants"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/secret_scope.py",
+          "target_module": "hermes_cli.env_loader"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "agent.azure_identity_adapter"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "agent.bedrock_adapter"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "agent.credential_persistence"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "agent.credential_pool"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "hermes_cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "hermes_cli.colors"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "hermes_cli.config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "hermes_cli.copilot_auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "hermes_cli.curses_ui"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "hermes_cli.model_cost_guard"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "hermes_cli.models"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "hermes_cli.nous_account"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "hermes_cli.providers"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "hermes_constants"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "providers"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/auth.py",
+          "target_module": "utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "agent.redact"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "agent.secret_scope"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "agent.skill_utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.colors"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.credential_lifecycle"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.default_soul"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.mcp_security"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.route_identity"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.secret_prompt"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.toolset_validation"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_constants"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "providers"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/runtime_provider.py",
+          "target_module": "agent.anthropic_adapter"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/runtime_provider.py",
+          "target_module": "agent.azure_identity_adapter"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/runtime_provider.py",
+          "target_module": "agent.bedrock_adapter"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/runtime_provider.py",
+          "target_module": "agent.vertex_adapter"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/runtime_provider.py",
+          "target_module": "hermes_cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/runtime_provider.py",
+          "target_module": "hermes_cli.models"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/runtime_provider.py",
+          "target_module": "hermes_constants"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/runtime_provider.py",
+          "target_module": "utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "providers/__init__.py",
+          "target_module": "hermes_constants"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "providers/__init__.py",
+          "target_module": "providers"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "providers/base.py",
+          "target_module": "hermes_cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "providers/base.py",
+          "target_module": "hermes_cli.urllib_security"
+        }
+      ],
+      "required_internal_edges": [
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "hermes_cli/runtime_provider.py",
+          "target": "hermes_cli/config.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "hermes_cli/runtime_provider.py",
+          "target": "hermes_cli/auth.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "hermes_cli/runtime_provider.py",
+          "target": "agent/credential_pool.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "hermes_cli/runtime_provider.py",
+          "target": "agent/secret_scope.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "agent/agent_init.py",
+          "target": "agent/credential_pool.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "agent/agent_init.py",
+          "target": "providers/__init__.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "providers/__init__.py",
+          "target": "providers/base.py"
+        }
+      ],
+      "required_source_predicates": [
+        "requested_provider_selection",
+        "provider_credential_resolution",
+        "post_detection_pool_validation",
+        "agent_construction_boundary"
+      ],
+      "roots": [
+        "hermes_cli/runtime_provider.py",
+        "agent/agent_init.py"
+      ],
+      "verdict": "PASS_CLAIM_SCOPED_SOURCE_CLOSURE"
+    },
+    "security_guidance_plugin": {
+      "blocked_reasons": [],
+      "out_of_claim_dynamic_leaves": [
+        {
+          "kind": "nonliteral_or_dynamic_loader",
+          "leaf_type": "out_of_claim_dynamic_leaf",
+          "mechanism": "exec_module",
+          "source": "hermes_cli/plugins.py"
+        },
+        {
+          "kind": "nonliteral_or_dynamic_loader",
+          "leaf_type": "out_of_claim_dynamic_leaf",
+          "mechanism": "spec_from_file_location",
+          "source": "hermes_cli/plugins.py"
+        }
+      ],
+      "out_of_claim_internal_leaves": [
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "agent"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "agent.anthropic_adapter"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "agent.auxiliary_client"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "agent.insights"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "agent.lsp.cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "agent.shell_hooks"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "agent.trace_upload"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli._parser"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli._subprocess_compat"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.auth_commands"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.backup"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.banner"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.bundles"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.checkpoints"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.claw"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.completion"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.console_engine"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.cron"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.curator"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.curses_ui"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.dashboard_auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.dashboard_register"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.debug"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.dep_ensure"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.doctor"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.dump"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.env_loader"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.fallback_cmd"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.gateway"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.gateway_enroll"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.gui_uninstall"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.hooks"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.journey"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.kanban"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.kanban_db"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.logs"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.managed_uv"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.mcp_config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.mcp_startup"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.memory_setup"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.migrate"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.moa_cmd"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.model_catalog"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.model_setup_flows"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.model_switch"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.models"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.oneshot"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.pairing"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.pets"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.plugins_cmd"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.portal_cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.profile_distribution"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.profiles"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.projects_cmd"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.prompt_size"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.providers"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.proxy.cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.psutil_android"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.relaunch"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.runtime_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.secret_prompt"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.security_audit"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.send_cmd"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.session_export"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.session_export_html"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.session_export_md"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.session_filters"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.setup"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.setup_whatsapp_cloud"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.skills_config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.skills_hub"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.skin_cmd"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.slack_cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.status"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.stdio"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands._shared"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.acp"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.backup"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.claw"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.console"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.cron"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.dashboard"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.debug"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.doctor"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.dump"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.gateway"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.gui"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.hooks"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.import_cmd"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.insights"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.login"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.logout"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.logs"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.mcp"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.memory"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.model"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.pairing"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.plugins"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.profile"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.prompt_size"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.security"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.setup"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.skills"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.skin"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.slack"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.status"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.tools"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.uninstall"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.update"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.version"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.webhook"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.whatsapp"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.tools_config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.uninstall"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.web_server"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.webhook"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.windows_ssh_runtime"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.xai_retirement"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_constants"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "plugins.dashboard_auth.basic"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "plugins.memory"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "plugins.memory.honcho.cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "providers"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.async_delegation"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.browser_tool"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.computer_use.cua_backend"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.computer_use.doctor"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.computer_use.permissions"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.mcp_tool"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.skills_sync"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.terminal_tool"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/oneshot.py",
+          "target_module": "hermes_cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/oneshot.py",
+          "target_module": "hermes_cli.config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/oneshot.py",
+          "target_module": "hermes_cli.fallback_config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/oneshot.py",
+          "target_module": "hermes_cli.models"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/oneshot.py",
+          "target_module": "hermes_cli.runtime_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/oneshot.py",
+          "target_module": "hermes_cli.tools_config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/oneshot.py",
+          "target_module": "run_agent"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.browser_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.browser_registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.context_engine"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.image_gen_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.image_gen_registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.plugin_llm"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.secret_sources.base"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.secret_sources.registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.skill_utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.transcription_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.transcription_registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.tts_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.tts_registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.video_gen_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.video_gen_registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.web_search_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.web_search_registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "hermes_cli.commands"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "hermes_cli.config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "hermes_cli.dashboard_auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "hermes_cli.main"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "hermes_cli.middleware"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "hermes_cli.profiles"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "hermes_constants"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "tools.approval"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "tools.registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "agent.delegation_context"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "agent.model_metadata"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "hermes_cli.config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "hermes_cli.middleware"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "hermes_cli.runtime_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools.approval"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools.code_execution_tool"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools.file_tools"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools.registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools.schema_sanitizer"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools.thread_context"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools.tool_search"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "plugins/security-guidance/__init__.py",
+          "target_module": "plugins.security_guidance"
+        }
+      ],
+      "required_internal_edges": [
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "hermes_cli/main.py",
+          "target": "hermes_cli/plugins.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "hermes_cli/oneshot.py",
+          "target": "hermes_cli/plugins.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "model_tools.py",
+          "target": "hermes_cli/plugins.py"
+        },
+        {
+          "edge_kind": "conditional_fixed_plugin_loader_candidate",
+          "resolved": true,
+          "source": "hermes_cli/plugins.py",
+          "target": "plugins/security-guidance/__init__.py"
+        },
+        {
+          "edge_kind": "fixed_manifest_entrypoint",
+          "resolved": true,
+          "source": "plugins/security-guidance/plugin.yaml",
+          "target": "plugins/security-guidance/__init__.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "plugins/security-guidance/__init__.py",
+          "target": "plugins/security-guidance/patterns.py"
+        }
+      ],
+      "required_source_predicates": [
+        "conditional_loader_register_candidate",
+        "literal_hook_registration",
+        "plugin_context_mutation_candidate"
+      ],
+      "roots": [
+        "plugins/security-guidance/plugin.yaml",
+        "hermes_cli/plugins.py",
+        "model_tools.py",
+        "hermes_cli/main.py",
+        "hermes_cli/oneshot.py"
+      ],
+      "verdict": "PASS_CLAIM_SCOPED_SOURCE_CLOSURE"
+    },
+    "startup_source_ordering": {
+      "blocked_reasons": [],
+      "out_of_claim_dynamic_leaves": [
+        {
+          "kind": "nonliteral_or_dynamic_loader",
+          "leaf_type": "out_of_claim_dynamic_leaf",
+          "mechanism": "exec_module",
+          "source": "hermes_cli/plugins.py"
+        },
+        {
+          "kind": "nonliteral_or_dynamic_loader",
+          "leaf_type": "out_of_claim_dynamic_leaf",
+          "mechanism": "spec_from_file_location",
+          "source": "hermes_cli/plugins.py"
+        }
+      ],
+      "out_of_claim_internal_leaves": [
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/process_bootstrap.py",
+          "target_module": "utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/shell_hooks.py",
+          "target_module": "hermes_cli._subprocess_compat"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/shell_hooks.py",
+          "target_module": "hermes_cli.plugins"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/shell_hooks.py",
+          "target_module": "hermes_constants"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "agent/shell_hooks.py",
+          "target_module": "utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "agent.redact"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "agent.secret_scope"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "agent.skill_utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.colors"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.credential_lifecycle"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.default_soul"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.mcp_security"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.route_identity"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.secret_prompt"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_cli.toolset_validation"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "hermes_constants"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "providers"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/config.py",
+          "target_module": "utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/env_loader.py",
+          "target_module": "agent.secret_sources.registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/env_loader.py",
+          "target_module": "hermes_cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/env_loader.py",
+          "target_module": "hermes_cli.config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/env_loader.py",
+          "target_module": "utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "agent"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "agent.anthropic_adapter"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "agent.auxiliary_client"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "agent.insights"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "agent.lsp.cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "agent.trace_upload"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli._parser"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli._subprocess_compat"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.auth_commands"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.backup"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.banner"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.bundles"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.checkpoints"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.claw"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.completion"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.console_engine"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.cron"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.curator"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.curses_ui"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.dashboard_auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.dashboard_register"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.debug"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.dep_ensure"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.doctor"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.dump"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.fallback_cmd"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.gateway"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.gateway_enroll"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.gui_uninstall"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.hooks"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.journey"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.kanban"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.kanban_db"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.logs"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.managed_uv"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.mcp_config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.mcp_startup"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.memory_setup"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.migrate"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.moa_cmd"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.model_catalog"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.model_setup_flows"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.model_switch"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.models"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.oneshot"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.pairing"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.pets"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.plugins_cmd"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.portal_cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.profile_distribution"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.profiles"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.projects_cmd"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.prompt_size"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.providers"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.proxy.cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.psutil_android"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.relaunch"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.runtime_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.secret_prompt"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.security_audit"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.send_cmd"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.session_export"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.session_export_html"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.session_export_md"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.session_filters"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.setup"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.setup_whatsapp_cloud"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.skills_config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.skills_hub"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.skin_cmd"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.slack_cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.status"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.stdio"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands._shared"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.acp"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.backup"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.claw"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.console"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.cron"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.dashboard"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.debug"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.doctor"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.dump"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.gateway"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.gui"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.hooks"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.import_cmd"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.insights"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.login"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.logout"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.logs"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.mcp"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.memory"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.model"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.pairing"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.plugins"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.profile"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.prompt_size"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.security"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.setup"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.skills"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.skin"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.slack"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.status"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.tools"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.uninstall"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.update"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.version"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.webhook"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.subcommands.whatsapp"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.tools_config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.uninstall"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.web_server"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.webhook"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.windows_ssh_runtime"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_cli.xai_retirement"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "hermes_constants"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "plugins.dashboard_auth.basic"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "plugins.memory"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "plugins.memory.honcho.cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "providers"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.async_delegation"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.browser_tool"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.computer_use.cua_backend"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.computer_use.doctor"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.computer_use.permissions"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.mcp_tool"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.skills_sync"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "tools.terminal_tool"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/main.py",
+          "target_module": "utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.browser_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.browser_registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.context_engine"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.image_gen_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.image_gen_registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.plugin_llm"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.secret_sources.base"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.secret_sources.registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.skill_utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.transcription_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.transcription_registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.tts_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.tts_registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.video_gen_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.video_gen_registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.web_search_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "agent.web_search_registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "hermes_cli.commands"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "hermes_cli.config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "hermes_cli.dashboard_auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "hermes_cli.main"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "hermes_cli.middleware"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "hermes_cli.profiles"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "hermes_constants"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "tools.approval"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "tools.registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "hermes_cli/plugins.py",
+          "target_module": "utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "agent.delegation_context"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "agent.model_metadata"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "hermes_cli.config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "hermes_cli.middleware"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "hermes_cli.runtime_provider"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools.approval"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools.code_execution_tool"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools.file_tools"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools.registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools.schema_sanitizer"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools.thread_context"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "model_tools.py",
+          "target_module": "tools.tool_search"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.agent_init"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.agent_runtime_helpers"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.anthropic_adapter"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.aux_accounting"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.auxiliary_client"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.background_review"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.chat_completion_helpers"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.codex_responses_adapter"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.codex_runtime"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.context_compressor"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.conversation_compression"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.conversation_loop"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.credits_tracker"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.error_classifier"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.image_routing"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.iteration_budget"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.lmstudio_reasoning"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.memory_manager"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.message_content"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.message_sanitization"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.model_metadata"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.portal_tags"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.prompt_builder"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.rate_limit_tracker"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.reasoning_timeouts"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.redact"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.retry_utils"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.stream_diag"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.system_prompt"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.tool_dispatch_helpers"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.tool_executor"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.tool_guardrails"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.tool_result_classification"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.trajectory"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.transports"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.transports.chat_completions"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.usage_pricing"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "agent.vertex_adapter"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "hermes_cli"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "hermes_cli.auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "hermes_cli.config"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "hermes_cli.copilot_auth"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "hermes_cli.models"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "hermes_cli.plugins"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "hermes_cli.profiles"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "hermes_cli.route_identity"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "hermes_cli.timeouts"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "hermes_constants"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "providers"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "tools.browser_tool"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "tools.delegate_tool"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "tools.interrupt"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "tools.kanban_tools"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "tools.process_registry"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "tools.terminal_tool"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "tools.thread_context"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "tools.todo_tool"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "tools.vision_tools"
+        },
+        {
+          "leaf_type": "out_of_claim_internal_leaf",
+          "source": "run_agent.py",
+          "target_module": "utils"
+        }
+      ],
+      "required_internal_edges": [
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "run_agent.py",
+          "target": "hermes_cli/env_loader.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "run_agent.py",
+          "target": "agent/process_bootstrap.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "run_agent.py",
+          "target": "model_tools.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "hermes_cli/main.py",
+          "target": "hermes_cli/env_loader.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "hermes_cli/main.py",
+          "target": "hermes_cli/config.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "hermes_cli/main.py",
+          "target": "hermes_cli/plugins.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "hermes_cli/main.py",
+          "target": "agent/shell_hooks.py"
+        },
+        {
+          "edge_kind": "literal_import",
+          "resolved": true,
+          "source": "model_tools.py",
+          "target": "hermes_cli/plugins.py"
+        }
+      ],
+      "required_source_predicates": [
+        "cli_entrypoint",
+        "dotenv_before_model_tools",
+        "startup_plugin_then_shell_hook"
+      ],
+      "roots": [
+        "pyproject.toml",
+        "run_agent.py",
+        "hermes_cli/main.py"
+      ],
+      "verdict": "PASS_CLAIM_SCOPED_SOURCE_CLOSURE"
+    }
+  },
+  "files": [
+    {
+      "byte_length": 131629,
+      "claim_membership": [
+        "credential_provider_boundary"
+      ],
+      "claim_roles": {
+        "credential_provider_boundary": "claim_root"
+      },
+      "depth": {
+        "credential_provider_boundary": 0
+      },
+      "git_blob_sha": "e239c48cfbd9d5f3a6f08c3d05852025cb08c218",
+      "graph_role": "claim_root",
+      "introduced_by": {
+        "credential_provider_boundary": "root:credential_provider_boundary"
+      },
+      "path": "agent/agent_init.py"
+    },
+    {
+      "byte_length": 125241,
+      "claim_membership": [
+        "credential_provider_boundary"
+      ],
+      "claim_roles": {
+        "credential_provider_boundary": "required_claim_dependency"
+      },
+      "depth": {
+        "credential_provider_boundary": 1
+      },
+      "git_blob_sha": "d5d652ad7414c0fc270a4ff5cf837dcb382bb427",
+      "graph_role": "required_claim_dependency",
+      "introduced_by": {
+        "credential_provider_boundary": "hermes_cli/runtime_provider.py"
+      },
+      "path": "agent/credential_pool.py"
+    },
+    {
+      "byte_length": 7497,
+      "claim_membership": [
+        "startup_source_ordering"
+      ],
+      "claim_roles": {
+        "startup_source_ordering": "required_claim_dependency"
+      },
+      "depth": {
+        "startup_source_ordering": 1
+      },
+      "git_blob_sha": "89b6278a8c258f49f9fda3c8ed35d9eba3117b96",
+      "graph_role": "required_claim_dependency",
+      "introduced_by": {
+        "startup_source_ordering": "run_agent.py"
+      },
+      "path": "agent/process_bootstrap.py"
+    },
+    {
+      "byte_length": 10095,
+      "claim_membership": [
+        "credential_provider_boundary"
+      ],
+      "claim_roles": {
+        "credential_provider_boundary": "required_claim_dependency"
+      },
+      "depth": {
+        "credential_provider_boundary": 1
+      },
+      "git_blob_sha": "8b376d5fceff347de8dce40ae0f917b82f3586b5",
+      "graph_role": "required_claim_dependency",
+      "introduced_by": {
+        "credential_provider_boundary": "hermes_cli/runtime_provider.py"
+      },
+      "path": "agent/secret_scope.py"
+    },
+    {
+      "byte_length": 33689,
+      "claim_membership": [
+        "startup_source_ordering"
+      ],
+      "claim_roles": {
+        "startup_source_ordering": "required_claim_dependency"
+      },
+      "depth": {
+        "startup_source_ordering": 1
+      },
+      "git_blob_sha": "c1cec81df3332b3f9b85238635cdf914af007193",
+      "graph_role": "required_claim_dependency",
+      "introduced_by": {
+        "startup_source_ordering": "hermes_cli/main.py"
+      },
+      "path": "agent/shell_hooks.py"
+    },
+    {
+      "byte_length": 357982,
+      "claim_membership": [
+        "credential_provider_boundary"
+      ],
+      "claim_roles": {
+        "credential_provider_boundary": "required_claim_dependency"
+      },
+      "depth": {
+        "credential_provider_boundary": 1
+      },
+      "git_blob_sha": "011cf817aebd88b915a32ba090628d19e8fb360b",
+      "graph_role": "required_claim_dependency",
+      "introduced_by": {
+        "credential_provider_boundary": "hermes_cli/runtime_provider.py"
+      },
+      "path": "hermes_cli/auth.py"
+    },
+    {
+      "byte_length": 438401,
+      "claim_membership": [
+        "credential_provider_boundary",
+        "startup_source_ordering"
+      ],
+      "claim_roles": {
+        "credential_provider_boundary": "required_claim_dependency",
+        "startup_source_ordering": "required_claim_dependency"
+      },
+      "depth": {
+        "credential_provider_boundary": 1,
+        "startup_source_ordering": 1
+      },
+      "git_blob_sha": "640c184f0cc0874644ad21a0cdf51a4e52ea5d9b",
+      "graph_role": "shared_claim_path",
+      "introduced_by": {
+        "credential_provider_boundary": "hermes_cli/runtime_provider.py",
+        "startup_source_ordering": "hermes_cli/main.py"
+      },
+      "path": "hermes_cli/config.py"
+    },
+    {
+      "byte_length": 22239,
+      "claim_membership": [
+        "startup_source_ordering"
+      ],
+      "claim_roles": {
+        "startup_source_ordering": "required_claim_dependency"
+      },
+      "depth": {
+        "startup_source_ordering": 1
+      },
+      "git_blob_sha": "e91c12adf7ebf8dde6cd794775110c8c61100cd6",
+      "graph_role": "required_claim_dependency",
+      "introduced_by": {
+        "startup_source_ordering": "run_agent.py"
+      },
+      "path": "hermes_cli/env_loader.py"
+    },
+    {
+      "byte_length": 670990,
+      "claim_membership": [
+        "security_guidance_plugin",
+        "startup_source_ordering"
+      ],
+      "claim_roles": {
+        "security_guidance_plugin": "claim_root",
+        "startup_source_ordering": "claim_root"
+      },
+      "depth": {
+        "security_guidance_plugin": 0,
+        "startup_source_ordering": 0
+      },
+      "git_blob_sha": "fcca52b8851ebd40ea82ad812e3dc9c3a3233e01",
+      "graph_role": "shared_claim_path",
+      "introduced_by": {
+        "security_guidance_plugin": "root:security_guidance_plugin",
+        "startup_source_ordering": "root:startup_source_ordering"
+      },
+      "path": "hermes_cli/main.py"
+    },
+    {
+      "byte_length": 20852,
+      "claim_membership": [
+        "security_guidance_plugin"
+      ],
+      "claim_roles": {
+        "security_guidance_plugin": "claim_root"
+      },
+      "depth": {
+        "security_guidance_plugin": 0
+      },
+      "git_blob_sha": "320c61c8cc12e3d7041215ab37a93b0e5b60c7e9",
+      "graph_role": "claim_root",
+      "introduced_by": {
+        "security_guidance_plugin": "root:security_guidance_plugin"
+      },
+      "path": "hermes_cli/oneshot.py"
+    },
+    {
+      "byte_length": 102530,
+      "claim_membership": [
+        "security_guidance_plugin",
+        "startup_source_ordering"
+      ],
+      "claim_roles": {
+        "security_guidance_plugin": "claim_root",
+        "startup_source_ordering": "required_claim_dependency"
+      },
+      "depth": {
+        "security_guidance_plugin": 0,
+        "startup_source_ordering": 1
+      },
+      "git_blob_sha": "6ca393fca53c1fd2b3479bed72180fedcc848c88",
+      "graph_role": "shared_claim_path",
+      "introduced_by": {
+        "security_guidance_plugin": "root:security_guidance_plugin",
+        "startup_source_ordering": "hermes_cli/main.py"
+      },
+      "path": "hermes_cli/plugins.py"
+    },
+    {
+      "byte_length": 98052,
+      "claim_membership": [
+        "credential_provider_boundary"
+      ],
+      "claim_roles": {
+        "credential_provider_boundary": "claim_root"
+      },
+      "depth": {
+        "credential_provider_boundary": 0
+      },
+      "git_blob_sha": "7a17fc83943f7b058d6feabf838c60d7c1864a99",
+      "graph_role": "claim_root",
+      "introduced_by": {
+        "credential_provider_boundary": "root:credential_provider_boundary"
+      },
+      "path": "hermes_cli/runtime_provider.py"
+    },
+    {
+      "byte_length": 65159,
+      "claim_membership": [
+        "security_guidance_plugin",
+        "startup_source_ordering"
+      ],
+      "claim_roles": {
+        "security_guidance_plugin": "claim_root",
+        "startup_source_ordering": "required_claim_dependency"
+      },
+      "depth": {
+        "security_guidance_plugin": 0,
+        "startup_source_ordering": 1
+      },
+      "git_blob_sha": "32394a69eec64f3d676bedb1659a6f4e94887a74",
+      "graph_role": "shared_claim_path",
+      "introduced_by": {
+        "security_guidance_plugin": "root:security_guidance_plugin",
+        "startup_source_ordering": "run_agent.py"
+      },
+      "path": "model_tools.py"
+    },
+    {
+      "byte_length": 9739,
+      "claim_membership": [
+        "security_guidance_plugin"
+      ],
+      "claim_roles": {
+        "security_guidance_plugin": "required_claim_dependency"
+      },
+      "depth": {
+        "security_guidance_plugin": 1
+      },
+      "git_blob_sha": "99cc6f725ee750f9283db76ba741227f06ef9487",
+      "graph_role": "required_claim_dependency",
+      "introduced_by": {
+        "security_guidance_plugin": "plugins/security-guidance/plugin.yaml"
+      },
+      "path": "plugins/security-guidance/__init__.py"
+    },
+    {
+      "byte_length": 18580,
+      "claim_membership": [
+        "security_guidance_plugin"
+      ],
+      "claim_roles": {
+        "security_guidance_plugin": "required_claim_dependency"
+      },
+      "depth": {
+        "security_guidance_plugin": 2
+      },
+      "git_blob_sha": "6980888733c2714a6db3339d47595ce96b4a2ee4",
+      "graph_role": "required_claim_dependency",
+      "introduced_by": {
+        "security_guidance_plugin": "plugins/security-guidance/__init__.py"
+      },
+      "path": "plugins/security-guidance/patterns.py"
+    },
+    {
+      "byte_length": 626,
+      "claim_membership": [
+        "security_guidance_plugin"
+      ],
+      "claim_roles": {
+        "security_guidance_plugin": "claim_root"
+      },
+      "depth": {
+        "security_guidance_plugin": 0
+      },
+      "git_blob_sha": "97567299954b578b15f8508588c7c29cd9f8dd99",
+      "graph_role": "claim_root",
+      "introduced_by": {
+        "security_guidance_plugin": "root:security_guidance_plugin"
+      },
+      "path": "plugins/security-guidance/plugin.yaml"
+    },
+    {
+      "byte_length": 6780,
+      "claim_membership": [
+        "credential_provider_boundary"
+      ],
+      "claim_roles": {
+        "credential_provider_boundary": "required_claim_dependency"
+      },
+      "depth": {
+        "credential_provider_boundary": 1
+      },
+      "git_blob_sha": "a394e74b335ae25c8344c025a500eebb97d47b2d",
+      "graph_role": "required_claim_dependency",
+      "introduced_by": {
+        "credential_provider_boundary": "agent/agent_init.py"
+      },
+      "path": "providers/__init__.py"
+    },
+    {
+      "byte_length": 9927,
+      "claim_membership": [
+        "credential_provider_boundary"
+      ],
+      "claim_roles": {
+        "credential_provider_boundary": "required_claim_dependency"
+      },
+      "depth": {
+        "credential_provider_boundary": 2
+      },
+      "git_blob_sha": "554e01e4f7c77c3f32604a36fe6f94581b9dea27",
+      "graph_role": "required_claim_dependency",
+      "introduced_by": {
+        "credential_provider_boundary": "providers/__init__.py"
+      },
+      "path": "providers/base.py"
+    },
+    {
+      "byte_length": 19582,
+      "claim_membership": [
+        "startup_source_ordering"
+      ],
+      "claim_roles": {
+        "startup_source_ordering": "claim_root"
+      },
+      "depth": {
+        "startup_source_ordering": 0
+      },
+      "git_blob_sha": "a2a1d6c0ee240044de98b55bf93f7092f6ecef7d",
+      "graph_role": "claim_root",
+      "introduced_by": {
+        "startup_source_ordering": "root:startup_source_ordering"
+      },
+      "path": "pyproject.toml"
+    },
+    {
+      "byte_length": 312947,
+      "claim_membership": [
+        "startup_source_ordering"
+      ],
+      "claim_roles": {
+        "startup_source_ordering": "claim_root"
+      },
+      "depth": {
+        "startup_source_ordering": 0
+      },
+      "git_blob_sha": "75846d5bec81f8daaabb742e33642ee97990b425",
+      "graph_role": "claim_root",
+      "introduced_by": {
+        "startup_source_ordering": "root:startup_source_ordering"
+      },
+      "path": "run_agent.py"
+    }
+  ],
+  "fixed_plugin": {
+    "actual_activation_observed": false,
+    "call_time_environment_predicates": [
+      "SECURITY_GUIDANCE_BLOCK",
+      "SECURITY_GUIDANCE_DISABLE"
+    ],
+    "context_mutation_claim": "plugin_context_hook_registration_candidate",
+    "identity": "security-guidance",
+    "literal_hooks": [
+      "pre_tool_call",
+      "transform_tool_result"
+    ],
+    "paths": [
+      "plugins/security-guidance/plugin.yaml",
+      "plugins/security-guidance/__init__.py",
+      "plugins/security-guidance/patterns.py"
+    ],
+    "registration_claim": "conditional_registration_path_candidate"
+  },
+  "h2_inventory_approved": false,
+  "live_actions_authorized": false,
+  "runtime_status": "not_run",
+  "schema_version": "spec034-h1-claim-scoped-inventory-v2",
+  "spec_id": "034-hermes-v019-pinned-startup-source-graph",
+  "status": "SPEC034_H1_INVENTORY_PROPOSED",
+  "union": {
+    "files": 20,
+    "max_observed_depth": 2,
+    "out_of_claim_dynamic_leaves": 7,
+    "out_of_claim_internal_leaves": 530,
+    "required_internal_edges": 21,
+    "total_bytes": 2462537
+  },
+  "whole_program_source_graph_closed": false
+}

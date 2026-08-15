@@ -9,6 +9,7 @@ registration order and re-exports the public surface.
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from typing import Any, Callable
 
 from mcp.server.fastmcp import FastMCP
@@ -23,6 +24,30 @@ MAX_CONTEXT_SEGMENTS = 5
 SEMANTIC_API_COST_ACK = semantic_summarizer.SEMANTIC_API_COST_ACK
 
 mcp = FastMCP("podcast-ingest-core")
+
+
+@dataclass(frozen=True)
+class StreamableHttpConfig:
+    """Loopback-only Streamable HTTP listener configuration.
+
+    Spec 026 fixes the network boundary to the shared host-network namespace
+    used by the local OpenAB/Hermes deployment. Invalid values fail before the
+    shared server settings are changed.
+    """
+
+    host: str = "127.0.0.1"
+    port: int = 8767
+    path: str = "/mcp"
+
+    def __post_init__(self) -> None:
+        if self.host != "127.0.0.1":
+            raise ValueError("host must be 127.0.0.1")
+        if self.path != "/mcp":
+            raise ValueError("path must be /mcp")
+        if type(self.port) is not int:
+            raise ValueError("port must be an integer")
+        if not 1 <= self.port <= 65535:
+            raise ValueError("port must be between 1 and 65535")
 
 
 def tool_success(data: Any, warnings: list[str] | None = None) -> dict[str, Any]:
@@ -72,6 +97,16 @@ def run() -> None:
     """以 FastMCP 預設 stdio transport 啟動 server。"""
 
     mcp.run()
+
+
+def run_streamable_http(config: StreamableHttpConfig | None = None) -> None:
+    """以核准的 loopback Streamable HTTP transport 啟動同一個 server。"""
+
+    resolved = config or StreamableHttpConfig()
+    mcp.settings.host = resolved.host
+    mcp.settings.port = resolved.port
+    mcp.settings.streamable_http_path = resolved.path
+    mcp.run(transport="streamable-http")
 
 
 def _tool_call(operation: Callable[[], Any], warnings: list[str] | None = None) -> dict[str, Any]:

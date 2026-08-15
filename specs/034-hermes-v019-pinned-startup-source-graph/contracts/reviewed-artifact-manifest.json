@@ -1,0 +1,293 @@
+{
+  "artifacts": [
+    {
+      "path": "src/podcast_ingest_core/hermes_v019_startup_source_graph.py",
+      "sha256": "3c6969fa6dc34fe18b594affa500f203aa87c2a327bd9b616a9c7801a03ff65b",
+      "byte_length": 57007
+    },
+    {
+      "path": "src/podcast_ingest_core/artifact_lock.py",
+      "sha256": "6f0047e375764b4cb70da5c4a0318a4479a92dcbc7a06d6538fb89ef703e19e4",
+      "byte_length": 3851
+    },
+    {
+      "path": "src/podcast_ingest_core/canonical_transcript.py",
+      "sha256": "fe8e7669b9240f7e8dbc81661eb9d090afe4c5aea30d4f27f8af943faa4bbbe8",
+      "byte_length": 8887
+    },
+    {
+      "path": "src/podcast_ingest_core/config.py",
+      "sha256": "19a551e990427b795bbba3c82ede776dfa544f4fc633f948d7619cf17a8b7fa9",
+      "byte_length": 2571
+    },
+    {
+      "path": "src/podcast_ingest_core/llm_provider.py",
+      "sha256": "caf6195007675bd171d2fb32aaa4ed0158534d5803f71f0f7ad8715055d1a4f2",
+      "byte_length": 7886
+    },
+    {
+      "path": "src/podcast_ingest_core/stock_lens.py",
+      "sha256": "98fe25913c8fc7e95608c5dc970632219c4f726de62fc839539332589031dd92",
+      "byte_length": 21178
+    },
+    {
+      "path": "src/podcast_ingest_core/episode_claim.py",
+      "sha256": "4e04d459c03ee9ec8f35a9cf891a11505565e785cf04e81b1a4051b9b23525dc",
+      "byte_length": 4142
+    },
+    {
+      "path": "src/podcast_ingest_core/errors.py",
+      "sha256": "ebcd078df69e34b1e610f3cc2319a918fd9b80b8cea8e7435258b6790510543e",
+      "byte_length": 6420
+    },
+    {
+      "path": "src/podcast_ingest_core/external_data_boundary.py",
+      "sha256": "b00113812913aff23994d139907f2e808c66bd53c2be30cc1c344d053a6832ac",
+      "byte_length": 13084
+    },
+    {
+      "path": "src/podcast_ingest_core/external_data_verification.py",
+      "sha256": "aaaa709fa693aa6e20ae0a4b5eeef026f113456b609656826683d0e724d574ef",
+      "byte_length": 17545
+    },
+    {
+      "path": "src/podcast_ingest_core/generation_proof.py",
+      "sha256": "cbf89b0ff11a93fb357fcc86dd763d5babd456f4aa02b89fed24688c4f722453",
+      "byte_length": 1509
+    },
+    {
+      "path": "src/podcast_ingest_core/gooaye_lens.py",
+      "sha256": "efa9c4acd51ff347fd430e14de35a4357bc477e6977c9e87c2916f425320e9a2",
+      "byte_length": 4130
+    },
+    {
+      "path": "src/podcast_ingest_core/industry_mapping.py",
+      "sha256": "e5a6cbcb7a886f8a12f3ebb9b19adf02e600a468a77be983513edacff2b070f1",
+      "byte_length": 19966
+    },
+    {
+      "path": "src/podcast_ingest_core/models.py",
+      "sha256": "86d20e89608e3c09905e3750c9bcae63de9ddc6174bc44e0d6683c0d4e96091b",
+      "byte_length": 35034
+    },
+    {
+      "path": "src/podcast_ingest_core/report_safety.py",
+      "sha256": "2beae1d00d04fe15f782530f4beb33636897b2fa92a9ec152f3da79b9c052023",
+      "byte_length": 10877
+    },
+    {
+      "path": "src/podcast_ingest_core/secure_local_snapshot.py",
+      "sha256": "51f8461a2a102a623d66b4f3543ce1a0c66ac3dfb33fabbc582a6cc1a3598520",
+      "byte_length": 14570
+    },
+    {
+      "path": "src/podcast_ingest_core/semantic_review_artifact.py",
+      "sha256": "0ac85bcc0382cef8b6bd2b1e015fce007119d527e92e4174398439f597654537",
+      "byte_length": 16622
+    },
+    {
+      "path": "src/podcast_ingest_core/semantic_summary_identity.py",
+      "sha256": "6bb7c5e894bd549581b67ee5862d4cc0147efdb5b0b7e58d575755b647a32311",
+      "byte_length": 1847
+    },
+    {
+      "path": "src/podcast_ingest_core/semantic_summary_smoke_review.py",
+      "sha256": "5915c129b3b30fa3dd8e810f9f133babd95eff26feb6c792f0cba02b45443dee",
+      "byte_length": 7825
+    },
+    {
+      "path": "src/podcast_ingest_core/storage.py",
+      "sha256": "78e72a15291cbdd9247b4b0d80b842c991ca1349191cb704ee2fd258d49bcfee",
+      "byte_length": 19747
+    },
+    {
+      "path": "src/podcast_ingest_core/verified_research_lineage.py",
+      "sha256": "c21e63f0faa2ab1b6b695bf8e68c4caaa509b87459a7503950bb03d918495d84",
+      "byte_length": 42151
+    },
+    {
+      "path": "src/podcast_ingest_core/verified_research_report.py",
+      "sha256": "0af315418be5b850d4141357b05cbea1957150047656af9ca89ba4bdfeae93c6",
+      "byte_length": 56395
+    },
+    {
+      "path": "scripts/acquire_spec_034_hermes_source.py",
+      "sha256": "ceaf4cbef2fa57c630834f1d1e2f346ac65bccd6d1f836cdf978638863b55445",
+      "byte_length": 20480
+    },
+    {
+      "path": "scripts/validate_spec_034_source_graph.py",
+      "sha256": "0fef0cd3ea16027278cafc97e3056a7647e4349964b283cc435ea51ffc0319b2",
+      "byte_length": 912
+    },
+    {
+      "path": "scripts/spec034_offline_runtime_sentinel.py",
+      "sha256": "f7700b679bf1a38071c8cf5c7cda6c0b77536c27754df776ccfccd8df238e76d",
+      "byte_length": 2353
+    },
+    {
+      "path": "scripts/spec034_isolated_pytest_runner.py",
+      "sha256": "944dd42b79f53ed8490a69dd2823105675d7efd359e4ddff3cbf603d239aa248",
+      "byte_length": 21408
+    },
+    {
+      "path": "scripts/spec034_trust_launcher.py",
+      "sha256": "8ae84116e2234332f80fa175131832952405faaf69ba9fdf8d3425deb1b2f934",
+      "byte_length": 3523
+    },
+    {
+      "path": "scripts/run_spec_034_final_once.py",
+      "sha256": "e38d8ab1a180a00f5ffecb8571048fd0683b45e5e36bb8c292e25c9307fe457d",
+      "byte_length": 7932
+    },
+    {
+      "path": "scripts/verify_spec_034_offline.py",
+      "sha256": "0565ea4556933e2843af1b61cf4d5b853c3d91fc9e06269090aa7b9ddaa3bb89",
+      "byte_length": 32890
+    },
+    {
+      "path": "tests/__init__.py",
+      "sha256": "6f27f24214a120af70634ef897d54b6dd2efcafa2a1ef4d4ae08fa0614a0ea84",
+      "byte_length": 62
+    },
+    {
+      "path": "tests/test_hermes_v019_startup_source_graph.py",
+      "sha256": "4756e2f180e5b5a44217000c3c3a670b231e6b2c262d981190864d88330b34aa",
+      "byte_length": 3962
+    },
+    {
+      "path": "tests/test_spec_034_h1_inventory.py",
+      "sha256": "2f1063565ad4a23261f5ede66aec5bafa941df0132c479cfefc2ce9064d91bbf",
+      "byte_length": 3253
+    },
+    {
+      "path": "tests/test_spec_034_h4_repair.py",
+      "sha256": "19532aa75c29a9e3cad9b0f04b3ad3c2987fa683a56cce8d43f0841fbc59ea29",
+      "byte_length": 61855
+    },
+    {
+      "path": "tests/test_spec_034_source_graph_docs.py",
+      "sha256": "590936741a277aa33e163d395c8762ca2f89a2835ec448830dbae5e0eaeb4a9e",
+      "byte_length": 3072
+    },
+    {
+      "path": "tests/spec034_final_c6_support.py",
+      "sha256": "73ed49f65555b2a564a833c77c2d881720fa06b279954eadd16530e67f24ff65",
+      "byte_length": 18890
+    },
+    {
+      "path": "tests/test_spec_034_verified_report_public_seam_regression.py",
+      "sha256": "541c1d629821ce51ec9f2c6577dbc042adb593a7e819e00ebd53ebecd05021f6",
+      "byte_length": 411
+    },
+    {
+      "path": "tests/test_spec_034_final_acceptance.py",
+      "sha256": "4a39fb52c08709d4fd779d88ca036a1fa08a54457941c05d62b37c033b66813e",
+      "byte_length": 5808
+    },
+    {
+      "path": "specs/034-hermes-v019-pinned-startup-source-graph/proposal.md",
+      "sha256": "9359d0227046d30c6b3fcc918e3ed9f5367dd71481b3414a9efd3341cf584c40",
+      "byte_length": 3288
+    },
+    {
+      "path": "specs/034-hermes-v019-pinned-startup-source-graph/spec.md",
+      "sha256": "16f00adf3d0491b0fea32b3040aa051ec463f881a4c6af37badfa9893fd8d46f",
+      "byte_length": 6108
+    },
+    {
+      "path": "specs/034-hermes-v019-pinned-startup-source-graph/plan.md",
+      "sha256": "eea8fe57262265d64d67f41aa598a3484c6f0782c9419412b26ba48efdf60cd6",
+      "byte_length": 5998
+    },
+    {
+      "path": "specs/034-hermes-v019-pinned-startup-source-graph/tasks.md",
+      "sha256": "8234831feeb47e27b41725512cea4c88646f65515b127def327bb842ada1e4fa",
+      "byte_length": 6334
+    },
+    {
+      "path": "specs/034-hermes-v019-pinned-startup-source-graph/checklists/requirements.md",
+      "sha256": "fc3ff8f671d5ece422eada44ce5a0bb92d72414c699f045e610fdff70c2da936",
+      "byte_length": 5274
+    },
+    {
+      "path": "specs/034-hermes-v019-pinned-startup-source-graph/checklists/safety.md",
+      "sha256": "8b6aa20aa45b3f4ccf7bb62e259eec56591f6ad6dbdb69d62edc2728019d9209",
+      "byte_length": 3461
+    },
+    {
+      "path": "specs/034-hermes-v019-pinned-startup-source-graph/contracts/h1-source-inventory-proposal.json",
+      "sha256": "90ba45ccf11bbcbf446f7d16904964073e84837a04aaaa0c6f4887d3ea75109d",
+      "byte_length": 108509
+    },
+    {
+      "path": "specs/034-hermes-v019-pinned-startup-source-graph/contracts/h1-discovery-receipt.json",
+      "sha256": "8050f1fccb89ddb9cdaf500e668f79e2da35ea69496f1bc773da5181b3d876eb",
+      "byte_length": 1530
+    },
+    {
+      "path": "specs/034-hermes-v019-pinned-startup-source-graph/contracts/source-bundle-manifest.json",
+      "sha256": "5daac70ce86a8eac04bb227b10c8b58fcd6938eababda30988209b3f2e3147ff",
+      "byte_length": 5191
+    },
+    {
+      "path": "specs/034-hermes-v019-pinned-startup-source-graph/contracts/predecessor-boundary.json",
+      "sha256": "8e65163b8d17b8b232031ac2bdf731ec2776049923b62eaac195ab2f4597ca51",
+      "byte_length": 615
+    },
+    {
+      "path": "specs/034-hermes-v019-pinned-startup-source-graph/contracts/python-test-capability-manifest.json",
+      "sha256": "5185a9b618dabdbd9bf815a344037b988d8290aef81666a536c838123bbb3173",
+      "byte_length": 132037
+    },
+    {
+      "path": "specs/034-hermes-v019-pinned-startup-source-graph/contracts/final-invocation.md",
+      "sha256": "54bd3de67b478a054fc406d968d4c949dcb4c6f1954fb09ae988a6c54581df4e",
+      "byte_length": 8629
+    },
+    {
+      "path": "config/industry_chain_mappings.yaml",
+      "sha256": "55f722998321dbd3ea02e669a8fccece51199ad1364edbf8bf1c948f5f1c0d1a",
+      "byte_length": 1307
+    },
+    {
+      "path": "config/external_data_boundary.yaml",
+      "sha256": "c4adecfa835998091c3ef137a706d5d79acc5db0d2ad8b2c99757636ef6eb6b8",
+      "byte_length": 502
+    },
+    {
+      "path": "config/gooaye_lens.yaml",
+      "sha256": "3b45f20765e2bcfa0397627526758ae2b82700dacae21ff425efc4566b4c07b6",
+      "byte_length": 3246
+    },
+    {
+      "path": "README.md",
+      "sha256": "3ff9117d62c9a75636e1b08d39d2098105781d62ef60d153a63911350f9bee05",
+      "byte_length": 73339
+    },
+    {
+      "path": "docs/roadmap.md",
+      "sha256": "64dbf9365652ac5d383a941499c9b7b7e39d960100e5ad16c0955160a0244b38",
+      "byte_length": 35967
+    },
+    {
+      "path": "docs/verification-matrix.md",
+      "sha256": "ad42b686673bbe74b129a14acfbdd2f67e18875e04b64026354ab13c28612569",
+      "byte_length": 21770
+    },
+    {
+      "path": "specs/README.md",
+      "sha256": "2ef5a52121420ec92168288954961fe0588ac2041cfbddaac74fd1da746da725",
+      "byte_length": 39017
+    },
+    {
+      "path": "pyproject.toml",
+      "sha256": "044c21c806fcba66766dd2ee608c0fe19c86b50d38f9d906487a4df0e96d4337",
+      "byte_length": 1021
+    }
+  ],
+  "live_actions_authorized": false,
+  "review_evidence_included": false,
+  "schema_version": "spec034-reviewed-artifact-manifest-v8",
+  "self_hash_policy": "This manifest and detached review root are excluded only to avoid a self-referential digest cycle. External root/bootstrap authority validates their detached identities. The trust launcher, bootstrap, final verifier, isolated pytest runner, sentinel, reviewer-approved local Python capability manifest, sealed shared C6 helper, final-safe C0-C7 acceptance suite, non-final meta tests, configuration, and current authority docs are sealed. Fresh H4 reviewers approve the detached root bytes and its external launcher/bootstrap/final/runner/capability identities; all earlier rejected identities are not approval evidence."
+}

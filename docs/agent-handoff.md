@@ -1,10 +1,12 @@
 # AI Agent Handoff Entrypoint
 
+> Spec 029 is **Offline Implemented** only: live preflight not run; G2-G3 not authorized; source contract remains `BLOCKED_RUNTIME_SEAM`. A future PASS is only an expected high-level MCP tool-call attempt policy-blocked before dispatch, not internal Skill selection, fallback, 019 outcome, or Core execution.
+
 這是新 AI agent（Opus 4.8、GPT-5.5 或其他）接手本 repo 的第一份文件。目標：10 分鐘內理解專案、知道哪些檔案是 source of truth、哪些邊界不可逾越、如何開始與驗證工作。
 
 ## Project Summary
 
-Podcast Ingestion Core 是一個本機優先的通用 Podcast 擷取與研究核心：RSS episode listing、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive 摘要、opt-in 的 OpenAI-compatible LLM semantic summary、deterministic mention extraction、SQLite metadata cache / search、stdio-only MCP server（目前恰好 21 個 reviewed tools），以及 deterministic research workflow（stock lens synthesis、external data boundary）。第一個 podcast profile 是 Gooaye 股癌，但核心程式不得寫死股癌；所有 podcast-specific 設定在 `config/podcasts.yaml`。本專案支援 evidence-based 研究整理，明確**不**提供投資建議。
+Podcast Ingestion Core 是一個本機優先的通用 Podcast 擷取與研究核心：RSS episode listing、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive 摘要、opt-in 的 OpenAI-compatible LLM semantic summary、deterministic mention extraction、SQLite metadata cache / search、共用單一 FastMCP 的 stdio 與 loopback Streamable HTTP sidecar（目前恰好 21 個 reviewed tools），以及 deterministic research workflow（stock lens synthesis、external data boundary）。第一個 podcast profile 是 Gooaye 股癌，但核心程式不得寫死股癌；所有 podcast-specific 設定在 `config/podcasts.yaml`。本專案支援 evidence-based 研究整理，明確**不**提供投資建議。
 Corpus packages 008–018 add local artifact indexing/planning, bounded intake/download/transcription/deterministic remediation, a one-stage fresh workflow, standalone `015-corpus-semantic-remediation-runner`, the human-controlled `016-corpus-episode-completion-workflow-runner`, `017-corpus-latest-episode-deterministic-workflow`, and `018-latest-episode-verified-research-report-workflow`. 016 previews in memory with strict zero-file behavior, 017 locks latest once and stops at `ready_for_semantic_summary`, and 018 validates a previewed exact episode reference plus exact acknowledgement before it pins, gates, researches, and atomically publishes a digest-versioned verified report bundle.
 The local stdio registry has exact 21 reviewed tools. Tool 21, `list_verified_report_gap_backlog`, is append-only after Tools 1–20 and is a read-query inventory gap backlog (no confirm/ack). Tool 20 remains historical next-step suggestion. Tool 19 remains coverage join. Tool 18 remains exact-locator source revalidation. Tool 17 retains its catalog contract.
 For historical context, 016 introduced 13 reviewed tools before 017 added the fourteenth tool; the registry therefore had exact 14 reviewed tools before 018 added the fifteenth; 019 added the sixteenth; 020 appends the seventeenth.
@@ -36,8 +38,9 @@ README.md 是 quick orientation 與 CLI 範例，不是 governance source。
 
 ## Implemented / Not Implemented
 
-- **已實作**：RSS episode listing、episode lookup、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive Markdown 摘要、opt-in LLM semantic summary pipeline、deterministic mention extraction、SQLite metadata cache / search、stdio-only MCP server（21 tools）、research workflow orchestration、stock lens synthesis、external data boundary（local fixture only）。
+- **已實作**：RSS episode listing、episode lookup、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive Markdown 摘要、opt-in LLM semantic summary pipeline、deterministic mention extraction、SQLite metadata cache / search、stdio MCP、loopback-only Streamable HTTP sidecar transport、research workflow orchestration、stock lens synthesis、external data boundary（local fixture only）。
 - **Corpus 已實作**：008–024，包括 014–023 既有 corpus/verified-report 路徑，以及 gap backlog（024 / Tool 21）；confirmed summary requires exact acknowledgement before profile/`.env`, deterministic review uses no LLM configuration, 018 atomically publishes an identity-validated digest bundle only after review passes, and 019 publishes the same bundle class for a named episode without LLM/ack when lineage already passes.
+- **Spec 026 Blocked**：sidecar image/health、OpenAB config/四 Skills、direct exact-21 readiness、`hermes mcp test`、portable runbook 與 boolean-only endpoint-equality validator 已存在。C6已由required reviewers＋唯一live v2 run驗證為PASS-current；C7仍缺safe runtime evidence，Hermes v0.20.0 tag `v2026.8.3` hooks只是未安裝候選。不可標Implemented，也不可重跑validator/inference、讀live config values/session dump、保存raw response、升級或啟用hooks補證。
 - **未實作**：Web UI、排程、embedding、vector search、live market API（明確不批准，見邊界）。
 
 ## Non-Negotiable Boundaries
@@ -65,6 +68,9 @@ README.md 是 quick orientation 與 CLI 範例，不是 governance source。
 | 025 MCP facade 邊界 | `src` 僅一處 `FastMCP(`；`@mcp.tool()` 只存在 `mcp_tools_*` 群組模組；群組不得 import `mcp_server`；facade re-export 別名契約完整；completion 拒絕訊息單一來源於 Core | `tests/test_mcp_server_facade_boundary.py` |
 | 025 docs 計數一致性 | 受治理文件的 tool 計數宣稱必須等於 live registry 數或帶 historical 標記；`*closeout*` 檔豁免 | `tests/test_docs_registry_count_consistency.py` |
 | 025 測試資料目錄 fixture | conftest fixture 反射覆蓋全部 storage `*_DIR` 與 evals 旁路常數；`PODCAST_INGEST_DATA_DIR` 未設時預設不變；新測試檔不得再複製 `_use_tmp_data_dirs` | `tests/test_data_dir_fixture_contract.py` |
+| 026 Hermes sidecar boundary | stdio/HTTP共用單一 FastMCP；HTTP僅loopback Streamable HTTP、non-root/no ports/no SSE；config/四 Skills採pre-mutation manifest-bound recovery。v2 direct validator不跑 inference，只輸出metadata/content equality booleans，拒絕`.env`/reparse/special entries；C6須reviewer＋唯一live run，C7須另案safe runtime evidence，否則維持Blocked。禁止protected digest/path/value、private endpoint、session/raw response輸出與目前計畫外的Hermes upgrade/hooks | `tests/test_mcp_http_transport.py`、`tests/test_hermes_deployment_contract.py`、`tests/test_hermes_integration.py`、`tests/test_hermes_live_smoke.py` |
+| 027 Hermes Skill contract layer | Spec 027 contract layer is complete (offline assurance only); actual Hermes runtime routing is BLOCKED/not_evaluated and is not a runtime PASS. It validates closed routing/protocol projections only, never production MCP, runtime inference, hooks, config, prompts, sessions, or C6. | `tests/test_hermes_skill_protocol.py`、`tests/test_spec_027_hermes_skill_protocol_docs.py` |
+| 028 Hermes runtime capability gate | Spec 028 capability gate is complete and correctly terminates at BLOCKED_CAPABILITY for Hermes v0.20.0 tag v2026.8.3; no upgrade, Skill sync, hooks, collector, inference, or runtime observation was performed. C6 remains PASS-current and was not rerun; actual Hermes Skill routing remains BLOCKED/not_run. | `tests/test_hermes_runtime_capability.py`、`tests/test_spec_028_hermes_runtime_capability_docs.py` |
 
 ## How to Start a New Feature
 

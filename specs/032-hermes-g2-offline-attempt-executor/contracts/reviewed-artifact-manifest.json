@@ -1,0 +1,163 @@
+{
+  "schema_version": "spec032-reviewed-artifact-manifest-v2",
+  "review_evidence_included": false,
+  "live_authorization": false,
+  "self_hash_policy": "This manifest is excluded from artifacts to avoid a self-referential digest cycle; all listed artifacts are hashed in one deterministic pass sorted by fixed explicit path order.",
+  "artifacts": [
+    {
+      "path": "README.md",
+      "byte_length": 72021,
+      "sha256": "f1dae77013a85212f3509389cdeb503db6072fab86bb620fedfc46c42828c005"
+    },
+    {
+      "path": "docs/roadmap.md",
+      "byte_length": 32903,
+      "sha256": "1511275700637cae2dfd90f1cbbbab3becc366ab4e13d7b2ef91a0380cf7079a"
+    },
+    {
+      "path": "docs/verification-matrix.md",
+      "byte_length": 18997,
+      "sha256": "150e954977385b3f19e5313ad6f7c753a305fc2ce6392713c8cc4a9443a4764b"
+    },
+    {
+      "path": "specs/README.md",
+      "byte_length": 36723,
+      "sha256": "8fe3380c8ccb51cfd7359a976c397f8e231e24b9986cb30eca6edd48f3d28f07"
+    },
+    {
+      "path": "src/podcast_ingest_core/hermes_g2_activation_authority.py",
+      "byte_length": 7205,
+      "sha256": "5d8d2d9b36a79a95e4c2119030d7a5babc5a921a605a2411d26eabbc0c2c8cc0"
+    },
+    {
+      "path": "src/podcast_ingest_core/hermes_g2_attempt_ledger.py",
+      "byte_length": 5519,
+      "sha256": "a91de53dc849018cffac5ccbad833928e6d973f3472bd6a87553547c93052b39"
+    },
+    {
+      "path": "src/podcast_ingest_core/hermes_g2_activation_executor.py",
+      "byte_length": 11263,
+      "sha256": "787d36ca3854d627a51455735c7b02a05a44eeefa9138bb3060a150db43fa5db"
+    },
+    {
+      "path": "src/podcast_ingest_core/hermes_g2_docker_commands.py",
+      "byte_length": 4595,
+      "sha256": "38aa821c96617dd44fc39e59bca5f49e28c84452485c14c9358de4bd920cdba3"
+    },
+    {
+      "path": "src/podcast_ingest_core/hermes_g2_docker_driver.py",
+      "byte_length": 863,
+      "sha256": "0a99b74ff66ef0efddfde5bf4c987ecf8f139c8c161d6a830ccdc98749e3cd61"
+    },
+    {
+      "path": "tests/test_hermes_g2_activation_authority.py",
+      "byte_length": 4971,
+      "sha256": "3d0808aff4fc844627b37278dd463e3226b2429b915ba1fd6720a69d44a9bc66"
+    },
+    {
+      "path": "tests/test_hermes_g2_attempt_ledger.py",
+      "byte_length": 2844,
+      "sha256": "e329a0b066103599569488dcf816daac709b3f4601837cb6af830e10d2c3b04d"
+    },
+    {
+      "path": "tests/test_hermes_g2_activation_executor.py",
+      "byte_length": 5523,
+      "sha256": "5cc16747dc0f4a65eb1562f5da31f3bf3e5ff0ea40eb28c275700c50989d31dc"
+    },
+    {
+      "path": "tests/test_hermes_g2_docker_commands.py",
+      "byte_length": 3998,
+      "sha256": "a8c8345a027ce6034c2c64f62499402422167bff5f3b55bfc717d28701e6852e"
+    },
+    {
+      "path": "tests/test_spec_032_hermes_g2_docs.py",
+      "byte_length": 10854,
+      "sha256": "4f92cf14aba5c903528e7c0194d501aa8609bea3f2a1f8ad504c6edc343daffe"
+    },
+    {
+      "path": "scripts/validate_hermes_g2_executor_offline.py",
+      "byte_length": 844,
+      "sha256": "3c21758b66fc783fe48b873c1dd50cf6ade41a17657e9c88724026d37a150863"
+    },
+    {
+      "path": "scripts/run_spec_032_g2_once.py",
+      "byte_length": 965,
+      "sha256": "94b3c49f8a6ce9b840587ee25fd5269569c4fdb2f1d201ebfa15635fdaec0828"
+    },
+    {
+      "path": "scripts/verify_spec_032_offline.py",
+      "byte_length": 15076,
+      "sha256": "cc90af488f971df5db68eba27876643ba8224a1f07124956d09be2b5047e2890"
+    },
+    {
+      "path": "scripts/spec032_offline_runtime_sentinel.py",
+      "byte_length": 3145,
+      "sha256": "c483d83ae811f550db1375793ab374901d4e29da589e32abbbf3a1777a01d1a7"
+    },
+    {
+      "path": "deploy/hermes/spec032/fixture-definition.json",
+      "byte_length": 280,
+      "sha256": "0de5087b872dd9d43599e088e2e70823c67fd6dc71d34c60315e0d545d3db9c8"
+    },
+    {
+      "path": "deploy/hermes/spec032/build-context-allowlist.json",
+      "byte_length": 290,
+      "sha256": "4ed9d97a1227a1fda15b8e7bb2df333059484f8d23bf32fbe077196d2eef37d6"
+    },
+    {
+      "path": "deploy/hermes/spec032/fixture-contract.md",
+      "byte_length": 437,
+      "sha256": "2f6ae152d0b3d239c48976642715d678c2982c127bd051c799655c6417432b3f"
+    },
+    {
+      "path": "deploy/hermes/spec032/credentialless_probe.py",
+      "byte_length": 500,
+      "sha256": "5d2a8a47d27f0eb50091e3a933137e8d959f44d55abb0c7be698d237e7024a45"
+    },
+    {
+      "path": "specs/032-hermes-g2-offline-attempt-executor/proposal.md",
+      "byte_length": 564,
+      "sha256": "b2a75022741e10c89cf76b2af7dc4c20afc0f3db0b0cbd6a53115819bc95823b"
+    },
+    {
+      "path": "specs/032-hermes-g2-offline-attempt-executor/spec.md",
+      "byte_length": 1097,
+      "sha256": "e7951b06aeb928d4710f286aad573af27ccc278f4638177ef6e09989fea215f4"
+    },
+    {
+      "path": "specs/032-hermes-g2-offline-attempt-executor/plan.md",
+      "byte_length": 802,
+      "sha256": "dacb12561afe655da4071fdeec36f26e9b5bbb095adf68af886b514d16d09a1f"
+    },
+    {
+      "path": "specs/032-hermes-g2-offline-attempt-executor/data-model.md",
+      "byte_length": 1292,
+      "sha256": "10313fb2396fa55830ae6715e1bdb2636b467b766be2086ffee03b8f59ddfcfb"
+    },
+    {
+      "path": "specs/032-hermes-g2-offline-attempt-executor/tasks.md",
+      "byte_length": 692,
+      "sha256": "c053000c64b9f09a6325aa9beef9bd627d93ba3d731ad7cc9df2629c614f804c"
+    },
+    {
+      "path": "specs/032-hermes-g2-offline-attempt-executor/contracts/executor-contract.md",
+      "byte_length": 1148,
+      "sha256": "e2b788a2d87c5e988c65308002418d581fc21009a71afc9026026f9145ec799c"
+    },
+    {
+      "path": "specs/032-hermes-g2-offline-attempt-executor/contracts/source-audit-manifest.json",
+      "byte_length": 394,
+      "sha256": "a3d632674a6cf7fe70877374f5178739e9978cf3cc0e2055805eb39d8c1d0912"
+    },
+    {
+      "path": "specs/032-hermes-g2-offline-attempt-executor/contracts/predecessor-digests.json",
+      "byte_length": 21822,
+      "sha256": "352b2e63991dfa54f57e8a427f9f8e9dab4ab7b90aab5cd0194df9b54da17f13"
+    },
+    {
+      "path": "specs/032-hermes-g2-offline-attempt-executor/checklists/requirements.md",
+      "byte_length": 425,
+      "sha256": "2af5b0da1cd61d4a61da704d9e2dfdc32e2c5f3a835f586cf1acdffb254254b9"
+    }
+  ]
+}

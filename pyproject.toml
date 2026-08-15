@@ -31,3 +31,6 @@ pythonpath = ["src"]
 # ACLs, and a long basetemp can push artifact paths past the Windows 260-char
 # MAX_PATH. Run pytest from the repo root. (.pytest-tmp/ is gitignored.)
 addopts = "--basetemp=.pytest-tmp/run"
+markers = [
+    "product_regression_only: synthetic named-public-seam regression with no live market/provider request",
+]

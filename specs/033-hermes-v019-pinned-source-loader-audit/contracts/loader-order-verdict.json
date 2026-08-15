@@ -1,0 +1,16 @@
+{
+  "bounded_loader_edges_verified": true,
+  "call_time_status": "BLOCKED_SOURCE_GRAPH",
+  "dynamic_execution_status": "unresolved",
+  "import_time_callers": ["model_tools.py"],
+  "import_time_status": "BLOCKED_SOURCE_GRAPH",
+  "call_time_callers": ["hermes_cli/main.py", "hermes_cli/oneshot.py"],
+  "live_actions_authorized": false,
+  "loader_path_verified": false,
+  "plugins_list_status": "manifest_only_not_loader_proof",
+  "required_hook_registration_verified": false,
+  "runtime_status": "not_run",
+  "source_bundle_valid": true,
+  "spec_id": "033-hermes-v019-pinned-source-loader-audit",
+  "terminal_status": "BLOCKED_SOURCE_GRAPH"
+}

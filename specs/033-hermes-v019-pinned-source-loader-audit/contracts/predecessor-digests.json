@@ -1,0 +1,35 @@
+{
+  "schema_version": "spec033-predecessor-boundary-v3",
+  "chain_scope": [
+    "029",
+    "030",
+    "031",
+    "032"
+  ],
+  "authority_roots": {
+    "spec032_predecessor_verifier": {
+      "path": "scripts/verify_spec_032_offline.py",
+      "sha256": "cc90af488f971df5db68eba27876643ba8224a1f07124956d09be2b5047e2890",
+      "inventory_symbol": "AUTHORITATIVE_PREDECESSOR_PATHS"
+    },
+    "spec032_predecessor_manifest": {
+      "path": "specs/032-hermes-g2-offline-attempt-executor/contracts/predecessor-digests.json",
+      "sha256": "352b2e63991dfa54f57e8a427f9f8e9dab4ab7b90aab5cd0194df9b54da17f13",
+      "schema_version": "spec032-predecessor-boundary-v2"
+    },
+    "spec032_reviewed_manifest": {
+      "path": "specs/032-hermes-g2-offline-attempt-executor/contracts/reviewed-artifact-manifest.json",
+      "sha256": "4a7f8bd25066443dbd05d812775b570ca2e8bab17a8ee7ec13885d690da3e60e",
+      "schema_version": "spec032-reviewed-artifact-manifest-v2"
+    }
+  },
+  "successor_mutable_shared_paths": [
+    "README.md",
+    "docs/roadmap.md",
+    "docs/verification-matrix.md",
+    "specs/README.md"
+  ],
+  "coverage_policy": "Spec032's pinned verifier inventory must equal its predecessor manifest scope and digest keys. Its reviewed manifest must independently validate every explicitly listed Spec032-owned artifact; the four shared top-level pointers are required inventory members but are sealed at their current Spec033 bytes by Spec033's reviewed manifest. No predecessor verifier is executed.",
+  "runtime_status": "not_run",
+  "live_actions_authorized": false
+}

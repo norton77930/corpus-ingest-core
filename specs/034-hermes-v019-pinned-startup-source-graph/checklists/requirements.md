@@ -1,0 +1,34 @@
+# Spec034 H1 Requirements Checklist
+
+- [x] Same official Hermes v0.19 commit/tree as Spec033.
+- [x] H1 proves three claim-scoped closures, explicitly not a whole-program import closure.
+- [x] Startup ordering closure contains only its required CLI/run-agent, dotenv, plugin/config, and shell-hook source predicates.
+- [x] Credential/provider closure contains only runtime-provider/config/auth, credential-pool/secret-scope, and agent-init boundary predicates.
+- [x] `security-guidance` is the sole bundled plugin candidate and records literal hooks, fixed env predicate names, conditional registration candidate, and no observed activation.
+- [x] Required literal edges are fail-closed; ordinary internal imports and non-required dynamic behavior are transparent out-of-claim leaves.
+- [x] Exact ordered path/blob/length/role/membership/introducer/depth inventory and safe digest receipt generated within 96 files, 8 MiB, and 16 levels.
+- [x] H1-R targeted RED/GREEN and one final self-check completed.
+- [x] H2 freeze obtained: exact H1 digest and 20-file allowlist; independently literal path/blob identity prevents trusting H1 JSON alone.
+- [x] H3 validates Git blob/SHA-256/length, exact filesystem/no symlink, revalidation before graph/receipt, atomic publication and cleanup recovery.
+- [x] H3 models three claim-scoped graphs and fixed conditional security-guidance registration, not whole-program closure or activation.
+- [x] Task #80 current terminal: **startup/plugin closed; credential_provider BLOCKED; overall BLOCKED**; H2 remains exactly 20 upstream paths.
+- [x] Task #80 typed execution authority exact-matches reviewed mutable records, detached manifest/root authority, 20 H2 source-bundle/literal records, and three predecessor-boundary-pinned Spec033 artifacts; manifest/root are excluded from reviewed records only to prevent self-cycle.
+- [x] Task #80 snapshot exactness rejects missing/extra/link/category mismatch; child has only sentinel-safe C0–C7 file/AST/public-seam acceptance target while runner/journal/trust tests remain non-final verification.
+- [x] Task #80 post-child seal revalidates current external root SHA, manifest/reviewed bytes, capability, H2, predecessor, and snapshots; permanent drift fails while replace/restore is distinguishable.
+- [x] Task #80 retains finite local Python capability manifest (approved purelib distribution identities/RECORD/files), snapshots only its verified bytes, rejects capability shadows/extras/links, and revalidates snapshots throughout isolated child use.
+- [x] Task #80 plugin proof requires same-manifest loader result, `exec_module(module)`, same-module return/register lookup, and `PluginContext(manifest, self)` invocation.
+- [x] H3 retains config/credential/provider source-only distinctions and dynamic/external runtime edges fail-closed.
+- [x] H3 retains product regression through named verified-report public seam only.
+- [ ] Reviews and unique Main final verifier pending.
+- [x] Task #75 has exact final-seal authority, lock recovery, claim-specific analysis, canonical evidence, product-test isolation, predecessor closure, and bounded sentinel repairs.
+- [x] Credential/provider construction data-flow is honestly `BLOCKED_SOURCE_GRAPH` within the fixed 20-file authority; no path was added.
+- [x] Publication normal path/recovery uses only exact protocol-owned journal identity; public lock handling remains fail-closed, owner-pruned AST and same-manifest plugin mutations fail closed, and the `-I -S` child installs verified guards before pytest import.
+- [x] Task #81 seals a single final-safe shared C6 public workflow helper, reused by non-final regression; public assemble/publish evidence covers provenance/classification/digest/publication/reuse/drift/safety/status claims under pre-fixture fail-if-called guards.
+- [x] Task #81 uses typed atomic detached authority bytes for execution snapshot records; replacement after authority cannot alter approved snapshot bytes, while post-child permanent current drift remains rejected.
+- [x] Task #81 requires a minimal parent child environment plus runner-side removal of ambient `PYTEST_*`, explicit `--noconftest -o addopts=`, and exact eight-node C0–C7 passed-call execution proof rather than a pytest return code alone.
+- [x] Task #82 binds child cwd to the verified project snapshot before any sentinel/Pytest/product import and proves C6's three relative configs retain snapshot-approved bytes after original-workspace replacement; non-snapshot/link/reparse cwd payloads fail closed.
+- [x] Task #82 receipt issuance has no public `_require` or arbitrary-facts issuer seam; current canonical graph/plugin projections preserve exact-class/weakref/token/immutable provenance pairing and receipt recomputation.
+- [x] Task #82 plugin AST proof requires same owner-local package spec, module, loader receiver/argument, returned module, register lookup, and context; alias/substitution mutations fail closed.
+- [x] Task #82 fsyncs the bundle parent after rename before `bundle_renamed` journal persistence and safely clears only exact nonce-bound journal-durable/both-missing recovery; manifest/unknown states fail closed.
+- [ ] Fresh H4 reviews and the Main-only final verifier remain pending.
+

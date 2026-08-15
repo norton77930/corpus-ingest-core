@@ -1,0 +1,33 @@
+# The Spec 026-034 audit chain pins file bytes with SHA-256: reviewed-artifact
+# manifests, source-bundle manifests, predecessor digests, and the pinned
+# upstream bundle are all hashed verbatim. This repository is authored on
+# Windows (CRLF) while `core.autocrlf=input` stores LF, so a clone that checks
+# out LF -- exactly the WSL/Linux host the Hermes runbook requires -- would
+# change those bytes and invalidate every digest. The failure surfaces as
+# BLOCKED_SOURCE_GRAPH and dozens of audit-test failures that look like a
+# security regression rather than an end-of-line conversion.
+#
+# Keep every digest-pinned surface byte-identical on all platforms.
+specs/026-hermes-mcp-integration/** -text
+specs/027-hermes-skill-routing-contracts/** -text
+specs/028-hermes-runtime-skill-routing-observation/** -text
+specs/029-hermes-blocked-tool-attempt-runtime-smoke/** -text
+specs/030-hermes-g1r-offline-remediation/** -text
+specs/031-hermes-g2-credentialless-activation-gate/** -text
+specs/032-hermes-g2-offline-attempt-executor/** -text
+specs/033-hermes-v019-pinned-source-loader-audit/** -text
+specs/034-hermes-v019-pinned-startup-source-graph/** -text
+deploy/** -text
+src/podcast_ingest_core/hermes_*.py -text
+tests/test_hermes_*.py -text
+tests/test_mcp_http_transport.py -text
+tests/test_spec_02[6-9]*.py -text
+tests/test_spec_03*.py -text
+tests/spec034_final_c6_support.py -text
+scripts/*hermes*.py -text
+scripts/*spec_03*.py -text
+scripts/spec03*.py -text
+scripts/export_spec029_tool_descriptor_snapshot.py -text
+scripts/run_mcp_deny_interposer.py -text
+scripts/run_mcp_http_server.py -text
+scripts/build_hermes_sidecar.sh -text

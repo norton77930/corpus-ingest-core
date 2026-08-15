@@ -1,0 +1,8 @@
+{
+  "pinned_commit": "b7a05b6b6f509d14f708a2fe7b7c1d3559396ef6",
+  "source_bytes_available_for_official_loader_proof": false,
+  "official_loader_call_path_verified": false,
+  "provider_free_verified": false,
+  "terminal_status": "BLOCKED_CREDENTIAL_SEAM",
+  "evidence_rule": "No JSON field is evidence of a loader path; only audited pinned source bytes and call graph could make these true."
+}
