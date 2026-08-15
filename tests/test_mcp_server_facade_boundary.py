@@ -3,7 +3,7 @@
 specs/025-core-consolidation FR-005 / FR-006 / FR-010:
 
 1. Exactly one ``FastMCP(`` construction in ``src`` — in ``mcp_runtime.py``.
-2. Every ``@mcp.tool()`` decoration lives in the four ``mcp_tools_*`` group
+2. Every ``@mcp.tool()`` decoration lives in the ``mcp_tools_*`` group
    modules; the facade itself registers nothing.
 3. Group modules and ``mcp_runtime`` never import ``mcp_server`` (cycle ban).
 4. The facade re-exports every dependency alias and tool name that tests and
@@ -23,6 +23,7 @@ SRC_DIR = Path(__file__).resolve().parents[1] / "src" / "podcast_ingest_core"
 SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "scripts"
 
 GROUP_MODULES = (
+    "mcp_tools_stock_lens.py",
     "mcp_tools_read.py",
     "mcp_tools_side_effect.py",
     "mcp_tools_corpus_workflows.py",
@@ -52,6 +53,7 @@ FACADE_EXPORTS = (
     "summarizer",
     "transcriber",
     "validator",
+    "stock_lens",
     "verified_research_report_workflow_runner",
     "mcp_episode_verified_research_report",
     "mcp_verified_research_report_catalog",
@@ -123,7 +125,7 @@ def test_group_modules_do_not_value_bind_private_runtime_helpers():
 
 
 def test_group_modules_are_imported_only_via_the_facade():
-    """Registration order (Tools 1-21) is defined by the facade's group-import
+    """Registration order (Tools 1-22) is defined by the facade's group-import
     order; a direct group import in a fresh process (or earlier in the pytest
     session) would register its tools first. Ban direct imports everywhere
     except the facade itself."""

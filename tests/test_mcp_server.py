@@ -1807,3 +1807,108 @@ def test_gap_backlog_mcp_rejects_invalid_input_before_core(monkeypatch, kwargs):
         "error_type": "VerifiedReportGapBacklogInputError",
         "message": "verified report gap backlog query failed",
     }
+
+
+def test_generate_stock_lens_report_dry_run_does_not_call_core(monkeypatch):
+    from podcast_ingest_core import mcp_server
+
+    called = False
+
+    def fake_generate(*args, **kwargs):
+        nonlocal called
+        called = True
+        return None
+
+    monkeypatch.setattr(mcp_server.stock_lens, "generate_stock_lens_report", fake_generate)
+
+    response = mcp_server.generate_stock_lens_report(
+        podcast_id="gooaye",
+        stock_query="台積電",
+        confirm=False,
+    )
+
+    assert response["ok"] is True
+    assert response["dry_run"] is True
+    assert response["requires_confirmation"] is True
+    assert response["tool"] == "generate_stock_lens_report"
+    assert called is False
+    assert any("data/stock-lens/gooaye" in write for write in response["writes"])
+    assert any("no live market API" in risk for risk in response["risks"])
+    assert any("no buy/sell/hold" in risk for risk in response["risks"])
+
+
+def test_generate_stock_lens_report_confirm_clamps_and_forwards_validated_inputs(monkeypatch):
+    from types import SimpleNamespace
+
+    from podcast_ingest_core import mcp_server
+
+    captured = {}
+
+    def fake_generate(podcast_id, stock_query, **kwargs):
+        captured["podcast_id"] = podcast_id
+        captured["stock_query"] = stock_query
+        captured.update(kwargs)
+        return SimpleNamespace(
+            podcast_id=podcast_id,
+            stock_query=stock_query,
+            report_json_path="data/stock-lens/gooaye/x.json",
+            report_markdown_path="data/stock-lens/gooaye/x.md",
+            report_status="final",
+            match_count=1,
+            warning_count=0,
+            generated=True,
+            already_exists=False,
+        )
+
+    monkeypatch.setattr(mcp_server.stock_lens, "generate_stock_lens_report", fake_generate)
+
+    response = mcp_server.generate_stock_lens_report(
+        podcast_id="gooaye",
+        stock_query="台積電",
+        confirm=True,
+        max_evidence_items=9999,
+    )
+
+    assert response["ok"] is True
+    assert response.get("dry_run") is not True
+    # The clamp must reach Core, not just the plan.
+    assert captured["max_evidence_items"] == mcp_server.MAX_EVIDENCE_ITEMS
+    assert captured["podcast_id"] == "gooaye"
+    assert captured["stock_query"] == "台積電"
+    assert captured["force"] is False
+    assert captured["allow_partial"] is False
+    assert any("rebuild_cache" in warning for warning in response["warnings"])
+    assert any("no buy/sell/hold" in warning for warning in response["warnings"])
+
+
+def test_generate_stock_lens_report_clamps_below_minimum(monkeypatch):
+    from types import SimpleNamespace
+
+    from podcast_ingest_core import mcp_server
+
+    captured = {}
+
+    def fake_generate(podcast_id, stock_query, **kwargs):
+        captured.update(kwargs)
+        return SimpleNamespace(
+            podcast_id=podcast_id,
+            stock_query=stock_query,
+            report_json_path="",
+            report_markdown_path="",
+            report_status="final",
+            match_count=0,
+            warning_count=0,
+            generated=True,
+            already_exists=False,
+        )
+
+    monkeypatch.setattr(mcp_server.stock_lens, "generate_stock_lens_report", fake_generate)
+
+    mcp_server.generate_stock_lens_report(
+        podcast_id="gooaye",
+        stock_query="Apple",
+        confirm=True,
+        max_evidence_items=0,
+    )
+
+    assert captured["max_evidence_items"] == mcp_server.MIN_EVIDENCE_ITEMS

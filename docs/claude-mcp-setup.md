@@ -45,7 +45,7 @@ Read / query tools 可直接查詢既有 metadata 與 SQLite cache：
 - `suggest_historical_verified_report_next_step` (Tool 20)
 - `list_verified_report_gap_backlog` (Tool 21)
 
-The local reviewed registry has exactly 21 tools. Tool 21 is append-only: Tools 1–20 keep their contracts/order. It is an offline read-only inventory gap backlog (`podcast_id`, optional `limit`); no `confirm` or acknowledgement. Tool 20 remains historical next-step suggestion. Tool 19 remains coverage join. Tool 18 remains exact-locator source revalidation. Tool 17 retains its offline read-only manifest-first list/search/inspect contract, including `source_currentness_status=not_evaluated` for inspect.
+The local reviewed registry has exactly 22 tools. Tool 22, `generate_stock_lens_report`, is append-only after unchanged Tools 1–21 and is a dry-run-first side-effect stock lens (no LLM, no `api_cost_ack`, no network, no live market API, no investment advice). Tool 21 is append-only: Tools 1–20 keep their contracts/order. It is an offline read-only inventory gap backlog (`podcast_id`, optional `limit`); no `confirm` or acknowledgement. Tool 20 remains historical next-step suggestion. Tool 19 remains coverage join. Tool 18 remains exact-locator source revalidation. Tool 17 retains its offline read-only manifest-first list/search/inspect contract, including `source_currentness_status=not_evaluated` for inspect.
 
 Local side-effect tools 預設 `confirm=false`，只回傳 dry-run action plan：
 

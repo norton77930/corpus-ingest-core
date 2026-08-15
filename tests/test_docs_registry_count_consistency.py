@@ -24,6 +24,19 @@ CLAIM_PATTERNS = (
     re.compile(r"恰(?:好)?\s*(?:暴露\s*)?(\d+)\s*個"),
 )
 
+# Feature names that merely contain a marker word. Tool 20 is literally called
+# "historical next-step suggestion", so a current-tense count claim sharing that
+# line was silently treated as historical and skipped — the exact drift this
+# check exists to catch. Strip these before marker matching.
+MARKER_FALSE_POSITIVES = (
+    "suggest_historical_verified_report_next_step",
+    "historical-episode-verified-report-path",
+    "historical next-step",
+    "historical verified-report path",
+    "historical verified report path",
+    "historical episode",
+)
+
 # A wrong count is acceptable only on a line that explicitly reads as history.
 HISTORICAL_MARKERS = (
     "was ",
@@ -77,8 +90,11 @@ def test_every_tool_count_claim_is_current_or_marked_historical():
             ]
             if not counts:
                 continue
+            marker_text = lowered
+            for false_positive in MARKER_FALSE_POSITIVES:
+                marker_text = marker_text.replace(false_positive, " ")
             marked_historical = any(
-                marker in lowered for marker in HISTORICAL_MARKERS
+                marker in marker_text for marker in HISTORICAL_MARKERS
             )
             for count in counts:
                 if count == expected or marked_historical:

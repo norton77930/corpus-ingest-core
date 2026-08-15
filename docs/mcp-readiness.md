@@ -94,7 +94,7 @@ index, plan, or SQLite cache automatically.
 
 ## 020 Read-Only Verified Report Catalog Tool
 
-The current registry has exactly 21 reviewed tools. Tool 21, `list_verified_report_gap_backlog`, is appended after unchanged Tools 1–20 and is a read-query inventory gap backlog (no confirm/ack). Tool 20 remains historical next-step suggestion. Tool 19 remains coverage join. Tool 18 remains exact-locator offline revalidation. Tool 17 retains its offline manifest-first `list`, safe-metadata `search`, and exact-bundle `inspect` contract; inspect always reports `source_currentness_status=not_evaluated`.
+The current registry has exactly 22 reviewed tools. Tool 22, `generate_stock_lens_report`, is append-only after unchanged Tools 1–21 and is a dry-run-first side-effect stock lens (no LLM, no `api_cost_ack`, no network, no live market API, no investment advice). Tool 21, `list_verified_report_gap_backlog`, remains a read-query inventory gap backlog (no confirm/ack). Tool 20 remains historical next-step suggestion. Tool 19 remains coverage join. Tool 18 remains exact-locator offline revalidation. Tool 17 retains its offline manifest-first `list`, safe-metadata `search`, and exact-bundle `inspect` contract; inspect always reports `source_currentness_status=not_evaluated`.
 
 ## 對 MCP 友善的設計
 

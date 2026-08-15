@@ -1200,6 +1200,51 @@
         "title": "list_verified_report_gap_backlogDictOutput",
         "type": "object"
       }
+    },
+    {
+      "description": "Side-effect tool\uff1a\u9700\u8981 confirm=true \u624d\u6703\u5beb\u5165 deterministic stock lens report\u3002",
+      "inputSchema": {
+        "properties": {
+          "allow_partial": {
+            "default": false,
+            "title": "Allow Partial",
+            "type": "boolean"
+          },
+          "confirm": {
+            "default": false,
+            "title": "Confirm",
+            "type": "boolean"
+          },
+          "force": {
+            "default": false,
+            "title": "Force",
+            "type": "boolean"
+          },
+          "max_evidence_items": {
+            "default": 10,
+            "title": "Max Evidence Items",
+            "type": "integer"
+          },
+          "podcast_id": {
+            "default": "gooaye",
+            "title": "Podcast Id",
+            "type": "string"
+          },
+          "stock_query": {
+            "default": "",
+            "title": "Stock Query",
+            "type": "string"
+          }
+        },
+        "title": "generate_stock_lens_reportArguments",
+        "type": "object"
+      },
+      "name": "generate_stock_lens_report",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "generate_stock_lens_reportDictOutput",
+        "type": "object"
+      }
     }
   ]
 }

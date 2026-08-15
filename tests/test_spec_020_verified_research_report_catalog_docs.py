@@ -113,8 +113,9 @@ def test_spec_020_implemented_docs_and_handoff_keep_current_contracts() -> None:
     # 025 doc-count consolidation: the stale "恰好 18 個" claims were synced to
     # the live registry; the registry-derived checker
     # (tests/test_docs_registry_count_consistency.py) now owns count drift.
-    assert "共用單一 FastMCP 的 stdio 與 loopback Streamable HTTP sidecar（目前恰好 21 個 reviewed tools）" in handoff
-    assert "The local stdio registry has exact 21 reviewed tools." in handoff
+    assert "共用單一 FastMCP 的 stdio 與 loopback Streamable HTTP sidecar（目前恰好 22 個 reviewed tools）" in handoff
+    assert "The local stdio registry has exact 22 reviewed tools." in handoff
+    assert "`generate_stock_lens_report`" in handoff
     assert "stdio-only MCP server" not in handoff
     assert "恰好 18 個 reviewed tools" not in handoff
     assert "MCP tool 16 + portable Skill" not in handoff

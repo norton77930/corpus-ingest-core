@@ -233,6 +233,7 @@ _MCP_TOOL_SOURCE_FILES = (
     "mcp_tools_side_effect.py",
     "mcp_tools_corpus_workflows.py",
     "mcp_tools_verified_report_queries.py",
+    "mcp_tools_stock_lens.py",
 )
 def _is_direct_mcp_tool_reference(expression: ast.AST) -> bool:
     return (
@@ -379,7 +380,7 @@ def _registry_tool_names_from_source() -> frozenset[str] | None:
         return None
     source_tool_names = frozenset(names)
     if (
-        len(source_tool_names) != 21
+        len(source_tool_names) != 22
         or not frozenset(tool.value for tool in Tool) <= source_tool_names
     ):
         return None
@@ -387,7 +388,7 @@ def _registry_tool_names_from_source() -> frozenset[str] | None:
 
 
 def canonical_registry_tool_names_from_source() -> frozenset[str] | None:
-    """Return the offline AST-derived exact-21 registry without MCP import."""
+    """Return the offline AST-derived exact-22 registry without MCP import."""
 
     return _registry_tool_names_from_source()
 

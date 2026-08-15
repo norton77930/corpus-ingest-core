@@ -1,12 +1,15 @@
 """Facade for the podcast-ingest-core MCP server.
 
 specs/025-core-consolidation FR-005: the single ``FastMCP`` instance lives in
-``mcp_runtime``; tool functions live in four ``mcp_tools_*`` group modules
+``mcp_runtime``; tool functions live in the ``mcp_tools_*`` group modules
 that register on import, so the group import order below IS the registration
-order (Tools 1-21). Tests and clients keep reaching every tool function,
+order (Tools 1-22). Tests and clients keep reaching every tool function,
 envelope, and dependency-module alias through this module — the re-exports
-below are contract surface. Tool 22 playbook: implement in the matching group
-module, extend the re-exports here, then deliberately update
+below are contract surface. Next-tool playbook (as used for Tool 22, spec 035):
+add a group module imported LAST so existing slots keep their order, extend the
+re-exports here, move the size guard in
+``hermes_skill_protocol._registry_tool_names_from_source``, regenerate the spec029
+descriptor snapshot with its official script, then deliberately update
 ``tests/test_mcp_tool_registry_contract.py``.
 """
 
@@ -26,11 +29,13 @@ from .mcp_runtime import (
 )
 
 # Registration order: read (1-6) -> side-effect (7-12) -> corpus workflows
-# (13-16) -> verified-report queries (17-21). Do not reorder these imports.
+# (13-16) -> verified-report queries (17-21) -> stock lens (22). Do not reorder
+# these imports; a new group is appended last so Tools 1-21 keep their slots.
 from . import mcp_tools_read
 from . import mcp_tools_side_effect
 from . import mcp_tools_corpus_workflows
 from . import mcp_tools_verified_report_queries
+from . import mcp_tools_stock_lens
 
 from .mcp_tools_read import (
     get_episode,
@@ -77,6 +82,13 @@ from .mcp_tools_verified_report_queries import (
     revalidate_verified_research_report_sources,
     suggest_historical_verified_report_next_step,
 )
+from .mcp_tools_stock_lens import (
+    MAX_EVIDENCE_ITEMS,
+    MIN_EVIDENCE_ITEMS,
+    NOT_INVESTMENT_ADVICE,
+    STOCK_LENS_CACHE_STALE_WARNING,
+    generate_stock_lens_report,
+)
 
 # Dependency-module aliases: tests monkeypatch through these shared module
 # objects (e.g. monkeypatch.setattr(mcp_server.feed_reader, ...)), and the
@@ -100,3 +112,4 @@ from . import semantic_summarizer
 from . import summarizer
 from . import transcriber
 from . import validator
+from . import stock_lens

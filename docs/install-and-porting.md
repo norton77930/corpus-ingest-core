@@ -1,6 +1,6 @@
 # 安裝與移植指南
 
-把 podcast-ingest-core 的 21 個 MCP tools 與 portable Skills 裝到一台新電腦上。
+把 podcast-ingest-core 的 22 個 MCP tools 與 portable Skills 裝到一台新電腦上。
 
 本文件分四段：**A 裝核心**（任何機器都要做）、**B 搬資料**、**C 接上 Hermes**（只有要用 Hermes 才需要）、**D 驗收**。
 最後一段是**已知限制**，動手前請先看過。
@@ -181,7 +181,7 @@ docker exec <hermes-container> hermes skills list --source local --enabled-only
 - [ ] `validate_mcp_setup.py` 通過
 - [ ] `rebuild_cache.py` 後搜尋得到既有逐字稿
 - [ ] sidecar health 為 `healthy`
-- [ ] `hermes mcp test` 看得到 **21 個** tools
+- [ ] `hermes mcp test` 看得到 **22 個** tools
 - [ ] `hermes skills list` 看得到同步過去的 Skills
 - [ ] integration manifest 路徑已保存
 
@@ -206,21 +206,37 @@ docker exec <hermes-container> hermes skills list --source local --enabled-only
 
 修改 `MANAGED_SKILLS` 會觸發 027 的 drift 檢查；要增減**同步**內容請改 `SYNCED_SKILLS`。
 
-**2a. `SYNCED_SKILLS` 的加入使 Spec 032 的 predecessor digest 基準失效（待重建）。**
+**2a. 兩項合法變更使 Hermes 稽核鏈的 digest 基準失效（待負責人重建）。**
 
-`specs/032-hermes-g2-offline-attempt-executor/contracts/predecessor-digests.json` 以 SHA-256 釘住 110 個檔案。加入 `SYNCED_SKILLS` 後，以下 5 個條目與實際位元組不符：
+Spec 026–034 以 SHA-256 釘住檔案位元組。以下兩項變更是刻意且經過驗證的，但它們使既有基準過期：
+
+- **`SYNCED_SKILLS`**（讓第五個 Skill 隨 `apply` 同步）
+- **Tool 22 `generate_stock_lens_report`**（含用官方腳本 `scripts/export_spec029_tool_descriptor_snapshot.py` 重簽 descriptor 快照）
+
+需要重建基準的檔案與**目前**的正確 digest：
+
+| 檔案 | 目前 SHA-256 |
+|---|---|
+| `deploy/hermes/README.md` | `e13769dd02fed7d38f91e49f24d716b27e6ab42cbec6bcc0218f48af72dc29e8` |
+| `deploy/hermes/spec029/contracts/mcp-tool-descriptor-snapshot.json` | `4c5a3b749c55f6a7949a9d0f6648d70dcc05fb75918b4a26e38fef578072c28c` |
+| `deploy/hermes/spec029/spec029_mcp_deny_adapter.py` | `994b13909b4035cd52a478758ca4ecff16960360489810ce747d288c5412c05a` |
+| `src/podcast_ingest_core/hermes_integration.py` | `311706a0d1d5b8d1a1cf719013d4720b62b61270941c5e69e10301b34cb29e43` |
+| `src/podcast_ingest_core/hermes_skill_protocol.py` | `a1b75d5184e3d20ac0d445f0df6d7d0b46efea2841318d07f3245ae47ad7c5f0` |
+| `src/podcast_ingest_core/mcp_server.py` | `ce672b51a355c1e65f63fcff55398bc058eff0b97f7673a05b949c401c4209b1` |
+| `tests/test_hermes_integration.py` | `e51321608916b5c2227b96e47237cf538124caf347fd51c038f70ef0cb771fac` |
+| `tests/test_hermes_skill_protocol.py` | `43577f95d9b58ff3f60ae2abd055eda5cd690c388a33aa6e68d3a1c61f2eaced` |
+| `tests/test_spec_029_offline.py` | `f12cddb4409e1856700e3bf0e27f5698195b4045b4a829458549b3c4c3035b1b` |
+
+記錄基準的兩處：`specs/032-.../contracts/predecessor-digests.json`（110 個條目，其餘 101 個仍吻合）與 `tests/test_spec_030_g1r_offline_remediation.py::test_task42_deep_ledger_adapter_hash_and_verifier_guards`（測試內硬編 4 個）。
+
+對應失敗的測試：
 
 ```
-deploy/hermes/README.md
-src/podcast_ingest_core/hermes_integration.py
-src/podcast_ingest_core/hermes_skill_protocol.py
-tests/test_hermes_integration.py
-tests/test_hermes_skill_protocol.py
+test_spec_033_hermes_source_audit_docs::test_predecessor_boundary_covers_spec029_through_spec032_...
+test_spec_030_g1r_offline_remediation::test_task42_deep_ledger_adapter_hash_and_verifier_guards
 ```
 
-其餘 105 個仍吻合。後果是 `test_spec_033_hermes_source_audit_docs.py::test_predecessor_boundary_covers_spec029_through_spec032_without_executing_predecessors` 失敗。
-
-**Skill 同步功能不受影響**（`test_hermes_integration.py` 全綠，`apply` 確實同步五個 Skill）。這是稽核證據邊界需要由 Spec 032/033 的負責人重新建立基準，不是功能缺陷。重建前請勿把該測試的紅燈解讀為同步壞掉。
+**功能本身不受影響**：`test_hermes_integration.py` 全綠（`apply` 確實同步五個 Skill），Tool 22 的 registry／契約／文件一致性測試全綠。這是稽核證據邊界待重建，不是功能缺陷——重建前請勿把這兩個紅燈解讀為同步或 registry 壞掉。
 
 **3. 驗證器不能在原生 Windows 跑。**
 `validate_hermes_integration.py` 需要 descriptor-only no-follow 的檔案系統原語，原生 Windows 會在碰觸受保護路徑**之前**就 fail closed。請在 WSL/Docker 內執行。

@@ -744,6 +744,7 @@ MCP server 使用官方 Python MCP SDK 的單一 FastMCP instance。本機 Codex
 - `query_verified_research_report_coverage`（Tool 19；episode-centric offline coverage join）
 - `suggest_historical_verified_report_next_step`（Tool 20；historical next-step suggestion）
 - `list_verified_report_gap_backlog`（Tool 21；inventory gap backlog）
+- `generate_stock_lens_report`（Tool 22；deterministic stock lens report，side-effect、dry-run-first）
 
 Side-effect tools 是：
 
@@ -758,7 +759,7 @@ Side-effect tools 是：
 - `run_latest_episode_verified_research_report_workflow`
 - `run_episode_verified_research_report_workflow`
 
-本機 reviewed stdio registry 共 21 個 tools。Tool 21 `list_verified_report_gap_backlog` append-only；Tools 1–20 contracts/order 不變。它是 inventory gap backlog read-query。Tool 20 仍為 historical next-step suggestion。Tool 19 仍為 episode-centric coverage。Tool 18 仍為 exact-locator offline source revalidation。Tool 17 保留 catalog list/search/inspect 契約。上述 side-effect tools 預設 `confirm=false`，只回傳 dry-run action plan，不會下載、轉錄或寫檔；確認 action plan 後才使用 `confirm=true`。`run_corpus_episode_completion_workflow` 維持 preview → human approval → one explicit action，`run_corpus_latest_episode_deterministic_workflow` 只處理 latest episode 的本機 deterministic stages 並在 semantic summary 前停止。`run_latest_episode_verified_research_report_workflow` 必須先 preview，再由使用者給出相同 canonical `expected_episode_ref` 與 exact `api_cost_ack` 後只 confirmed 呼叫一次。`run_episode_verified_research_report_workflow` 以明確 `episode_ref`（可為歷史集）做 readiness preview，確認後僅 assemble/publish 同等 digest bundle，不需 `api_cost_ack`、不呼叫 LLM。所有 side-effect tools 完成後都不會自動 rebuild SQLite cache，且不提供投資建議。例如：
+本機 reviewed stdio registry 共 22 個 tools。Tool 22 `generate_stock_lens_report` append-only；Tools 1–21 contracts/order 不變。它是 side-effect、dry-run-first 的 deterministic stock lens report，只讀本機 mapping/boundary artifacts，無 live market API、無網路、無 LLM，且不提供投資建議。Tool 21 `list_verified_report_gap_backlog` append-only；Tools 1–20 contracts/order 不變。它是 inventory gap backlog read-query。Tool 20 仍為 historical next-step suggestion。Tool 19 仍為 episode-centric coverage。Tool 18 仍為 exact-locator offline source revalidation。Tool 17 保留 catalog list/search/inspect 契約。上述 side-effect tools 預設 `confirm=false`，只回傳 dry-run action plan，不會下載、轉錄或寫檔；確認 action plan 後才使用 `confirm=true`。`run_corpus_episode_completion_workflow` 維持 preview → human approval → one explicit action，`run_corpus_latest_episode_deterministic_workflow` 只處理 latest episode 的本機 deterministic stages 並在 semantic summary 前停止。`run_latest_episode_verified_research_report_workflow` 必須先 preview，再由使用者給出相同 canonical `expected_episode_ref` 與 exact `api_cost_ack` 後只 confirmed 呼叫一次。`run_episode_verified_research_report_workflow` 以明確 `episode_ref`（可為歷史集）做 readiness preview，確認後僅 assemble/publish 同等 digest bundle，不需 `api_cost_ack`、不呼叫 LLM。所有 side-effect tools 完成後都不會自動 rebuild SQLite cache，且不提供投資建議。例如：
 
 ```text
 Call transcribe_episode with confirm=false first to review the action plan.

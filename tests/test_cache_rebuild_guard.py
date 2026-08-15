@@ -145,6 +145,7 @@ def test_rebuild_cache_references_stay_in_reviewed_modules():
         "mcp_server.py",
         "mcp_tools_read.py",
         "mcp_tools_side_effect.py",
+        "mcp_tools_stock_lens.py",
         "research_workflow.py",
     }
     src_dir = ROOT / "src" / "podcast_ingest_core"

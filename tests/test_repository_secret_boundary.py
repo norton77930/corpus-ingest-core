@@ -50,6 +50,25 @@ PRIVATE_ENDPOINT_PATTERN = re.compile(
     r"https?://(?:10\.|192\.168\.|172\.(?:1[6-9]|2[0-9]|3[01])\.)"
 )
 
+# Specs 033/034 pin an exact third-party bundle (NousResearch/hermes-agent at a
+# fixed commit) so an offline audit can hash it. Those files are not ours to
+# edit — their bytes are recorded in the spec contracts and any change breaks
+# the audit — and the value-shaped hits inside them are the upstream CLI's own
+# documentation strings: "sk-..." placeholder examples and setup prompts that
+# illustrate a private LAN address. They are not credentials and not our
+# endpoints. The bundle stays inside the scan surface; only the two value-shape
+# guards below tolerate it, only under these exact prefixes, and
+# ``test_pinned_upstream_exemption_stays_third_party_and_digest_pinned`` keeps
+# the exemption from widening into a hole.
+PINNED_UPSTREAM_PREFIXES = (
+    "specs/033-hermes-v019-pinned-source-loader-audit/upstream/",
+    "specs/034-hermes-v019-pinned-startup-source-graph/upstream/",
+)
+
+
+def _is_pinned_upstream(path: Path) -> bool:
+    return path.relative_to(ROOT).as_posix().startswith(PINNED_UPSTREAM_PREFIXES)
+
 
 def _scannable_files() -> list[Path]:
     files = []
@@ -147,6 +166,8 @@ def test_scan_prunes_excluded_directories_before_descending(monkeypatch, tmp_pat
 def test_no_secret_like_api_key_in_committable_files():
     violations = []
     for path in _scannable_files():
+        if _is_pinned_upstream(path):
+            continue
         text = _read_text(path)
         if text is None:
             continue
@@ -167,6 +188,8 @@ def test_no_secret_like_api_key_in_committable_files():
 def test_no_private_internal_endpoint_in_committable_files():
     violations = []
     for path in _scannable_files():
+        if _is_pinned_upstream(path):
+            continue
         text = _read_text(path)
         if text is None:
             continue
@@ -178,4 +201,57 @@ def test_no_private_internal_endpoint_in_committable_files():
     assert not violations, (
         "private/internal network endpoints found in committable files "
         f"(use placeholders such as https://api.example.com/v1): {violations}"
+    )
+
+
+def test_pinned_upstream_exemption_stays_third_party_and_digest_pinned():
+    """The exemption may only cover bundles whose bytes a spec contract pins.
+
+    Without this, ``PINNED_UPSTREAM_PREFIXES`` would be a free-form allowlist:
+    anyone could park a first-party file under an ``upstream/`` directory and
+    have it skip both value-shape guards. Binding every exempted file to a
+    digest recorded in its own spec ``source-bundle-manifest.json`` keeps the
+    exemption exactly as wide as the audited third-party bundle, and makes an
+    edited or added file fail here instead of silently gaining an exemption.
+    """
+
+    import hashlib
+    import json
+
+    exempted = [path for path in _scannable_files() if _is_pinned_upstream(path)]
+    assert exempted, "pinned upstream prefixes match nothing — drop the exemption"
+
+    problems = []
+    for path in exempted:
+        relative = path.relative_to(ROOT).as_posix()
+        prefix = next(
+            candidate
+            for candidate in PINNED_UPSTREAM_PREFIXES
+            if relative.startswith(candidate)
+        )
+        spec_root = ROOT / prefix.split("/upstream/")[0]
+        manifest_path = spec_root / "contracts" / "source-bundle-manifest.json"
+        if not manifest_path.is_file():
+            problems.append(f"{relative}: no source-bundle-manifest.json for its spec")
+            continue
+        records = json.loads(manifest_path.read_text(encoding="utf-8")).get("files", [])
+        pinned = {
+            record["path"]: record["sha256"]
+            for record in records
+            if isinstance(record, dict) and "path" in record and "sha256" in record
+        }
+        bundle_root = ROOT / prefix
+        bundle_relative = path.relative_to(
+            bundle_root / next(entry.name for entry in bundle_root.iterdir())
+        ).as_posix()
+        expected = pinned.get(bundle_relative)
+        if expected is None:
+            problems.append(f"{relative}: not listed in its source-bundle manifest")
+        elif hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+            problems.append(f"{relative}: bytes differ from the pinned digest")
+
+    assert not problems, (
+        "secret-guard exemption covers files the spec contracts do not pin "
+        "byte-for-byte; pin them or remove them from the exemption: "
+        + "; ".join(problems)
     )

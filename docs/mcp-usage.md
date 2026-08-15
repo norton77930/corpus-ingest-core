@@ -52,6 +52,7 @@ args = ["D:/path/to/podcast-ingest-core/scripts/run_mcp_server.py"]
 - `transcribe_episode`
 - `summarize_episode_extractive`
 - `extract_mentions`
+- `generate_stock_lens_report`
 
 Side-effect tools 預設 `confirm=false`，只回傳 action plan，不會執行。確認 runtime、IO、overwrite 與 cache stale 風險後，才再次以 `confirm=true` 呼叫。
 
@@ -170,6 +171,16 @@ Tool 21 appends after unchanged Tools 1–20. Read-query only (`podcast_id`, opt
 
 ```powershell
 python scripts/list_verified_report_gap_backlog.py gooaye --limit 20
+```
+
+### Stock Lens Tool
+
+- `generate_stock_lens_report` (Tool 22)
+
+Tool 22 appends after unchanged Tools 1–21. It completes Spec 001 User Story 3 over MCP: the deterministic stock lens already existed in Core and the CLI, but no tool exposed it. Side-effect and dry-run-first — `confirm=false` returns the action plan only. It reads local industry-mapping and external-data-boundary artifacts and writes one report under `data/stock-lens/{podcast_id}/`; it makes no live market API call, no network request and no LLM call. Direct podcast evidence and inferred industry leads stay separated, inferred leads keep `needs_verification`, and the report never gives buy/sell/hold advice, a target price, or a guaranteed return.
+
+```powershell
+python scripts/generate_stock_lens_report.py gooaye 台積電
 ```
 
 ## Safety

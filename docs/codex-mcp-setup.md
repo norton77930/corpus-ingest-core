@@ -62,7 +62,7 @@ default_tools_approval_mode = "prompt"
 - 不要把 user-level config commit 到 repo。
 - 如果需要 API key，請使用本機環境變數，不要寫進 config。
 - `semantic_summarize_episode` 即使出現在 MCP tools 中，也仍需要 `confirm=true` 與 exact `api_cost_ack`。
-- The local reviewed registry has exactly 21 tools. Tool 21, `list_verified_report_gap_backlog`, is append-only after unchanged Tools 1–20 and is a read-query inventory gap backlog; no confirm/ack. Tool 20 remains historical next-step suggestion. Tool 19 remains coverage join. Tool 18 remains exact-locator offline revalidation. Tool 17 retains its offline manifest-first list/search/inspect contract and `source_currentness_status=not_evaluated` inspect result.
+- The local reviewed registry has exactly 22 tools. Tool 22, `generate_stock_lens_report`, is append-only after unchanged Tools 1–21 and is a dry-run-first side-effect stock lens (no LLM, no `api_cost_ack`, no network, no live market API, no investment advice). Tool 21, `list_verified_report_gap_backlog`, remains a read-query inventory gap backlog; no confirm/ack. Tool 20 remains historical next-step suggestion. Tool 19 remains coverage join. Tool 18 remains exact-locator offline revalidation. Tool 17 retains its offline manifest-first list/search/inspect contract and `source_currentness_status=not_evaluated` inspect result.
 
 ## 4. Codex CLI Command 範例
 

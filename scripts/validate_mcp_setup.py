@@ -244,7 +244,8 @@ def _check_completion_surface(checks: list[dict[str, Any]], mcp_server) -> None:
         _add_check(
             checks,
             "completion_tool_registry",
-            len(tool_names) == 21
+            len(tool_names) == 22
+            and "generate_stock_lens_report" in tool_names
             and "query_verified_research_report_catalog" in tool_names
             and "revalidate_verified_research_report_sources" in tool_names
             and COMPLETION_TOOL_NAME in tool_names
