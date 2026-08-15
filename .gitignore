@@ -27,4 +27,11 @@ __pycache__/
 *.egg-info/
 # Local tooling lockfile; packaging source of truth is pyproject.toml (setuptools).
 uv.lock
+.playwright-mcp/
+# Writer locks. A `.claim` is a transient dot-prefixed sibling of the artifact it
+# guards and is meaningless outside the run that took it.
+*.claim
+# Per-session scratch handoffs at the repo root. The durable, reviewed handoff
+# document is docs/agent-handoff.md.
+/HANDOFF-*-SESSION.md
 
