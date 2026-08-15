@@ -1,0 +1,57 @@
+{
+  "review_mode": "semantic-summary-smoke-review-v1",
+  "review_boundary": "deterministic-local-review-no-llm-env-network-or-summary-rewrite-v1",
+  "review_status": "passed",
+  "podcast_id": "gooaye",
+  "episode_ref": "EP687",
+  "semantic_summary_path": "data\\summaries\\gooaye\\EP687__EP687.semantic.md",
+  "semantic_summary_sha256": "38de1d978e22d19f92af706a5f97a8738496719ebaeae9e3647cf47f141c87a2",
+  "workflow_stdout_path": null,
+  "check_count": 8,
+  "failed_check_count": 0,
+  "warning_count": 1,
+  "blocked_check_count": 0,
+  "checks": [
+    {
+      "name": "semantic_summary_exists",
+      "status": "pass",
+      "message": "data\\summaries\\gooaye\\EP687__EP687.semantic.md"
+    },
+    {
+      "name": "secret_leak",
+      "status": "pass",
+      "message": "credential, private-key, and unsafe URI scan"
+    },
+    {
+      "name": "traceback_leak",
+      "status": "pass",
+      "message": "stack-trace scan"
+    },
+    {
+      "name": "raw_transcript_dump",
+      "status": "pass",
+      "message": "transcript-dump marker scan"
+    },
+    {
+      "name": "timestamp_evidence",
+      "status": "warn",
+      "message": "timestamp evidence scan"
+    },
+    {
+      "name": "chunk_summaries",
+      "status": "pass",
+      "message": "chunk summaries section scan"
+    },
+    {
+      "name": "metadata",
+      "status": "pass",
+      "message": "metadata/provider/model/status scan"
+    },
+    {
+      "name": "prohibited_advice",
+      "status": "pass",
+      "message": "no prohibited advice"
+    }
+  ],
+  "not_investment_advice_notice": true
+}
