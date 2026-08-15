@@ -50,6 +50,7 @@ python -m pytest tests/test_repository_secret_boundary.py tests/test_repository_
 | docs-only | `tests/test_ai_governance_docs.py`、`tests/test_architecture_spec_docs.py`、`tests/test_docs_mcp_eval.py`、`tests/test_research_safety_eval_docs.py`、`tests/test_spec_kit_*.py`、`tests/test_mcp_tool_registry_contract.py`（docs 對齊） |
 | spec-only | `tests/test_spec_kit_backfill_docs.py`、`tests/test_spec_kit_constitution.py` |
 | deterministic runtime | 對應模組的 targeted tests + `tests/test_contracts.py` |
+| X 影片擷取 (036) | `tests/test_x_video_ingest.py`、`tests/test_segment_grouping.py`、`tests/test_podcast_profile_source_type.py`、`tests/test_contracts.py`、`tests/test_transcriber.py`、`tests/test_feed_reader.py`、`tests/test_downloader.py`、`tests/test_mcp_tool_registry_contract.py`（確認 dry-run 零寫入零下載、未登記來源在下載前被拒、影片不落 data/、`transcribe_episode` 省略 `title` 時行為不變、groups 不持久化、v1 不新增 MCP tool 仍為 exact 22） |
 | corpus artifact index | `tests/test_corpus_index.py`、`tests/test_mcp_tool_registry_contract.py`（確認 v1 不新增 MCP tool） |
 | corpus remediation plan | `tests/test_corpus_remediation_plan.py`、`tests/test_mcp_tool_registry_contract.py`（確認 plan-only v1 不新增 MCP tool、不執行 remediation） |
 | corpus remediation runner | `tests/test_corpus_remediation_runner.py`、`tests/test_corpus_remediation_plan.py`、`tests/test_corpus_index.py`、`tests/test_mcp_tool_registry_contract.py`（確認 standalone dry-run 仍持久化 fresh 008/009、no own stage report、confirmed filter guard、deterministic-only、no MCP change） |

@@ -6,10 +6,12 @@ from typing import Any
 
 import yaml
 
+from .errors import UnsupportedSourceTypeError
 from .models import PodcastProfile
 
 
 DEFAULT_CONFIG_PATH = Path("config/podcasts.yaml")
+RSS_SOURCE_TYPE = "rss"
 _SAFE_SLUG_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 
 
@@ -53,6 +55,26 @@ def load_podcast_profile(
         raise KeyError(f"找不到 podcast_id：{podcast_id}") from exc
 
 
+def require_rss_profile(
+    podcast_id: str, path: str | Path = DEFAULT_CONFIG_PATH
+) -> PodcastProfile:
+    """載入 profile，並確認它確實是 RSS 來源。
+
+    RSS 專用入口（``list_episodes`` / ``get_episode`` / ``download_audio``）對
+    非 RSS 來源沒有意義。在這裡明確拒絕，呼叫端才會拿到「為什麼不適用」，
+    而不是在 feedparser 深處因為 ``rss_url`` 是 None 而失敗。
+    """
+
+    profile = load_podcast_profile(podcast_id, path)
+    if profile.source_type != RSS_SOURCE_TYPE:
+        raise UnsupportedSourceTypeError(
+            f"{podcast_id} 的 source_type 是 {profile.source_type}，不是 RSS 來源。"
+            "list_episodes、get_episode 與 download_audio 只適用於 RSS podcast；"
+            "請改用該來源自己的擷取流程。"
+        )
+    return profile
+
+
 def _parse_profile(item: Any) -> PodcastProfile:
     if not isinstance(item, dict):
         raise ValueError("podcasts 的每個項目都必須是 mapping。")
@@ -61,12 +83,20 @@ def _parse_profile(item: Any) -> PodcastProfile:
     if not _SAFE_SLUG_PATTERN.fullmatch(podcast_id):
         raise ValueError("podcast_id 必須是小寫 slug，只允許 a-z、0-9 與 -。")
 
+    source_type = _optional_text(item, "source_type") or RSS_SOURCE_TYPE
+    is_rss = source_type == RSS_SOURCE_TYPE
+
     return PodcastProfile(
         podcast_id=podcast_id,
         display_name=_required_text(item, "display_name"),
-        rss_url=_required_text(item, "rss_url"),
+        rss_url=_required_text(item, "rss_url") if is_rss else _optional_text(item, "rss_url"),
         language=_required_text(item, "language"),
-        default_episode_prefix=_required_text(item, "default_episode_prefix"),
+        default_episode_prefix=(
+            _required_text(item, "default_episode_prefix")
+            if is_rss
+            else _optional_text(item, "default_episode_prefix")
+        ),
+        source_type=source_type,
     )
 
 
@@ -74,4 +104,11 @@ def _required_text(item: dict[str, Any], key: str) -> str:
     value = item.get(key)
     if not isinstance(value, str) or not value.strip():
         raise ValueError(f"{key} 必須是非空字串。")
+    return value.strip()
+
+
+def _optional_text(item: dict[str, Any], key: str) -> str | None:
+    value = item.get(key)
+    if not isinstance(value, str) or not value.strip():
+        return None
     return value.strip()

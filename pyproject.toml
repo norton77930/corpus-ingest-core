@@ -14,6 +14,10 @@ dependencies = [
     "mcp[cli]>=1.27,<2",
     "PyYAML>=6.0",
     "requests>=2.31",
+    # Spec 036：X 影片取得。兩者都採惰性匯入，缺套件時由
+    # XVideoIngestDependencyError 說明如何安裝，不會拖垮其他功能。
+    "yt-dlp>=2024.1.0",
+    "av>=12.0",
 ]
 
 [project.optional-dependencies]

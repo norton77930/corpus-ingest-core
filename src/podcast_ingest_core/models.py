@@ -10,9 +10,12 @@ class PodcastProfile:
 
     podcast_id: str
     display_name: str
-    rss_url: str
+    rss_url: str | None
     language: str
-    default_episode_prefix: str
+    default_episode_prefix: str | None
+    # 非 RSS 來源（例如 X 影片）沒有 feed，rss_url 與 default_episode_prefix
+    # 因此可為 None；language 對每種來源都必要，轉錄要用。
+    source_type: str = "rss"
 
 
 @dataclass(frozen=True)

@@ -200,3 +200,15 @@ class EpisodeIndexError(PodcastIngestCoreError):
 
 class SearchError(PodcastIngestCoreError):
     """SQLite cache 搜尋失敗。"""
+
+
+class UnsupportedSourceTypeError(PodcastIngestCoreError):
+    """對某個 podcast 來源型別呼叫了不適用的入口。"""
+
+
+class XVideoIngestDependencyError(PodcastIngestCoreError):
+    """缺少取得 X 影片所需的套件。"""
+
+
+class XVideoIngestFailedError(PodcastIngestCoreError):
+    """X 影片取得流程失敗。"""

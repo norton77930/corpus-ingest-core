@@ -34,14 +34,20 @@ def transcribe_episode(
     force: bool = False,
     *,
     audio_path: str | Path | None = None,
+    title: str | None = None,
     progress_callback: Callable[[int, float | None], None] | None = None,
 ) -> TranscriptAsset:
-    """使用 faster-whisper 將已下載的 episode 音檔轉成逐字稿。"""
+    """使用 faster-whisper 將已下載的 episode 音檔轉成逐字稿。
+
+    ``title`` 只作用在 ``audio_path`` 這條分支：非 RSS 來源自己知道標題，
+    否則輸出會退回用 episode_ref 命名。走 RSS 下載時 feed 的標題才是權威，
+    此參數會被忽略。
+    """
 
     model_name = model or DEFAULT_TRANSCRIPTION_MODEL
     profile = load_podcast_profile(podcast_id)
     audio_asset = (
-        _audio_asset_from_path(podcast_id, episode_ref, audio_path)
+        _audio_asset_from_path(podcast_id, episode_ref, audio_path, title)
         if audio_path is not None
         else download_audio(podcast_id, episode_ref)
     )
@@ -134,14 +140,14 @@ def transcribe_episode(
 
 
 def _audio_asset_from_path(
-    podcast_id: str, episode_ref: str, audio_path: str | Path
+    podcast_id: str, episode_ref: str, audio_path: str | Path, title: str | None = None
 ) -> AudioAsset:
     local_path = Path(audio_path)
     size_bytes = local_path.stat().st_size if local_path.exists() else None
     return AudioAsset(
         podcast_id=podcast_id,
         episode_ref=episode_ref,
-        title=episode_ref,
+        title=title or episode_ref,
         source_url=str(local_path),
         local_path=local_path,
         size_bytes=size_bytes,

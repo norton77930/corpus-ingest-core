@@ -52,6 +52,9 @@ from .errors import (
     TranscriptParseError,
     TranscriptionDependencyError,
     TranscriptionFailedError,
+    UnsupportedSourceTypeError,
+    XVideoIngestDependencyError,
+    XVideoIngestFailedError,
 )
 from .cache import initialize_cache, index_episode, rebuild_cache
 from .corpus_index import discover_local_episode_refs, generate_corpus_index
@@ -118,8 +121,10 @@ from .search import search_mentions, search_transcripts
 from .stock_lens import generate_stock_lens_report
 from .stock_lens_synthesis import generate_stock_lens_synthesis_report
 from .summarizer import summarize_episode
+from .segment_grouping import group_segments
 from .transcriber import transcribe_episode
 from .validator import validate_transcript
+from .x_video_ingest import XVideoIdentity, XVideoIngestResult, run_x_video_ingest
 from .models import (
     CorpusArtifactFamilyCounts,
     CorpusAudioDownloadOutcomeCounts,
@@ -379,6 +384,13 @@ __all__ = [
     "TranscriptionDependencyError",
     "TranscriptionFailedError",
     "transcribe_episode",
+    "UnsupportedSourceTypeError",
     "validate_transcript",
     "verify_external_data_boundary",
+    "group_segments",
+    "XVideoIdentity",
+    "XVideoIngestDependencyError",
+    "XVideoIngestFailedError",
+    "XVideoIngestResult",
+    "run_x_video_ingest",
 ]
