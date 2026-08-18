@@ -2,7 +2,7 @@
 
 **Feature Branch**: `036-x-video-corpus-ingestion`  
 **Created**: 2026-08-15  
-**Status**: Implemented (v1). One confirmed real-URL run completed 2026-08-15. Both review axes passed: `code-reviewer` after five fixes, `architecture-reviewer` after one (the X surface was not enforcing the `source_type` discriminant it introduced). Structural follow-ups for the next source spec are listed in `tasks.md`.
+**Status**: Implemented and verified (v1). One confirmed real-URL run completed, and all nine Success Criteria are met — including the semantic summariser running on an X episode with no source-specific branching. Both review axes passed: `code-reviewer` after five fixes, `architecture-reviewer` after one (the X surface was not enforcing the `source_type` discriminant it introduced). Structural follow-ups for the next source spec are listed in `tasks.md`.
 
 **Input**: The corpus ingests RSS podcasts only, but the AI practitioners the user learns from teach on X. A working single-video prototype already exists outside this repo (`../prompt-engineering`, built 2026-06-30): yt-dlp downloads an X video with a guest token, PyAV extracts audio, faster-whisper transcribes, and `group_segments()` merges fragments into 30-90s blocks. Its weakness is the analysis layer — `generate_learning_docs.py` bakes hand-written zh-TW prose into source, so a second video would need rewriting by hand. This repo already automates exactly that layer. A seam trial on 2026-08-15 shaped the prototype's existing 366-segment output into the corpus contract and confirmed the whole downstream pipeline accepts it unchanged. What is missing is the producer: a path from an X video URL to a conformant episode seed plus transcript trio, after which the existing pipeline takes over.
 

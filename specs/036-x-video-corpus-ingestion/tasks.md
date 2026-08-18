@@ -2,7 +2,7 @@
 
 **Feature**: 036-x-video-corpus-ingestion  
 **TDD**: RED before GREEN.  
-**Status**: Phase 1 complete; Phase 2 not started, not authorized.
+**Status**: Implemented and verified. All nine Success Criteria met; both review axes passed.
 
 ## Completion Contract
 
@@ -31,7 +31,7 @@
 - [x] T005 Tasks + analyze table (below)
 - [x] T006 Analyze review pass before any implementation — findings below
 
-## Phase 2: Implement (not started)
+## Phase 2: Implement
 
 - [x] T007 RED: `group_segments()` port — 30s sentence-boundary soft break, 90s hard cap
 - [x] T008 GREEN: `segment_grouping.py` as a pure function; no persistence
@@ -307,7 +307,44 @@ Verified as sound, not changed:
   a fixed `x-` prefix, and the status id is `\d+`. A userinfo-style host such as
   `https://evil.com@x.com/...` fails the netloc allowlist.
 
-### Architecture review (2026-08-15)
+### Downstream verification (2026-08-16)
+
+One Success Criterion was still unverified when the work was committed: "the semantic
+summariser runs on an X episode with no source-specific branching". Splitting it:
+
+- **Deterministic downstream: verified.** `summarize_episode.py --mode extractive` ran on
+  the X episode with no source-specific handling, correctly using the profile's
+  `display_name` ("@Raytar (X)"), reporting 366 segments / 00:33:23 / 25372 characters,
+  and constructing no provider (`provider: null`, `model: null`). `corpus_index` now
+  reports `extractive_summary: available` alongside `audio: available` and
+  `transcript: valid`.
+- **Semantic (LLM) summary: verified.** It ran on the X episode with no source-specific
+  branching — `summary_mode: semantic-llm`, 4 chunks, 10 evidence items — and
+  `corpus_index` now reports `semantic_summary: available`. This was the last
+  unverified Success Criterion; all nine are now met.
+
+  Three attempts were needed, and the failures are worth recording because none was a
+  code defect. First: a connect timeout, because the configured provider sits on a
+  private network segment the machine could not reach. Second, on VPN: a read timeout at
+  120s and again at 600s. Rather than keep raising the timeout, a liveness probe was sent
+  with no transcript and no key — the gateway answered in 0.2s (401 on `/v1/models`, 200
+  on `/`), proving it healthy and isolating the fault to model routing. Passing an
+  explicit model name resolved it; the model configured in the environment was not one
+  the gateway routes, and that class of proxy hangs rather than erroring on an unknown
+  model.
+
+  **The criterion is met, but the output is not yet the deliverable.** "Runs with no
+  source-specific branching" is satisfied precisely because there is no branching — and
+  that is also why roughly a third of the generated sections are dead weight here. The
+  summariser's template is finance-shaped: an AI-teaching video gets empty
+  台股觀點 / 美股觀點 / 總經觀點 / 生活閒聊 / 廣告 sections, one of which strains to
+  invent a market connection, and the artifact carries a "not investment advice" notice.
+  The substance it does produce is strong — timestamped evidence throughout, and it
+  correctly flagged the transcript's model-version names as uncertain rather than
+  asserting them. Reshaping the output toward the prototype's `00_*.md`..`07_*.md`
+  study-guide sequence is the next spec's work, not this one's.
+
+## Architecture review (2026-08-15)
 
 `architecture-reviewer` ran after the code review and answered all eight structural
 questions. **Sound as implemented, with no material finding**: dependency direction
