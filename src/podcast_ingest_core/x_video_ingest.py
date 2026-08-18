@@ -177,18 +177,28 @@ def run_x_video_ingest(
     transcript_targets = storage.transcript_asset_paths(
         identity.podcast_id, identity.episode_ref, seed.title
     )
-    planned_writes = [
-        str(seed_target),
-        str(audio_target),
-        str(transcript_targets.text_path),
-        str(transcript_targets.srt_path),
-        str(transcript_targets.json_path),
-    ]
-
     warnings = [*seed.warnings, CACHE_STALE_WARNING]
     registration_problem = _registration_problem(identity.podcast_id)
     if registration_problem is not None:
         warnings.append(registration_problem)
+
+    # 抽好的音訊就是耐久產物。轉錄失敗後重跑不應該再下載一次整支影片；
+    # 要重新取得就自行刪掉這個檔案。這個判斷必須在 dry-run 回傳之前做，
+    # 否則計畫會預告一個實際不會發生的寫入。
+    audio_exists = audio_target.exists()
+    if audio_exists:
+        warnings.append(f"沿用既有音訊，未重新下載：{audio_target}")
+
+    planned_writes = [str(seed_target)]
+    if not audio_exists:
+        planned_writes.append(str(audio_target))
+    planned_writes.extend(
+        [
+            str(transcript_targets.text_path),
+            str(transcript_targets.srt_path),
+            str(transcript_targets.json_path),
+        ]
+    )
 
     if not confirm:
         return XVideoIngestResult(
@@ -208,11 +218,7 @@ def run_x_video_ingest(
     if registration_problem is not None:
         raise XVideoIngestFailedError(registration_problem)
 
-    if audio_target.exists():
-        # 抽好的音訊就是耐久產物。轉錄失敗後重跑不應該再下載一次整支影片；
-        # 要重新取得就自行刪掉這個檔案。
-        warnings.append(f"沿用既有音訊，未重新下載：{audio_target}")
-    else:
+    if not audio_exists:
         _acquire_audio(identity.canonical_url, audio_target, work_dir)
 
     _write_seed(seed_target, seed)

@@ -435,6 +435,36 @@ def test_an_extraction_failure_leaves_no_part_file_behind(monkeypatch, tmp_data_
     assert not list(audio_dir.glob("*.part")), "a stale .part was left in data/audio"
 
 
+def test_dry_run_plan_reflects_that_existing_audio_will_be_reused(
+    monkeypatch, tmp_data_dirs
+):
+    """A plan that promises a write it will not perform is a false plan.
+
+    The confirmed path reuses an existing WAV instead of re-downloading, so the
+    dry-run must say so — otherwise an operator checking the plan before spending
+    a large download is reading fiction.
+    """
+
+    from podcast_ingest_core import storage, x_video_ingest
+
+    _stub_acquisition(monkeypatch, x_video_ingest)
+
+    existing = storage.audio_asset_path(
+        "x-raytar",
+        "2071290493581840707",
+        "Code with Claude Prompt Engineering Breakout",
+        ".wav",
+    )
+    existing.parent.mkdir(parents=True, exist_ok=True)
+    existing.write_bytes(b"already extracted")
+
+    result = x_video_ingest.run_x_video_ingest(_SAMPLE_URL)
+
+    assert result.confirmed is False
+    assert str(existing) not in result.planned_writes
+    assert any("沿用既有音訊" in warning for warning in result.warnings)
+
+
 def test_an_existing_audio_asset_is_not_downloaded_again(monkeypatch, tmp_data_dirs):
     """Recovery from a failed transcription must not re-fetch a 260 MB video.
 

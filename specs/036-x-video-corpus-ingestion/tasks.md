@@ -111,16 +111,10 @@ Verified against code, not inferred:
       `transcript: valid`; `rebuild_cache --podcast x-raytar` → 1 indexed, 0 problems;
       `search_transcripts "prompting playbook"` → hit at `[00:00:18 - 00:00:23]`.
 
-      **Caveat on what is actually on disk.** Because transcription short-circuited, the
-      transcript in `data/` is still the one the 2026-08-15 scratchpad shaper wrote, not
-      one the pipeline produced. Its provenance fields point outside the repo — 
-      `audio_path` and `source_audio_path` are the prototype's `.mp4` and
-      `source_audio_size_bytes` is the video's 272589549 — while the corpus's own audio
-      asset is the extracted 64125654-byte WAV. Validation, indexing and search are all
-      unaffected (none of them read those fields), and the T021 claim is unharmed because
-      it covers acquisition, not transcription. But an operator reading provenance would
-      be misled. Re-running with `--force` regenerates it correctly at the cost of a real
-      33-minute transcription; that has not been done.
+      **Superseded caveat — resolved 2026-08-19, see T027 below.** Because transcription
+      short-circuited, the transcript left on disk was still the one the scratchpad shaper
+      wrote, with provenance fields pointing outside the repo.
+
 - [x] T022 gooaye regression: search returns the identical EP672 hit at `[00:26:37 - 00:26:38]`,
       `data/corpus/gooaye/corpus-index.json` is unchanged at 34215 bytes / 2026-08-13 22:25:47,
       and its profile still resolves as `source_type=rss`.
@@ -130,16 +124,17 @@ Verified against code, not inferred:
 
 `python -m compileall src scripts` exits 0.
 
-`python -m pytest -q` → **24 failed / 1583 passed / 14 skipped**. The failure count
+`python -m pytest -q` → **24 failed / 1584 passed / 14 skipped**. The failure count
 matches the Spec 035 recorded baseline, and the complete list was captured rather than
 the tail: every one sits in the pre-existing blocked chain
 (`test_hermes_runtime_capability`, `test_mcp_http_transport`, `test_spec_029_offline`,
-`test_spec_030…`, `031`, `032`, `033`, `034`). Passed rose 1552 → 1583, exactly the 31
+`test_spec_030…`, `031`, `032`, `033`, `034`). Passed rose 1552 → 1584, exactly the 32
 tests added here. Nothing this feature touches is red.
 
-The suite was run four times across this work — after the first slice, after the
-error-handling fixes, after the code reviewer's five fixes, and after the architecture
-reviewer's fix. All four produced a failure list identical line for line, which is what
+The suite was run five times across this work — after the first slice, after the
+error-handling fixes, after the code reviewer's five fixes, after the architecture
+reviewer's fix, and after the dry-run plan fix. All five produced a failure list identical
+line for line, which is what
 makes "no regression" a measurement rather than an assertion.
 
 **One real regression was introduced and fixed, recorded because it nearly slipped.**
@@ -307,7 +302,48 @@ Verified as sound, not changed:
   a fixed `x-` prefix, and the status id is `\d+`. A userinfo-style host such as
   `https://evil.com@x.com/...` fails the netloc allowlist.
 
-### Downstream verification (2026-08-16)
+### Transcript provenance repair (2026-08-19)
+
+- [x] T027 Re-transcribed from the corpus's own audio asset, closing the T021 caveat.
+
+      **A dry-run defect surfaced first, and only because the operator asked to see the
+      plan before spending the time.** The plan listed the `.wav` under `planned_writes`
+      even though the confirmed path would reuse the existing file — the
+      `audio_target.exists()` check sat *after* the dry-run return, so it only affected
+      the confirmed branch. A plan that promises a write it will not perform is a false
+      plan, which is precisely what FR-014 exists to prevent. The check now runs before
+      the return: the `.wav` drops out of `planned_writes` when it already exists, and a
+      "reusing existing audio" warning appears in the dry-run itself. Fixed red-green with
+      `test_dry_run_plan_reflects_that_existing_audio_will_be_reused`.
+
+      **The repair.** Ran with `--force` on GPU (`medium` / `cuda` / `float16`; cuBLAS and
+      cuDNN were already on this shell's PATH). No download occurred — the reuse
+      short-circuit worked, and the source read was the corpus WAV, never the prototype's
+      `.mp4`. Provenance is now internally consistent:
+
+      | field | before (shaper) | after (pipeline) |
+      | --- | --- | --- |
+      | `source_audio_path` | prototype `.mp4`, outside the repo | `data/audio/x-raytar/…wav` |
+      | `source_audio_size_bytes` | 272589549 (the video) | 64125654 (matches the WAV) |
+      | `model` / `device` | `small` / `cpu` | `medium` / `cuda` |
+      | `segment_count` | 366 | 593 |
+
+      **The cascade was flagged before starting, not discovered after.** A finer model
+      re-segments the audio, so both summaries were describing a superseded transcript,
+      timestamp citations included. Both were regenerated: extractive at 593 segments, and
+      semantic at 7 chunks / 22 evidence items — up from 4 / 10, because finer segments
+      give the summariser more citable material. Cache rebuilt; search re-verified
+      (`"prompting playbook"` at `[00:00:21 - 00:00:23]`, tighter than the previous
+      `[00:00:18 - 00:00:23]`). `corpus_index` reports audio, transcript, extractive and
+      semantic all present.
+
+      **One honest wart, deliberately not chased.** `last_segment_end_seconds` is 2005.12
+      against an audio length of 2003.9 — whisper extrapolates the final segment's end
+      slightly past the media. `validate_transcript` accepts it, the previous `small` run
+      did not exhibit it, and it would affect every source rather than X alone. Out of
+      scope here; recorded so the number is not a surprise later.
+
+## Downstream verification (2026-08-16)
 
 One Success Criterion was still unverified when the work was committed: "the semantic
 summariser runs on an X episode with no source-specific branching". Splitting it:
