@@ -4,3 +4,11 @@ podcasts:
     rss_url: https://feeds.soundon.fm/podcasts/954689a5-3096-43a4-a80b-7810b219cef3.xml
     language: zh
     default_episode_prefix: EP
+  # 非 RSS 來源：沒有 feed，所以沒有 rss_url / default_episode_prefix。
+  # episode_ref 是 tweet status id，由擷取流程帶入而非從 feed 解析。
+  x-raytar:
+    display_name: "@Raytar (X)"
+    source_type: x-video
+    language: en
+    # 內容是 AI 教學，不是財經；摘要形狀因此與來源型別分開設定。
+    summary_profile: learning-notes

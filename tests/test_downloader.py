@@ -217,3 +217,17 @@ def test_download_cli_parses_podcast_and_episode(monkeypatch, capsys, tmp_path):
     assert payload["podcast_id"] == "gooaye"
     assert payload["episode_ref"] == "EP672"
     assert payload["downloaded"] is True
+
+
+def test_download_audio_refuses_a_non_rss_source_with_a_source_aware_error():
+    """Spec 036: HTTP enclosure download has no meaning for an X video.
+
+    Acquisition for those sources goes through the yt-dlp path instead, and the
+    error must point there rather than failing inside the RSS lookup.
+    """
+
+    from podcast_ingest_core import downloader
+    from podcast_ingest_core.errors import UnsupportedSourceTypeError
+
+    with pytest.raises(UnsupportedSourceTypeError, match="x-video"):
+        downloader.download_audio("x-raytar", "2071290493581840707")

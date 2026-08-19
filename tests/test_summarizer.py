@@ -280,3 +280,72 @@ def test_summarize_cli_parses_options_and_outputs_json(monkeypatch, capsys, tmp_
         "window_seconds": 600,
         "allow_partial": True,
     }
+
+
+# --- Spec 037: the extractive prompt block follows the profile ---------------
+
+_FINANCE_EXTRACTIVE_BLOCK = "\n".join(
+    [
+        "## 待 LLM 深度摘要 Prompt",
+        "",
+        "請根據本集逐字稿整理：",
+        "1. 本集主題",
+        "2. 市場觀點",
+        "3. 提到的公司 / 股票 / 產業",
+        "4. 總經觀點",
+        "5. 生活閒聊",
+        "6. 廣告段落",
+        "7. 可驗證時間戳引用",
+        "",
+        "限制：",
+        "- 不要產生投資建議。",
+        "- 所有判斷都要能回到逐字稿。",
+        "",
+    ]
+)
+
+
+def _profile_with_summary(summary_profile):
+    from podcast_ingest_core.models import PodcastProfile
+
+    return PodcastProfile(
+        podcast_id="gooaye",
+        display_name="Gooaye 股癌",
+        rss_url="https://example.invalid/feed.xml",
+        language="zh",
+        default_episode_prefix="EP",
+        summary_profile=summary_profile,
+    )
+
+
+def test_extractive_finance_prompt_block_is_byte_identical(monkeypatch, tmp_path):
+    import podcast_ingest_core.summarizer as summarizer
+
+    _write_transcript(monkeypatch, tmp_path)
+
+    asset = summarizer.summarize_episode("gooaye", "EP672")
+    content = Path(asset.summary_path).read_text(encoding="utf-8")
+
+    assert _FINANCE_EXTRACTIVE_BLOCK in content
+
+
+def test_extractive_learning_notes_prompt_block_drops_the_market_sections(
+    monkeypatch, tmp_path
+):
+    import podcast_ingest_core.summarizer as summarizer
+
+    _write_transcript(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        summarizer,
+        "load_podcast_profile",
+        lambda podcast_id: _profile_with_summary("learning-notes"),
+    )
+
+    asset = summarizer.summarize_episode("gooaye", "EP672")
+    content = Path(asset.summary_path).read_text(encoding="utf-8")
+
+    assert "## 待 LLM 深度摘要 Prompt" in content
+    assert "核心觀念" in content
+    assert "不要補充逐字稿沒有的內容。" in content
+    for unwanted in ("市場觀點", "股票", "總經觀點", "廣告段落", "不要產生投資建議"):
+        assert unwanted not in content

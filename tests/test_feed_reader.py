@@ -152,3 +152,25 @@ podcasts:
     profiles = load_podcast_profiles(config_path)
 
     assert profiles["gooaye"].rss_url == "https://example.com/feed.xml"
+
+
+def test_list_episodes_refuses_a_non_rss_source_with_a_source_aware_error():
+    """Spec 036: an X source has no feed, and the refusal must say so.
+
+    Before this guard the call died on ``profile.rss_url`` being ``None`` deep
+    inside feedparser, which told the caller nothing about why.
+    """
+
+    from podcast_ingest_core import feed_reader
+    from podcast_ingest_core.errors import UnsupportedSourceTypeError
+
+    with pytest.raises(UnsupportedSourceTypeError, match="x-video"):
+        feed_reader.list_episodes("x-raytar")
+
+
+def test_get_episode_refuses_a_non_rss_source_with_a_source_aware_error():
+    from podcast_ingest_core import feed_reader
+    from podcast_ingest_core.errors import UnsupportedSourceTypeError
+
+    with pytest.raises(UnsupportedSourceTypeError, match="x-raytar"):
+        feed_reader.get_episode("x-raytar", "2071290493581840707")

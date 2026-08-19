@@ -641,3 +641,206 @@ def test_summarize_cli_loads_env_file_for_semantic_mode(monkeypatch, capsys, tmp
     assert captured["kwargs"]["api_key_env"] == "API_KEY"
     assert payload["local_env"]["loaded_env_var_names"] == ["API_KEY", "MODEL"]
     assert "secret-value" not in output
+
+
+# --- Spec 037: summary profiles ---------------------------------------------
+
+_EXPECTED_FINANCE_DOCUMENT = """# Gooaye 股癌 - EP672 語意摘要
+
+## Metadata
+
+- Podcast: Gooaye 股癌
+- Podcast ID: gooaye
+- Episode: EP672
+- Title: EP672 title
+- Transcript status: valid
+- Segment count: 3
+- Last segment end: 1270.00
+- Summary mode: semantic-llm
+- Provider: openai-compatible
+- Model: test-model
+- Chunk count: 3
+
+## 摘要限制
+
+本摘要由 LLM 根據逐字稿產生。所有重點應盡量附 timestamp evidence。
+本摘要不構成投資建議。
+
+## Validation Warnings
+
+- legacy transcript metadata missing: generated_at, source_audio_path, source_audio_size_bytes
+
+## 本集主題
+
+- 語意摘要 `[00:00:00 - 00:00:10]`
+
+## Chunk Summaries
+
+### Chunk 1
+
+### Chunk 1
+- 重點 `[00:00:00 - 00:00:10]`
+
+### Chunk 2
+
+### Chunk 2
+- 重點 `[00:10:20 - 00:10:40]`
+
+### Chunk 3
+
+### Chunk 3
+- 重點 `[00:20:50 - 00:21:10]`
+"""
+
+
+def _profile_with_summary(summary_profile):
+    from podcast_ingest_core.models import PodcastProfile
+
+    return PodcastProfile(
+        podcast_id="gooaye",
+        display_name="Gooaye 股癌",
+        rss_url="https://example.invalid/feed.xml",
+        language="zh",
+        default_episode_prefix="EP",
+        summary_profile=summary_profile,
+    )
+
+
+def test_finance_rendering_is_byte_identical_to_the_pre_spec_037_document(
+    monkeypatch, tmp_path
+):
+    """Every published verified research report descends from a semantic summary.
+    This literal is the fixed point that keeps 股癌's shape from drifting."""
+
+    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+
+    paths = _write_transcript(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        semantic_summarizer, "_build_provider", lambda **kwargs: FakeProvider()
+    )
+
+    asset = semantic_summarizer.semantic_summarize_episode(
+        "gooaye",
+        "EP672",
+        api_cost_ack=semantic_summarizer.SEMANTIC_API_COST_ACK,
+        model="test-model",
+    )
+
+    assert paths.json_path.exists()
+    assert (
+        Path(asset.summary_path).read_text(encoding="utf-8")
+        == _EXPECTED_FINANCE_DOCUMENT
+    )
+
+
+def test_learning_notes_replaces_the_disclaimer_and_keeps_the_envelope(
+    monkeypatch, tmp_path
+):
+    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+
+    _write_transcript(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        semantic_summarizer,
+        "load_podcast_profile",
+        lambda podcast_id: _profile_with_summary("learning-notes"),
+    )
+    monkeypatch.setattr(
+        semantic_summarizer, "_build_provider", lambda **kwargs: FakeProvider()
+    )
+
+    asset = semantic_summarizer.semantic_summarize_episode(
+        "gooaye",
+        "EP672",
+        api_cost_ack=semantic_summarizer.SEMANTIC_API_COST_ACK,
+        model="test-model",
+    )
+    content = Path(asset.summary_path).read_text(encoding="utf-8")
+
+    # The profile-driven part changed.
+    assert "本摘要不構成投資建議" not in content
+    assert "本摘要僅整理影片內容，結論請回到 timestamp 驗證。" in content
+
+    # The envelope did not. Four downstream readers depend on each of these.
+    assert "## 摘要限制" in content
+    assert "## Chunk Summaries" in content
+    assert "Summary mode: semantic-llm" in content
+    assert "Provider:" in content
+    assert "Model:" in content
+    assert "Transcript status:" in content
+
+
+def test_the_profile_reaches_the_provider_factory(monkeypatch, tmp_path):
+    """FR-009: the shape follows the registered profile, not a call argument."""
+
+    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+
+    _write_transcript(monkeypatch, tmp_path)
+    monkeypatch.setattr(
+        semantic_summarizer,
+        "load_podcast_profile",
+        lambda podcast_id: _profile_with_summary("learning-notes"),
+    )
+    captured = {}
+
+    def _capture(**kwargs):
+        captured.update(kwargs)
+        return FakeProvider()
+
+    monkeypatch.setattr(semantic_summarizer, "_build_provider", _capture)
+
+    semantic_summarizer.semantic_summarize_episode(
+        "gooaye",
+        "EP672",
+        api_cost_ack=semantic_summarizer.SEMANTIC_API_COST_ACK,
+        model="test-model",
+    )
+
+    assert captured["summary_profile"] == "learning-notes"
+
+
+def test_semantic_summarize_episode_has_no_per_run_profile_argument():
+    """A per-run override would let one episode's summaries disagree with each
+    other at the same canonical path."""
+
+    import inspect
+
+    from podcast_ingest_core.semantic_summarizer import semantic_summarize_episode
+
+    assert "summary_profile" not in inspect.signature(
+        semantic_summarize_episode
+    ).parameters
+
+
+def test_empty_transcript_branch_still_honours_the_profile(monkeypatch, tmp_path):
+    """The empty-chunk path renders without ever building a provider, so it is
+    the one place the profile reaches rendering through a different route."""
+
+    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+
+    _write_transcript(
+        monkeypatch,
+        tmp_path,
+        segments=[{"id": 1, "start": 0.0, "end": 10.0, "text": "   "}],
+    )
+    monkeypatch.setattr(
+        semantic_summarizer,
+        "load_podcast_profile",
+        lambda podcast_id: _profile_with_summary("learning-notes"),
+    )
+
+    def _must_not_build(**kwargs):
+        raise AssertionError("the empty branch must not construct a provider")
+
+    monkeypatch.setattr(semantic_summarizer, "_build_provider", _must_not_build)
+
+    asset = semantic_summarizer.semantic_summarize_episode(
+        "gooaye",
+        "EP672",
+        api_cost_ack=semantic_summarizer.SEMANTIC_API_COST_ACK,
+        model="test-model",
+    )
+    content = Path(asset.summary_path).read_text(encoding="utf-8")
+
+    assert "本摘要不構成投資建議" not in content
+    assert "本摘要僅整理影片內容，結論請回到 timestamp 驗證。" in content
+    assert "## Chunk Summaries" in content

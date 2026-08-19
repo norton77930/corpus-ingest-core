@@ -52,6 +52,10 @@ from .errors import (
     TranscriptParseError,
     TranscriptionDependencyError,
     TranscriptionFailedError,
+    UnknownSummaryProfileError,
+    UnsupportedSourceTypeError,
+    XVideoIngestDependencyError,
+    XVideoIngestFailedError,
 )
 from .cache import initialize_cache, index_episode, rebuild_cache
 from .corpus_index import discover_local_episode_refs, generate_corpus_index
@@ -118,8 +122,16 @@ from .search import search_mentions, search_transcripts
 from .stock_lens import generate_stock_lens_report
 from .stock_lens_synthesis import generate_stock_lens_synthesis_report
 from .summarizer import summarize_episode
+from .segment_grouping import group_segments
+from .summary_profiles import (
+    DEFAULT_SUMMARY_PROFILE,
+    SUMMARY_PROFILES,
+    SummaryProfile,
+    resolve_summary_profile,
+)
 from .transcriber import transcribe_episode
 from .validator import validate_transcript
+from .x_video_ingest import XVideoIdentity, XVideoIngestResult, run_x_video_ingest
 from .models import (
     CorpusArtifactFamilyCounts,
     CorpusAudioDownloadOutcomeCounts,
@@ -308,6 +320,7 @@ __all__ = [
     "CorpusRemediationRunWarning",
     "CorpusRemediationWarning",
     "download_audio",
+    "DEFAULT_SUMMARY_PROFILE",
     "DownloadFailedError",
     "EpisodeNotFoundError",
     "EpisodeIndexError",
@@ -348,6 +361,7 @@ __all__ = [
     "ResearchWorkflowFailedError",
     "ResearchWorkflowInputError",
     "rebuild_cache",
+    "resolve_summary_profile",
     "review_research_llm_smoke",
     "review_semantic_summary_smoke",
     "run_research_workflow",
@@ -374,11 +388,21 @@ __all__ = [
     "generate_stock_lens_synthesis_report",
     "SummaryFailedError",
     "summarize_episode",
+    "SUMMARY_PROFILES",
+    "SummaryProfile",
     "TranscriptMissingError",
     "TranscriptParseError",
     "TranscriptionDependencyError",
     "TranscriptionFailedError",
     "transcribe_episode",
+    "UnknownSummaryProfileError",
+    "UnsupportedSourceTypeError",
     "validate_transcript",
     "verify_external_data_boundary",
+    "group_segments",
+    "XVideoIdentity",
+    "XVideoIngestDependencyError",
+    "XVideoIngestFailedError",
+    "XVideoIngestResult",
+    "run_x_video_ingest",
 ]

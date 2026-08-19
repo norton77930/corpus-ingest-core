@@ -337,6 +337,44 @@ def test_transcribe_episode_uses_audio_path_without_downloading(monkeypatch, tmp
     assert asset.transcribed is True
 
 
+def test_transcribe_episode_names_outputs_by_an_explicit_title(monkeypatch, tmp_path):
+    """Spec 036 FR-006: a source that knows its own title must be able to say so.
+
+    Without this the ``audio_path`` branch hardcodes ``title=episode_ref``, so an
+    X video would land as ``2071290493581840707__2071290493581840707`` — a corpus
+    nobody can read. Omitting ``title`` must keep the old behaviour, which the
+    test above pins.
+    """
+
+    import podcast_ingest_core.transcriber as transcriber
+    from podcast_ingest_core.storage import transcript_asset_paths
+
+    _use_tmp_transcripts_dir(monkeypatch, tmp_path)
+    sample_audio_path = tmp_path / "sample.wav"
+    sample_audio_path.write_bytes(b"audio")
+
+    def fail_download(*_args):
+        raise AssertionError("audio_path branch should not download")
+
+    monkeypatch.setattr(transcriber, "download_audio", fail_download)
+    _install_fake_faster_whisper(monkeypatch)
+
+    asset = transcriber.transcribe_episode(
+        "gooaye",
+        "smoke-test",
+        audio_path=sample_audio_path,
+        title="Code with Claude Prompt Engineering Breakout",
+    )
+
+    assert asset.title == "Code with Claude Prompt Engineering Breakout"
+    expected = transcript_asset_paths(
+        "gooaye", "smoke-test", "Code with Claude Prompt Engineering Breakout"
+    )
+    assert asset.text_path == expected.text_path
+    assert expected.json_path.exists()
+    assert "Code_with_Claude_Prompt_Engineering_Breakout" in expected.json_path.name
+
+
 def test_transcribe_episode_removes_part_files_and_preserves_no_half_outputs(
     monkeypatch, tmp_path
 ):

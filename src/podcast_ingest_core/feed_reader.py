@@ -5,7 +5,7 @@ import re
 
 import feedparser
 
-from .config import load_podcast_profile
+from .config import require_rss_profile
 from .errors import EpisodeNotFoundError
 from .models import Episode
 
@@ -13,7 +13,7 @@ from .models import Episode
 def list_episodes(podcast_id: str, limit: int = 10) -> list[Episode]:
     """從 podcast RSS 列出 episodes。"""
 
-    profile = load_podcast_profile(podcast_id)
+    profile = require_rss_profile(podcast_id)
     if limit < 1:
         raise ValueError("limit 必須大於 0。")
 
@@ -28,7 +28,7 @@ def get_episode(podcast_id: str, episode_ref: str) -> Episode:
     if not episode_ref:
         raise ValueError("episode_ref 不可為空。")
 
-    profile = load_podcast_profile(podcast_id)
+    profile = require_rss_profile(podcast_id)
     episodes = _read_episodes(
         profile.podcast_id, profile.rss_url, profile.default_episode_prefix
     )

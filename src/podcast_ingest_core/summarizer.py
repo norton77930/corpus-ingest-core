@@ -12,6 +12,7 @@ from .storage import (
     find_transcript_asset_paths,
     summary_asset_path,
 )
+from .summary_profiles import SummaryProfile, resolve_summary_profile
 from .validator import validate_transcript
 
 
@@ -84,6 +85,7 @@ def summarize_episode(
         raise TranscriptMissingError(f"無法讀取逐字稿 TXT：{exc}") from exc
 
     markdown = _render_markdown(
+        summary_profile=resolve_summary_profile(profile.summary_profile),
         display_name=profile.display_name,
         podcast_id=podcast_id,
         episode_ref=episode_ref,
@@ -190,6 +192,7 @@ def _normalize_segments(raw_segments: Any) -> list[dict[str, Any]]:
 
 def _render_markdown(
     *,
+    summary_profile: SummaryProfile,
     display_name: str,
     podcast_id: str,
     episode_ref: str,
@@ -254,18 +257,7 @@ def _render_markdown(
         [
             "## 待 LLM 深度摘要 Prompt",
             "",
-            "請根據本集逐字稿整理：",
-            "1. 本集主題",
-            "2. 市場觀點",
-            "3. 提到的公司 / 股票 / 產業",
-            "4. 總經觀點",
-            "5. 生活閒聊",
-            "6. 廣告段落",
-            "7. 可驗證時間戳引用",
-            "",
-            "限制：",
-            "- 不要產生投資建議。",
-            "- 所有判斷都要能回到逐字稿。",
+            *summary_profile.extractive_prompt_lines,
             "",
         ]
     )

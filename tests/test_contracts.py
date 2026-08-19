@@ -4,12 +4,14 @@ import inspect
 import pytest
 
 
-def test_loads_gooaye_profile_from_yaml():
+def test_loads_registered_profiles_from_yaml():
     from podcast_ingest_core.config import load_podcast_profiles
 
     profiles = load_podcast_profiles(Path("config/podcasts.yaml"))
 
-    assert set(profiles) == {"gooaye"}
+    assert set(profiles) == {"gooaye", "x-raytar"}
+
+    # The RSS profile must be untouched by Spec 036's source_type addition.
     profile = profiles["gooaye"]
     assert profile.podcast_id == "gooaye"
     assert profile.display_name == "Gooaye 股癌"
@@ -19,6 +21,18 @@ def test_loads_gooaye_profile_from_yaml():
     )
     assert profile.language == "zh"
     assert profile.default_episode_prefix == "EP"
+    assert profile.source_type == "rss"
+    # Spec 037: no summary_profile key means the finance shape, unchanged.
+    assert profile.summary_profile == "finance"
+
+    # Spec 036: a non-RSS source carries no feed fields.
+    x_profile = profiles["x-raytar"]
+    assert x_profile.source_type == "x-video"
+    assert x_profile.language == "en"
+    assert x_profile.rss_url is None
+    assert x_profile.default_episode_prefix is None
+    # Spec 037: AI-teaching content, so the summary shape is learning notes.
+    assert x_profile.summary_profile == "learning-notes"
 
 
 def test_package_exports_required_core_functions():
@@ -37,6 +51,8 @@ def test_package_exports_required_core_functions():
             "vad_filter",
             "force",
             "audio_path",
+            # Spec 036: keyword-only, applies to the audio_path branch only.
+            "title",
             "progress_callback",
         ],
         "summarize_episode": [

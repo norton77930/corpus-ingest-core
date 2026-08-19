@@ -6,6 +6,11 @@ from typing import Any, Protocol
 import requests
 
 from .errors import LLMProviderConfigError, LLMProviderRequestError
+from .summary_profiles import (
+    DEFAULT_SUMMARY_PROFILE,
+    SummaryProfile,
+    resolve_summary_profile,
+)
 
 
 DEFAULT_OPENAI_COMPATIBLE_BASE_URL = "https://api.openai.com/v1"
@@ -70,6 +75,7 @@ class OpenAICompatibleProvider:
         api_key_env: str = "OPENAI_API_KEY",
         reasoning_effort: str | None = None,
         read_timeout_seconds: int = 120,
+        summary_profile: str = DEFAULT_SUMMARY_PROFILE,
         _factory_token: object | None = None,
     ) -> None:
         if _factory_token is not _PROVIDER_FACTORY_TOKEN:
@@ -100,19 +106,17 @@ class OpenAICompatibleProvider:
         self.base_url = resolved_base_url.rstrip("/")
         self.reasoning_effort = reasoning_effort
         self.read_timeout_seconds = read_timeout_seconds
+        self.summary_profile: SummaryProfile = resolve_summary_profile(summary_profile)
 
     def summarize_chunk(self, chunk: dict[str, Any]) -> str:
         messages = [
             {
                 "role": "system",
-                "content": (
-                    "你是 podcast 逐字稿摘要器。只根據使用者提供的逐字稿片段摘要，"
-                    "所有重點盡量附 timestamp evidence，不要產生投資建議。"
-                ),
+                "content": self.summary_profile.chunk_system,
             },
             {
                 "role": "user",
-                "content": _chunk_prompt(chunk),
+                "content": _chunk_prompt(self.summary_profile, chunk),
             },
         ]
         return self.complete(messages)
@@ -128,14 +132,12 @@ class OpenAICompatibleProvider:
         messages = [
             {
                 "role": "system",
-                "content": (
-                    "你是 podcast 語意摘要器。根據 chunk summaries 整理整集摘要，"
-                    "不得產生投資建議，所有市場觀點、公司、人物與事件都要盡量附 timestamp evidence。"
-                ),
+                "content": self.summary_profile.final_system,
             },
             {
                 "role": "user",
                 "content": _final_prompt(
+                    self.summary_profile,
                     podcast_display_name=podcast_display_name,
                     episode_ref=episode_ref,
                     title=title,
@@ -191,8 +193,13 @@ def create_provider(
     reasoning_effort: str | None = None,
     read_timeout_seconds: int = 120,
     api_cost_ack: str = "",
+    summary_profile: str = DEFAULT_SUMMARY_PROFILE,
 ) -> SemanticSummaryProvider:
-    """依 provider 名稱建立語意摘要 provider。"""
+    """依 provider 名稱建立語意摘要 provider。
+
+    ``summary_profile`` 在 ack 之後才解析：一個打錯的 profile 名稱不能搶在
+    ack 失敗之前拋錯，否則錯誤訊息會遮住真正的安全邊界。
+    """
 
     require_exact_api_cost_ack(api_cost_ack)
     if provider != "openai-compatible":
@@ -203,17 +210,18 @@ def create_provider(
         api_key_env=api_key_env,
         reasoning_effort=reasoning_effort,
         read_timeout_seconds=read_timeout_seconds,
+        summary_profile=summary_profile,
         _factory_token=_PROVIDER_FACTORY_TOKEN,
     )
 
 
-def _chunk_prompt(chunk: dict[str, Any]) -> str:
+def _chunk_prompt(profile: SummaryProfile, chunk: dict[str, Any]) -> str:
     return "\n".join(
         [
             f"請摘要 chunk {chunk['index']}，時間範圍 {chunk['start_time']} - {chunk['end_time']}。",
             "",
-            "請包含：主要內容、提到的人物 / 公司 / 股票 / 產業 / 地點 / 書籍 / 電影 / 餐廳、可引用片段、不確定事項。",
-            "限制：不要產生投資建議；所有判斷都要能回到逐字稿 timestamp。",
+            profile.chunk_sections,
+            profile.chunk_constraints,
             "",
             chunk["text"],
         ]
@@ -221,6 +229,7 @@ def _chunk_prompt(chunk: dict[str, Any]) -> str:
 
 
 def _final_prompt(
+    profile: SummaryProfile,
     *,
     podcast_display_name: str,
     episode_ref: str,
@@ -232,8 +241,8 @@ def _final_prompt(
             f"Podcast: {podcast_display_name}",
             f"Episode: {episode_ref}",
             f"Title: {title}",
-            "請將以下 chunk summaries 合併成整集摘要，使用 Markdown，包含本集主題、市場觀點、台股觀點、美股觀點、總經觀點、提到的公司 / 股票 / 產業、人物 / 書 / 電影 / 音樂 / 餐廳 / 地點、生活閒聊、廣告 / 業配段落、時間軸摘要、可驗證引用、不確定事項。",
-            "限制：不要產生投資建議；所有重要判斷都要盡量附 timestamp evidence。",
+            profile.final_sections,
+            profile.final_constraints,
             "\n\n".join(chunk_summaries),
         ]
     )
