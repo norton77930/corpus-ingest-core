@@ -43,6 +43,7 @@ from .errors import (
     ResearchWorkflowInputError,
     SearchError,
     SemanticSummaryFailedError,
+    StudyGuideBundleError,
     StockLensReportFailedError,
     StockLensReportInputError,
     StockLensSynthesisFailedError,
@@ -74,6 +75,10 @@ from .corpus_latest_episode_deterministic_workflow_runner import (
     run_corpus_latest_episode_deterministic_workflow,
 )
 from .corpus_semantic_remediation_runner import run_corpus_semantic_remediation
+from .study_guide_bundle import (
+    result_to_dict as study_guide_bundle_result_to_dict,
+    run_study_guide_bundle,
+)
 from .latest_episode_verified_research_report_workflow_runner import (
     result_to_dict as latest_episode_verified_research_report_workflow_result_to_dict,
     run_latest_episode_verified_research_report_workflow,
@@ -197,6 +202,7 @@ from .models import (
     HistoricalVerifiedReportNextStep,
     VerifiedReportGapBacklogRow,
     VerifiedReportGapBacklogPage,
+    StudyGuideBundleResult,
 )
 from .storage import (
     CorpusEpisodeCompletionWorkflowRunAssetPaths,
@@ -379,6 +385,10 @@ __all__ = [
     "search_mentions",
     "search_transcripts",
     "SemanticSummaryFailedError",
+    "StudyGuideBundleError",
+    "StudyGuideBundleResult",
+    "run_study_guide_bundle",
+    "study_guide_bundle_result_to_dict",
     "semantic_summarize_episode",
     "StockLensReportFailedError",
     "StockLensReportInputError",

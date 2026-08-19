@@ -19,6 +19,7 @@ STOCK_LENS_DIR = DATA_DIR / "stock-lens"
 CACHE_DIR = DATA_DIR / "cache"
 CORPUS_DIR = DATA_DIR / "corpus"
 RESEARCH_REPORTS_DIR = DATA_DIR / "research-reports"
+STUDY_GUIDES_DIR = DATA_DIR / "study-guides"
 # Repo-root-relative evals path (independent of DATA_DIR); the single defining
 # site — smoke-review and index modules re-export it under their local names.
 EVALS_RESEARCH_SMOKE_REPORTS_DIR = Path("evals") / "research-llm-smoke" / "reports"
@@ -74,6 +75,21 @@ class StockLensSynthesisAssetPaths:
 
 @dataclass(frozen=True)
 class CorpusIndexAssetPaths:
+    json_path: Path
+    markdown_path: Path
+
+
+@dataclass(frozen=True)
+class StudyGuideBundlePaths:
+    bundle_dir: Path
+    cover_path: Path
+    summary_path: Path
+    notes_path: Path
+    guide_path: Path
+
+
+@dataclass(frozen=True)
+class StudyGuideRunAssetPaths:
     json_path: Path
     markdown_path: Path
 
@@ -536,6 +552,60 @@ def corpus_latest_episode_deterministic_workflow_run_asset_paths(
     )
 
 
+def study_guide_bundle_paths(
+    podcast_id: str, episode_ref: str, title: str
+) -> StudyGuideBundlePaths:
+    """Return the four canonical study-guide Markdown paths for one episode."""
+
+    return study_guide_bundle_paths_from_stem(
+        podcast_id,
+        f"{_safe_episode_ref(episode_ref)}__{title_slug(title, episode_ref)}",
+    )
+
+
+def study_guide_bundle_paths_from_stem(
+    podcast_id: str, identity_stem: str
+) -> StudyGuideBundlePaths:
+    """Return bundle paths for a canonical ``{episode_ref}__{title_slug}`` stem."""
+
+    if (
+        not identity_stem
+        or "/" in identity_stem
+        or "\\" in identity_stem
+        or ".." in identity_stem
+    ):
+        raise ValueError("study-guide identity stem is not a safe filename")
+    bundle_dir = (
+        STUDY_GUIDES_DIR
+        / _safe_slug(podcast_id, "podcast_id")
+        / identity_stem
+    )
+    return StudyGuideBundlePaths(
+        bundle_dir=bundle_dir,
+        cover_path=bundle_dir / "00_video_info.md",
+        summary_path=bundle_dir / "03_full_summary.md",
+        notes_path=bundle_dir / "04_learning_notes.md",
+        guide_path=bundle_dir / "07_final_study_guide.md",
+    )
+
+
+def study_guide_run_asset_paths(
+    podcast_id: str, episode_ref: str
+) -> StudyGuideRunAssetPaths:
+    """Return metadata-only study-guide run report paths."""
+
+    run_dir = (
+        CORPUS_DIR
+        / _safe_slug(podcast_id, "podcast_id")
+        / "study-guide-runs"
+    )
+    ref = _safe_episode_ref(episode_ref)
+    return StudyGuideRunAssetPaths(
+        json_path=run_dir / f"{ref}.study-guide-run.json",
+        markdown_path=run_dir / f"{ref}.study-guide-run.md",
+    )
+
+
 def latest_episode_verified_research_report_paths(
     podcast_id: str,
     episode_ref: str,
@@ -594,6 +664,7 @@ def ensure_data_directories() -> None:
         STOCK_LENS_DIR,
         CACHE_DIR,
         CORPUS_DIR,
+        STUDY_GUIDES_DIR,
     ):
         directory.mkdir(parents=True, exist_ok=True)
 

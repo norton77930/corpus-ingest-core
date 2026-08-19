@@ -1419,3 +1419,24 @@ class MentionSearchResult:
     evidence_text: str
     highlighted_text: str | None = None
     search_mode: str | None = None
+
+
+@dataclass(frozen=True)
+class StudyGuideBundleResult:
+    """Dry-run plan or confirmed study-guide bundle result."""
+
+    podcast_id: str
+    episode_ref: str
+    confirm: bool
+    run_mode: str
+    source_summary_path: str | None
+    bundle_dir: str
+    planned_reads: list[str]
+    planned_writes: list[str]
+    planned_reuses: list[str]
+    output_paths: dict[str, str]
+    report_json_path: Path | None
+    report_markdown_path: Path | None
+    reused: bool
+    warnings: list[str]
+    not_investment_advice: bool

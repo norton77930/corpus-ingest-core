@@ -42,6 +42,10 @@ class SemanticSummaryFailedError(PodcastIngestCoreError):
     """語意摘要產生或輸出寫入失敗。"""
 
 
+class StudyGuideBundleError(PodcastIngestCoreError):
+    """Study-guide bundle selection, generation, or write failed."""
+
+
 class CorpusIndexFailedError(PodcastIngestCoreError):
     """Corpus artifact index 產生或輸出寫入失敗。"""
 

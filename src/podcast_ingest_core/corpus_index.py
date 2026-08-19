@@ -33,6 +33,7 @@ SUPPORTED_ARTIFACT_FAMILIES = (
     "episode_intelligence",
     "industry_mapping",
     "external_boundary",
+    "study_guide",
 )
 from .storage import EVALS_RESEARCH_SMOKE_REPORTS_DIR as SEMANTIC_REVIEW_REPORTS_DIR
 _AUDIO_SUFFIXES = {".mp3", ".m4a", ".wav", ".aac", ".flac"}
@@ -186,6 +187,7 @@ def _build_episode_row(podcast_id: str, episode_ref: str) -> CorpusEpisodeRow:
         "episode_intelligence": _episode_intelligence_status(podcast_id, episode_ref),
         "industry_mapping": _industry_mapping_status(podcast_id, episode_ref),
         "external_boundary": _external_boundary_status(podcast_id, episode_ref),
+        "study_guide": _study_guide_status(podcast_id, episode_ref),
     }
     missing_artifacts = [
         family
@@ -416,6 +418,64 @@ def _semantic_summary_readability(path: Path) -> tuple[bool, str | None]:
     except (OSError, UnicodeError):
         return False, "semantic summary is not readable UTF-8"
     return True, None
+
+
+def _study_guide_status(podcast_id: str, episode_ref: str) -> dict[str, Any]:
+    canonical = canonical_semantic_summary_path(podcast_id, episode_ref)
+    if canonical is None:
+        return {**_missing_status(), "exists": False, "path": None}
+    stem = canonical.name.removesuffix(".semantic.md")
+    paths = storage.study_guide_bundle_paths_from_stem(podcast_id, stem)
+    bundle_dir = paths.bundle_dir
+    files = (
+        paths.cover_path,
+        paths.summary_path,
+        paths.notes_path,
+        paths.guide_path,
+    )
+    existing = [path for path in files if path.is_file()]
+    if not existing:
+        return {**_missing_status(), "exists": False, "path": None}
+    warnings: list[str] = []
+    readable = True
+    for path in existing:
+        ok, warning = _semantic_summary_readability(path)
+        if not ok:
+            readable = False
+            if warning:
+                warnings.append(warning)
+    if len(existing) < 4:
+        return {
+            "status": "partial",
+            "exists": True,
+            "path": str(bundle_dir),
+            "paths": {"bundle": str(bundle_dir)},
+            "candidate_count": len(existing),
+            "warnings": warnings,
+            "warning_count": len(warnings),
+            "readable": readable,
+        }
+    if not readable:
+        return {
+            "status": "unreadable",
+            "exists": True,
+            "path": str(bundle_dir),
+            "paths": {"bundle": str(bundle_dir)},
+            "candidate_count": 4,
+            "warnings": warnings,
+            "warning_count": len(warnings),
+            "readable": False,
+        }
+    return {
+        "status": "available",
+        "exists": True,
+        "path": str(bundle_dir),
+        "paths": {"bundle": str(bundle_dir)},
+        "candidate_count": 4,
+        "warnings": warnings,
+        "warning_count": len(warnings),
+        "readable": True,
+    }
 
 
 def _mentions_status(podcast_id: str, episode_ref: str) -> dict[str, Any]:
@@ -764,7 +824,7 @@ def _artifact_family_counts(
             status = row.artifact_status[family]["status"]
             if status == "missing":
                 bucket = "missing"
-            elif status == "unreadable":
+            elif status in {"unreadable", "partial"}:
                 bucket = "unreadable"
             else:
                 bucket = "available"

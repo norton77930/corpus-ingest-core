@@ -451,16 +451,23 @@ def test_generate_corpus_index_discovers_supported_episode_artifacts(
     assert ep672["artifact_status"]["episode_intelligence"]["report_status"] == "final"
     assert ep672["artifact_status"]["industry_mapping"]["node_count"] == 1
     assert ep672["artifact_status"]["external_boundary"]["candidate_count"] == 1
-    assert ep672["missing_artifacts"] == []
+    assert ep672["missing_artifacts"] == ["study_guide"]
+    assert ep672["artifact_status"]["study_guide"]["status"] == "missing"
     assert ep673["artifact_status"]["extractive_summary"]["status"] == "available"
     assert "transcript" in ep673["missing_artifacts"]
+    assert "study_guide" in ep673["missing_artifacts"]
     assert payload["artifact_family_counts"]["transcript"] == {
         "available": 1,
         "missing": 1,
         "unreadable": 0,
     }
+    assert payload["artifact_family_counts"]["study_guide"] == {
+        "available": 0,
+        "missing": 2,
+        "unreadable": 0,
+    }
     assert (
-        "| EP672 | Alpha | valid | available | passed | 2 | final | final | final | none | 0 |"
+        "| EP672 | Alpha | valid | available | passed | 2 | final | final | final | study_guide | 0 |"
         in markdown
     )
 
@@ -504,6 +511,7 @@ def test_generate_corpus_index_reports_missing_artifact_families(monkeypatch, tm
         "episode_intelligence",
         "industry_mapping",
         "external_boundary",
+        "study_guide",
     ]
 
 

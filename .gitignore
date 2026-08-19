@@ -10,6 +10,7 @@ data/external/
 data/stock-lens/
 data/corpus/
 data/notes/
+data/study-guides/
 .env
 .env.*
 !.env.example

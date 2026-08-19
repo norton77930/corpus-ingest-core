@@ -31,6 +31,7 @@ EXPECTED_WRITER_MODULES = {
     "corpus_local_transcription_runner.py",
     "corpus_remediation_runner.py",
     "corpus_semantic_remediation_runner.py",
+    "study_guide_bundle.py",
 }
 
 
