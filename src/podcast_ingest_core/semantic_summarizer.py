@@ -22,6 +22,7 @@ from .llm_provider import (
 )
 from .models import SummaryAsset
 from .storage import semantic_summary_asset_path
+from .summary_profiles import SummaryProfile, resolve_summary_profile
 from .canonical_transcript import resolve_canonical_transcript_asset_paths
 from .episode_claim import episode_writer_claimed
 from .validator import validate_transcript
@@ -62,6 +63,7 @@ def semantic_summarize_episode(
     require_exact_api_cost_ack(api_cost_ack)
 
     profile = load_podcast_profile(podcast_id)
+    summary_profile = resolve_summary_profile(profile.summary_profile)
     validation = validate_transcript(podcast_id, episode_ref)
     _raise_for_invalid_transcript(validation.status, validation.problems, allow_partial)
 
@@ -107,6 +109,7 @@ def semantic_summarize_episode(
     )
     if not chunks:
         markdown = _render_empty_markdown(
+            summary_profile=summary_profile,
             display_name=profile.display_name,
             podcast_id=podcast_id,
             episode_ref=episode_ref,
@@ -142,6 +145,7 @@ def semantic_summarize_episode(
         reasoning_effort=reasoning_effort,
         read_timeout_seconds=read_timeout_seconds,
         api_cost_ack=api_cost_ack,
+        summary_profile=summary_profile.name,
     )
     try:
         if progress_callback is not None:
@@ -171,6 +175,7 @@ def semantic_summarize_episode(
         raise SemanticSummaryFailedError(f"語意摘要產生失敗：{exc}") from exc
 
     markdown = _render_semantic_markdown(
+        summary_profile=summary_profile,
         display_name=profile.display_name,
         podcast_id=podcast_id,
         episode_ref=episode_ref,
@@ -212,6 +217,7 @@ def _build_provider(
     reasoning_effort: str | None,
     read_timeout_seconds: int,
     api_cost_ack: str,
+    summary_profile: str,
 ) -> SemanticSummaryProvider:
     return create_provider(
         provider,
@@ -221,6 +227,7 @@ def _build_provider(
         reasoning_effort=reasoning_effort,
         read_timeout_seconds=read_timeout_seconds,
         api_cost_ack=api_cost_ack,
+        summary_profile=summary_profile,
     )
 
 
@@ -375,6 +382,7 @@ def _build_chunk(index: int, segments: list[dict[str, Any]]) -> dict[str, Any]:
 
 def _render_empty_markdown(
     *,
+    summary_profile: SummaryProfile,
     display_name: str,
     podcast_id: str,
     episode_ref: str,
@@ -386,6 +394,7 @@ def _render_empty_markdown(
     model_name: str | None,
 ) -> str:
     return _render_semantic_markdown(
+        summary_profile=summary_profile,
         display_name=display_name,
         podcast_id=podcast_id,
         episode_ref=episode_ref,
@@ -403,6 +412,7 @@ def _render_empty_markdown(
 
 def _render_semantic_markdown(
     *,
+    summary_profile: SummaryProfile,
     display_name: str,
     podcast_id: str,
     episode_ref: str,
@@ -435,8 +445,7 @@ def _render_semantic_markdown(
         "",
         "## 摘要限制",
         "",
-        "本摘要由 LLM 根據逐字稿產生。所有重點應盡量附 timestamp evidence。",
-        "本摘要不構成投資建議。",
+        *summary_profile.limitation_lines,
         "",
     ]
     if validation_warnings:

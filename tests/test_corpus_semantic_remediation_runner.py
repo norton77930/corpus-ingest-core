@@ -993,6 +993,7 @@ def test_confirmed_summary_uses_real_semantic_core_with_mock_provider_once(
         reasoning_effort,
         read_timeout_seconds,
         api_cost_ack,
+        summary_profile,
     ):
         provider_calls.append(
             {
@@ -1001,6 +1002,7 @@ def test_confirmed_summary_uses_real_semantic_core_with_mock_provider_once(
                 "base_url": base_url,
                 "api_key_env": api_key_env,
                 "api_cost_ack": api_cost_ack,
+                "summary_profile": summary_profile,
             }
         )
         return FakeProvider()
@@ -1037,6 +1039,9 @@ def test_confirmed_summary_uses_real_semantic_core_with_mock_provider_once(
     assert provider_calls[0]["model"] == "safe-model"
     assert provider_calls[0]["base_url"].startswith("https://endpoint.invalid")
     assert provider_calls[0]["api_key_env"] == "OPENAI_API_KEY"
+    # Spec 037: gooaye has no summary_profile key, so the finance shape reaches
+    # the factory unchanged through the remediation runner as well.
+    assert provider_calls[0]["summary_profile"] == "finance"
     assert review_calls == []
     assert progress_events
     assert len(result.rows[0].output_paths) == 1

@@ -212,3 +212,7 @@ class XVideoIngestDependencyError(PodcastIngestCoreError):
 
 class XVideoIngestFailedError(PodcastIngestCoreError):
     """X 影片取得流程失敗。"""
+
+
+class UnknownSummaryProfileError(PodcastIngestCoreError):
+    """設定檔指定了不存在的 summary_profile。"""

@@ -8,6 +8,7 @@ import yaml
 
 from .errors import UnsupportedSourceTypeError
 from .models import PodcastProfile
+from .summary_profiles import UNSET as _SUMMARY_PROFILE_UNSET, resolve_summary_profile
 
 
 DEFAULT_CONFIG_PATH = Path("config/podcasts.yaml")
@@ -86,6 +87,13 @@ def _parse_profile(item: Any) -> PodcastProfile:
     source_type = _optional_text(item, "source_type") or RSS_SOURCE_TYPE
     is_rss = source_type == RSS_SOURCE_TYPE
 
+    # 刻意不走 _optional_text：它會把 `summary_profile: 123` 靜默變成 None。
+    # 也刻意用哨兵而非 None 當預設，因為 YAML 的 `summary_profile:` 是操作者
+    # 寫了 key 卻留空，和完全沒寫這個 key 是兩件事；後者才該回退到預設。
+    summary_profile = resolve_summary_profile(
+        item.get("summary_profile", _SUMMARY_PROFILE_UNSET)
+    ).name
+
     return PodcastProfile(
         podcast_id=podcast_id,
         display_name=_required_text(item, "display_name"),
@@ -97,6 +105,7 @@ def _parse_profile(item: Any) -> PodcastProfile:
             else _optional_text(item, "default_episode_prefix")
         ),
         source_type=source_type,
+        summary_profile=summary_profile,
     )
 
 

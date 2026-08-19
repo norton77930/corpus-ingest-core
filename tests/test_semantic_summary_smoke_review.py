@@ -532,3 +532,68 @@ def test_single_review_inspector_rejects_valid_external_review_path(
 
     assert inspection.review_status == "needs_review"
     assert inspection.review_payload is None
+
+
+# --- Spec 037: the disclaimer was never the gate -----------------------------
+
+_LEARNING_NOTES_SUMMARY = "\n".join(
+    [
+        "# @Raytar (X) - 2071290493581840707 語意摘要",
+        "",
+        "## Metadata",
+        "",
+        "- Podcast ID: x-raytar",
+        "- Episode: 2071290493581840707",
+        "- Transcript status: valid",
+        "- Summary mode: semantic-llm",
+        "- Provider: openai-compatible",
+        "- Model: GB10",
+        "",
+        "## 摘要限制",
+        "",
+        "本摘要由 LLM 根據逐字稿產生。所有重點應盡量附 timestamp evidence。",
+        "本摘要僅整理影片內容，結論請回到 timestamp 驗證。",
+        "",
+        "## 本片主題與適合誰看",
+        "",
+        "- 這支影片講 prompt engineering `[00:00:01 - 00:00:10]`",
+        "",
+        "## Chunk Summaries",
+        "",
+        "### Chunk 1",
+        "",
+        "- chunk summary",
+        "",
+    ]
+)
+
+
+def _prohibited_advice_status(markdown: str) -> str:
+    from podcast_ingest_core.semantic_review_artifact import (
+        evaluate_semantic_review_bytes,
+    )
+
+    evaluation = evaluate_semantic_review_bytes(
+        summary_bytes=markdown.encode("utf-8"),
+        semantic_summary_path=Path("data/summaries/x-raytar/example.semantic.md"),
+    )
+    checks = {check["name"]: check["status"] for check in evaluation.checks}
+    return checks["prohibited_advice"]
+
+
+def test_learning_notes_summary_passes_without_an_investment_disclaimer():
+    """Spec 037's load-bearing claim: ``matched_investment_advice_guard`` is a
+    prohibition detector, not a disclaimer requirement. Dropping the disclaimer
+    for a profile whose content has no market claim does not weaken the gate."""
+
+    assert "投資" not in _LEARNING_NOTES_SUMMARY
+    assert _prohibited_advice_status(_LEARNING_NOTES_SUMMARY) == "pass"
+
+
+def test_learning_notes_summary_still_fails_when_it_carries_actual_advice():
+    """And the profile is not an escape hatch: the check reads rendered Markdown
+    and never sees which profile produced it."""
+
+    with_advice = _LEARNING_NOTES_SUMMARY + "\n- 立即買進 ACME。\n"
+
+    assert _prohibited_advice_status(with_advice) == "fail"

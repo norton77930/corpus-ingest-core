@@ -22,6 +22,8 @@ def test_loads_registered_profiles_from_yaml():
     assert profile.language == "zh"
     assert profile.default_episode_prefix == "EP"
     assert profile.source_type == "rss"
+    # Spec 037: no summary_profile key means the finance shape, unchanged.
+    assert profile.summary_profile == "finance"
 
     # Spec 036: a non-RSS source carries no feed fields.
     x_profile = profiles["x-raytar"]
@@ -29,6 +31,8 @@ def test_loads_registered_profiles_from_yaml():
     assert x_profile.language == "en"
     assert x_profile.rss_url is None
     assert x_profile.default_episode_prefix is None
+    # Spec 037: AI-teaching content, so the summary shape is learning notes.
+    assert x_profile.summary_profile == "learning-notes"
 
 
 def test_package_exports_required_core_functions():

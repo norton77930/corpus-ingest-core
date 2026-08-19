@@ -89,3 +89,124 @@ podcasts:
 
     with pytest.raises(ValueError, match="language"):
         load_podcast_profiles(config_path)
+
+
+# --- Spec 037: summary_profile -----------------------------------------------
+
+
+def test_profile_without_summary_profile_defaults_to_finance(tmp_path):
+    """Every profile written before Spec 037 must keep the finance shape."""
+
+    config_path = _write_config(
+        tmp_path,
+        """
+podcasts:
+  gooaye:
+    display_name: Gooaye
+    rss_url: https://example.invalid/feed.xml
+    language: zh
+    default_episode_prefix: EP
+""",
+    )
+
+    assert load_podcast_profiles(config_path)["gooaye"].summary_profile == "finance"
+
+
+def test_summary_profile_is_independent_of_source_type(tmp_path):
+    """An RSS source may want learning notes; that is the whole point of the
+    field being separate from ``source_type``."""
+
+    config_path = _write_config(
+        tmp_path,
+        """
+podcasts:
+  x-raytar:
+    display_name: "@Raytar (X)"
+    source_type: x-video
+    language: en
+    summary_profile: learning-notes
+  lecture-feed:
+    display_name: Lecture Feed
+    rss_url: https://example.invalid/feed.xml
+    language: en
+    default_episode_prefix: EP
+    summary_profile: learning-notes
+""",
+    )
+
+    profiles = load_podcast_profiles(config_path)
+
+    assert profiles["x-raytar"].summary_profile == "learning-notes"
+    assert profiles["lecture-feed"].source_type == "rss"
+    assert profiles["lecture-feed"].summary_profile == "learning-notes"
+
+
+def test_unknown_summary_profile_is_refused_at_load(tmp_path):
+    """A typo must fail before it can cost an LLM call, and must name both the
+    bad value and the known ones."""
+
+    from podcast_ingest_core.errors import UnknownSummaryProfileError
+
+    config_path = _write_config(
+        tmp_path,
+        """
+podcasts:
+  x-raytar:
+    display_name: "@Raytar (X)"
+    source_type: x-video
+    language: en
+    summary_profile: leraning-notes
+""",
+    )
+
+    with pytest.raises(UnknownSummaryProfileError) as excinfo:
+        load_podcast_profiles(config_path)
+
+    message = str(excinfo.value)
+    assert "leraning-notes" in message
+    assert "learning-notes" in message
+    assert "finance" in message
+
+
+def test_non_string_summary_profile_is_refused_not_silently_defaulted(tmp_path):
+    """``_optional_text`` turns a non-string into None. Routing summary_profile
+    through it would make ``summary_profile: 123`` silently mean finance."""
+
+    from podcast_ingest_core.errors import UnknownSummaryProfileError
+
+    config_path = _write_config(
+        tmp_path,
+        """
+podcasts:
+  x-raytar:
+    display_name: "@Raytar (X)"
+    source_type: x-video
+    language: en
+    summary_profile: 123
+""",
+    )
+
+    with pytest.raises(UnknownSummaryProfileError):
+        load_podcast_profiles(config_path)
+
+
+def test_explicit_null_summary_profile_is_refused(tmp_path):
+    """An operator who writes the key and leaves it empty wrote something
+    deliberate. Treating that as "unconfigured" was the last silent path."""
+
+    from podcast_ingest_core.errors import UnknownSummaryProfileError
+
+    config_path = _write_config(
+        tmp_path,
+        """
+podcasts:
+  x-raytar:
+    display_name: "@Raytar (X)"
+    source_type: x-video
+    language: en
+    summary_profile:
+""",
+    )
+
+    with pytest.raises(UnknownSummaryProfileError):
+        load_podcast_profiles(config_path)

@@ -10,3 +10,5 @@ podcasts:
     display_name: "@Raytar (X)"
     source_type: x-video
     language: en
+    # 內容是 AI 教學，不是財經；摘要形狀因此與來源型別分開設定。
+    summary_profile: learning-notes
