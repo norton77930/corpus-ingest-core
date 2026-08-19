@@ -231,3 +231,24 @@ def test_download_audio_refuses_a_non_rss_source_with_a_source_aware_error():
 
     with pytest.raises(UnsupportedSourceTypeError, match="x-video"):
         downloader.download_audio("x-raytar", "2071290493581840707")
+
+
+def test_download_audio_refuses_youtube_and_names_the_ingest_path(monkeypatch):
+    from podcast_ingest_core import config, downloader
+    from podcast_ingest_core.errors import UnsupportedSourceTypeError
+    from podcast_ingest_core.models import PodcastProfile
+
+    monkeypatch.setattr(
+        config,
+        "load_podcast_profile",
+        lambda podcast_id, path=None: PodcastProfile(
+            podcast_id=podcast_id,
+            display_name="yt",
+            rss_url=None,
+            language="en",
+            default_episode_prefix=None,
+            source_type="yt-video",
+        ),
+    )
+    with pytest.raises(UnsupportedSourceTypeError, match="run_youtube_video_ingest"):
+        downloader.download_audio("yt-foo-bar", "dQw4w9WgXcQ")

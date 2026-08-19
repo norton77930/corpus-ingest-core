@@ -284,7 +284,8 @@ def _row_for_episode_transcript(
         audio_status=audio_status,
         audio_path=audio_path,
     )
-    planned_writes = _planned_transcript_writes(podcast_id, episode_ref)
+    write_title = _safe_text(episode_payload.get("title"), episode_ref)
+    planned_writes = _planned_transcript_writes(podcast_id, episode_ref, write_title)
     planned_reads = [*source_plan_reads]
     if audio_path is not None:
         planned_reads.append(str(audio_path))
@@ -292,7 +293,7 @@ def _row_for_episode_transcript(
         action_id=action_id,
         podcast_id=podcast_id,
         episode_ref=episode_ref,
-        title=episode_ref,
+        title=write_title,
         transcript_status=transcript_status,
         audio_status=audio_status,
         audio_path=str(audio_path) if audio_path else None,
@@ -415,6 +416,7 @@ def _execute_confirmed_rows(
                 vad_filter=vad_filter,
                 force=False,
                 audio_path=Path(row.audio_path),
+                title=row.title,
             )
         except Exception as exc:  # noqa: BLE001 - record per-episode failure safely.
             updated_rows.append(
@@ -594,8 +596,11 @@ def _local_audio_path(audio_payload: dict[str, Any]) -> Path | None:
 def _planned_transcript_writes(
     podcast_id: str,
     episode_ref: str,
+    title: str | None = None,
 ) -> list[str]:
-    paths = storage.transcript_asset_paths(podcast_id, episode_ref, episode_ref)
+    paths = storage.transcript_asset_paths(
+        podcast_id, episode_ref, title or episode_ref
+    )
     return [str(paths.json_path), str(paths.text_path), str(paths.srt_path)]
 
 

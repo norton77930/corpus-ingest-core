@@ -167,6 +167,16 @@ def test_package_exports_required_core_functions():
             "reasoning_effort",
             "read_timeout_seconds",
         ],
+        "run_youtube_video_ingest": [
+            "url",
+            "confirm",
+            "title",
+            "model",
+            "device",
+            "compute_type",
+            "force",
+            "work_dir",
+        ],
         "run_research_workflow": [
             "podcast_id",
             "episode_ref",

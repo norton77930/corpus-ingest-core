@@ -60,7 +60,7 @@ _EXECUTABLE_STAGES = {
     STAGE_LOCAL_TRANSCRIPTION,
     STAGE_DETERMINISTIC_REMEDIATION,
 }
-_SAFE_EPISODE_REF_PATTERN = re.compile(r'^[A-Za-z0-9][A-Za-z0-9-]{0,127}$')
+
 _SAFE_STAGE_NAME_PATTERN = re.compile(r'^[a-z][a-z0-9_]{0,63}$')
 _WORKFLOW_ROW_REASONS = frozenset(
     {
@@ -1067,7 +1067,7 @@ def _safe_stage_name(value: Any) -> str:
 def _safe_episode_ref(value: Any) -> str | None:
     if not isinstance(value, str):
         return None
-    if not _SAFE_EPISODE_REF_PATTERN.fullmatch(value):
+    if not storage.is_safe_episode_ref(value, max_length=128):
         return None
     return value
 

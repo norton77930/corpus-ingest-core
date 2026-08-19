@@ -218,5 +218,21 @@ class XVideoIngestFailedError(PodcastIngestCoreError):
     """X 影片取得流程失敗。"""
 
 
+class VideoAcquireDependencyError(PodcastIngestCoreError):
+    """缺少共用影片取得所需的套件。"""
+
+
+class VideoAcquireFailedError(PodcastIngestCoreError):
+    """共用影片取得（metadata / 下載 / 抽音）失敗。"""
+
+
+class YoutubeVideoIngestDependencyError(PodcastIngestCoreError):
+    """缺少取得 YouTube 影片所需的套件。"""
+
+
+class YoutubeVideoIngestFailedError(PodcastIngestCoreError):
+    """YouTube 影片取得流程失敗。"""
+
+
 class UnknownSummaryProfileError(PodcastIngestCoreError):
     """設定檔指定了不存在的 summary_profile。"""

@@ -750,7 +750,7 @@ def test_dry_run_planned_writes_match_local_transcriber_output_paths(
 
     result = run_corpus_local_transcription("gooaye")
 
-    paths = storage.transcript_asset_paths("gooaye", "EP001", "EP001")
+    paths = storage.transcript_asset_paths("gooaye", "EP001", "Human Title")
     assert result.rows[0].planned_writes == [
         str(paths.json_path),
         str(paths.text_path),
@@ -795,6 +795,7 @@ def test_confirmed_execution_passes_explicit_audio_path_and_force_false(
             "vad_filter": False,
             "force": False,
             "audio_path": audio,
+            "title": "Alpha",
         }
     ]
 
@@ -1029,7 +1030,7 @@ def test_outputs_do_not_leak_raw_transcript_prompt_llm_secret_or_traceback(
         [
             _episode_payload(
                 "EP001",
-                title="Bearer abc123 TOKEN=title-secret",
+                title="Safe Title",
                 audio_path=str(audio),
                 warnings=[
                     {

@@ -24,7 +24,7 @@ STUDY_GUIDES_DIR = DATA_DIR / "study-guides"
 # site — smoke-review and index modules re-export it under their local names.
 EVALS_RESEARCH_SMOKE_REPORTS_DIR = Path("evals") / "research-llm-smoke" / "reports"
 _SAFE_SLUG_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
-_SAFE_EPISODE_REF_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]*$")
+_SAFE_EPISODE_REF_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]*$")
 _WINDOWS_ILLEGAL_FILENAME_CHARS = re.compile(r'[<>:"/\\|?*]')
 _WHITESPACE_PATTERN = re.compile(r"\s+")
 _MAX_TITLE_SLUG_LENGTH = 80
@@ -675,9 +675,23 @@ def _safe_slug(value: str, field_name: str) -> str:
     return value
 
 
-def _safe_episode_ref(value: str) -> str:
+def is_safe_episode_ref(value: object, *, max_length: int | None = None) -> bool:
+    """Return whether ``value`` is a legal corpus episode_ref.
+
+    The alphabet is A-Z, a-z, 0-9, hyphen, and underscore. Underscore is
+    required for YouTube video ids. It is not a path separator.
+    """
+
     if not isinstance(value, str) or not _SAFE_EPISODE_REF_PATTERN.fullmatch(value):
-        raise ValueError("episode_ref 必須只包含 A-Z、a-z、0-9 與 -。")
+        return False
+    if max_length is not None and len(value) > max_length:
+        return False
+    return True
+
+
+def _safe_episode_ref(value: str) -> str:
+    if not is_safe_episode_ref(value):
+        raise ValueError("episode_ref 必須只包含 A-Z、a-z、0-9、- 與 _。")
     return value
 
 

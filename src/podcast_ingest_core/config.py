@@ -68,10 +68,15 @@ def require_rss_profile(
 
     profile = load_podcast_profile(podcast_id, path)
     if profile.source_type != RSS_SOURCE_TYPE:
+        ingest_hint = (
+            "請改用 scripts/run_youtube_video_ingest.py。"
+            if profile.source_type == "yt-video"
+            else "請改用該來源自己的擷取流程。"
+        )
         raise UnsupportedSourceTypeError(
             f"{podcast_id} 的 source_type 是 {profile.source_type}，不是 RSS 來源。"
             "list_episodes、get_episode 與 download_audio 只適用於 RSS podcast；"
-            "請改用該來源自己的擷取流程。"
+            f"{ingest_hint}"
         )
     return profile
 

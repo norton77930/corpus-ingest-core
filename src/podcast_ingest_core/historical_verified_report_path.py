@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 from dataclasses import asdict
-import re
 from typing import Any
 
 from .corpus_episode_completion_workflow_runner import (
@@ -17,6 +16,7 @@ from .errors import (
     VerifiedResearchReportCatalogInputError,
 )
 from .models import HistoricalVerifiedReportNextStep
+from . import storage
 from .verified_research_report_catalog import (
     discover_eligible_report_summaries,
     require_safe_podcast_id,
@@ -142,6 +142,6 @@ def _validate_episode_ref(value: str) -> str:
             "episode_ref rejects reserved selectors"
         )
     # Same episode_ref character class as catalog safe episode refs (no latest/next).
-    if re.fullmatch(r"^[A-Za-z0-9][A-Za-z0-9-]*$", normalized) is None:
+    if not storage.is_safe_episode_ref(normalized):
         raise HistoricalVerifiedReportPathInputError("episode_ref is invalid")
     return normalized

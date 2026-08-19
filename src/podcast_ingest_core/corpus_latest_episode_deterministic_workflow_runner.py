@@ -48,7 +48,8 @@ _EXECUTABLE_STAGES = {
     STAGE_DETERMINISTIC_REMEDIATION,
 }
 _MAX_REMEDIATION_ACTIONS = 5
-_SAFE_IDENTIFIER = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]{0,127}$")
+_SAFE_PODCAST_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,127}$")
+_SAFE_FAILURE_CATEGORY = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{0,127}$")
 _SAFE_ACTION_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9:_-]{0,255}$")
 _API_KEY_LIKE_PATTERN = re.compile(r"\bsk-[A-Za-z0-9_-]+", re.IGNORECASE)
 _SENSITIVE_ASSIGNMENT_PATTERN = re.compile(
@@ -322,7 +323,7 @@ def _resolve_latest_episode(
             type(exc).__name__,
         )
     value = getattr(result, "resolved_episode_ref", None)
-    if not isinstance(value, str) or not _SAFE_IDENTIFIER.fullmatch(value):
+    if not isinstance(value, str) or not storage.is_safe_episode_ref(value, max_length=128):
         return None, None
     return value, None
 
@@ -685,7 +686,7 @@ def _write_run_report(result: CorpusLatestEpisodeDeterministicWorkflowRunResult)
 
 
 def _normalize_podcast_id(value: str) -> str:
-    if not isinstance(value, str) or not _SAFE_IDENTIFIER.fullmatch(value):
+    if not isinstance(value, str) or not _SAFE_PODCAST_ID.fullmatch(value):
         raise CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError(
             "podcast_id is invalid"
         )
@@ -697,7 +698,7 @@ def _safe_status(value: object) -> str:
 
 
 def _safe_identifier(value: object) -> str | None:
-    if isinstance(value, str) and _SAFE_IDENTIFIER.fullmatch(value):
+    if isinstance(value, str) and _SAFE_FAILURE_CATEGORY.fullmatch(value):
         return value
     return None
 

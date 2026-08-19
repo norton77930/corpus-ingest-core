@@ -2,15 +2,14 @@
 
 from __future__ import annotations
 
-import re
 from typing import Any, Callable
 
 from . import episode_verified_research_report_workflow_runner as core
+from . import storage
 from .serialization import to_jsonable
 
 _TOOL_ERROR_TYPE = "EpisodeVerifiedResearchReportWorkflowRunnerFailedError"
 _TOOL_ERROR_MESSAGE = "episode verified research report workflow command failed"
-_SAFE_EPISODE_REF_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]{0,127}$")
 
 
 def dispatch(
@@ -44,7 +43,7 @@ def request_rejected_early(*, confirm: bool, episode_ref: str) -> bool:
         return True
     if episode_ref.strip().casefold() in {"latest", "next"}:
         return True
-    if confirm and not _SAFE_EPISODE_REF_PATTERN.fullmatch(episode_ref.strip()):
+    if confirm and not storage.is_safe_episode_ref(episode_ref.strip(), max_length=128):
         return True
     return False
 

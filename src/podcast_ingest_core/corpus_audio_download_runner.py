@@ -11,6 +11,7 @@ from .downloader import download_audio
 from .errors import CorpusAudioDownloadRunnerFailedError
 from .run_report_io import write_part_staged_report_pair
 from .models import (
+    VIDEO_SEED_SOURCES,
     CorpusAudioDownloadOutcomeCounts,
     CorpusAudioDownloadRunFilter,
     CorpusAudioDownloadRunResult,
@@ -293,6 +294,7 @@ def _row_for_episode_audio(
         confirmed=confirmed,
         episode_ref=episode_ref,
         audio_status=audio_status,
+        episode_payload=episode_payload,
     )
     return CorpusAudioDownloadRunRow(
         action_id=action_id,
@@ -339,6 +341,19 @@ def _row_for_non_audio_action(
     )
 
 
+def _video_seed_source(episode_payload: dict[str, Any]) -> str | None:
+    source_metadata = episode_payload.get("source_metadata")
+    if not isinstance(source_metadata, dict):
+        return None
+    episode_seed = source_metadata.get("episode_seed")
+    if not isinstance(episode_seed, dict):
+        return None
+    seed_source = episode_seed.get("seed_source")
+    if seed_source in VIDEO_SEED_SOURCES:
+        return str(seed_source)
+    return None
+
+
 def _audio_outcome(
     *,
     action_payload: dict[str, Any] | None,
@@ -346,10 +361,21 @@ def _audio_outcome(
     confirmed: bool,
     episode_ref: str,
     audio_status: str,
+    episode_payload: dict[str, Any] | None = None,
 ) -> tuple[str, str]:
     if filters.episode_ref is not None and filters.episode_ref != episode_ref:
         return "skipped", "episode filter does not match"
     unsafe_status = "rejected" if confirmed else "skipped"
+    video_source = (
+        _video_seed_source(episode_payload) if episode_payload is not None else None
+    )
+    if video_source == "x-video":
+        return unsafe_status, "audio is recovered through scripts/run_x_video_ingest.py"
+    if video_source == "yt-video":
+        return (
+            unsafe_status,
+            "audio is recovered through scripts/run_youtube_video_ingest.py",
+        )
     if audio_status != AUDIO_STATUS_MISSING:
         return unsafe_status, f"audio status is {audio_status}"
     if action_payload is None:

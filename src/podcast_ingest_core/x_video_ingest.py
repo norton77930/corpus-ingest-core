@@ -14,7 +14,6 @@ import shutil
 import tempfile
 from typing import Any
 from urllib.parse import urlparse
-import wave
 
 from . import storage
 from .config import load_podcast_profile
@@ -25,6 +24,7 @@ from .errors import (
 )
 from .models import CorpusEpisodeSeed
 from .transcriber import transcribe_episode
+from . import video_acquire
 
 
 X_SOURCE_TYPE = "x-video"
@@ -326,105 +326,52 @@ def _registration_problem(podcast_id: str) -> str | None:
 
 
 def _load_yt_dlp():
-    try:
-        import yt_dlp
-    except ImportError as exc:  # pragma: no cover - 依賴缺失才會走到
-        raise XVideoIngestDependencyError(
-            "需要 yt-dlp 才能取得 X 影片，請先安裝：pip install yt-dlp"
-        ) from exc
-    return yt_dlp
+    return video_acquire._load_yt_dlp(XVideoIngestDependencyError)
 
 
 def _load_av():
-    try:
-        import av
-    except ImportError as exc:  # pragma: no cover - 依賴缺失才會走到
-        raise XVideoIngestDependencyError(
-            "需要 PyAV 才能抽出音軌，請先安裝：pip install av"
-        ) from exc
-    return av
+    return video_acquire._load_av(XVideoIngestDependencyError)
 
 
 def _resolve_metadata(url: str) -> dict[str, Any]:
     """只取 metadata，不下載影片。這是 dry-run 得以成立的原因。"""
 
-    yt_dlp = _load_yt_dlp()
-    options = {"quiet": True, "no_warnings": True, "skip_download": True}
-    with yt_dlp.YoutubeDL(options) as client:
-        info = client.extract_info(url, download=False)
-    if not isinstance(info, dict):
-        raise XVideoIngestFailedError(f"無法解析來源 metadata：{url}")
-    return info
+    return video_acquire.resolve_metadata(
+        url,
+        failed_error=XVideoIngestFailedError,
+        dependency_error=XVideoIngestDependencyError,
+    )
 
 
 def _download_video(url: str, target_dir: Path) -> Path:
     """以 guest token 下載；不帶任何登入憑證。"""
 
-    yt_dlp = _load_yt_dlp()
-    target_dir.mkdir(parents=True, exist_ok=True)
-    options = {
-        "quiet": True,
-        "no_warnings": True,
-        "outtmpl": str(target_dir / "%(id)s.%(ext)s"),
-    }
-    with yt_dlp.YoutubeDL(options) as client:
-        info = client.extract_info(url, download=True)
-        if not isinstance(info, dict):
-            raise XVideoIngestFailedError(f"下載失敗：{url}")
-        return _downloaded_path(client, info)
+    return video_acquire.download_video(
+        url,
+        target_dir,
+        failed_error=XVideoIngestFailedError,
+        dependency_error=XVideoIngestDependencyError,
+        load_yt_dlp=_load_yt_dlp,
+    )
 
 
 def _downloaded_path(client, info: dict[str, Any]) -> Path:
-    """回傳 yt-dlp 實際寫出的檔案路徑。
-
-    有 ffmpeg 時 yt-dlp 預設會合併 bestvideo+bestaudio，合併後容器的副檔名
-    可能與 ``prepare_filename`` 推測的不同；那會回一個不存在的路徑，接著在
-    抽音軌時才爆掉。``requested_downloads`` 記的是真正寫出的檔案，優先採用。
-    """
-
-    downloads = info.get("requested_downloads")
-    if isinstance(downloads, list) and downloads and isinstance(downloads[0], dict):
-        filepath = downloads[0].get("filepath")
-        if filepath:
-            return Path(filepath)
-    return Path(client.prepare_filename(info))
+    return video_acquire.downloaded_path(client, info)
 
 
 def _extract_audio(video_path: Path, audio_path: Path) -> None:
     """抽出 16 kHz 單聲道 PCM WAV，也就是 faster-whisper 要的格式。"""
 
-    av = _load_av()
-    container = av.open(str(video_path))
-    try:
-        audio_stream = next(
-            (stream for stream in container.streams if stream.type == "audio"), None
-        )
-        if audio_stream is None:
-            raise XVideoIngestFailedError(f"影片沒有音軌：{video_path}")
-
-        resampler = av.audio.resampler.AudioResampler(
-            format="s16", layout="mono", rate=16000
-        )
-        with wave.open(str(audio_path), "wb") as wav:
-            wav.setnchannels(1)
-            wav.setsampwidth(2)
-            wav.setframerate(16000)
-            for packet in container.demux(audio_stream):
-                for frame in packet.decode():
-                    _write_resampled(wav, resampler.resample(frame))
-            _write_resampled(wav, resampler.resample(None))
-    finally:
-        container.close()
+    video_acquire.extract_audio(
+        video_path,
+        audio_path,
+        failed_error=XVideoIngestFailedError,
+        dependency_error=XVideoIngestDependencyError,
+    )
 
 
 def _write_resampled(wav, resampled) -> None:
-    if not resampled:
-        return
-    if not isinstance(resampled, list):
-        resampled = [resampled]
-    for frame in resampled:
-        samples = frame.to_ndarray().astype("int16", copy=False)
-        wav.writeframes(samples.reshape(-1).tobytes())
+    video_acquire.write_resampled(wav, resampled)
 
 
 def _resolve_title(

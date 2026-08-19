@@ -69,7 +69,7 @@ from .verified_research_report import (
 _RUN_MODE_DRY_RUN = "dry_run"
 _RUN_MODE_CONFIRMED = "confirmed"
 _SAFE_PODCAST_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,127}$")
-_SAFE_EPISODE_REF = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]{0,127}$")
+
 _SAFE_DEPENDENCY = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
 _SAFE_ENVIRONMENT_NAME = re.compile(r"^[A-Z_][A-Z0-9_]{0,127}$")
 _SAFE_STOCK_QUERY = re.compile(r"^[^\x00-\x1f?#]{1,128}$")
@@ -1257,7 +1257,7 @@ def _normalize_expected_episode_ref(value: str | None) -> str | None:
         return None
     if (
         not isinstance(value, str)
-        or not _SAFE_EPISODE_REF.fullmatch(value)
+        or not storage.is_safe_episode_ref(value, max_length=128)
         or value.casefold() == DEFAULT_SELECTOR
     ):
         raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("expected_episode_ref is invalid")

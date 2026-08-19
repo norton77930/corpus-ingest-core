@@ -840,7 +840,7 @@ def _is_safe_podcast_id(value: str) -> bool:
 
 def _is_safe_episode_ref(value: str) -> bool:
     return (
-        storage._SAFE_EPISODE_REF_PATTERN.fullmatch(value) is not None
+        storage.is_safe_episode_ref(value)
         and value.casefold() not in _RESERVED_EPISODE_REFS
     )
 

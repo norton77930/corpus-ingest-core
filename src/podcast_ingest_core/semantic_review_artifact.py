@@ -210,7 +210,7 @@ def parse_semantic_review_filename(
 
     safe_podcast = storage.title_slug(podcast_id, "podcast")
     if episode_ref is None:
-        episode_pattern = r"(?P<episode>[A-Za-z0-9][A-Za-z0-9-]{0,127})"
+        episode_pattern = r"(?P<episode>[A-Za-z0-9][A-Za-z0-9_-]{0,127})"
     else:
         episode_pattern = re.escape(storage.title_slug(episode_ref, "episode"))
     match = re.fullmatch(

@@ -1312,8 +1312,13 @@ def _normalize_stock_query(value: str | None) -> str | None:
 
 
 def _validate_identifier(value: str, field: str, *, lower_slug: bool = False) -> None:
-    pattern = r"[a-z0-9][a-z0-9-]*" if lower_slug else r"[A-Za-z0-9][A-Za-z0-9-]{0,127}"
-    if not isinstance(value, str) or not re.fullmatch(pattern, value):
+    if not isinstance(value, str):
+        raise VerifiedResearchReportInputError(f"{field} is invalid")
+    if lower_slug:
+        if re.fullmatch(r"[a-z0-9][a-z0-9-]*", value) is None:
+            raise VerifiedResearchReportInputError(f"{field} is invalid")
+        return
+    if not storage.is_safe_episode_ref(value, max_length=128):
         raise VerifiedResearchReportInputError(f"{field} is invalid")
 
 

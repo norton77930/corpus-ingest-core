@@ -9,6 +9,7 @@ from . import storage
 from .corpus_index import generate_corpus_index
 from .errors import CorpusRemediationPlanFailedError
 from .models import (
+    VIDEO_SEED_SOURCES,
     CorpusIndexResult,
     CorpusRemediationAction,
     CorpusRemediationActionCounts,
@@ -216,7 +217,9 @@ def _build_action(
     blockers = _blocking_dependencies(family, artifact_status)
     status_payload = artifact_status.get(family, {})
     source_status = _status_text(status_payload)
-    if family == "audio" and _seed_audio_unavailable(source_metadata):
+    if family == "audio" and _video_seed_source(source_metadata) is not None:
+        blockers = ["source_ingest"]
+    elif family == "audio" and _seed_audio_unavailable(source_metadata):
         blockers = ["feed_audio_url"]
     if blockers:
         status = "blocked"
@@ -234,7 +237,9 @@ def _build_action(
         order=ARTIFACT_LADDER.index(family) + 1,
         reason=_action_reason(family, source_status, source_metadata),
         blocking_artifacts=blockers,
-        suggested_command=_suggested_command(podcast_id, episode_ref, family),
+        suggested_command=_suggested_command(
+            podcast_id, episode_ref, family, source_metadata
+        ),
         manual_only=True,
         optional=family in _OPTIONAL_FAMILIES,
         gated=family in _GATED_FAMILIES,
@@ -281,6 +286,8 @@ def _action_reason(
     source_status: str,
     source_metadata: dict[str, Any],
 ) -> str:
+    if family == "audio" and _video_seed_source(source_metadata) is not None:
+        return "audio is recovered through the source ingest CLI, not download_episode"
     if family == "audio" and _seed_audio_unavailable(source_metadata):
         return "audio artifact is missing but feed audio is unavailable"
     if source_status == "unreadable":
@@ -288,7 +295,39 @@ def _action_reason(
     return f"{family} artifact is missing"
 
 
-def _suggested_command(podcast_id: str, episode_ref: str, family: str) -> str:
+def _video_seed_source(source_metadata: dict[str, Any]) -> str | None:
+    episode_seed = source_metadata.get("episode_seed")
+    if not isinstance(episode_seed, dict):
+        return None
+    seed_source = episode_seed.get("seed_source")
+    if seed_source in VIDEO_SEED_SOURCES:
+        return str(seed_source)
+    return None
+
+
+def _seed_selector(source_metadata: dict[str, Any]) -> str:
+    episode_seed = source_metadata.get("episode_seed")
+    if not isinstance(episode_seed, dict):
+        return ""
+    selector = episode_seed.get("selector")
+    return selector if isinstance(selector, str) else ""
+
+
+def _suggested_command(
+    podcast_id: str,
+    episode_ref: str,
+    family: str,
+    source_metadata: dict[str, Any] | None = None,
+) -> str:
+    metadata = source_metadata or {}
+    video_source = _video_seed_source(metadata) if family == "audio" else None
+    if video_source == "x-video":
+        return f"python scripts/run_x_video_ingest.py --url {_seed_selector(metadata)}"
+    if video_source == "yt-video":
+        return (
+            "python scripts/run_youtube_video_ingest.py "
+            f"--url {_seed_selector(metadata)}"
+        )
     base = f"--podcast {podcast_id} --episode {episode_ref}"
     commands = {
         "audio": f"python scripts/download_episode.py {base}",

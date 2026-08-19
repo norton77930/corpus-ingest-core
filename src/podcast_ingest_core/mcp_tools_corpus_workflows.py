@@ -9,13 +9,13 @@ dependency details and tracebacks never leak.
 
 from __future__ import annotations
 
-import re
 from typing import Any, Callable
 
 from . import corpus_episode_completion_workflow_runner as completion_workflow_runner
 from . import corpus_latest_episode_deterministic_workflow_runner as latest_deterministic_workflow_runner
 from . import latest_episode_verified_research_report_workflow_runner as verified_research_report_workflow_runner
 from . import mcp_episode_verified_research_report
+from . import storage
 from .mcp_runtime import SEMANTIC_API_COST_ACK, mcp, tool_error, tool_success
 
 
@@ -41,7 +41,7 @@ _VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL_ERROR_TYPE = (
 _VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL_ERROR_MESSAGE = (
     "latest episode verified research report workflow command failed"
 )
-_SAFE_EPISODE_REF_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]{0,127}$")
+
 
 
 @mcp.tool()
@@ -262,7 +262,7 @@ def _verified_research_report_request_rejected_early(
         return False
     return (
         not isinstance(expected_episode_ref, str)
-        or not _SAFE_EPISODE_REF_PATTERN.fullmatch(expected_episode_ref)
+        or not storage.is_safe_episode_ref(expected_episode_ref, max_length=128)
         or expected_episode_ref.casefold() == "latest"
         or api_cost_ack != SEMANTIC_API_COST_ACK
     )

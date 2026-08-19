@@ -57,6 +57,8 @@ from .errors import (
     UnsupportedSourceTypeError,
     XVideoIngestDependencyError,
     XVideoIngestFailedError,
+    YoutubeVideoIngestDependencyError,
+    YoutubeVideoIngestFailedError,
 )
 from .cache import initialize_cache, index_episode, rebuild_cache
 from .corpus_index import discover_local_episode_refs, generate_corpus_index
@@ -137,6 +139,7 @@ from .summary_profiles import (
 from .transcriber import transcribe_episode
 from .validator import validate_transcript
 from .x_video_ingest import XVideoIdentity, XVideoIngestResult, run_x_video_ingest
+from .youtube_video_ingest import run_youtube_video_ingest
 from .models import (
     CorpusArtifactFamilyCounts,
     CorpusAudioDownloadOutcomeCounts,
@@ -203,6 +206,9 @@ from .models import (
     VerifiedReportGapBacklogRow,
     VerifiedReportGapBacklogPage,
     StudyGuideBundleResult,
+    VIDEO_SEED_SOURCES,
+    YoutubeVideoIdentity,
+    YoutubeVideoIngestResult,
 )
 from .storage import (
     CorpusEpisodeCompletionWorkflowRunAssetPaths,
@@ -415,4 +421,10 @@ __all__ = [
     "XVideoIngestFailedError",
     "XVideoIngestResult",
     "run_x_video_ingest",
+    "YoutubeVideoIngestDependencyError",
+    "YoutubeVideoIngestFailedError",
+    "YoutubeVideoIdentity",
+    "YoutubeVideoIngestResult",
+    "run_youtube_video_ingest",
+    "VIDEO_SEED_SOURCES",
 ]

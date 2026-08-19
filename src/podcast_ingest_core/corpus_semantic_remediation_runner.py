@@ -54,7 +54,7 @@ _EXECUTABLE_ACTIONS = {
     ACTION_SEMANTIC_SUMMARY,
     ACTION_SEMANTIC_REVIEW,
 }
-_SAFE_EPISODE_REF_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]{0,127}$")
+
 _SAFE_PROVIDER_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 _SAFE_MODEL_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
 _SAFE_API_KEY_ENV_PATTERN = re.compile(r"^[A-Z_][A-Z0-9_]{0,127}$")
@@ -982,7 +982,7 @@ def _normalize_podcast_id(value: str) -> str:
 
 
 def _normalize_episode_ref(value: str) -> str:
-    if not isinstance(value, str) or not _SAFE_EPISODE_REF_PATTERN.fullmatch(value):
+    if not isinstance(value, str) or not storage.is_safe_episode_ref(value, max_length=128):
         raise CorpusSemanticRemediationRunnerFailedError("invalid episode_ref")
     if value.lower() == "latest":
         raise CorpusSemanticRemediationRunnerFailedError("invalid episode_ref")

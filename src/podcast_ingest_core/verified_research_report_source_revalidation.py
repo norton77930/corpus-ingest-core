@@ -324,7 +324,7 @@ def _validate_locator(podcast_id: str, episode_ref: str, source_digest: str) -> 
         or storage._SAFE_SLUG_PATTERN.fullmatch(podcast_id) is None
         or not isinstance(episode_ref, str)
         or not 1 <= len(episode_ref) <= 128
-        or storage._SAFE_EPISODE_REF_PATTERN.fullmatch(episode_ref) is None
+        or not storage.is_safe_episode_ref(episode_ref, max_length=128)
         or episode_ref.casefold() in {"latest", "next"}
         or not isinstance(source_digest, str)
         or re.fullmatch(r"[a-f0-9]{64}", source_digest) is None

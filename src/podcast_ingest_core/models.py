@@ -1440,3 +1440,32 @@ class StudyGuideBundleResult:
     reused: bool
     warnings: list[str]
     not_investment_advice: bool
+
+
+VIDEO_SEED_SOURCES = frozenset({"x-video", "yt-video"})
+
+
+@dataclass(frozen=True)
+class YoutubeVideoIdentity:
+    """一支 YouTube 影片在 corpus 裡的身分。"""
+
+    podcast_id: str
+    episode_ref: str
+    channel_slug: str
+    canonical_url: str
+
+
+@dataclass(frozen=True)
+class YoutubeVideoIngestResult:
+    """一次 YouTube 取得流程的結果；dry-run 時落地路徑都是 None。"""
+
+    podcast_id: str
+    episode_ref: str
+    title: str
+    canonical_url: str
+    confirmed: bool
+    planned_writes: list[str]
+    audio_path: str | None
+    seed_path: str | None
+    transcript_json_path: str | None
+    warnings: list[str]

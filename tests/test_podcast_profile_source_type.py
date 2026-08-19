@@ -11,6 +11,25 @@ def _write_config(tmp_path: Path, body: str) -> Path:
     return config_path
 
 
+def test_youtube_profile_parses_without_rss_fields(tmp_path):
+    config_path = _write_config(
+        tmp_path,
+        """
+podcasts:
+  yt-foo-bar:
+    display_name: Foo Bar
+    source_type: yt-video
+    language: en
+""",
+    )
+
+    profile = load_podcast_profiles(config_path)["yt-foo-bar"]
+    assert profile.source_type == "yt-video"
+    assert profile.language == "en"
+    assert profile.rss_url is None
+    assert profile.default_episode_prefix is None
+
+
 def test_non_rss_profile_parses_without_rss_fields(tmp_path):
     """A non-RSS source has no feed, so the RSS-only fields must be optional."""
 

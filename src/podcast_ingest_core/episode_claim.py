@@ -47,7 +47,6 @@ _CURRENT_EPISODE_CLAIMS: ContextVar[dict[str, _HeldEpisodeClaim] | None] = Conte
 P = ParamSpec("P")
 T = TypeVar("T")
 _SAFE_PODCAST_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,127}$")
-_SAFE_EPISODE_REF = re.compile(r"^[A-Za-z0-9][A-Za-z0-9-]{0,127}$")
 _WINDOWS_RESERVED = {
     "CON", "PRN", "AUX", "NUL", *(f"COM{number}" for number in range(1, 10)),
     *(f"LPT{number}" for number in range(1, 10)),
@@ -61,7 +60,7 @@ def validate_episode_writer_claim_identity(podcast_id: object, episode_ref: obje
         not isinstance(podcast_id, str)
         or not isinstance(episode_ref, str)
         or not _SAFE_PODCAST_ID.fullmatch(podcast_id)
-        or not _SAFE_EPISODE_REF.fullmatch(episode_ref)
+        or not storage.is_safe_episode_ref(episode_ref, max_length=128)
         or podcast_id.upper() in _WINDOWS_RESERVED
         or episode_ref.upper() in _WINDOWS_RESERVED
     ):
