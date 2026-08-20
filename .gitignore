@@ -1,16 +1,9 @@
-data/audio/
-data/transcripts/
-data/summaries/
-data/mentions/
-data/cache/
-data/reports/
-data/research-reports/
-data/mappings/
-data/external/
-data/stock-lens/
-data/corpus/
-data/notes/
-data/study-guides/
+# Every runtime data artifact is local-only: audio, transcripts, summaries,
+# mentions, cache, reports, research reports, mappings, external boundary
+# records, stock lens, corpus snapshots, notes, and study guides. Ignore the
+# whole tree instead of listing subdirectories, so a new artifact kind added
+# later is covered by default rather than silently becoming committable.
+data/
 .env
 .env.*
 !.env.example

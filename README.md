@@ -879,6 +879,10 @@ Spec-kit 文件：
 ## License
 
 This repository is licensed under the MIT License. See [LICENSE](LICENSE).
+That copyright covers the first-party work only: two spec packages vendor a
+byte-pinned snapshot of the third-party `NousResearch/hermes-agent` repository,
+which carries its own MIT license. See
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
 
 ## 開發指令
 
