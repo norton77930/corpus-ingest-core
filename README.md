@@ -876,6 +876,10 @@ Spec-kit 文件：
 - Verification matrix：[`docs/verification-matrix.md`](docs/verification-matrix.md)
 - ADR index：[`docs/architecture-decision-records/README.md`](docs/architecture-decision-records/README.md)
 
+## License
+
+This repository is licensed under the MIT License. See [LICENSE](LICENSE).
+
 ## 開發指令
 
 ```powershell

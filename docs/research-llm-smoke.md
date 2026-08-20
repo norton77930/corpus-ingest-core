@@ -139,7 +139,7 @@ The review gate checks the stock lens synthesis input boundary, no-investment-ad
 - Missing model: set `MODEL` in `.env` or pass `--model`. Legacy `OPENAI_MODEL` is still accepted as a fallback.
 - Missing API key: set `API_KEY` in `.env` or pass `--api-key-env` for another env var name.
 - pro4500 profile missing API key: set `API_KEY`; do not put the key in `config/llm_profiles.yaml`.
-- gb10 profile unavailable: use `--llm-profile pro4500`. The GB10 endpoint accepts connections and never returns inference.
+- gb10 profile unavailable: use `--llm-profile pro4500`.
 - Wrong acknowledgement: copy the exact `api_cost_ack` string.
 - Missing stock lens source: run workflow dry-run first and inspect planned writes.
 - Review gate failed: inspect the `.review.md` check table before tuning the prompt or guard.
