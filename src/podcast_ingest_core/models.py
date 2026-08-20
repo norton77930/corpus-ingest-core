@@ -1422,6 +1422,28 @@ class MentionSearchResult:
 
 
 @dataclass(frozen=True)
+class WorkflowDerivationResult:
+    """Dry-run plan or confirmed 05/06 derivation result."""
+
+    podcast_id: str
+    episode_ref: str
+    confirm: bool
+    run_mode: str
+    lecture_dir: str
+    context_path: str
+    planned_reads: list[str]
+    planned_writes: list[str]
+    planned_reuses: list[str]
+    prompt_examples_path: str | None
+    apply_path: str | None
+    report_json_path: Path | None
+    report_markdown_path: Path | None
+    reused: bool
+    warnings: list[str]
+    not_investment_advice: bool
+
+
+@dataclass(frozen=True)
 class StudyGuideBundleResult:
     """Dry-run plan or confirmed study-guide bundle result."""
 

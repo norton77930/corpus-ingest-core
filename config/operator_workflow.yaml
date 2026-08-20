@@ -1,0 +1,11 @@
+# Operator workflow context for Spec 042 derivations.
+# Tools named here are the only surfaces 06 may advise.
+allowed_tools:
+  - Claude Code
+  - Codex
+  - GitHub Copilot
+  - CLAUDE.md
+  - Skill
+  - spec-kit
+notes: |
+  Local Windows PowerShell. Spec Kit flow. TDD. Thin CLI / thick core.

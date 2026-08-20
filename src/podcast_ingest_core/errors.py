@@ -46,6 +46,10 @@ class StudyGuideBundleError(PodcastIngestCoreError):
     """Study-guide bundle selection, generation, or write failed."""
 
 
+class WorkflowDerivationError(PodcastIngestCoreError):
+    """Workflow derivation selection, generation, or write failed."""
+
+
 class CorpusIndexFailedError(PodcastIngestCoreError):
     """Corpus artifact index 產生或輸出寫入失敗。"""
 

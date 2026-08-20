@@ -44,6 +44,7 @@ from .errors import (
     SearchError,
     SemanticSummaryFailedError,
     StudyGuideBundleError,
+    WorkflowDerivationError,
     StockLensReportFailedError,
     StockLensReportInputError,
     StockLensSynthesisFailedError,
@@ -80,6 +81,10 @@ from .corpus_semantic_remediation_runner import run_corpus_semantic_remediation
 from .study_guide_bundle import (
     result_to_dict as study_guide_bundle_result_to_dict,
     run_study_guide_bundle,
+)
+from .workflow_derivation import (
+    result_to_dict as workflow_derivation_result_to_dict,
+    run_workflow_derivation,
 )
 from .latest_episode_verified_research_report_workflow_runner import (
     result_to_dict as latest_episode_verified_research_report_workflow_result_to_dict,
@@ -206,6 +211,7 @@ from .models import (
     VerifiedReportGapBacklogRow,
     VerifiedReportGapBacklogPage,
     StudyGuideBundleResult,
+    WorkflowDerivationResult,
     VIDEO_SEED_SOURCES,
     YoutubeVideoIdentity,
     YoutubeVideoIngestResult,
@@ -395,6 +401,10 @@ __all__ = [
     "StudyGuideBundleResult",
     "run_study_guide_bundle",
     "study_guide_bundle_result_to_dict",
+    "WorkflowDerivationError",
+    "WorkflowDerivationResult",
+    "run_workflow_derivation",
+    "workflow_derivation_result_to_dict",
     "semantic_summarize_episode",
     "StockLensReportFailedError",
     "StockLensReportInputError",

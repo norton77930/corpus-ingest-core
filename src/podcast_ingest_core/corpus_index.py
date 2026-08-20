@@ -34,6 +34,7 @@ SUPPORTED_ARTIFACT_FAMILIES = (
     "industry_mapping",
     "external_boundary",
     "study_guide",
+    "workflow_derivation",
 )
 from .storage import EVALS_RESEARCH_SMOKE_REPORTS_DIR as SEMANTIC_REVIEW_REPORTS_DIR
 _AUDIO_SUFFIXES = {".mp3", ".m4a", ".wav", ".aac", ".flac"}
@@ -188,6 +189,7 @@ def _build_episode_row(podcast_id: str, episode_ref: str) -> CorpusEpisodeRow:
         "industry_mapping": _industry_mapping_status(podcast_id, episode_ref),
         "external_boundary": _external_boundary_status(podcast_id, episode_ref),
         "study_guide": _study_guide_status(podcast_id, episode_ref),
+        "workflow_derivation": _workflow_derivation_status(podcast_id, episode_ref),
     }
     missing_artifacts = [
         family
@@ -418,6 +420,62 @@ def _semantic_summary_readability(path: Path) -> tuple[bool, str | None]:
     except (OSError, UnicodeError):
         return False, "semantic summary is not readable UTF-8"
     return True, None
+
+
+def _workflow_derivation_status(podcast_id: str, episode_ref: str) -> dict[str, Any]:
+    canonical = canonical_semantic_summary_path(podcast_id, episode_ref)
+    if canonical is None:
+        return {**_missing_status(), "exists": False, "path": None}
+    stem = canonical.name.removesuffix(".semantic.md")
+    paths = storage.workflow_derivation_paths_from_stem(podcast_id, stem)
+    files = (paths.prompt_examples_path, paths.apply_path)
+    existing = [path for path in files if path.is_file()]
+    if not existing:
+        return {**_missing_status(), "exists": False, "path": None}
+    warnings: list[str] = []
+    readable = True
+    for path in existing:
+        ok, warning = _semantic_summary_readability(path)
+        if not ok:
+            readable = False
+            if warning:
+                warnings.append(warning)
+    if len(existing) < 2:
+        return {
+            "status": "partial",
+            "exists": True,
+            "path": str(paths.bundle_dir),
+            "paths": {"bundle": str(paths.bundle_dir)},
+            "candidate_count": len(existing),
+            "warnings": warnings,
+            "warning_count": len(warnings),
+            "readable": readable,
+        }
+    if not readable:
+        return {
+            "status": "unreadable",
+            "exists": True,
+            "path": str(paths.bundle_dir),
+            "paths": {"bundle": str(paths.bundle_dir)},
+            "candidate_count": 2,
+            "warnings": warnings,
+            "warning_count": len(warnings),
+            "readable": False,
+        }
+    return {
+        "status": "available",
+        "exists": True,
+        "path": str(paths.bundle_dir),
+        "paths": {
+            "bundle": str(paths.bundle_dir),
+            "05": str(paths.prompt_examples_path),
+            "06": str(paths.apply_path),
+        },
+        "candidate_count": 2,
+        "warnings": warnings,
+        "warning_count": len(warnings),
+        "readable": True,
+    }
 
 
 def _study_guide_status(podcast_id: str, episode_ref: str) -> dict[str, Any]:

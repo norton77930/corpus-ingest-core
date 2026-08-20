@@ -29,7 +29,7 @@ reference such as
 [`specs/019-episode-verified-research-report-workflow/plan.md`](specs/019-episode-verified-research-report-workflow/plan.md)
 describes completed work only; it is not an active-feature selector.
 The current in-progress package plan is
-[`specs/039-youtube-video-corpus-ingestion/plan.md`](specs/039-youtube-video-corpus-ingestion/plan.md);
+[`specs/042-workflow-derivation-bundle/plan.md`](specs/042-workflow-derivation-bundle/plan.md);
 select it explicitly with `SPECIFY_FEATURE_DIRECTORY` — do not treat that
 path as a repository-wide active-feature pin.
 <!-- SPECKIT END -->

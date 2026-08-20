@@ -95,6 +95,19 @@ class StudyGuideRunAssetPaths:
 
 
 @dataclass(frozen=True)
+class WorkflowDerivationPaths:
+    bundle_dir: Path
+    prompt_examples_path: Path
+    apply_path: Path
+
+
+@dataclass(frozen=True)
+class WorkflowDerivationRunAssetPaths:
+    json_path: Path
+    markdown_path: Path
+
+
+@dataclass(frozen=True)
 class CorpusRemediationPlanAssetPaths:
     json_path: Path
     markdown_path: Path
@@ -632,6 +645,36 @@ def study_guide_bundle_paths_from_stem(
         summary_path=bundle_dir / "03_full_summary.md",
         notes_path=bundle_dir / "04_learning_notes.md",
         guide_path=bundle_dir / "07_final_study_guide.md",
+    )
+
+
+def workflow_derivation_paths_from_stem(
+    podcast_id: str, identity_stem: str
+) -> WorkflowDerivationPaths:
+    """Return 05/06 paths beside the Spec 038 lecture files."""
+
+    lecture = study_guide_bundle_paths_from_stem(podcast_id, identity_stem)
+    return WorkflowDerivationPaths(
+        bundle_dir=lecture.bundle_dir,
+        prompt_examples_path=lecture.bundle_dir / "05_prompt_examples.md",
+        apply_path=lecture.bundle_dir / "06_apply_to_my_workflow.md",
+    )
+
+
+def workflow_derivation_run_asset_paths(
+    podcast_id: str, episode_ref: str
+) -> WorkflowDerivationRunAssetPaths:
+    """Return metadata-only workflow-derivation run report paths."""
+
+    run_dir = (
+        CORPUS_DIR
+        / _safe_slug(podcast_id, "podcast_id")
+        / "workflow-derivation-runs"
+    )
+    ref = _safe_episode_ref(episode_ref)
+    return WorkflowDerivationRunAssetPaths(
+        json_path=run_dir / f"{ref}.workflow-derivation.json",
+        markdown_path=run_dir / f"{ref}.workflow-derivation.md",
     )
 
 
