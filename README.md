@@ -585,10 +585,10 @@ Phase 6U.1 修正 semantic review guard false positive：semantic summary review
 Phase 6V adds optional reviewed semantic context for stock lens synthesis. Default synthesis remains `phase-6f-stock-lens-json-only` and does not read `.semantic.md`. When explicitly enabled with `--include-semantic-context`, synthesis may include only matched episode semantic summaries with a latest passed review report; the input boundary becomes `phase-6f-stock-lens-json-plus-reviewed-semantic-summary`. The context excludes `## Chunk Summaries`, does not read raw transcript text, does not read `.env`, does not fetch live market data, and makes no MCP tool changes. Reviewed semantic summary context is an LLM intermediate artifact, not podcast raw evidence and not an external market fact. Phase 6V.1 aligns the deterministic review gate with boundary/context consistency: JSON-only synthesis must have no semantic context, and reviewed semantic synthesis must include non-empty, review-passed semantic context.
 
 ```powershell
-python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile gb10 --confirm --force --include-semantic-context --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
+python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile pro4500 --confirm --force --include-semantic-context --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
 ```
 
-LLM provider profile 可放在 `config/llm_profiles.yaml`，只保存 provider、model、base URL 與 API key 環境變數名稱，不保存 API key 值。預設 `gb10` profile 使用 `api_key_env=API_KEY`，因此可搭配 `.env` 的 `API_KEY=...` 使用。不要把 API key、token 或 secret 寫進 YAML。
+LLM provider profile 可放在 `config/llm_profiles.yaml`，只保存 provider、model、base URL 與 API key 環境變數名稱，不保存 API key 值。工作中的 `pro4500` profile 使用 `api_key_env=API_KEY`，因此可搭配 `.env` 的 `API_KEY=...` 使用。committed `gb10` profile 已標成 unavailable，載入時會失敗並提示改用 `pro4500`。不要把 API key、token 或 secret 寫進 YAML。
 
 擷取 deterministic mentions：
 
@@ -659,7 +659,7 @@ Stock lens report 會掃描該 podcast 既有 `data/mappings/` 與 `data/externa
 ```powershell
 python scripts/generate_stock_lens_synthesis_report.py --podcast gooaye --stock 台積電
 python scripts/generate_stock_lens_synthesis_report.py --podcast gooaye --stock 台積電 --confirm --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs." --model your-model
-python scripts/generate_stock_lens_synthesis_report.py --podcast gooaye --stock 台積電 --llm-profile gb10 --confirm --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
+python scripts/generate_stock_lens_synthesis_report.py --podcast gooaye --stock 台積電 --llm-profile pro4500 --confirm --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
 ```
 
 Stock lens synthesis 預設 dry-run，只列 planned reads/writes、LLM API/cost risk 與 required acknowledgement，不讀 API key、不呼叫 LLM、不寫 artifacts。Confirmed execution 只把 6F stock lens JSON only 的 compact evidence、lens dimensions、external boundary status 與 warnings 交給 LLM；no raw transcript、no `.semantic.md` input、no external market data lookup、no MCP tool changes，也不接 `run_research_workflow`。LLM 輸出若包含 buy/sell/hold、target price 或 guaranteed return 等投資建議語句，會拒絕寫入 synthesis artifact。
@@ -669,12 +669,12 @@ Stock lens synthesis 預設 dry-run，只列 planned reads/writes、LLM API/cost
 ```powershell
 python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --model your-model
 python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --confirm --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs." --model your-model --force
-python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile gb10 --confirm --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs." --force --debug-llm-output
+python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile pro4500 --confirm --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs." --force --debug-llm-output
 python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --confirm --include-semantic-summary --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs." --model your-model --force
 ```
 
 Phase 6O 是 OpenAI-compatible smoke + Codex manual review harness。真實 LLM 呼叫仍走 OpenAI-compatible `/chat/completions`；目前沒有 no direct Codex-session backend，Codex 只作為 manual reviewer 檢查 artifacts、prompt 邊界與品質。Smoke 預設跑 stock lens synthesis 並啟用 fixture external verification；semantic summary 必須明確加 `--include-semantic-summary`，因為它會傳送 transcript text。此階段 no live market data、不新增 MCP tools、不改 investment-advice boundary，也維持 no investment advice。
-Phase 6Q 加入 LLM profile config，手動測試可用 `--llm-profile gb10` 讀取 `config/llm_profiles.yaml`。CLI 明確傳入的 `--model`、`--base-url`、`--api-key-env` 會覆寫 profile；YAML 不得包含 API key、token 或 secret 值。Phase 6R 加入本機 `.env` loader，LLM-facing CLI 預設讀取 `.env` 的 `API_KEY`、`MODEL`、`BASE_URL`，並只在 JSON metadata 顯示載入的 env var 名稱，不顯示值。
+Phase 6Q 加入 LLM profile config，手動測試可用 `--llm-profile pro4500` 讀取 `config/llm_profiles.yaml`。CLI 明確傳入的 `--model`、`--base-url`、`--api-key-env` 會覆寫 profile；YAML 不得包含 API key、token 或 secret 值。Phase 6R 加入本機 `.env` loader，LLM-facing CLI 預設讀取 `.env` 的 `API_KEY`、`MODEL`、`BASE_URL`，並只在 JSON metadata 顯示載入的 env var 名稱，不顯示值。
 若要診斷 provider 回覆，可加 `--debug-llm-output`，raw LLM output 只會寫到已由 `.gitignore` 忽略的 `evals/research-llm-smoke/raw/`，不會成為正式 artifact。
 Phase 6T 加入 deterministic review report / quality gate。Confirmed smoke 後可用下列命令產生 timestamped review report；它只讀既有 artifacts，no LLM call、no `.env` read、no external market data，也不重寫 synthesis artifacts：
 
@@ -687,8 +687,8 @@ LLM smoke 文件與 review template：
 Phase 6U semantic summary smoke validation：
 
 ```powershell
-python scripts/run_semantic_summary_smoke.py --podcast gooaye --episode EP672 --llm-profile gb10
-python scripts/run_semantic_summary_smoke.py --podcast gooaye --episode EP672 --llm-profile gb10 --confirm --force --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
+python scripts/run_semantic_summary_smoke.py --podcast gooaye --episode EP672 --llm-profile pro4500
+python scripts/run_semantic_summary_smoke.py --podcast gooaye --episode EP672 --llm-profile pro4500 --confirm --force --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
 python scripts/review_semantic_summary_smoke.py --podcast gooaye --episode EP672
 ```
 
@@ -745,6 +745,8 @@ MCP server 使用官方 Python MCP SDK 的單一 FastMCP instance。本機 Codex
 - `suggest_historical_verified_report_next_step`（Tool 20；historical next-step suggestion）
 - `list_verified_report_gap_backlog`（Tool 21；inventory gap backlog）
 - `generate_stock_lens_report`（Tool 22；deterministic stock lens report，side-effect、dry-run-first）
+- `ingest_x_video`（Tool 23；X video ingest，preview 零寫入但會讀公開 metadata）
+- `ingest_youtube_video`（Tool 24；YouTube video ingest，preview 零寫入但會讀公開 metadata）
 
 Side-effect tools 是：
 
@@ -758,8 +760,11 @@ Side-effect tools 是：
 - `run_corpus_latest_episode_deterministic_workflow`
 - `run_latest_episode_verified_research_report_workflow`
 - `run_episode_verified_research_report_workflow`
+- `generate_stock_lens_report`
+- `ingest_x_video`
+- `ingest_youtube_video`
 
-本機 reviewed stdio registry 共 22 個 tools。Tool 22 `generate_stock_lens_report` append-only；Tools 1–21 contracts/order 不變。它是 side-effect、dry-run-first 的 deterministic stock lens report，只讀本機 mapping/boundary artifacts，無 live market API、無網路、無 LLM，且不提供投資建議。Tool 21 `list_verified_report_gap_backlog` append-only；Tools 1–20 contracts/order 不變。它是 inventory gap backlog read-query。Tool 20 仍為 historical next-step suggestion。Tool 19 仍為 episode-centric coverage。Tool 18 仍為 exact-locator offline source revalidation。Tool 17 保留 catalog list/search/inspect 契約。上述 side-effect tools 預設 `confirm=false`，只回傳 dry-run action plan，不會下載、轉錄或寫檔；確認 action plan 後才使用 `confirm=true`。`run_corpus_episode_completion_workflow` 維持 preview → human approval → one explicit action，`run_corpus_latest_episode_deterministic_workflow` 只處理 latest episode 的本機 deterministic stages 並在 semantic summary 前停止。`run_latest_episode_verified_research_report_workflow` 必須先 preview，再由使用者給出相同 canonical `expected_episode_ref` 與 exact `api_cost_ack` 後只 confirmed 呼叫一次。`run_episode_verified_research_report_workflow` 以明確 `episode_ref`（可為歷史集）做 readiness preview，確認後僅 assemble/publish 同等 digest bundle，不需 `api_cost_ack`、不呼叫 LLM。所有 side-effect tools 完成後都不會自動 rebuild SQLite cache，且不提供投資建議。例如：
+本機 reviewed stdio registry 共 24 個 tools。Tool 24 `ingest_youtube_video` append-only；Tools 1–23 contracts/order 不變。Tool 23 `ingest_x_video` 仍為 X ingest。Preview 是 zero-write 但會讀公開 metadata，不是 corpus runner 的零網路 dry-run。Tool 22 `generate_stock_lens_report` 仍為 append-only dry-run-first stock lens。它是 side-effect、dry-run-first 的 deterministic stock lens report，只讀本機 mapping/boundary artifacts，無 live market API、無網路、無 LLM，且不提供投資建議。Tool 21 `list_verified_report_gap_backlog` append-only；Tools 1–20 contracts/order 不變。它是 inventory gap backlog read-query。Tool 20 仍為 historical next-step suggestion。Tool 19 仍為 episode-centric coverage。Tool 18 仍為 exact-locator offline source revalidation。Tool 17 保留 catalog list/search/inspect 契約。上述 side-effect tools 預設 `confirm=false`，只回傳 dry-run action plan，不會下載、轉錄或寫檔；確認 action plan 後才使用 `confirm=true`。`run_corpus_episode_completion_workflow` 維持 preview → human approval → one explicit action，`run_corpus_latest_episode_deterministic_workflow` 只處理 latest episode 的本機 deterministic stages 並在 semantic summary 前停止。`run_latest_episode_verified_research_report_workflow` 必須先 preview，再由使用者給出相同 canonical `expected_episode_ref` 與 exact `api_cost_ack` 後只 confirmed 呼叫一次。`run_episode_verified_research_report_workflow` 以明確 `episode_ref`（可為歷史集）做 readiness preview，確認後僅 assemble/publish 同等 digest bundle，不需 `api_cost_ack`、不呼叫 LLM。所有 side-effect tools 完成後都不會自動 rebuild SQLite cache，且不提供投資建議。例如：
 
 ```text
 Call transcribe_episode with confirm=false first to review the action plan.
@@ -845,7 +850,7 @@ Research eval 文件：
 - Phase 6O LLM smoke：[`docs/research-llm-smoke.md`](docs/research-llm-smoke.md)
 - Phase 6O smoke template：[`evals/research-llm-smoke/phase-6o-llm-smoke-template.md`](evals/research-llm-smoke/phase-6o-llm-smoke-template.md)
 
-Phase 6H 不呼叫 LLM、不讀 API key、不查外部市場資料、不新增 MCP tools，也不改 Phase 6G workflow。Phase 6I 已加入 optional semantic summary execution inside research workflow。Phase 6J 已加入 Stock Lens LLM Synthesis，輸入邊界是 6F stock lens JSON only，必須 exact api_cost_ack，no raw transcript、no external market data、no MCP tool changes。Phase 6K 已加入 workflow opt-in synthesis：`include_stock_lens_synthesis` 只在 workflow confirmed 且 exact ack 後執行 synthesis。Phase 6L 已加入 `run_research_workflow` MCP exposure：dry-run first，confirmed execution 才包裝 core workflow，LLM steps 仍需 exact ack，且 no automatic cache rebuild。Phase 6N 已加入 `include_external_data_verification` optional workflow fixture verification：只支援本機 fixture provider，no live market API、no API key、no MCP tool changes、no automatic cache rebuild，也不提供投資建議。Phase 6O 已加入 research-llm-smoke：real OpenAI-compatible smoke + Codex manual review，exact ack，no direct Codex-session backend、no live market data、no investment advice。Phase 6Q 已加入 LLM profile config：`--llm-profile gb10` 可重用 provider/model/base URL/env var 名稱，但不保存 API key 值。Phase 6R 已加入本機 `.env` secret loader：手動 LLM smoke 可用 `API_KEY`、`MODEL`、`BASE_URL`，CLI metadata 只顯示 env var 名稱、不顯示 secret value。Phase 6T 已加入 research LLM smoke review report / quality gate：confirmed smoke 後可產生 deterministic review artifacts，no LLM call、no `.env` read、no external market data。Phase 6V 已加入 reviewed semantic context opt-in：stock lens synthesis 預設仍是 6F stock lens JSON only，明確啟用後才使用 review-passed `.semantic.md` context，no raw transcript、no live market data、no MCP tool changes、no investment advice。Phase 6V.1 已對齊 review gate boundary/context consistency：JSON-only artifact 不得帶 semantic context，reviewed semantic boundary 必須帶 review-passed context。
+Phase 6H 不呼叫 LLM、不讀 API key、不查外部市場資料、不新增 MCP tools，也不改 Phase 6G workflow。Phase 6I 已加入 optional semantic summary execution inside research workflow。Phase 6J 已加入 Stock Lens LLM Synthesis，輸入邊界是 6F stock lens JSON only，必須 exact api_cost_ack，no raw transcript、no external market data、no MCP tool changes。Phase 6K 已加入 workflow opt-in synthesis：`include_stock_lens_synthesis` 只在 workflow confirmed 且 exact ack 後執行 synthesis。Phase 6L 已加入 `run_research_workflow` MCP exposure：dry-run first，confirmed execution 才包裝 core workflow，LLM steps 仍需 exact ack，且 no automatic cache rebuild。Phase 6N 已加入 `include_external_data_verification` optional workflow fixture verification：只支援本機 fixture provider，no live market API、no API key、no MCP tool changes、no automatic cache rebuild，也不提供投資建議。Phase 6O 已加入 research-llm-smoke：real OpenAI-compatible smoke + Codex manual review，exact ack，no direct Codex-session backend、no live market data、no investment advice。Phase 6Q 已加入 LLM profile config：`--llm-profile pro4500` 可重用 provider/model/base URL/env var 名稱，但不保存 API key 值。Phase 6R 已加入本機 `.env` secret loader：手動 LLM smoke 可用 `API_KEY`、`MODEL`、`BASE_URL`，CLI metadata 只顯示 env var 名稱、不顯示 secret value。Phase 6T 已加入 research LLM smoke review report / quality gate：confirmed smoke 後可產生 deterministic review artifacts，no LLM call、no `.env` read、no external market data。Phase 6V 已加入 reviewed semantic context opt-in：stock lens synthesis 預設仍是 6F stock lens JSON only，明確啟用後才使用 review-passed `.semantic.md` context，no raw transcript、no live market data、no MCP tool changes、no investment advice。Phase 6V.1 已對齊 review gate boundary/context consistency：JSON-only artifact 不得帶 semantic context，reviewed semantic boundary 必須帶 review-passed context。
 
 ## Spec Kit / Architecture
 

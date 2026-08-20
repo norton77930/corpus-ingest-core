@@ -183,6 +183,26 @@ Tool 22 appends after unchanged Tools 1–21. It completes Spec 001 User Story 3
 python scripts/generate_stock_lens_report.py gooaye 台積電
 ```
 
+### X Video Ingest Tool
+
+- `ingest_x_video` (Tool 23)
+
+Tool 23 appends after unchanged Tools 1–22. It exposes the existing Spec 036 X video ingest seam. `confirm=false` is a **preview**: zero-write, but it resolves public metadata over the network so the plan can be real. That is not the corpus runner zero-network dry-run. `confirm=true` downloads with a guest token, extracts audio, transcribes locally, and writes a metadata-only run report. No cookies, no credentials, no LLM, no `work_dir` on the tool, and no automatic cache rebuild.
+
+```powershell
+python scripts/run_x_video_ingest.py --url "https://x.com/<handle>/status/<id>"
+```
+
+### YouTube Video Ingest Tool
+
+- `ingest_youtube_video` (Tool 24)
+
+Tool 24 appends after unchanged Tools 1–23. It exposes the existing Spec 039 YouTube ingest seam. `confirm=false` is a **preview**: zero-write, but it resolves public metadata over the network. That is not the corpus runner zero-network dry-run. `confirm=true` downloads with a guest token, extracts audio, transcribes locally, and writes a metadata-only run report. No cookies, no credentials, no LLM, no `work_dir` on the tool, and no automatic cache rebuild.
+
+```powershell
+python scripts/run_youtube_video_ingest.py --url "https://www.youtube.com/watch?v=<id>"
+```
+
 ## Safety
 
 MCP tools 不接受任意本機檔案路徑，也不構成投資建議。

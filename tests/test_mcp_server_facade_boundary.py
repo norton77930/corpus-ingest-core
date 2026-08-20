@@ -28,6 +28,8 @@ GROUP_MODULES = (
     "mcp_tools_side_effect.py",
     "mcp_tools_corpus_workflows.py",
     "mcp_tools_verified_report_queries.py",
+    "mcp_tools_x_video.py",
+    "mcp_tools_youtube_video.py",
 )
 
 FACADE_EXPORTS = (
@@ -54,6 +56,8 @@ FACADE_EXPORTS = (
     "transcriber",
     "validator",
     "stock_lens",
+    "x_video_ingest",
+    "youtube_video_ingest",
     "verified_research_report_workflow_runner",
     "mcp_episode_verified_research_report",
     "mcp_verified_research_report_catalog",
@@ -125,7 +129,7 @@ def test_group_modules_do_not_value_bind_private_runtime_helpers():
 
 
 def test_group_modules_are_imported_only_via_the_facade():
-    """Registration order (Tools 1-22) is defined by the facade's group-import
+    """Registration order (Tools 1-24) is defined by the facade's group-import
     order; a direct group import in a fresh process (or earlier in the pytest
     session) would register its tools first. Ban direct imports everywhere
     except the facade itself."""

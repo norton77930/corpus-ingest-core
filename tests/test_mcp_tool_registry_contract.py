@@ -15,6 +15,7 @@ from __future__ import annotations
 
 import asyncio
 import inspect
+import re
 from pathlib import Path
 
 
@@ -48,6 +49,8 @@ COVERAGE_TOOL = "query_verified_research_report_coverage"
 HISTORICAL_PATH_TOOL = "suggest_historical_verified_report_next_step"
 GAP_BACKLOG_TOOL = "list_verified_report_gap_backlog"
 STOCK_LENS_TOOL = "generate_stock_lens_report"
+X_VIDEO_INGEST_TOOL = "ingest_x_video"
+YOUTUBE_VIDEO_INGEST_TOOL = "ingest_youtube_video"
 LEGACY_TOOL_ORDER = [
     "list_episodes",
     "get_episode",
@@ -69,6 +72,8 @@ SIDE_EFFECT_TOOLS = LEGACY_SIDE_EFFECT_TOOLS | {
     VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL,
     EPISODE_VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL,
     STOCK_LENS_TOOL,
+    X_VIDEO_INGEST_TOOL,
+    YOUTUBE_VIDEO_INGEST_TOOL,
 }
 EXPECTED_TOOLS = LEGACY_EXPECTED_TOOLS | {
     COMPLETION_WORKFLOW_TOOL,
@@ -81,6 +86,8 @@ EXPECTED_TOOLS = LEGACY_EXPECTED_TOOLS | {
     HISTORICAL_PATH_TOOL,
     GAP_BACKLOG_TOOL,
     STOCK_LENS_TOOL,
+    X_VIDEO_INGEST_TOOL,
+    YOUTUBE_VIDEO_INGEST_TOOL,
 }
 
 
@@ -93,7 +100,7 @@ def _registered_tool_names() -> set[str]:
 
 def test_mcp_registry_exposes_exactly_the_reviewed_tool_set():
     actual = _registered_tool_names()
-    assert len(actual) == 22
+    assert len(actual) == 24
     assert actual == EXPECTED_TOOLS
     assert LEGACY_EXPECTED_TOOLS <= actual
 
@@ -115,6 +122,8 @@ def test_workflow_tools_are_appended_after_the_preserved_twelve_tool_order():
         HISTORICAL_PATH_TOOL,
         GAP_BACKLOG_TOOL,
         STOCK_LENS_TOOL,
+        X_VIDEO_INGEST_TOOL,
+        YOUTUBE_VIDEO_INGEST_TOOL,
     ]
 
 
@@ -220,13 +229,29 @@ def test_readme_and_mcp_usage_doc_list_every_registered_tool():
         assert f"`{name}`" in usage, f"docs/mcp-usage.md must document MCP tool {name}"
 
 
+def test_readme_side_effect_list_matches_registry_side_effect_set():
+    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    match = re.search(
+        r"Side-effect tools 是：\r?\n\r?\n((?:- `[a-z0-9_]+`\r?\n)+)",
+        readme,
+    )
+    assert match is not None, "README.md must list side-effect tools as a markdown bullet list"
+    listed = set(re.findall(r"`([a-z0-9_]+)`", match.group(1)))
+    assert listed == SIDE_EFFECT_TOOLS, (
+        "README side-effect list drifted from SIDE_EFFECT_TOOLS: "
+        f"missing={sorted(SIDE_EFFECT_TOOLS - listed)} extra={sorted(listed - SIDE_EFFECT_TOOLS)}"
+    )
+
+
 def test_each_client_setup_doc_locks_the_current_registry_contract():
     for filename in ("claude-mcp-setup.md", "codex-mcp-setup.md"):
         setup = (ROOT / "docs" / filename).read_text(encoding="utf-8")
-        assert "exactly 22 tools" in setup
+        assert "exactly 24 tools" in setup
         assert "`generate_stock_lens_report`" in setup
+        assert "`ingest_x_video`" in setup
+        assert "`ingest_youtube_video`" in setup
         assert "`list_verified_report_gap_backlog`" in setup
-        assert "Tools 1–21" in setup
+        assert "Tools 1–23" in setup
         assert "現在有 exact 13 個 reviewed tools" not in setup
         assert "current registry has exactly 17" not in setup
 
@@ -234,7 +259,7 @@ def test_each_client_setup_doc_locks_the_current_registry_contract():
         encoding="utf-8"
     )
     assert "恰 14 個" not in framework
-    assert "恰 22 個" in framework
+    assert "恰 24 個" in framework
 
 
 def test_mcp_workflow_tool_exposes_deliberate_core_parameter_subset():

@@ -31,13 +31,50 @@ profiles:
     assert profile.api_key_env == "API_KEY"
 
 
-def test_default_gb10_llm_profile_config_loads():
+def test_load_llm_profile_rejects_unavailable_profile(tmp_path):
+    from podcast_ingest_core.errors import LLMProviderConfigError
     from podcast_ingest_core.llm_profiles import load_llm_profile
 
-    profile = load_llm_profile("gb10")
+    config_path = tmp_path / "llm_profiles.yaml"
+    config_path.write_text(
+        """
+profiles:
+  gb10:
+    provider: openai-compatible
+    model: GB10
+    api_key_env: API_KEY
+    unavailable: true
+  pro4500:
+    provider: openai-compatible
+    model: PRO4500
+    api_key_env: API_KEY
+""".strip(),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(LLMProviderConfigError, match=r"unavailable: gb10.*pro4500"):
+        load_llm_profile("gb10", config_path)
+
+    profile = load_llm_profile("pro4500", config_path)
+    assert profile.profile_id == "pro4500"
+    assert profile.model == "PRO4500"
+
+
+def test_committed_gb10_llm_profile_is_unavailable():
+    from podcast_ingest_core.errors import LLMProviderConfigError
+    from podcast_ingest_core.llm_profiles import load_llm_profile
+
+    with pytest.raises(LLMProviderConfigError, match=r"unavailable: gb10.*pro4500"):
+        load_llm_profile("gb10")
+
+
+def test_committed_pro4500_llm_profile_config_loads():
+    from podcast_ingest_core.llm_profiles import load_llm_profile
+
+    profile = load_llm_profile("pro4500")
 
     assert profile.provider == "openai-compatible"
-    assert profile.model == "GB10"
+    assert profile.model == "PRO4500"
     assert profile.base_url is None
     assert profile.api_key_env == "API_KEY"
 

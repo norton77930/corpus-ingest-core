@@ -2,11 +2,19 @@
 # and the API key environment variable NAME. Never store API key, token, or
 # secret values here.
 #
-# base_url is intentionally not committed for gb10. Provide the endpoint locally
-# via BASE_URL in your local .env (gitignored), or keep a local-only profile in
+# base_url is intentionally not committed. Provide the endpoint locally via
+# BASE_URL in your local .env (gitignored), or keep a local-only profile in
 # config/llm_profiles.local.yaml (gitignored).
+#
+# gb10 is retained as a named profile but is unavailable: the GB10 endpoint
+# accepts connections and never returns inference. Use pro4500.
 profiles:
   gb10:
     provider: openai-compatible
     model: GB10
+    api_key_env: API_KEY
+    unavailable: true
+  pro4500:
+    provider: openai-compatible
+    model: PRO4500
     api_key_env: API_KEY

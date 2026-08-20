@@ -119,6 +119,12 @@ class CorpusAudioDownloadRunAssetPaths:
 
 
 @dataclass(frozen=True)
+class XVideoIngestRunAssetPaths:
+    json_path: Path
+    markdown_path: Path
+
+
+@dataclass(frozen=True)
 class CorpusEpisodeIntakeRunAssetPaths:
     json_path: Path
     markdown_path: Path
@@ -478,6 +484,46 @@ def corpus_audio_download_run_asset_paths(
     return CorpusAudioDownloadRunAssetPaths(
         json_path=base_dir / "corpus-audio-download-run.json",
         markdown_path=base_dir / "corpus-audio-download-run.md",
+    )
+
+
+@dataclass(frozen=True)
+class YoutubeVideoIngestRunAssetPaths:
+    json_path: Path
+    markdown_path: Path
+
+
+def x_video_ingest_run_asset_paths(
+    podcast_id: str, episode_ref: str
+) -> XVideoIngestRunAssetPaths:
+    """回傳一次 X 影片取得的 metadata-only run report 路徑。"""
+
+    base_dir = (
+        CORPUS_DIR
+        / _safe_slug(podcast_id, "podcast_id")
+        / "x-video-ingest-runs"
+    )
+    safe_ref = _safe_episode_ref(episode_ref)
+    return XVideoIngestRunAssetPaths(
+        json_path=base_dir / f"{safe_ref}.x-video-ingest.json",
+        markdown_path=base_dir / f"{safe_ref}.x-video-ingest.md",
+    )
+
+
+def youtube_video_ingest_run_asset_paths(
+    podcast_id: str, episode_ref: str
+) -> YoutubeVideoIngestRunAssetPaths:
+    """回傳一次 YouTube 影片取得的 metadata-only run report 路徑。"""
+
+    base_dir = (
+        CORPUS_DIR
+        / _safe_slug(podcast_id, "podcast_id")
+        / "youtube-video-ingest-runs"
+    )
+    safe_ref = _safe_episode_ref(episode_ref)
+    return YoutubeVideoIngestRunAssetPaths(
+        json_path=base_dir / f"{safe_ref}.youtube-video-ingest.json",
+        markdown_path=base_dir / f"{safe_ref}.youtube-video-ingest.md",
     )
 
 

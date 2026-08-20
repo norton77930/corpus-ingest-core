@@ -1245,6 +1245,90 @@
         "title": "generate_stock_lens_reportDictOutput",
         "type": "object"
       }
+    },
+    {
+      "description": "Side-effect tool\uff1aconfirm=false \u662f preview\uff08\u96f6\u5beb\u5165\uff0c\u6703\u8b80\u516c\u958b metadata\uff09\u3002",
+      "inputSchema": {
+        "properties": {
+          "confirm": {
+            "default": false,
+            "title": "Confirm",
+            "type": "boolean"
+          },
+          "force": {
+            "default": false,
+            "title": "Force",
+            "type": "boolean"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Title"
+          },
+          "url": {
+            "default": "",
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "title": "ingest_x_videoArguments",
+        "type": "object"
+      },
+      "name": "ingest_x_video",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "ingest_x_videoDictOutput",
+        "type": "object"
+      }
+    },
+    {
+      "description": "Side-effect tool\uff1aconfirm=false \u662f preview\uff08\u96f6\u5beb\u5165\uff0c\u6703\u8b80\u516c\u958b metadata\uff09\u3002",
+      "inputSchema": {
+        "properties": {
+          "confirm": {
+            "default": false,
+            "title": "Confirm",
+            "type": "boolean"
+          },
+          "force": {
+            "default": false,
+            "title": "Force",
+            "type": "boolean"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Title"
+          },
+          "url": {
+            "default": "",
+            "title": "Url",
+            "type": "string"
+          }
+        },
+        "title": "ingest_youtube_videoArguments",
+        "type": "object"
+      },
+      "name": "ingest_youtube_video",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "ingest_youtube_videoDictOutput",
+        "type": "object"
+      }
     }
   ]
 }

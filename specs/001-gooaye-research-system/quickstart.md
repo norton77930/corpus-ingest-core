@@ -8,11 +8,11 @@ Use `.env` for local CLI convenience only. `.env` must not be committed.
 
 ```text
 API_KEY=your-local-key
-MODEL=GB10
+MODEL=PRO4500
 BASE_URL=https://api.example.com/v1
 ```
 
-The `gb10` profile in `config/llm_profiles.yaml` stores provider metadata only. Do not store API key values in YAML or docs.
+The `pro4500` profile in `config/llm_profiles.yaml` stores provider metadata only. The committed `gb10` profile is unavailable and fails closed. Do not store API key values in YAML or docs.
 
 ## Deterministic Workflow Dry-run
 
@@ -31,7 +31,7 @@ I understand this may call an external LLM API, send transcript text outside thi
 ```
 
 ```powershell
-python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile gb10 --confirm --force --debug-llm-output --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
+python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile pro4500 --confirm --force --debug-llm-output --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
 ```
 
 The smoke command uses stock lens synthesis by default. It sends Phase 6F stock lens JSON only, not raw transcript. Semantic summary remains opt-in because it can send transcript text.

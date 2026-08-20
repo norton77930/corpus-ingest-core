@@ -24,9 +24,12 @@ from .errors import (
     YoutubeVideoIngestFailedError,
 )
 from .models import CorpusEpisodeSeed, YoutubeVideoIdentity, YoutubeVideoIngestResult
+from .run_report_io import write_part_staged_report_pair
 from .transcriber import transcribe_episode
 
 YT_SOURCE_TYPE = "yt-video"
+RUN_MODE_PREVIEW = "preview"
+RUN_MODE_CONFIRMED = "confirmed"
 _WHITESPACE_PATTERN = re.compile(r"\s+")
 _UPLOAD_DATE_PATTERN = re.compile(r"^(\d{4})(\d{2})(\d{2})$")
 _VIDEO_ID_PATTERN = re.compile(r"^[A-Za-z0-9_-]{11}$")
@@ -137,6 +140,7 @@ def run_youtube_video_ingest(
     force: bool = False,
     work_dir: str | Path | None = None,
 ) -> YoutubeVideoIngestResult:
+    parse_youtube_video_id(url)
     try:
         info = _resolve_metadata(url)
     except PodcastIngestCoreError:
@@ -165,6 +169,9 @@ def run_youtube_video_ingest(
     if audio_exists:
         warnings.append(f"沿用既有音訊，未重新下載：{audio_target}")
 
+    report_paths = storage.youtube_video_ingest_run_asset_paths(
+        identity.podcast_id, identity.episode_ref
+    )
     planned_writes = [str(seed_target)]
     if not audio_exists:
         planned_writes.append(str(audio_target))
@@ -173,6 +180,8 @@ def run_youtube_video_ingest(
             str(transcript_targets.text_path),
             str(transcript_targets.srt_path),
             str(transcript_targets.json_path),
+            str(report_paths.json_path),
+            str(report_paths.markdown_path),
         ]
     )
 
@@ -183,11 +192,15 @@ def run_youtube_video_ingest(
             title=seed.title,
             canonical_url=identity.canonical_url,
             confirmed=False,
+            run_mode=RUN_MODE_PREVIEW,
             planned_writes=planned_writes,
             audio_path=None,
             seed_path=None,
             transcript_json_path=None,
+            report_json_path=None,
+            report_markdown_path=None,
             warnings=warnings,
+            not_investment_advice=True,
         )
 
     if registration_problem is not None:
@@ -210,18 +223,24 @@ def run_youtube_video_ingest(
         title=seed.title,
     )
 
-    return YoutubeVideoIngestResult(
+    result = YoutubeVideoIngestResult(
         podcast_id=identity.podcast_id,
         episode_ref=identity.episode_ref,
         title=seed.title,
         canonical_url=identity.canonical_url,
         confirmed=True,
+        run_mode=RUN_MODE_CONFIRMED,
         planned_writes=planned_writes,
         audio_path=str(audio_target),
         seed_path=str(seed_target),
         transcript_json_path=str(transcript.json_path),
+        report_json_path=str(report_paths.json_path),
+        report_markdown_path=str(report_paths.markdown_path),
         warnings=warnings,
+        not_investment_advice=True,
     )
+    _write_run_report(result)
+    return result
 
 
 def _resolve_metadata(url: str) -> dict[str, Any]:
@@ -294,6 +313,37 @@ def _acquire_audio(url: str, audio_target: Path, work_dir: str | Path | None) ->
             pass
         if owns_work_dir:
             shutil.rmtree(resolved_work_dir, ignore_errors=True)
+
+
+def _write_run_report(result: YoutubeVideoIngestResult) -> None:
+    if result.report_json_path is None or result.report_markdown_path is None:
+        return
+    payload = asdict(result)
+    markdown = "\n".join(
+        [
+            f"# YouTube Video Ingest - {payload['podcast_id']} / {payload['episode_ref']}",
+            "",
+            f"- Run mode: {payload['run_mode']}",
+            f"- Title: {payload['title']}",
+            f"- Canonical URL: {payload['canonical_url']}",
+            f"- Audio: {payload['audio_path']}",
+            f"- Seed: {payload['seed_path']}",
+            f"- Transcript JSON: {payload['transcript_json_path']}",
+            f"- Not investment advice: {payload['not_investment_advice']}",
+            "",
+        ]
+    )
+    try:
+        write_part_staged_report_pair(
+            Path(result.report_json_path),
+            Path(result.report_markdown_path),
+            payload,
+            markdown,
+        )
+    except OSError as exc:
+        raise YoutubeVideoIngestFailedError(
+            f"failed to write youtube-video ingest run report: {type(exc).__name__}"
+        ) from exc
 
 
 def _write_seed(seed_target: Path, seed: CorpusEpisodeSeed) -> None:

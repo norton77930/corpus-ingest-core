@@ -5,13 +5,13 @@
 ## Dry-run smoke
 
 ```powershell
-python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile gb10
+python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile pro4500
 ```
 
 ## Confirmed synthesis smoke
 
 ```powershell
-python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile gb10 --confirm --force --debug-llm-output --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
+python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile pro4500 --confirm --force --debug-llm-output --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
 ```
 
 ## Review gate
@@ -23,8 +23,8 @@ python scripts/review_research_llm_smoke.py --podcast gooaye --episode EP672 --s
 ## Phase 6U Semantic Summary Smoke Validation
 
 ```powershell
-python scripts/run_semantic_summary_smoke.py --podcast gooaye --episode EP672 --llm-profile gb10
-python scripts/run_semantic_summary_smoke.py --podcast gooaye --episode EP672 --llm-profile gb10 --confirm --force --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
+python scripts/run_semantic_summary_smoke.py --podcast gooaye --episode EP672 --llm-profile pro4500
+python scripts/run_semantic_summary_smoke.py --podcast gooaye --episode EP672 --llm-profile pro4500 --confirm --force --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
 python scripts/review_semantic_summary_smoke.py --podcast gooaye --episode EP672
 ```
 
@@ -43,7 +43,7 @@ no investment advice, and manual cache rebuild.
 Default stock lens synthesis remains `phase-6f-stock-lens-json-only`. After a semantic summary has passed review, opt in to reviewed semantic context:
 
 ```powershell
-python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile gb10 --confirm --force --include-semantic-context --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
+python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile pro4500 --confirm --force --include-semantic-context --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
 ```
 
 The enabled boundary is `phase-6f-stock-lens-json-plus-reviewed-semantic-summary`. The context excludes `## Chunk Summaries`, uses no raw transcript, no live market API, no MCP tool changes, and no investment advice.

@@ -59,6 +59,8 @@ EXPECTED_TOOL_ORDER = [
     "suggest_historical_verified_report_next_step",
     "list_verified_report_gap_backlog",
     "generate_stock_lens_report",
+    "ingest_x_video",
+    "ingest_youtube_video",
 ]
 
 
@@ -348,7 +350,7 @@ def test_build_evidence_accepts_only_exact_registry_preview_and_unchanged_surfac
     )
 
     assert result["ok"] is True
-    assert result["tool_count"] == 22
+    assert result["tool_count"] == 24
     assert result["tool_names"] == EXPECTED_TOOL_ORDER
     assert result["readonly_call_count"] == 1
     assert result["preview_call_count"] == 1

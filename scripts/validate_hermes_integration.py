@@ -40,6 +40,8 @@ EXPECTED_TOOL_ORDER = [
     "suggest_historical_verified_report_next_step",
     "list_verified_report_gap_backlog",
     "generate_stock_lens_report",
+    "ingest_x_video",
+    "ingest_youtube_video",
 ]
 SURFACE_NAMES = (
     "podcast_data",

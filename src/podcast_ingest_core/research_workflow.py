@@ -7,7 +7,12 @@ from .entity_extractor import extract_mentions
 from .episode_claim import episode_writer_claimed
 from .generation_proof import notify_child_artifact_committed
 from .episode_intelligence import generate_episode_intelligence_report
-from .errors import PodcastIngestCoreError, ResearchWorkflowFailedError, ResearchWorkflowInputError
+from .errors import (
+    PodcastIngestCoreError,
+    ResearchWorkflowFailedError,
+    ResearchWorkflowInputError,
+    StockLensSynthesisInputError,
+)
 from .external_data_boundary import generate_external_data_boundary
 from .external_data_verification import (
     DEFAULT_EXTERNAL_MARKET_DATA_FIXTURE_PATH,
@@ -18,7 +23,10 @@ from .industry_mapping import generate_industry_chain_mapping
 from .models import ResearchWorkflowResult, ResearchWorkflowStep
 from .semantic_summarizer import SEMANTIC_API_COST_ACK, semantic_summarize_episode
 from .stock_lens import generate_stock_lens_report
-from .stock_lens_synthesis import generate_stock_lens_synthesis_report
+from .stock_lens_synthesis import (
+    generate_stock_lens_synthesis_report,
+    require_finance_summary_profile,
+)
 from . import storage
 from .canonical_transcript import resolve_canonical_transcript_asset_paths
 from .validator import validate_transcript
@@ -92,6 +100,11 @@ def run_research_workflow(
         raise ResearchWorkflowInputError(
             "include_stock_lens_synthesis requires stock_query."
         )
+    if include_stock_lens_synthesis:
+        try:
+            require_finance_summary_profile(podcast_id)
+        except StockLensSynthesisInputError as exc:
+            raise ResearchWorkflowInputError(str(exc)) from exc
     if external_data_provider != SUPPORTED_EXTERNAL_DATA_PROVIDER:
         raise ResearchWorkflowInputError(
             f"unsupported external data provider: {external_data_provider}"

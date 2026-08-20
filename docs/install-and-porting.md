@@ -225,6 +225,8 @@ Spec 026–034 以 SHA-256 釘住檔案位元組。以下兩項變更是刻意�
 
 - **`SYNCED_SKILLS`**（讓第五個 Skill 隨 `apply` 同步）
 - **Tool 22 `generate_stock_lens_report`**（含用官方腳本 `scripts/export_spec029_tool_descriptor_snapshot.py` 重簽 descriptor 快照）
+- **Tool 23 `ingest_x_video`**（同一官方腳本再次重簽 descriptor 快照；deny adapter size 22→23）
+- **Tool 24 `ingest_youtube_video`**（同一官方腳本再次重簽 descriptor 快照；deny adapter size 23→24）
 - **把 Tool 22 補進 Spec 026 的 live harness**（否則新機器的授權 preflight 會判定 registry 不符而失敗）
 
 需要重建基準的檔案與**目前**的正確 digest：
@@ -232,7 +234,7 @@ Spec 026–034 以 SHA-256 釘住檔案位元組。以下兩項變更是刻意�
 | 檔案 | 目前 SHA-256 |
 |---|---|
 | `deploy/hermes/README.md` | `e13769dd02fed7d38f91e49f24d716b27e6ab42cbec6bcc0218f48af72dc29e8` |
-| `deploy/hermes/spec029/contracts/mcp-tool-descriptor-snapshot.json` | `4c5a3b749c55f6a7949a9d0f6648d70dcc05fb75918b4a26e38fef578072c28c` |
+| `deploy/hermes/spec029/contracts/mcp-tool-descriptor-snapshot.json` | `4b8219e75ab5c5d3fe8c7273c8e3569de862bbe99d71635265d60ddfbf9a2d2b` |
 | `deploy/hermes/spec029/spec029_mcp_deny_adapter.py` | `994b13909b4035cd52a478758ca4ecff16960360489810ce747d288c5412c05a` |
 | `scripts/validate_hermes_integration.py` | `48e7afdb3209a66dd46668f793dd95a9ec26a228850a92cd0a4a423b3cf35e8f` |
 | `specs/027-.../contracts/skill-routing-and-protocol.md` | `b0c5622041102294bc976826f445c1f64fbdcd11b01e5cefdb6a839c97a0c097` |

@@ -172,16 +172,21 @@ def test_dry_run_returns_a_plan_and_touches_nothing(monkeypatch, tmp_data_dirs):
     result = x_video_ingest.run_x_video_ingest(_SAMPLE_URL)
 
     assert result.confirmed is False
+    assert result.run_mode == "preview"
+    assert result.not_investment_advice is True
     assert result.podcast_id == "x-raytar"
     assert result.episode_ref == "2071290493581840707"
     assert result.title == "Code with Claude Prompt Engineering Breakout"
     assert result.audio_path is None
     assert result.seed_path is None
     assert result.transcript_json_path is None
+    assert result.report_json_path is None
+    assert result.report_markdown_path is None
 
     planned = " ".join(result.planned_writes)
     assert "episode-seeds" in planned
     assert ".wav" in planned
+    assert "x-video-ingest-runs" in planned
     # FR-015: the operator must be told the episode is not searchable yet.
     assert any("rebuild" in warning.lower() for warning in result.warnings)
 
@@ -291,6 +296,15 @@ def test_confirmed_run_lands_audio_and_seed_then_transcribes_under_the_title(
     result = x_video_ingest.run_x_video_ingest(_SAMPLE_URL, confirm=True)
 
     assert result.confirmed is True
+    assert result.run_mode == "confirmed"
+    assert result.not_investment_advice is True
+    assert result.report_json_path is not None
+    assert result.report_markdown_path is not None
+    assert Path(result.report_json_path).is_file()
+    assert Path(result.report_markdown_path).is_file()
+    report_payload = json.loads(Path(result.report_json_path).read_text(encoding="utf-8"))
+    assert report_payload["run_mode"] == "confirmed"
+    assert report_payload["not_investment_advice"] is True
 
     expected_audio = storage.audio_asset_path(
         "x-raytar", "2071290493581840707", result.title, ".wav"

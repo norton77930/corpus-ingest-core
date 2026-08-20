@@ -1457,15 +1457,19 @@ class YoutubeVideoIdentity:
 
 @dataclass(frozen=True)
 class YoutubeVideoIngestResult:
-    """一次 YouTube 取得流程的結果；dry-run 時落地路徑都是 None。"""
+    """一次 YouTube 取得流程的結果；preview 時落地路徑都是 None。"""
 
     podcast_id: str
     episode_ref: str
     title: str
     canonical_url: str
     confirmed: bool
+    run_mode: str
     planned_writes: list[str]
     audio_path: str | None
     seed_path: str | None
     transcript_json_path: str | None
+    report_json_path: str | None
+    report_markdown_path: str | None
     warnings: list[str]
+    not_investment_advice: bool

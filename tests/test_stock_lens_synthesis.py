@@ -253,6 +253,44 @@ def test_stock_lens_synthesis_dry_run_requires_ack_and_writes_nothing(
     assert not result.synthesis_markdown_path.exists()
 
 
+def test_stock_lens_synthesis_refuses_non_finance_summary_profile(monkeypatch, tmp_path):
+    import podcast_ingest_core.stock_lens_synthesis as synthesis
+    from podcast_ingest_core.errors import StockLensSynthesisInputError
+
+    _write_stock_lens(monkeypatch, tmp_path, podcast_id="x-raytar")
+    monkeypatch.setattr(
+        synthesis,
+        "_build_provider",
+        lambda **kwargs: pytest.fail("provider must not be built for a non-finance profile"),
+    )
+
+    with pytest.raises(StockLensSynthesisInputError, match="learning-notes"):
+        synthesis.generate_stock_lens_synthesis_report("x-raytar", "ignored")
+
+    with pytest.raises(StockLensSynthesisInputError, match="learning-notes"):
+        synthesis.generate_stock_lens_synthesis_report(
+            "x-raytar",
+            "ignored",
+            confirm=True,
+            api_cost_ack=ACK,
+        )
+
+
+def test_stock_lens_synthesis_refuses_unknown_podcast_before_provider(monkeypatch, tmp_path):
+    import podcast_ingest_core.stock_lens_synthesis as synthesis
+    from podcast_ingest_core.errors import StockLensSynthesisInputError
+
+    _write_stock_lens(monkeypatch, tmp_path, podcast_id="no-such-podcast")
+    monkeypatch.setattr(
+        synthesis,
+        "_build_provider",
+        lambda **kwargs: pytest.fail("provider must not be built for an unknown podcast"),
+    )
+
+    with pytest.raises(StockLensSynthesisInputError, match="no-such-podcast"):
+        synthesis.generate_stock_lens_synthesis_report("no-such-podcast", "台積電")
+
+
 def test_stock_lens_synthesis_confirm_requires_exact_ack_before_writes(
     monkeypatch, tmp_path
 ):

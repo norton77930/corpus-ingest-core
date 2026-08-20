@@ -334,6 +334,19 @@ def test_run_research_workflow_external_verification_dry_run_includes_local_step
     assert not (tmp_path / "stock-lens").exists()
 
 
+def test_run_research_workflow_refuses_stock_lens_synthesis_for_non_finance_profile():
+    from podcast_ingest_core.errors import ResearchWorkflowInputError
+    from podcast_ingest_core.research_workflow import run_research_workflow
+
+    with pytest.raises(ResearchWorkflowInputError, match="learning-notes"):
+        run_research_workflow(
+            "x-raytar",
+            "2071290493581840707",
+            stock_query="ignored",
+            include_stock_lens_synthesis=True,
+        )
+
+
 def test_run_research_workflow_synthesis_dry_run_requires_ack_and_writes_nothing(
     monkeypatch, tmp_path
 ):

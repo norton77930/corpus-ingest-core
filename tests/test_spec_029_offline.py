@@ -739,7 +739,7 @@ def test_snapshot_and_lowlevel_adapter_are_exact_read_only_and_never_dispatch():
         "schema_version": "spec029-mcp-tool-descriptor-snapshot-v1",
         "tools": descriptors,
     }
-    assert len(snapshot["tools"]) == 22
+    assert len(snapshot["tools"]) == 24
     # Spec027 static-source extraction remains the sole offline registry oracle.
     from podcast_ingest_core.hermes_skill_protocol import (
         canonical_registry_tool_names_from_source,

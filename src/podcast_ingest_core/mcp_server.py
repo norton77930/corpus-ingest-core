@@ -3,9 +3,9 @@
 specs/025-core-consolidation FR-005: the single ``FastMCP`` instance lives in
 ``mcp_runtime``; tool functions live in the ``mcp_tools_*`` group modules
 that register on import, so the group import order below IS the registration
-order (Tools 1-22). Tests and clients keep reaching every tool function,
+order (Tools 1-24). Tests and clients keep reaching every tool function,
 envelope, and dependency-module alias through this module — the re-exports
-below are contract surface. Next-tool playbook (as used for Tool 22, spec 035):
+below are contract surface. Next-tool playbook (as used for Tool 22, spec 035 and Tool 23, spec 040):
 add a group module imported LAST so existing slots keep their order, extend the
 re-exports here, move the size guard in
 ``hermes_skill_protocol._registry_tool_names_from_source``, regenerate the spec029
@@ -29,13 +29,16 @@ from .mcp_runtime import (
 )
 
 # Registration order: read (1-6) -> side-effect (7-12) -> corpus workflows
-# (13-16) -> verified-report queries (17-21) -> stock lens (22). Do not reorder
-# these imports; a new group is appended last so Tools 1-21 keep their slots.
+# (13-16) -> verified-report queries (17-21) -> stock lens (22) ->
+# x-video ingest (23) -> youtube-video ingest (24). Do not reorder these
+# imports; a new group is appended last so Tools 1-23 keep their slots.
 from . import mcp_tools_read
 from . import mcp_tools_side_effect
 from . import mcp_tools_corpus_workflows
 from . import mcp_tools_verified_report_queries
 from . import mcp_tools_stock_lens
+from . import mcp_tools_x_video
+from . import mcp_tools_youtube_video
 
 from .mcp_tools_read import (
     get_episode,
@@ -89,6 +92,8 @@ from .mcp_tools_stock_lens import (
     STOCK_LENS_CACHE_STALE_WARNING,
     generate_stock_lens_report,
 )
+from .mcp_tools_x_video import ingest_x_video
+from .mcp_tools_youtube_video import ingest_youtube_video
 
 # Dependency-module aliases: tests monkeypatch through these shared module
 # objects (e.g. monkeypatch.setattr(mcp_server.feed_reader, ...)), and the
@@ -113,3 +118,5 @@ from . import summarizer
 from . import transcriber
 from . import validator
 from . import stock_lens
+from . import x_video_ingest
+from . import youtube_video_ingest

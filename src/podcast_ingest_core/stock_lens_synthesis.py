@@ -6,6 +6,7 @@ import re
 from pathlib import Path
 from typing import Any
 
+from .config import load_podcast_profile
 from .errors import (
     LLMProviderConfigError,
     LLMProviderRequestError,
@@ -16,6 +17,7 @@ from .llm_provider import SemanticSummaryProvider, create_provider
 from .models import StockLensSynthesisResult
 from .report_safety import strip_safety_disclaimers
 from .semantic_summarizer import SEMANTIC_API_COST_ACK
+from .summary_profiles import FINANCE
 from . import storage
 
 
@@ -36,6 +38,24 @@ RISKS = [
     "Does not use raw transcript text or semantic summary files",
     "Does not fetch external market data",
 ]
+
+
+def require_finance_summary_profile(podcast_id: str) -> None:
+    """Refuse stock-lens synthesis unless the podcast's summary shape is finance."""
+
+    try:
+        profile = load_podcast_profile(podcast_id)
+    except KeyError as exc:
+        raise StockLensSynthesisInputError(
+            f"podcast profile not found: {podcast_id}"
+        ) from exc
+    if profile.summary_profile != FINANCE:
+        raise StockLensSynthesisInputError(
+            f"{podcast_id} summary_profile is {profile.summary_profile}, not {FINANCE}. "
+            "stock lens synthesis only accepts finance-shaped summaries."
+        )
+
+
 PROHIBITED_ADVICE_PATTERNS = [
     ("trade_action", re.compile(r"\b(?:buy|sell|hold)\b", re.IGNORECASE)),
     (
@@ -83,6 +103,7 @@ def generate_stock_lens_synthesis_report(
         raise ValueError("max_prompt_chars 必須大於 0。")
     if semantic_context_max_chars < 1:
         raise ValueError("semantic_context_max_chars 必須大於 0。")
+    require_finance_summary_profile(podcast_id)
 
     source_paths = storage.stock_lens_report_asset_paths(podcast_id, stock_query)
     synthesis_paths = storage.stock_lens_synthesis_asset_paths(podcast_id, stock_query)

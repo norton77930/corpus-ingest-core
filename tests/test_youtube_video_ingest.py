@@ -45,6 +45,17 @@ def test_playlist_without_video_id_is_refused() -> None:
         parse_youtube_video_id("https://www.youtube.com/playlist?list=PLxxxx")
 
 
+def test_non_youtube_url_is_refused_before_metadata(monkeypatch) -> None:
+    from podcast_ingest_core import youtube_video_ingest
+
+    def refuse(_url):
+        raise AssertionError("must not resolve metadata")
+
+    monkeypatch.setattr(youtube_video_ingest, "_resolve_metadata", refuse)
+    with pytest.raises(ValueError, match="不是 YouTube"):
+        youtube_video_ingest.run_youtube_video_ingest("https://example.com/not-youtube")
+
+
 def test_video_id_with_underscore_is_kept() -> None:
     identity = derive_youtube_identity(
         f"https://youtu.be/{_UNDERSCORE_ID}",
@@ -144,13 +155,17 @@ def test_dry_run_returns_a_plan_and_touches_nothing(monkeypatch, tmp_data_dirs: 
     result = youtube_video_ingest.run_youtube_video_ingest(_WATCH_URL)
 
     assert result.confirmed is False
+    assert result.run_mode == "preview"
+    assert result.not_investment_advice is True
     assert result.podcast_id == "yt-raytar"
     assert result.episode_ref == _VIDEO_ID
     assert result.audio_path is None
     assert result.seed_path is None
+    assert result.report_json_path is None
     planned = " ".join(result.planned_writes)
     assert "episode-seeds" in planned
     assert ".wav" in planned
+    assert "youtube-video-ingest-runs" in planned
     assert any("rebuild" in warning.lower() for warning in result.warnings)
     assert not (tmp_data_dirs / "corpus").exists()
     assert not (tmp_data_dirs / "audio").exists()
@@ -237,6 +252,10 @@ def test_confirm_writes_seed_wav_and_reuses_transcriber(monkeypatch, tmp_data_di
     result = youtube_video_ingest.run_youtube_video_ingest(_WATCH_URL, confirm=True)
 
     assert result.confirmed is True
+    assert result.run_mode == "confirmed"
+    assert result.not_investment_advice is True
+    assert result.report_json_path is not None
+    assert Path(result.report_json_path).is_file()
     expected_audio = storage.audio_asset_path(
         "yt-raytar", _VIDEO_ID, result.title, ".wav"
     )

@@ -83,12 +83,25 @@ def test_spec_kit_quickstart_covers_llm_smoke_and_review_gate():
     assert "run_research_llm_smoke.py" in text
     assert "review_research_llm_smoke.py" in text
     assert "I understand this may call an external LLM API" in text
-    assert "--llm-profile gb10" in text
+    assert "--llm-profile pro4500" in text
     assert "--debug-llm-output" in text
     assert "Phase 6T review gate" in text
     assert "no `.env` read" in text
     assert "no live market API" in text
     assert "no investment advice" in text
+
+
+def test_operator_docs_use_working_llm_profile_not_unavailable_gb10():
+    paths = [
+        ROOT / "README.md",
+        DOCS / "research-llm-smoke.md",
+        SPEC / "quickstart.md",
+        ROOT / "specs" / "006-llm-safety-synthesis-smoke-review" / "quickstart.md",
+    ]
+    for path in paths:
+        text = _read(path)
+        assert "--llm-profile pro4500" in text
+        assert "--llm-profile gb10" not in text
 
 
 def test_docs_do_not_treat_local_secrets_as_committable_configuration():
@@ -545,9 +558,9 @@ def test_018_verified_research_report_docs_and_agent_surface_contract():
     assert "run_latest_episode_verified_research_report_workflow" in readme
     assert "run_latest_episode_verified_research_report_workflow.py" in readme
     assert "latest_episode_verified_research_report_workflow_runner.py" in architecture
-    assert "exact 22 tools" in architecture
+    assert "exact 24 tools" in architecture
     assert "018-latest-episode-verified-research-report-workflow" in handoff
-    assert "22 reviewed tools" in handoff
+    assert "24 reviewed tools" in handoff
     assert "018-latest-episode-verified-research-report-workflow" in roadmap
     assert "018-latest-episode-verified-research-report-workflow" in registry
     assert "run_latest_episode_verified_research_report_workflow.py" in registry

@@ -29,13 +29,13 @@ The smoke CLI loads `.env` by default. Use `--env-file path\to\.env` to choose a
 
 LLM profiles live in `config/llm_profiles.yaml`. Profiles store provider metadata only: provider name, model, base URL, and API key environment variable name. They must not contain API key, token, or secret values.
 
-For the local GB10 profile:
+For the local PRO4500 profile:
 
 ```powershell
-python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile gb10
+python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile pro4500
 ```
 
-The committed `gb10` profile uses `api_key_env: API_KEY`, so the key can live in `.env` as `API_KEY=...`.
+The committed `pro4500` profile uses `api_key_env: API_KEY`, so the key can live in `.env` as `API_KEY=...`. The committed `gb10` profile is unavailable: loading it fails closed and names `pro4500` as the replacement.
 
 CLI flags override profile values, so `--model`, `--base-url`, or `--api-key-env` can still be used for one-off tests.
 
@@ -45,7 +45,7 @@ Dry-run first. This lists planned workflow steps, LLM risks, cost/data-transfer 
 
 ```powershell
 python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --model your-model
-python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile gb10
+python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile pro4500
 ```
 
 By default, the smoke workflow includes stock lens synthesis and fixture external data verification. It does not include semantic summary unless `--include-semantic-summary` is passed.
@@ -62,7 +62,7 @@ Run stock lens synthesis smoke:
 
 ```powershell
 python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --confirm --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs." --model your-model --force
-python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile gb10 --confirm --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs." --force --debug-llm-output
+python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile pro4500 --confirm --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs." --force --debug-llm-output
 ```
 
 Run semantic summary plus stock lens synthesis smoke only when you accept transcript transfer:
@@ -78,8 +78,8 @@ Phase 6U validates the direct semantic summary LLM path. This path can send tran
 Dry-run lists transcript validation status, planned reads/writes, provider metadata, transcript transfer risk, cost risk, and the required acknowledgement. It does not call the LLM, write artifacts, read API key values, or print raw transcript text.
 
 ```powershell
-python scripts/run_semantic_summary_smoke.py --podcast gooaye --episode EP672 --llm-profile gb10
-python scripts/run_semantic_summary_smoke.py --podcast gooaye --episode EP672 --llm-profile gb10 --confirm --force --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
+python scripts/run_semantic_summary_smoke.py --podcast gooaye --episode EP672 --llm-profile pro4500
+python scripts/run_semantic_summary_smoke.py --podcast gooaye --episode EP672 --llm-profile pro4500 --confirm --force --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
 python scripts/review_semantic_summary_smoke.py --podcast gooaye --episode EP672
 ```
 
@@ -93,8 +93,8 @@ Phase 6U.1 narrows the semantic review guard to avoid false positive failures on
 Phase 6V lets stock lens synthesis optionally include reviewed semantic summary context. The default remains Phase 6F stock lens JSON only. Add `--include-semantic-context` only after the relevant `.semantic.md` has a latest passed semantic review report.
 
 ```powershell
-python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile gb10 --confirm --force --include-semantic-context --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
-python scripts/generate_stock_lens_synthesis_report.py --podcast gooaye --stock 台積電 --llm-profile gb10 --confirm --force --include-semantic-context --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
+python scripts/run_research_llm_smoke.py --podcast gooaye --episode EP672 --stock 台積電 --llm-profile pro4500 --confirm --force --include-semantic-context --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
+python scripts/generate_stock_lens_synthesis_report.py --podcast gooaye --stock 台積電 --llm-profile pro4500 --confirm --force --include-semantic-context --api-cost-ack "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
 ```
 
 When context is included, the LLM input boundary is `phase-6f-stock-lens-json-plus-reviewed-semantic-summary`. The context is compact: metadata plus final summary only, with `## Chunk Summaries` excluded. It is reviewed LLM intermediate context, not raw transcript evidence, not external market data, and not a live market fact. Phase 6V makes no MCP tool changes, reads no `.env` values, fetches no live market API, and preserves no investment advice. Phase 6V.1 aligns the deterministic review gate with boundary/context consistency: JSON-only artifacts must have no semantic context, while reviewed semantic artifacts must include non-empty, review-passed semantic context.
@@ -138,7 +138,8 @@ The review gate checks the stock lens synthesis input boundary, no-investment-ad
 
 - Missing model: set `MODEL` in `.env` or pass `--model`. Legacy `OPENAI_MODEL` is still accepted as a fallback.
 - Missing API key: set `API_KEY` in `.env` or pass `--api-key-env` for another env var name.
-- GB10 profile missing API key: set `API_KEY`; do not put the key in `config/llm_profiles.yaml`.
+- pro4500 profile missing API key: set `API_KEY`; do not put the key in `config/llm_profiles.yaml`.
+- gb10 profile unavailable: use `--llm-profile pro4500`. The GB10 endpoint accepts connections and never returns inference.
 - Wrong acknowledgement: copy the exact `api_cost_ack` string.
 - Missing stock lens source: run workflow dry-run first and inspect planned writes.
 - Review gate failed: inspect the `.review.md` check table before tuning the prompt or guard.

@@ -10,7 +10,7 @@ from .models import LLMProfile
 
 
 DEFAULT_LLM_PROFILES_CONFIG_PATH = Path("config/llm_profiles.yaml")
-ALLOWED_PROFILE_FIELDS = {"provider", "model", "base_url", "api_key_env"}
+ALLOWED_PROFILE_FIELDS = {"provider", "model", "base_url", "api_key_env", "unavailable"}
 SECRET_FIELD_TOKENS = ("api_key", "token", "secret")
 
 
@@ -44,6 +44,20 @@ def load_llm_profile(
             f"LLM profile has unsupported fields: {', '.join(unsupported_fields)}"
         )
 
+    if _profile_is_unavailable(raw_profile):
+        available = sorted(
+            name
+            for name, body in profiles.items()
+            if isinstance(name, str)
+            and name != normalized_profile_id
+            and isinstance(body, dict)
+            and not _profile_is_unavailable(body)
+        )
+        suffix = f" Available profiles: {', '.join(available)}." if available else ""
+        raise LLMProviderConfigError(
+            f"LLM profile unavailable: {normalized_profile_id}.{suffix}"
+        )
+
     provider = _required_text(raw_profile.get("provider"), "provider")
     if provider != "openai-compatible":
         raise LLMProviderConfigError(f"unsupported LLM provider in profile: {provider}")
@@ -55,6 +69,15 @@ def load_llm_profile(
         base_url=_optional_text(raw_profile.get("base_url"), "base_url"),
         api_key_env=_required_text(raw_profile.get("api_key_env"), "api_key_env"),
     )
+
+
+def _profile_is_unavailable(profile: dict[str, Any]) -> bool:
+    flag = profile.get("unavailable")
+    if flag is None:
+        return False
+    if isinstance(flag, bool):
+        return flag
+    raise LLMProviderConfigError("LLM profile field must be boolean: unavailable")
 
 
 def _reject_secret_like_fields(profile: dict[str, Any]) -> None:

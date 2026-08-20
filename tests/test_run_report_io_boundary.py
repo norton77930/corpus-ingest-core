@@ -32,6 +32,8 @@ EXPECTED_WRITER_MODULES = {
     "corpus_remediation_runner.py",
     "corpus_semantic_remediation_runner.py",
     "study_guide_bundle.py",
+    "x_video_ingest.py",
+    "youtube_video_ingest.py",
 }
 
 
