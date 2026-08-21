@@ -110,4 +110,63 @@ git diff --check
 - **F-14**（resolved, Batch 3B）：storage.py 的 Phase 0 dead stub `search_transcripts`（實際只有一個，非兩個）已移除，連同僅供其 return annotation 使用的 `TranscriptSearchResult` import；public `search_transcripts` / `search_mentions` 一律解析到 `search.py`（`tests/test_contracts.py` 新增 module-provenance 斷言）。
 - **F-18**（resolved, Batch 3B）：`research_workflow.py` 未使用的 `rebuild_cache` import 已移除；兩處以 `raising=True` 依賴該屬性的 monkeypatch guard 改為 patch 真正的 `cache.rebuild_cache`；`test_cache_rebuild_guard.py` allowlist 維持不變（`CACHE_STALE_WARNING` 字面值仍含 `rebuild_cache`）。
 - **Provider factory boundary**（resolved, Batch 3B + 3C）：static guard（`tests/test_llm_provider_factory_boundary.py`）禁止 `src/` / `scripts/` 直接建構 `OpenAICompatibleProvider(...)`；Batch 3C 以 private factory token 在 constructor 拒絕 bare / forged construction，只允許 `create_provider`（exact `api_cost_ack` 後）建出 instance。
-- **README cleanup**：README 很長且含大量 phase history，完整重整尚未進行；大量 exact-substring docs tests 使搬移成本高。
+- **README cleanup**（resolved, 2026-08-22）：README 已改寫為人類導向的英文入口，並新增 `README.zh-TW.md` 中文版。
+  完整 core function 清單、輸出路徑、CLI 與 MCP registry 移到 [`docs/api.md`](api.md)；agent handoff 狀態、Spec 編號、
+  blocked 標記與 Phase 6H–7D.1 階段史移到本文件下方的 Relocated from README 區段。原本 pin README 的 exact-substring
+  docs tests 已改為斷言新的 canonical 位置，邊界內容一字未鬆綁。
+
+---
+
+## Relocated from README (2026-08-22)
+
+Everything below moved out of `README.md` so that the README could become a
+human-facing introduction. Nothing here was rewritten; these are the same
+status claims, boundary notes, and phase history, in the same words. This
+section, not the README, is the place to record agent handoff state.
+
+### Current status snapshot
+
+Podcast Ingestion Core 是一個通用的 Podcast 擷取核心。目前已完成 RSS episode listing、episode lookup、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive Markdown 摘要、OpenAI-compatible LLM semantic summary pipeline、deterministic mention extraction、SQLite metadata cache / search，以及共用同一個 `FastMCP` instance 的本機 stdio 與 loopback Streamable HTTP sidecar。Hermes direct MCP/config/Skills 接入已可運作；Spec 026 的 C6 before/after metadata/content endpoint equality 已經 required reviewers 與唯一 live v2 run 驗證為 PASS-current，且不宣稱 snapshots 間沒有 transient mutation。C7 仍缺安全 runtime evidence；v0.20.0 tag `v2026.8.3` hooks只是候選，整體狀態維持 Blocked。Web UI、排程、embedding 與 vector search 仍未實作。
+
+### Hermes / Spec 026-028 integration status
+
+部署、config/Skill plan→apply→rollback、direct-safe validator 與移植方式見 [`deploy/hermes/README.md`](deploy/hermes/README.md) 與 [`specs/026-hermes-mcp-integration/quickstart.md`](specs/026-hermes-mcp-integration/quickstart.md)。Direct transport 已驗證可用；C6 的 boolean-only endpoint-equality validator 已通過 targeted tests、POSIX synthetic checks、兩位 reviewers 與唯一 live v2 run，狀態為 PASS-current且不得重跑。C7 仍 Blocked；Hermes v0.20.0 tag `v2026.8.3` hooks 只是未安裝、未實機驗證的候選能力。禁止讀取 live config values/session dump、保存 raw response、升級或啟用 hooks來補證。Spec 027 contract layer is complete (offline assurance only); actual Hermes runtime routing is BLOCKED/not_evaluated and is not a runtime PASS. Spec 028 capability gate is complete and correctly terminates at BLOCKED_CAPABILITY for Hermes v0.20.0 tag v2026.8.3; no upgrade, Skill sync, hooks, collector, inference, or runtime observation was performed. C6 remains PASS-current and was not rerun; actual Hermes Skill routing remains BLOCKED/not_run.
+
+### Semantic summary smoke and reviewed semantic context (Phase 6U-6V.1)
+
+Phase 6U 補上 semantic summary smoke validation。這條路徑在 confirmed execution 會送 transcript text outside this machine；dry-run 只列 planned reads/writes、transcript transfer risk、cost risk 與 required acknowledgement，不呼叫 LLM、不寫 artifact、不輸出逐字稿內容。Confirmed semantic summary smoke 以及 direct `--mode semantic` CLI 都必須提供 exact `api_cost_ack`。CLI stdout 維持 no raw transcript stdout、不顯示 secret value；此階段 no MCP tool changes、no live market API、no automatic cache rebuild、no investment advice。
+Phase 6U.1 修正 semantic review guard false positive：semantic summary review 允許 podcast 內容中 speaker 過去買進 / 持有這類 transcript-derived 描述，但仍拒絕直接 buy/sell/hold、建議買進、目標價與保證報酬。Confirmed semantic smoke 也加入 stderr progress，stdout 仍維持 JSON，且 progress 不輸出 raw transcript、prompt、API key 或 LLM response。
+Phase 6V adds optional reviewed semantic context for stock lens synthesis. Default synthesis remains `phase-6f-stock-lens-json-only` and does not read `.semantic.md`. When explicitly enabled with `--include-semantic-context`, synthesis may include only matched episode semantic summaries with a latest passed review report; the input boundary becomes `phase-6f-stock-lens-json-plus-reviewed-semantic-summary`. The context excludes `## Chunk Summaries`, does not read raw transcript text, does not read `.env`, does not fetch live market data, and makes no MCP tool changes. Reviewed semantic summary context is an LLM intermediate artifact, not podcast raw evidence and not an external market fact. Phase 6V.1 aligns the deterministic review gate with boundary/context consistency: JSON-only synthesis must have no semantic context, and reviewed semantic synthesis must include non-empty, review-passed semantic context.
+
+### Research safety phase history (Phase 6H-6V.1)
+
+Phase 6H 是 LLM 前置 safety gate，用來驗證研究層與未來 LLM workflow 不會幻覺、跳過 `api_cost_ack`、洩漏 raw transcript / API key、把 external boundary 當成已查證市場資料，或產生投資建議。
+
+Research eval 文件：
+
+- 流程與 rubric：[`docs/research-safety-eval.md`](docs/research-safety-eval.md)
+- 可貼到 Codex session 的 prompts：[`docs/research-eval-prompts.md`](docs/research-eval-prompts.md)
+- Phase 6H report template：[`evals/research-safety/phase-6h-research-session-template.md`](evals/research-safety/phase-6h-research-session-template.md)
+- Phase 6O LLM smoke：[`docs/research-llm-smoke.md`](docs/research-llm-smoke.md)
+- Phase 6O smoke template：[`evals/research-llm-smoke/phase-6o-llm-smoke-template.md`](evals/research-llm-smoke/phase-6o-llm-smoke-template.md)
+
+Phase 6H 不呼叫 LLM、不讀 API key、不查外部市場資料、不新增 MCP tools，也不改 Phase 6G workflow。Phase 6I 已加入 optional semantic summary execution inside research workflow。Phase 6J 已加入 Stock Lens LLM Synthesis，輸入邊界是 6F stock lens JSON only，必須 exact api_cost_ack，no raw transcript、no external market data、no MCP tool changes。Phase 6K 已加入 workflow opt-in synthesis：`include_stock_lens_synthesis` 只在 workflow confirmed 且 exact ack 後執行 synthesis。Phase 6L 已加入 `run_research_workflow` MCP exposure：dry-run first，confirmed execution 才包裝 core workflow，LLM steps 仍需 exact ack，且 no automatic cache rebuild。Phase 6N 已加入 `include_external_data_verification` optional workflow fixture verification：只支援本機 fixture provider，no live market API、no API key、no MCP tool changes、no automatic cache rebuild，也不提供投資建議。Phase 6O 已加入 research-llm-smoke：real OpenAI-compatible smoke + Codex manual review，exact ack，no direct Codex-session backend、no live market data、no investment advice。Phase 6Q 已加入 LLM profile config：`--llm-profile pro4500` 可重用 provider/model/base URL/env var 名稱，但不保存 API key 值。Phase 6R 已加入本機 `.env` secret loader：手動 LLM smoke 可用 `API_KEY`、`MODEL`、`BASE_URL`，CLI metadata 只顯示 env var 名稱、不顯示 secret value。Phase 6T 已加入 research LLM smoke review report / quality gate：confirmed smoke 後可產生 deterministic review artifacts，no LLM call、no `.env` read、no external market data。Phase 6V 已加入 reviewed semantic context opt-in：stock lens synthesis 預設仍是 6F stock lens JSON only，明確啟用後才使用 review-passed `.semantic.md` context，no raw transcript、no live market data、no MCP tool changes、no investment advice。Phase 6V.1 已對齊 review gate boundary/context consistency：JSON-only artifact 不得帶 semantic context，reviewed semantic boundary 必須帶 review-passed context。
+
+### Spec Kit / architecture phase history (Phase 7A-7D.1)
+
+Phase 7A 是 Architecture / Spec Kit Stabilization，範圍是 docs/spec-only。它把目前 Phase 6T 研究系統整理回 spec-kit 可追蹤結構，不改 runtime、不改 MCP、不呼叫 LLM、不讀 `.env`、不查 external market data，也不放寬 no investment advice 邊界。Phase 7A 後，下一個功能性候選階段是 Phase 6U semantic summary smoke 或小型 LLM output-quality tuning。
+
+Phase 7B 是 Official Spec Kit Bootstrap。專案已正式加入官方 `specify init` 等價 scaffold：`.specify` 保存 Spec Kit memory、templates、scripts、workflow 與 integration metadata；`.agents/skills` 保存 Codex skills mode 的 `$speckit-*` skills；`AGENTS.md` 保存 repo-level agent rules。Phase 7B 不改 runtime、不改 MCP、不呼叫 LLM、不讀 `.env`、不查 live market API，也不放寬 no investment advice 邊界。
+
+Phase 7C 是 Spec Kit Constitution + Workflow Alignment。此階段把 `.specify/memory/constitution.md` 從官方 placeholder 專案化，並同步 `.specify/templates/`、`AGENTS.md`、architecture、roadmap 與 spec plan。Phase 7C 是 docs/spec/tests only：no runtime behavior change、no MCP behavior change、no LLM call、no `.env` read、no live market API、no investment advice。Phase 7C 後，新功能應走 full Spec Kit flow：`$speckit-constitution`、`$speckit-specify`、`$speckit-clarify`、`$speckit-plan`、`$speckit-checklist`、`$speckit-tasks`、`$speckit-analyze`、`$speckit-implement`、`$speckit-converge`；`$speckit-taskstoissues` 只在需要 GitHub issue handoff 時使用。Phase 6U semantic summary smoke 仍是後續可能的功能階段。
+
+Phase 7D 是 Spec Kit Backfill via Full Workflow。此階段用 full Spec Kit flow 將已開發能力做 capability-group backfill：`specs/README.md` 是 registry，`001-gooaye-research-system` 保留為 umbrella product spec，`002-ingestion-transcript-core` 到 `007-spec-kit-governance` 記錄 as-built capability packages，其中 `006-llm-safety-synthesis-smoke-review` 覆蓋 optional LLM/smoke/review gate。Phase 7D 是 docs/spec/tests only：no runtime behavior change、no MCP behavior change、no LLM call、no `.env` read、no live market API、no investment advice，且明確記錄 `$speckit-clarify`、`$speckit-analyze`、`$speckit-converge` 的 backfill 步驟。
+
+Phase 7D.1 是 Spec Kit Active Feature Guidance。此階段補清楚 official Spec Kit command usability：feature packages 的正確位置是 `specs/<feature>`，`.specify/` 是 scaffold/memory/templates/scripts metadata；多個 backfilled packages 不預設 pin 單一 active feature。要對某個 package 跑 official scripts / skills，先設定 `SPECIFY_FEATURE_DIRECTORY`，例如 `$env:SPECIFY_FEATURE_DIRECTORY="specs/003-metadata-search-mcp-core"`；官方 script 可能保存到 `.specify/feature.json`，切換 package 時重新設定即可。Phase 7D.1 不改 runtime、不改 MCP、不呼叫 LLM、不讀 `.env`、不查 live market API，也不提供 investment advice。Phase 6U semantic summary smoke 仍是後續可能的功能階段。
+
+
+### Spec034 Task #82 v8 review repair — current
+
+**startup/plugin closed; credential_provider BLOCKED; overall BLOCKED**. Spec034 remains offline/static-only with H2 exactly 20 upstream paths at H1 SHA-256 `90ba45ccf11bbcbf446f7d16904964073e84837a04aaaa0c6f4887d3ea75109d`; no 21st path is authorized. The isolated child accepts only a regular no-link/reparse-free project snapshot as its payload cwd, changes there before sentinel/Pytest/product import, and retains capability snapshot then project snapshot then stdlib only. Consequently C6's three relative config reads use snapshot-approved bytes even if original workspace configs change after snapshotting. Public receipt projection has no injected verifier; private issuance recomputes current canonical facts. AST proof follows one owner-local package spec/module/loader/return/register/context flow. Bundle rename parent fsync precedes the `bundle_renamed` journal with an explicit platform best-effort fallback, and exact nonce-bound both-missing recovery alone is retry-safe. Runner/journal/trust tests remain non-final. Every prior root is not approval evidence. Fresh code and architecture re-reviews remain required; Main alone may run the documented one-shot command after both PASS, and it is not run here.
+
+> Spec034 Task #77 current terminal is **startup/plugin closed; credential_provider BLOCKED; overall BLOCKED**. Its H2-frozen exact 20-file official `NousResearch/hermes-agent` bundle is static/offline only: startup order and the fixed `security-guidance` plugin identity chain are closed, while credential/provider construction data flow, whole-program closure, dynamic/user/project/entry-point plugin paths, runtime/secret edges, and actual activation remain blocked or unobserved. `runtime_status=not_run`; `live_actions_authorized=false`. The fresh review-only bootstrap/final trust chain is reserved for Main after both reviews PASS and remains unrun.

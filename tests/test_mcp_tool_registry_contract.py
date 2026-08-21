@@ -5,7 +5,7 @@ Invariants protected:
   tool must be a deliberate, test-visible change (audit F-07 guard).
 - Every side-effect tool defaults to ``confirm=False`` (dry-run first).
 - MCP responses keep the documented JSON envelope shapes.
-- ``README.md`` and ``docs/mcp-usage.md`` list every registered tool, so the
+- ``docs/api.md`` and ``docs/mcp-usage.md`` list every registered tool, so the
   docs cannot drift away from the implementation again.
 - The MCP ``run_research_workflow`` wrapper intentionally exposes only a
   subset of the core workflow parameters (audit F-08 characterization).
@@ -221,24 +221,24 @@ def test_action_plan_envelope_shape():
 
 
 def test_readme_and_mcp_usage_doc_list_every_registered_tool():
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme = (ROOT / "docs" / "api.md").read_text(encoding="utf-8")
     usage = (ROOT / "docs" / "mcp-usage.md").read_text(encoding="utf-8")
 
     for name in sorted(EXPECTED_TOOLS):
-        assert f"`{name}`" in readme, f"README.md must document MCP tool {name}"
+        assert f"`{name}`" in readme, f"docs/api.md must document MCP tool {name}"
         assert f"`{name}`" in usage, f"docs/mcp-usage.md must document MCP tool {name}"
 
 
 def test_readme_side_effect_list_matches_registry_side_effect_set():
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme = (ROOT / "docs" / "api.md").read_text(encoding="utf-8")
     match = re.search(
-        r"Side-effect tools 是：\r?\n\r?\n((?:- `[a-z0-9_]+`\r?\n)+)",
+        r"Side-effect tools:\r?\n\r?\n((?:- `[a-z0-9_]+`\r?\n)+)",
         readme,
     )
-    assert match is not None, "README.md must list side-effect tools as a markdown bullet list"
+    assert match is not None, "docs/api.md must list side-effect tools as a markdown bullet list"
     listed = set(re.findall(r"`([a-z0-9_]+)`", match.group(1)))
     assert listed == SIDE_EFFECT_TOOLS, (
-        "README side-effect list drifted from SIDE_EFFECT_TOOLS: "
+        "docs/api.md side-effect list drifted from SIDE_EFFECT_TOOLS: "
         f"missing={sorted(SIDE_EFFECT_TOOLS - listed)} extra={sorted(listed - SIDE_EFFECT_TOOLS)}"
     )
 

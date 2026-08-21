@@ -86,7 +86,6 @@ def test_spec_027_package_and_governed_docs_distinguish_contracts_from_runtime_e
         assert phrase in package_docs
 
     for relative_path in (
-        "README.md",
         "specs/README.md",
         "docs/architecture.md",
         "docs/mcp-readiness.md",

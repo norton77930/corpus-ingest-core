@@ -83,7 +83,6 @@ def test_spec_028_package_records_the_pinned_capability_gate_without_raw_runtime
 
 def test_governed_docs_and_predecessors_point_to_spec_028_without_reopening_c6():
     for relative_path in (
-        "README.md",
         "specs/README.md",
         "docs/architecture.md",
         "docs/mcp-readiness.md",

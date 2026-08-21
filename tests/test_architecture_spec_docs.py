@@ -93,7 +93,7 @@ def test_spec_kit_quickstart_covers_llm_smoke_and_review_gate():
 
 def test_operator_docs_use_working_llm_profile_not_unavailable_gb10():
     paths = [
-        ROOT / "README.md",
+        DOCS / "api.md",
         DOCS / "research-llm-smoke.md",
         SPEC / "quickstart.md",
         ROOT / "specs" / "006-llm-safety-synthesis-smoke-review" / "quickstart.md",
@@ -124,7 +124,7 @@ def test_docs_do_not_treat_local_secrets_as_committable_configuration():
 
 
 def test_readme_and_roadmap_document_phase_7a():
-    readme = _read(ROOT / "README.md")
+    readme = _read(DOCS / "agent-handoff.md")
     roadmap = _read(DOCS / "roadmap.md")
 
     for text in (readme, roadmap):
@@ -135,7 +135,7 @@ def test_readme_and_roadmap_document_phase_7a():
 
 
 def test_readme_and_roadmap_document_phase_7b_spec_kit_bootstrap():
-    readme = _read(ROOT / "README.md")
+    readme = _read(DOCS / "agent-handoff.md")
     roadmap = _read(DOCS / "roadmap.md")
 
     for text in (readme, roadmap):
@@ -151,7 +151,7 @@ def test_phase_7c_documents_constitution_and_workflow_alignment():
     combined = "\n".join(
         _read(path)
         for path in [
-            ROOT / "README.md",
+            DOCS / "agent-handoff.md",
             DOCS / "roadmap.md",
             DOCS / "architecture.md",
             SPEC / "plan.md",
@@ -180,7 +180,7 @@ def test_phase_7d_documents_existing_capability_backfill():
     combined = "\n".join(
         _read(path)
         for path in [
-            ROOT / "README.md",
+            DOCS / "agent-handoff.md",
             DOCS / "roadmap.md",
             DOCS / "architecture.md",
             SPEC / "plan.md",
@@ -210,7 +210,7 @@ def test_phase_7d1_documents_active_feature_guidance():
     combined = "\n".join(
         _read(path)
         for path in [
-            ROOT / "README.md",
+            DOCS / "agent-handoff.md",
             DOCS / "roadmap.md",
             DOCS / "architecture.md",
             SPEC / "plan.md",
@@ -304,7 +304,7 @@ def test_014_stabilization_docs_define_strict_zero_file_dry_run():
         assert phrase in package_docs
 
     direct_docs = [
-        _read(ROOT / "README.md"),
+        _read(DOCS / "api.md"),
         _read(ROOT / "specs" / "README.md"),
         _read(DOCS / "architecture.md"),
         _read(DOCS / "verification-matrix.md"),
@@ -318,7 +318,7 @@ def test_014_stabilization_docs_define_strict_zero_file_dry_run():
 
 def test_015_semantic_remediation_docs_and_registry_contract():
     feature = ROOT / "specs" / "015-corpus-semantic-remediation-runner"
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme = (ROOT / "docs" / "api.md").read_text(encoding="utf-8")
     architecture = (ROOT / "docs" / "architecture.md").read_text(encoding="utf-8")
     registry = (ROOT / "specs" / "README.md").read_text(encoding="utf-8")
     verification = (ROOT / "docs" / "verification-matrix.md").read_text(
@@ -364,7 +364,7 @@ def test_015_semantic_remediation_docs_and_registry_contract():
 
 def test_016_completion_workflow_docs_and_agent_surface_contract():
     feature = ROOT / "specs" / "016-corpus-episode-completion-workflow-runner"
-    readme = _read(ROOT / "README.md")
+    readme = _read(DOCS / "api.md")
     architecture = _read(DOCS / "architecture.md")
     handoff = _read(DOCS / "agent-handoff.md")
     roadmap = _read(DOCS / "roadmap.md")
@@ -424,7 +424,7 @@ def test_017_latest_episode_deterministic_workflow_docs_and_agent_surface_contra
         / "SKILL.md"
     )
     roadmap = _read(DOCS / "roadmap.md")
-    readme = _read(ROOT / "README.md")
+    readme = _read(DOCS / "api.md")
     architecture = _read(DOCS / "architecture.md")
     handoff = _read(DOCS / "agent-handoff.md")
     registry = _read(ROOT / "specs" / "README.md")
@@ -520,7 +520,7 @@ def test_018_verified_research_report_docs_and_agent_surface_contract():
     requirements = _read(feature / "checklists" / "requirements.md")
     safety = _read(feature / "checklists" / "safety.md")
     contract = _read(feature / "contracts" / "latest-episode-verified-research-report-workflow.md")
-    readme = _read(ROOT / "README.md")
+    readme = _read(DOCS / "api.md")
     architecture = _read(DOCS / "architecture.md")
     handoff = _read(DOCS / "agent-handoff.md")
     roadmap = _read(DOCS / "roadmap.md")
@@ -573,19 +573,21 @@ def test_018_verified_research_report_docs_and_agent_surface_contract():
 
 
 def test_readme_lists_current_corpus_workflow_surfaces_in_their_sections():
-    readme = _read(ROOT / "README.md")
-    directory_section = readme.split("## 目錄結構", 1)[1].split(
-        "## Core Functions", 1
+    # The full surface listing moved out of README.md into docs/api.md, so the
+    # README could become a human-facing introduction. The invariant is
+    # unchanged: each corpus workflow surface must appear in the section that
+    # documents that kind of surface, not just somewhere in the file.
+    api = _read(DOCS / "api.md")
+    directory_section = api.split("## CLI reference", 1)[1].split(
+        "## MCP tool registry", 1
     )[0]
-    core_block = readme.split("## Core Functions", 1)[1].split(
+    core_block = api.split("## Core function reference", 1)[1].split(
         "```python", 1
     )[1].split("```", 1)[0]
-    output_section = readme.split("## 輸出路徑規則", 1)[1].split(
-        "## CLI 範例", 1
+    output_section = api.split("## Output paths", 1)[1].split(
+        "## CLI reference", 1
     )[0]
-    mcp_section = readme.split("啟動本機 MCP server：", 1)[1].split(
-        "## MCP Client Integration", 1
-    )[0]
+    mcp_section = api.split("## MCP tool registry", 1)[1]
 
     for script in [
         "run_corpus_episode_completion_workflow.py",

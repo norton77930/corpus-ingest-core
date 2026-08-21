@@ -70,84 +70,90 @@ def test_research_session_template_tracks_required_safety_fields():
 def test_research_safety_eval_docs_link_from_readme_and_roadmap():
     readme = _read(ROOT / "README.md")
     roadmap = _read(DOCS / "roadmap.md")
+    # The research boundary claims and the Phase 6H-6V.1 history moved out of
+    # README.md: contract wording now lives in docs/api.md and the phase
+    # history in docs/agent-handoff.md. README keeps the entry-point links.
+    operator_docs = "\n".join(
+        [readme, _read(DOCS / "api.md"), _read(DOCS / "agent-handoff.md")]
+    )
 
     assert "docs/research-safety-eval.md" in readme
     assert "docs/research-eval-prompts.md" in readme
-    assert "evals/research-safety/phase-6h-research-session-template.md" in readme
+    assert "evals/research-safety/phase-6h-research-session-template.md" in operator_docs
     assert "LLM 前置 safety gate" in roadmap
     assert "Phase 6I" in roadmap
-    assert "optional semantic summary execution inside research workflow" in readme
-    assert "no MCP tool changes" in readme
+    assert "optional semantic summary execution inside research workflow" in operator_docs
+    assert "no MCP tool changes" in operator_docs
     assert "Phase 6J" in roadmap
     assert "Stock Lens LLM Synthesis" in roadmap
-    assert "6F stock lens JSON only" in readme
-    assert "exact api_cost_ack" in readme
-    assert "no raw transcript" in readme
-    assert "no external market data" in readme
-    assert "no MCP tool changes" in readme
+    assert "6F stock lens JSON only" in operator_docs
+    assert "exact api_cost_ack" in operator_docs
+    assert "no raw transcript" in operator_docs
+    assert "no external market data" in operator_docs
+    assert "no MCP tool changes" in operator_docs
     assert "Phase 6K" in roadmap
-    assert "workflow opt-in synthesis" in readme
-    assert "include_stock_lens_synthesis" in readme
+    assert "workflow opt-in synthesis" in operator_docs
+    assert "include_stock_lens_synthesis" in operator_docs
     assert "Phase 6L" in roadmap
-    assert "MCP exposure" in readme
-    assert "run_research_workflow" in readme
-    assert "dry-run first" in readme
-    assert "exact ack" in readme
-    assert "no automatic cache rebuild" in readme
+    assert "MCP exposure" in operator_docs
+    assert "run_research_workflow" in operator_docs
+    assert "dry-run first" in operator_docs
+    assert "exact ack" in operator_docs
+    assert "no automatic cache rebuild" in operator_docs
     assert "Phase 6M" in roadmap
-    assert "fixture provider" in readme
-    assert "confirm guard" in readme
-    assert "no live market API" in readme
-    assert "no investment advice" in readme
+    assert "fixture provider" in operator_docs
+    assert "confirm guard" in operator_docs
+    assert "no live market API" in operator_docs
+    assert "no investment advice" in operator_docs
     assert "Phase 6N" in roadmap
-    assert "include_external_data_verification" in readme
-    assert "optional workflow fixture verification" in readme
-    assert "no API key" in readme
-    assert "no automatic cache rebuild" in readme
+    assert "include_external_data_verification" in operator_docs
+    assert "optional workflow fixture verification" in operator_docs
+    assert "no API key" in operator_docs
+    assert "no automatic cache rebuild" in operator_docs
     assert "Phase 6O" in roadmap
-    assert "research-llm-smoke" in readme
-    assert "OpenAI-compatible smoke" in readme
-    assert "Codex manual review" in readme
-    assert "no direct Codex-session backend" in readme
-    assert "no live market data" in readme
-    assert "no investment advice" in readme
+    assert "research-llm-smoke" in operator_docs
+    assert "OpenAI-compatible smoke" in operator_docs
+    assert "Codex manual review" in operator_docs
+    assert "no direct Codex-session backend" in operator_docs
+    assert "no live market data" in operator_docs
+    assert "no investment advice" in operator_docs
     assert "Phase 6R" in roadmap
     assert "Local `.env` Secret Loader" in roadmap
-    assert "API_KEY" in readme
-    assert "MODEL" in readme
-    assert "BASE_URL" in readme
-    assert "--env-file" in readme
-    assert "--no-env-file" in readme
-    assert "不顯示 secret value" in readme
-    assert "OPENAI_MODEL" in readme
-    assert "OPENAI_BASE_URL" in readme
+    assert "API_KEY" in operator_docs
+    assert "MODEL" in operator_docs
+    assert "BASE_URL" in operator_docs
+    assert "--env-file" in operator_docs
+    assert "--no-env-file" in operator_docs
+    assert "不顯示 secret value" in operator_docs
+    assert "OPENAI_MODEL" in operator_docs
+    assert "OPENAI_BASE_URL" in operator_docs
     assert "Phase 6T" in roadmap
-    assert "review report" in readme
-    assert "quality gate" in readme
-    assert "no LLM call" in readme
-    assert "no `.env` read" in readme
-    assert "no external market data" in readme
+    assert "review report" in operator_docs
+    assert "quality gate" in operator_docs
+    assert "no LLM call" in operator_docs
+    assert "no `.env` read" in operator_docs
+    assert "no external market data" in operator_docs
     assert "Phase 6U" in roadmap
     assert "Semantic Summary Smoke Validation" in roadmap
-    assert "run_semantic_summary_smoke.py" in readme
-    assert "review_semantic_summary_smoke.py" in readme
-    assert "transcript text outside this machine" in readme
-    assert "semantic summary smoke" in readme
-    assert "no raw transcript stdout" in readme
-    assert "no MCP tool changes" in readme
-    assert "no live market API" in readme
-    assert "no investment advice" in readme
+    assert "run_semantic_summary_smoke.py" in operator_docs
+    assert "review_semantic_summary_smoke.py" in operator_docs
+    assert "transcript text outside this machine" in operator_docs
+    assert "semantic summary smoke" in operator_docs
+    assert "no raw transcript stdout" in operator_docs
+    assert "no MCP tool changes" in operator_docs
+    assert "no live market API" in operator_docs
+    assert "no investment advice" in operator_docs
     assert "Phase 6U.1" in roadmap
-    assert "semantic review guard" in readme
-    assert "stderr progress" in readme
-    assert "false positive" in readme
+    assert "semantic review guard" in operator_docs
+    assert "stderr progress" in operator_docs
+    assert "false positive" in operator_docs
     assert "Phase 6V" in roadmap
     assert "Phase 6V.1" in roadmap
-    assert "reviewed semantic context" in readme
-    assert "phase-6f-stock-lens-json-plus-reviewed-semantic-summary" in readme
-    assert "boundary/context consistency" in readme
-    assert "no MCP tool changes" in readme
-    assert "no live market data" in readme
+    assert "reviewed semantic context" in operator_docs
+    assert "phase-6f-stock-lens-json-plus-reviewed-semantic-summary" in operator_docs
+    assert "boundary/context consistency" in operator_docs
+    assert "no MCP tool changes" in operator_docs
+    assert "no live market data" in operator_docs
 
 
 def test_research_llm_smoke_template_tracks_quality_fields():

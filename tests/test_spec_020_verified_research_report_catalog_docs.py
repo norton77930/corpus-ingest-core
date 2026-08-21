@@ -70,7 +70,7 @@ def test_spec_020_catalog_package_locks_the_read_only_contract() -> None:
 
 
 def test_spec_020_user_docs_and_setup_align_with_the_current_catalog_contract() -> None:
-    readme = (ROOT / "README.md").read_text(encoding="utf-8")
+    readme = (ROOT / "docs" / "api.md").read_text(encoding="utf-8")
     usage = (ROOT / "docs" / "mcp-usage.md").read_text(encoding="utf-8")
     setup_docs = "\n".join(
         (ROOT / "docs" / filename).read_text(encoding="utf-8")

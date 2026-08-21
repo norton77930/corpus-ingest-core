@@ -58,7 +58,11 @@ HISTORICAL_MARKERS = (
 
 
 def _governed_files() -> list[Path]:
-    files = [ROOT / "README.md", ROOT / "specs" / "README.md"]
+    files = [
+        ROOT / "README.md",
+        ROOT / "README.zh-TW.md",
+        ROOT / "specs" / "README.md",
+    ]
     files.extend(sorted((ROOT / "docs").rglob("*.md")))
     return files
 
