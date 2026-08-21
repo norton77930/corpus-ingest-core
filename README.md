@@ -1,7 +1,5 @@
 # Podcast Ingestion Core
 
-> Spec034 Task #77 current terminal is **startup/plugin closed; credential_provider BLOCKED; overall BLOCKED**. Its H2-frozen exact 20-file official `NousResearch/hermes-agent` bundle is static/offline only: startup order and the fixed `security-guidance` plugin identity chain are closed, while credential/provider construction data flow, whole-program closure, dynamic/user/project/entry-point plugin paths, runtime/secret edges, and actual activation remain blocked or unobserved. `runtime_status=not_run`; `live_actions_authorized=false`. The fresh review-only bootstrap/final trust chain is reserved for Main after both reviews PASS and remains unrun.
-
 Podcast Ingestion Core 是一個通用的 Podcast 擷取核心。目前已完成 RSS episode listing、episode lookup、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive Markdown 摘要、OpenAI-compatible LLM semantic summary pipeline、deterministic mention extraction、SQLite metadata cache / search，以及共用同一個 `FastMCP` instance 的本機 stdio 與 loopback Streamable HTTP sidecar。Hermes direct MCP/config/Skills 接入已可運作；Spec 026 的 C6 before/after metadata/content endpoint equality 已經 required reviewers 與唯一 live v2 run 驗證為 PASS-current，且不宣稱 snapshots 間沒有 transient mutation。C7 仍缺安全 runtime evidence；v0.20.0 tag `v2026.8.3` hooks只是候選，整體狀態維持 Blocked。Web UI、排程、embedding 與 vector search 仍未實作。
 
 第一個 podcast profile 是 Gooaye 股癌，但核心程式不得寫死股癌。所有 podcast-specific 設定都放在 `config/podcasts.yaml`。
@@ -891,6 +889,14 @@ python -m pytest
 python -m compileall src scripts
 ```
 
+`python -m pytest` 預設排除 Hermes 029-034 鏈(該 chain 為 Blocked,且各自有
+`scripts/verify_spec_0NN*.py` 離線入口;排除清單與理由見 `pyproject.toml` 的
+`[tool.pytest.ini_options]`)。要跑其中任一檔,明確指定路徑即可:
+
+```powershell
+python -m pytest tests/test_spec_032_hermes_g2_docs.py
+```
+
 若要安裝開發依賴：
 
 ```powershell
@@ -900,3 +906,5 @@ python -m pip install -e .[dev]
 ### Spec034 Task #82 v8 review repair — current
 
 **startup/plugin closed; credential_provider BLOCKED; overall BLOCKED**. Spec034 remains offline/static-only with H2 exactly 20 upstream paths at H1 SHA-256 `90ba45ccf11bbcbf446f7d16904964073e84837a04aaaa0c6f4887d3ea75109d`; no 21st path is authorized. The isolated child accepts only a regular no-link/reparse-free project snapshot as its payload cwd, changes there before sentinel/Pytest/product import, and retains capability snapshot then project snapshot then stdlib only. Consequently C6's three relative config reads use snapshot-approved bytes even if original workspace configs change after snapshotting. Public receipt projection has no injected verifier; private issuance recomputes current canonical facts. AST proof follows one owner-local package spec/module/loader/return/register/context flow. Bundle rename parent fsync precedes the `bundle_renamed` journal with an explicit platform best-effort fallback, and exact nonce-bound both-missing recovery alone is retry-safe. Runner/journal/trust tests remain non-final. Every prior root is not approval evidence. Fresh code and architecture re-reviews remain required; Main alone may run the documented one-shot command after both PASS, and it is not run here.
+
+> Spec034 Task #77 current terminal is **startup/plugin closed; credential_provider BLOCKED; overall BLOCKED**. Its H2-frozen exact 20-file official `NousResearch/hermes-agent` bundle is static/offline only: startup order and the fixed `security-guidance` plugin identity chain are closed, while credential/provider construction data flow, whole-program closure, dynamic/user/project/entry-point plugin paths, runtime/secret edges, and actual activation remain blocked or unobserved. `runtime_status=not_run`; `live_actions_authorized=false`. The fresh review-only bootstrap/final trust chain is reserved for Main after both reviews PASS and remains unrun.
