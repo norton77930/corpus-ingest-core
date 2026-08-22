@@ -12,6 +12,7 @@ explicitly so a rename fails loudly here, in one place.
 from __future__ import annotations
 
 import importlib
+import os
 from pathlib import Path
 
 import pytest
@@ -39,6 +40,20 @@ def pytest_configure(config: pytest.Config) -> None:
     basetemp = config.getoption("basetemp", None)
     if basetemp:
         Path(basetemp).parent.mkdir(parents=True, exist_ok=True)
+
+    if os.environ.get("PODCAST_INGEST_DATA_DIR"):
+        raise pytest.UsageError(
+            "PODCAST_INGEST_DATA_DIR is set, and the suite cannot run with "
+            "it. Nine path-contract assertions compare against a literal "
+            "hardcoded data/ path -- specs/025 FR-008 protects that "
+            "default, and tests/test_data_dir_fixture_contract.py strips this "
+            "variable out of a subprocess to verify it. Those nine fail with a "
+            "message naming no environment variable at all, which is why the "
+            "run stops here instead. Unset it for the run; relocating data/ "
+            "still works at runtime, and the conflict is only with the tests. "
+            "Tests that need isolated roots use the tmp_data_dirs fixture in "
+            "this file, never this variable."
+        )
 
 
 def storage_dir_constant_names() -> list[str]:
