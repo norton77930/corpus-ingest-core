@@ -4,6 +4,8 @@
 在本機用 faster-whisper 轉錄,產出帶時間戳的逐字稿、摘要、實體 mention 與研究
 artifacts,並透過 MCP server 與 Skills 提供給 AI agent 使用。
 
+[![tests](https://github.com/norton77930/corpus-ingest-core/actions/workflows/tests.yml/badge.svg)](https://github.com/norton77930/corpus-ingest-core/actions/workflows/tests.yml)
+
 [English](README.md)
 
 **輸入:**podcast RSS feed,或影片 URL。
@@ -144,10 +146,13 @@ Hermes sidecar 整合(specs 026–034)目前只有離線驗證,runtime evidence 
 - [`docs/agent-handoff.md`](docs/agent-handoff.md) — 專案狀態、spec 歷史、blockers,
   以及接手開發(不論是人或 agent)的入口,包含從根目錄移入的
   [2026-08-19 session handoff](docs/agent-handoff.md#handoff--podcast-ingest-core-2026-08-19)
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — 環境設定、如何驗證一個變更、
+  不可跨越的產品邊界,以及被雜湊釘選、不可編輯的檔案
+- [`SECURITY.md`](SECURITY.md) — 私下通報漏洞
 - [`docs/ai-development-framework.md`](docs/ai-development-framework.md)、
   [`docs/verification-matrix.md`](docs/verification-matrix.md)、
   [`docs/architecture-decision-records/README.md`](docs/architecture-decision-records/README.md)、
-  [`AGENTS.md`](AGENTS.md) — 貢獻規範與決策記錄
+  [`AGENTS.md`](AGENTS.md) — 變更分類、guard test 對照表與決策記錄
 
 評測套件,用來確認 agent 在宣告的邊界內使用工具:
 [`docs/mcp-tool-use-eval.md`](docs/mcp-tool-use-eval.md)、
@@ -164,9 +169,9 @@ python -m pytest
 python -m compileall src scripts
 ```
 
-預設的 pytest 執行會排除 Hermes 029–034 鏈。那些 package 處於 blocked 狀態,
-且各自有離線入口(`scripts/verify_spec_0NN*.py`);排除清單與理由見 `pyproject.toml`。
-明確指定路徑仍然會跑:
+預設的 pytest 執行會排除 blocked 的 Hermes 030–034 文件鏈,它們各自有離線入口
+(`scripts/verify_spec_0NN*.py`);排除清單與理由見 `pyproject.toml`。
+明確指定路徑仍然會跑其中任一個:
 
 ```powershell
 python -m pytest tests/test_spec_032_hermes_g2_docs.py

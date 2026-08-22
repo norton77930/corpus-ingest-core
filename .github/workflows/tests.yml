@@ -1,0 +1,71 @@
+name: tests
+
+# Windows only, deliberately. The project documents PowerShell as its default
+# shell, pyproject carries Windows-specific pytest settings (a repo-local
+# basetemp, because long temp paths hit the 260-character MAX_PATH limit), and
+# the pipeline has never been run on Linux. CI verifies what the project claims
+# to support; adding a Linux job today would report path-separator noise rather
+# than signal.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    strategy:
+      fail-fast: false
+      matrix:
+        # pyproject declares requires-python = ">=3.11".
+        python-version: ['3.11', '3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+          # This repo has no requirements.txt, which is what setup-python globs
+          # for by default; point the cache key at the file that actually
+          # declares the dependencies.
+          cache-dependency-path: pyproject.toml
+
+      # Editable install, not a pythonpath shim. Several tests spawn
+      # subprocesses, and pythonpath = ["src"] does not reach them.
+      - name: Install
+        run: pip install -e .[dev]
+
+      # The default run excludes only the blocked Hermes 030-034 doc chain, so
+      # this is expected to be fully green. test_spec_029_offline,
+      # test_mcp_http_transport, and test_hermes_runtime_capability stay in it
+      # on purpose: they go red when the environment does not match what
+      # pyproject declares, which is the whole point of running this on a clean
+      # machine.
+      - name: Test
+        run: python -m pytest
+
+      - name: Compile
+        run: python -m compileall src scripts
+
+      # The suite must not write into a tracked path. Everything it produces
+      # belongs under the gitignored .pytest-tmp/ and data/ trees.
+      - name: Working tree stays clean
+        run: |
+          git status --porcelain
+          if (git status --porcelain) { throw "the test run modified tracked files" }

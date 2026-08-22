@@ -5,6 +5,8 @@ feed (or an X / YouTube video), transcribes it locally with faster-whisper, and
 produces timestamped transcripts, summaries, entity mentions, and research
 artifacts on disk — exposed to AI agents through an MCP server and Skills.
 
+[![tests](https://github.com/norton77930/corpus-ingest-core/actions/workflows/tests.yml/badge.svg)](https://github.com/norton77930/corpus-ingest-core/actions/workflows/tests.yml)
+
 [繁體中文說明](README.zh-TW.md)
 
 **In:** a podcast RSS feed, or a video URL.
@@ -160,10 +162,15 @@ remains blocked on runtime evidence. Details are in
   history, blockers, and the entry point for anyone (human or agent) picking up
   development, including the
   [2026-08-19 session handoff](docs/agent-handoff.md#handoff--podcast-ingest-core-2026-08-19) relocated from the repo root
+- [`CONTRIBUTING.md`](CONTRIBUTING.md) — setup, how to verify a change, the
+  product boundaries a change must not cross, and the hash-pinned files that
+  must not be edited
+- [`SECURITY.md`](SECURITY.md) — reporting a vulnerability privately
 - [`docs/ai-development-framework.md`](docs/ai-development-framework.md),
   [`docs/verification-matrix.md`](docs/verification-matrix.md),
   [`docs/architecture-decision-records/README.md`](docs/architecture-decision-records/README.md),
-  [`AGENTS.md`](AGENTS.md) — contribution rules and decision records
+  [`AGENTS.md`](AGENTS.md) — change classification, guard-test matrix, and
+  decision records
 
 Evaluation suites, for checking that an agent uses the tools within their
 declared boundaries:
