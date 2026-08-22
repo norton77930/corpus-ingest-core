@@ -258,13 +258,13 @@ Spec 026–034 以 SHA-256 釘住檔案位元組。以下兩項變更是刻意�
 | 檔案 | 目前 SHA-256 |
 |---|---|
 | `deploy/hermes/README.md` | `e13769dd02fed7d38f91e49f24d716b27e6ab42cbec6bcc0218f48af72dc29e8` |
-| `deploy/hermes/spec029/contracts/mcp-tool-descriptor-snapshot.json` | `2e32633711e47c6950073c3f5d112a01e6249120a866198c07126ef84397cb44` |
+| `deploy/hermes/spec029/contracts/mcp-tool-descriptor-snapshot.json` | `2c712c4e7b4c78370a904e4fc2dfa6c24268b1cd10cc533dd4ef2fa8f02919d0` |
 | `deploy/hermes/spec029/spec029_mcp_deny_adapter.py` | `95687aa845e00808c9f0a38883a0b1e6aa01eac0b99467fdd8f86fc5178132fd` |
 | `scripts/validate_hermes_integration.py` | `08442ddac0815330dc62bdf0164007ade4bec0d4693ad36d7575065d03c10efe` |
 | `specs/027-.../contracts/skill-routing-and-protocol.md` | `b0c5622041102294bc976826f445c1f64fbdcd11b01e5cefdb6a839c97a0c097` |
 | `src/podcast_ingest_core/hermes_integration.py` | `311706a0d1d5b8d1a1cf719013d4720b62b61270941c5e69e10301b34cb29e43` |
 | `src/podcast_ingest_core/hermes_skill_protocol.py` | `860a714e8c8c66cbc030a875e30b0b8c2dbdff2466f13166588c7a35a303269a` |
-| `src/podcast_ingest_core/mcp_server.py` | `f49ef5ec229c0e2b85a5c70f63537ca1ef07e5221b70ac8f18e697886a91d9bc` |
+| `src/podcast_ingest_core/mcp_server.py` | `8f2635710d1cf02d11a4d828a5b35ca0ece521f2e4c19401ffaf434417eaebbc` |
 | `tests/test_hermes_integration.py` | `e51321608916b5c2227b96e47237cf538124caf347fd51c038f70ef0cb771fac` |
 | `tests/test_hermes_live_smoke.py` | `7c4b5024b55959fcc528cefd7b746bda7a46570fbf3e6940ef5e3b5f217d4ae2` |
 | `tests/test_hermes_skill_protocol.py` | `43577f95d9b58ff3f60ae2abd055eda5cd690c388a33aa6e68d3a1c61f2eaced` |

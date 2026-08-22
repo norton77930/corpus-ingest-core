@@ -30,7 +30,12 @@ def build_snapshot() -> dict[str, object]:
 def main() -> int:
     snapshot = build_snapshot()
     OUTPUT.parent.mkdir(parents=True, exist_ok=True)
-    OUTPUT.write_text(json.dumps(snapshot, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+    # newline="" so the bytes are LF on every platform. This file is -text
+    # pinned and its SHA-256 is published in docs/install-and-porting.md, so a
+    # Windows text-mode default would silently change the digest and make the
+    # artifact platform-dependent -- exactly what it exists not to be.
+    with open(OUTPUT, "w", encoding="utf-8", newline="") as handle:
+        handle.write(json.dumps(snapshot, indent=2, sort_keys=True) + "\n")
     return 0
 
 
