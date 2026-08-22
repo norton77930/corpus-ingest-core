@@ -24,6 +24,23 @@ EVALS_REPORTS_DIR_BINDINGS = (
 )
 
 
+def pytest_configure(config: pytest.Config) -> None:
+    """Create the parent of ``--basetemp`` so a fresh clone can run the suite.
+
+    ``pyproject.toml`` sets ``--basetemp=.pytest-tmp/run``, and spec quickstarts
+    use siblings such as ``.pytest-tmp/run-009-empty``: ``.pytest-tmp/`` is a
+    container for several named basetemps, so each run clears only its own.
+    pytest creates a basetemp with ``parents=False``, so on a machine that has
+    never run the suite the container does not exist yet and every test wanting
+    ``tmp_path`` errors during setup with ``WinError 3``. It reproduces on any
+    clean checkout; CI found it on the first run.
+    """
+
+    basetemp = config.getoption("basetemp", None)
+    if basetemp:
+        Path(basetemp).parent.mkdir(parents=True, exist_ok=True)
+
+
 def storage_dir_constant_names() -> list[str]:
     from podcast_ingest_core import storage
 
