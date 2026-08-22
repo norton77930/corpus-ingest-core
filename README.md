@@ -180,10 +180,10 @@ python -m pytest
 python -m compileall src scripts
 ```
 
-The default pytest run excludes the Hermes 029–034 chain. Those packages are
-blocked, and each ships its own offline entry point
-(`scripts/verify_spec_0NN*.py`); the exclusion list and its reasoning are in
-`pyproject.toml`. Naming a path explicitly still runs it:
+The default pytest run excludes the blocked Hermes 030–034 doc chain, each of
+which ships its own offline entry point (`scripts/verify_spec_0NN*.py`); the
+exclusion list and its reasoning are in `pyproject.toml`. Naming a path
+explicitly still runs one:
 
 ```powershell
 python -m pytest tests/test_spec_032_hermes_g2_docs.py

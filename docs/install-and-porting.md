@@ -9,13 +9,24 @@
 > `pip install -e .[dev]` 成功、`import podcast_ingest_core` 成功、`validate_mcp_setup.py` 回 `"ok": true`。
 > C 段的指令對照過程式碼與設定檔，但未在第二台實機跑過。
 >
-> ⚠️ **`pytest` 不會全綠，這是預期的。** 在**正確安裝**的環境下約有 **21 個失敗，全部集中在 BLOCKED 的
-> Spec 026–034 稽核鏈**（見限制第 6 條與 2a）。核心產品那 22 個 tool 的測試全綠。
+> ⚠️ **`python -m pytest` 在正確安裝的環境下全綠。** Spec 030–034 的 BLOCKED 文件鏈已從預設
+> 執行排除（清單與理由見 `pyproject.toml` 的 `[tool.pytest.ini_options]`）。被排除的檔案沒有
+> 消失，指定路徑就跑得到，各自也有 `scripts/verify_spec_0NN*.py` 離線入口。
 >
-> 💡 **可以拿失敗數當安裝正確性的訊號。** 實測顯示，若 `mcp` 套件版本低於 `pyproject` 宣告的 `>=1.27`，
-> 會**額外**出現 3 個失敗（`test_mcp_http_transport`、`test_hermes_runtime_capability`、
-> `test_spec_029_offline`），因為它們用子行程執行 CLI、拿不到 pytest 的 `pythonpath`。
-> 看到 24 個而非 21 個，代表環境沒裝對，而不是程式有問題。已驗證 `mcp` 1.28.1 與 1.29.0 結果相同。
+> 💡 **有紅燈就代表環境沒裝對，失敗仍然是安裝正確性的訊號。** `test_spec_029_offline`、
+> `test_mcp_http_transport`、`test_hermes_runtime_capability` 三個檔案刻意留在預設執行裡。
+> 它們用子行程執行 CLI，而子行程繼承不到 pytest 的設定，所以只要環境不符 `pyproject.toml`
+> 的宣告就會紅。**實測 2026-08-22** 在一台看似正常的機器上抓到兩個缺口：
+>
+> | 症狀 | 原因 | 修法 |
+> |---|---|---|
+> | `test_mcp_http_transport` 三個測試全紅 | `mcp` 裝的是 1.10.1，低於宣告的 `>=1.27` | `pip install -U "mcp[cli]>=1.27,<2"` |
+> | `ModuleNotFoundError: No module named 'podcast_ingest_core'` | A2 的 `pip install -e .` 從未執行；`pythonpath = ["src"]` 只對 pytest 本身有效 | `pip install -e .[dev]` |
+>
+> 兩個補上後這三個檔案 35 passed。
+>
+> ⚠️ **`validate_mcp_setup.py` 不能單獨當環境完整性的判準。** 上述兩個缺口都存在時，它仍回
+> `ok: true`、18 項全過——它驗的是產品功能可用，不是環境符合宣告。兩者要一起看。
 
 ---
 
@@ -27,6 +38,8 @@
 | Git | 任意近期版本 | |
 | WSL2 + Docker | **僅 C 段需要** | Hermes sidecar 與驗證器都必須在 POSIX 環境跑 |
 | NVIDIA 驅動 + cuBLAS/cuDNN | **僅 GPU 轉錄需要** | 見「已知限制」 |
+| `ffmpeg` 在 `PATH` | **僅 YouTube 影片擷取需要** | yt-dlp 要合併 YouTube 的分離影音流；X 影片是混流 MP4，不需要 |
+| `yt-dlp` 保持最新 | **僅影片擷取需要** | YouTube 會讓舊版失效；實測十週前的版本 metadata 正常但媒體網址回 `403` |
 
 ---
 
@@ -88,10 +101,10 @@ python scripts/validate_mcp_setup.py --podcast gooaye --query 台積電
 
 `validate_mcp_setup.py` 是本機 readiness 檢查，會確認 MCP server 能起、tool registry 完整（22 個）、搜尋路徑可用。**這是判斷安裝成功與否的依據。**
 
-想跑測試的話，用核心產品那一段就好——全套會包含 BLOCKED 的 Hermes 鏈，紅燈是預期的：
+想跑測試的話直接跑就好——BLOCKED 的 Hermes 鏈已經是 `pyproject.toml` 裡的預設排除：
 
 ```powershell
-python -m pytest --ignore=tests/test_spec_029_offline.py --ignore=tests/test_spec_030_g1r_offline_remediation.py --ignore=tests/test_spec_031_hermes_g2_docs.py --ignore=tests/test_spec_032_hermes_g2_docs.py --ignore=tests/test_spec_033_hermes_source_audit_docs.py --ignore=tests/test_spec_034_h4_repair.py --ignore=tests/test_spec_034_final_acceptance.py --ignore=tests/test_mcp_http_transport.py --ignore=tests/test_hermes_runtime_capability.py -q
+python -m pytest -q
 ```
 
 ---

@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-19
 
-**Status**: Implemented (unit/integration verified; live YouTube confirm not run)
+**Status**: Implemented and live-confirmed (2026-08-22 — see Live Confirm Record)
 
 **Input**: Spec 036 added X videos as a second corpus source and left two named follow-ups for the next source spec: `source_type` does not travel through corpus index → remediation plan → runner, and re-transcription can fork one episode onto `{ref}__{ref}.*` because the local transcription runner never passes the seed title. Task B in `HANDOFF-2026-08-19.md` asks for YouTube as the third source **and** those two closures in the same package, because a third source without the seam closed triples the operator confusion.
 
@@ -217,3 +217,54 @@ A YouTube channel is registered with `source_type: yt-video` and no `rss_url`. R
 - Retrofitting `source_type` to a closed enum at profile load (037 explicitly left that asymmetry).
 - Live market API, investment advice, cache auto-rebuild, translation, `05` / `06` study-guide derivations.
 - Constitution amendment.
+
+## Live Confirm Record
+
+Run on 2026-08-22 against `https://www.youtube.com/watch?v=BOvyerl_0cE` (NASA, 78 s, US
+government work). The operator registered `yt-nasa` locally, confirmed the ingest, then
+removed the profile again. Nothing from the run is committed: every artifact landed under
+the ignored `data/` tree.
+
+| Claim | Evidence |
+| --- | --- |
+| Identity derivation (FR-007) | `@NASA` → `yt-nasa`; `@NASAJPL` → `yt-nasajpl` |
+| URL canonicalisation | `youtu.be/`, `m.`, and `music.` resolved to one `episode_ref` |
+| Preview is zero-write (FR-018) | `data/` held 155 files before and after; empty diff |
+| Title-slug fix | Wrote `BOvyerl_0cE__GoNo-Go_NASAs_Space_Toilet_Explained.*`, not `{ref}__{ref}.*` |
+| Trio at deterministic paths | Seed, 16 kHz mono WAV (77.2 s), and txt/srt/json all present |
+| Source video not under `data/` | No `.mp4`/`.webm`/`.mkv`/`.m4a` anywhere in the tree |
+| `validate_transcript` | `valid: true`, 27 segments, zero problems, zero warnings |
+| Index row | `seed_source: yt-video`, audio `available`, transcript `valid` |
+| gooaye untouched | `corpus-index.json` digest unchanged across the run |
+| Refuse cases | Channel and playlist URLs, unregistered id, `source_type` mismatch (4.1 s, pre-download), and `list_episodes` / `download_audio` all refused |
+
+Three things the mocked suite cannot see, because it stands in for exactly the
+preconditions this run tested:
+
+1. **yt-dlp goes stale against YouTube.** 2026.06.09 returned `HTTP 403` on the media URL
+   while metadata still resolved. 2026.08.19 downloads. A CI job that runs a live confirm has
+   to upgrade yt-dlp per run rather than pin it.
+2. **ffmpeg is an undeclared prerequisite, and only YouTube trips it.**
+   `video_acquire.guest_download_options` sets no `format`, so yt-dlp's default selector
+   merges separate streams. X serves pre-muxed MP4 and never needs the merge; YouTube serves
+   DASH and always does. `specs/036-x-video-corpus-ingestion/tasks.md:266` shows ffmpeg was
+   present when 036 was written, which is why it was never written down.
+3. **The documented procedure turns `test_contracts.py` red.** That test asserts
+   `set(profiles) == {"gooaye", "x-raytar"}` against the real config file, while Assumption 5
+   requires the operator to add a `yt-…` profile to it, and `run_youtube_video_ingest` takes
+   no alternate config path. Measured: 1 failed / 68 passed with the profile present, green
+   once removed.
+
+Two follow-ups, neither in this spec's scope:
+
+- Request an audio-only `format` in `video_acquire`, updating `DOWNLOAD_OPTION_KEYS` and the
+  subset assertion at `tests/test_video_acquire.py:22` with it. This run fetched 32.30 MiB of
+  video plus 1.26 MiB of audio, merged them, and discarded the video; the audio alone would
+  have done. It drops the ffmpeg dependency, and it touches the X path too, so it needs its
+  own change and review.
+- Give the runner an alternate config path, so a live confirm no longer has to edit the
+  committed profile file.
+
+One observation: `planned_writes` listed seven paths and the run wrote eight. The extra file
+is `data/corpus/yt-nasa/.episode-claims/BOvyerl_0cE.writer.claim`, the writer lock. Whether a
+lock counts as a planned write is a judgement call, but the plan currently under-reports.

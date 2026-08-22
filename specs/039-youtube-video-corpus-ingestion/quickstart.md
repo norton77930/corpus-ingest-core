@@ -5,8 +5,18 @@ Validation only. Do not run a live YouTube download until targeted tests are gre
 ## Prerequisites
 
 - `yt-dlp` and `av` already installed (Spec 036)
+- **`yt-dlp` upgraded immediately before the run.** YouTube breaks older releases: a version
+  ten weeks old resolved metadata fine and then returned `HTTP 403` on the media URL. Run
+  `pip install -U yt-dlp` first rather than trusting whatever is installed.
+- **`ffmpeg` on `PATH`.** `video_acquire` sets no `format`, so yt-dlp's default selector
+  merges YouTube's separate video and audio streams before PyAV ever sees the file. X videos
+  are pre-muxed and never need this, which is why Spec 036 did not surface the requirement.
 - A `config/podcasts.yaml` profile whose id equals the derived `yt-{handle-slug}` and whose `source_type` is `yt-video`
 - Public video (guest token; no cookies)
+
+`test_contracts.py::test_loads_registered_profiles_from_yaml` asserts the exact profile set of
+the committed config, so it fails for as long as the `yt-…` profile is registered. Remove the
+profile when the run is done and it goes green again.
 
 ## Dry-run (always first)
 
