@@ -2,7 +2,7 @@
 
 **Feature Branch**: `037-semantic-summary-profiles`
 **Created**: 2026-08-19
-**Status**: Draft — specification only. No implementation; `plan.md` and `tasks.md` are not yet written.
+**Status**: Implemented, reviewed on both axes, and confirmed by one real end-to-end run. `plan.md`, `tasks.md`, `data-model.md`, and `checklists/` are written; `summary_profiles.py` holds both shapes as pure data and `tests/test_summary_profiles.py` pins gooaye's prompts byte-identical. Full record in `specs/README.md`.
 
 **Input**: Spec 036 made an X video a first-class corpus source, and the semantic summariser ran on it with no source-specific branching — which was the point, and which is also exactly the problem. The prompts are finance-shaped and hardcoded. An AI-teaching talk by an Anthropic engineer is currently summarised under the headings 市場觀點 / 台股觀點 / 美股觀點 / 總經觀點 / 廣告 / 業配段落, and the rendered Markdown asserts 本摘要不構成投資建議 over content that never mentions a security. The corpus can now ingest what the user actually learns from, but it still reports on it as if it were 股癌. Meanwhile a hand-written target shape already exists: the prototype's `output/03_full_summary.md`, `04_learning_notes.md`, and `07_final_study_guide.md` are the user's own design for AI-learning output, and Spec 036's Assumption 6 recorded them as target rather than as something to redesign.
 

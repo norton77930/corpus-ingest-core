@@ -2,7 +2,7 @@
 
 **Feature Branch**: `038-multi-document-study-guide`
 **Created**: 2026-08-19
-**Status**: Implemented. Reviews addressed the dry-run/confirm reuse lie; MCP still 22.
+**Status**: Implemented. Reviews addressed the dry-run/confirm reuse lie. The package adds no MCP tool; the registry was exactly 22 tools at the time.
 
 **Input**: Spec 036 treated the prototype sequence `00_video_info.md` … `07_final_study_guide.md` as the user's design, not something to redesign. Spec 037 compressed `04` and `07` vocabulary into the existing single semantic summary and left the multi-document sequence out of scope. The real `learning-notes` run already showed why eight files cannot be one summarisation family: reusable-prompt examples were reconstructed from spoken description, and `05` / `06` are workflow derivations. This spec adds a new study-guide bundle — `00` + `03` + `04` + `07` only — generated from an existing `learning-notes` semantic summary.
 
