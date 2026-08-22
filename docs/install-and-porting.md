@@ -125,6 +125,15 @@ $env:PODCAST_INGEST_DATA_DIR = "D:\podcast-data"
 
 `storage.py` 讀這個環境變數，未設定時預設為 `./data`。
 
+> ⚠️ **跑測試前要把這個變數取消。** 有 9 個路徑契約測試把 `data/` 寫成字面值
+> （例如 `tests/test_contracts.py` 的 `assert audio_path("gooaye", "ep-001") ==`
+> `Path("data/audio/gooaye/ep-001.mp3")`），它們釘的就是「未設定變數時的預設路徑」。
+> 設了變數再跑 `pytest`，這 9 個會紅，而失敗訊息完全看不出跟環境變數有關。
+> 實測 2026-08-22：設定變數後 9 failed / 1639 passed，取消後全綠。
+> 搬遷本身不受影響——衝突只在測試，不在執行期。這是設計，不是缺陷：spec 025 FR-008 把
+> 「變數未設定時 `storage.DATA_DIR` 維持 `Path("data")`」列為受保護不變量，測試要隔離路徑時
+> 認可的方式是 `tests/conftest.py` 的 `tmp_data_dirs` fixture，不是這個環境變數。
+
 **B3. 重新 ingest（乾淨開始）**
 
 不複製任何東西，在新機器重跑一次擷取流程。轉錄會耗大量時間與算力。

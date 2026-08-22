@@ -114,6 +114,23 @@ git diff --check
   完整 core function 清單、輸出路徑、CLI 與 MCP registry 移到 [`docs/api.md`](api.md)；agent handoff 狀態、Spec 編號、
   blocked 標記與 Phase 6H–7D.1 階段史移到本文件下方的 Relocated from README 區段。原本 pin README 的 exact-substring
   docs tests 已改為斷言新的 canonical 位置，邊界內容一字未鬆綁。
+- **`PODCAST_INGEST_DATA_DIR` 與路徑契約測試相衝**（open, 2026-08-22）：9 個測試把 `data/` 寫成字面值
+  （`tests/test_contracts.py::test_storage_paths_are_deterministic_and_under_data` 與 7 個
+  `*_asset_paths_contract`），而 `docs/install-and-porting.md` 的 B2 方案正是叫操作者設這個變數把 `data/`
+  搬到別處。照做後跑 pytest 得到 9 failed / 1639 passed，且失敗訊息完全看不出與環境變數有關。已在 B2
+  補上警告。**已查明，不要改那 9 個測試。** Spec 025 FR-008 把「變數未設定時 `storage.DATA_DIR` 維持
+  `Path("data")`」列為受保護不變量，`tests/test_data_dir_fixture_contract.py` 的
+  `test_data_dir_default_is_unchanged_without_env_override` 還會主動把該變數從環境剔除再開子行程驗證它；
+  測試要隔離路徑時，認可的方式是 `conftest.py` 的 `tmp_data_dirs` fixture（monkeypatch `storage.DATA_DIR`），
+  不是設環境變數。換句話說整套測試本來就設計成在變數未設定下執行，那 9 個斷言與設計一致。剩下的只是
+  失敗訊息不會自我解釋；若要改善，做法是在 `conftest.py` 於 session 啟動時偵測到該變數就以清楚訊息 fail fast，
+  而不是動那 9 個測試。
+- **Spec 039 live confirm 留下的兩個 follow-up**（open, 2026-08-22）：完整證據見
+  [`specs/039-youtube-video-corpus-ingestion/spec.md`](../specs/039-youtube-video-corpus-ingestion/spec.md)
+  的 Live Confirm Record。一是 `video_acquire` 沒設 `format`，導致 YouTube 要先下載整支影片再合併才能抽音訊
+  （實測 32.30 MiB 影片 + 1.26 MiB 音訊，影片隨即丟棄）；改成只取音訊可省頻寬並移除 ffmpeg 依賴，但那段程式碼
+  與 X 共用，屬跨模組改動。二是 `run_youtube_video_ingest` 沒有替代設定檔路徑參數，所以 live confirm 一定要
+  改動已 commit 的 `config/podcasts.yaml`，而 `test_contracts.py` 對它有精確集合斷言。
 
 ---
 
