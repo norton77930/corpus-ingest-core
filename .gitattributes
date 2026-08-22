@@ -36,6 +36,7 @@ specs/034-hermes-v019-pinned-startup-source-graph/** -text
 # missing here until CI caught it: a GitHub Windows runner checks out with
 # core.autocrlf=true, which rewrote LF to CRLF and changed every one of those
 # digests, while an authoring machine using core.autocrlf=input never saw it.
+src/podcast_ingest_core/mcp_server.py -text
 config/external_data_boundary.yaml -text
 config/gooaye_lens.yaml -text
 config/industry_chain_mappings.yaml -text

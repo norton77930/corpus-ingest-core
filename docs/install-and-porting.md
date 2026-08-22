@@ -249,20 +249,22 @@ Spec 026–034 以 SHA-256 釘住檔案位元組。以下兩項變更是刻意�
 - **Tool 22 `generate_stock_lens_report`**（含用官方腳本 `scripts/export_spec029_tool_descriptor_snapshot.py` 重簽 descriptor 快照）
 - **Tool 23 `ingest_x_video`**（同一官方腳本再次重簽 descriptor 快照；deny adapter size 22→23）
 - **Tool 24 `ingest_youtube_video`**（同一官方腳本再次重簽 descriptor 快照；deny adapter size 23→24）
+- **Tool 25 `derive_workflow_bundle`**（spec 043；同一官方腳本再次重簽 descriptor 快照；deny adapter size 24→25;`hermes_skill_protocol` 的 AST 清單與其內部 exact-count 閘門同步）
 - **把 Tool 22 補進 Spec 026 的 live harness**（否則新機器的授權 preflight 會判定 registry 不符而失敗）
+- **把 Tool 25 補進同一個 live harness**（`scripts/validate_hermes_integration.py` 的 `EXPECTED_TOOL_ORDER` 與 `tests/test_hermes_live_smoke.py` 的副本;上一條的教訓在 043 又重演了一次,因為那份清單寫死且其鏡像測試自帶同樣過期的期望值,所以永遠是綠的）
 
 需要重建基準的檔案與**目前**的正確 digest：
 
 | 檔案 | 目前 SHA-256 |
 |---|---|
 | `deploy/hermes/README.md` | `e13769dd02fed7d38f91e49f24d716b27e6ab42cbec6bcc0218f48af72dc29e8` |
-| `deploy/hermes/spec029/contracts/mcp-tool-descriptor-snapshot.json` | `4b8219e75ab5c5d3fe8c7273c8e3569de862bbe99d71635265d60ddfbf9a2d2b` |
-| `deploy/hermes/spec029/spec029_mcp_deny_adapter.py` | `994b13909b4035cd52a478758ca4ecff16960360489810ce747d288c5412c05a` |
-| `scripts/validate_hermes_integration.py` | `48e7afdb3209a66dd46668f793dd95a9ec26a228850a92cd0a4a423b3cf35e8f` |
+| `deploy/hermes/spec029/contracts/mcp-tool-descriptor-snapshot.json` | `2e32633711e47c6950073c3f5d112a01e6249120a866198c07126ef84397cb44` |
+| `deploy/hermes/spec029/spec029_mcp_deny_adapter.py` | `95687aa845e00808c9f0a38883a0b1e6aa01eac0b99467fdd8f86fc5178132fd` |
+| `scripts/validate_hermes_integration.py` | `08442ddac0815330dc62bdf0164007ade4bec0d4693ad36d7575065d03c10efe` |
 | `specs/027-.../contracts/skill-routing-and-protocol.md` | `b0c5622041102294bc976826f445c1f64fbdcd11b01e5cefdb6a839c97a0c097` |
 | `src/podcast_ingest_core/hermes_integration.py` | `311706a0d1d5b8d1a1cf719013d4720b62b61270941c5e69e10301b34cb29e43` |
-| `src/podcast_ingest_core/hermes_skill_protocol.py` | `a1b75d5184e3d20ac0d445f0df6d7d0b46efea2841318d07f3245ae47ad7c5f0` |
-| `src/podcast_ingest_core/mcp_server.py` | `ce672b51a355c1e65f63fcff55398bc058eff0b97f7673a05b949c401c4209b1` |
+| `src/podcast_ingest_core/hermes_skill_protocol.py` | `860a714e8c8c66cbc030a875e30b0b8c2dbdff2466f13166588c7a35a303269a` |
+| `src/podcast_ingest_core/mcp_server.py` | `f49ef5ec229c0e2b85a5c70f63537ca1ef07e5221b70ac8f18e697886a91d9bc` |
 | `tests/test_hermes_integration.py` | `e51321608916b5c2227b96e47237cf538124caf347fd51c038f70ef0cb771fac` |
 | `tests/test_hermes_live_smoke.py` | `7c4b5024b55959fcc528cefd7b746bda7a46570fbf3e6940ef5e3b5f217d4ae2` |
 | `tests/test_hermes_skill_protocol.py` | `43577f95d9b58ff3f60ae2abd055eda5cd690c388a33aa6e68d3a1c61f2eaced` |

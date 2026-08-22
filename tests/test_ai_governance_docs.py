@@ -96,7 +96,7 @@ def test_ai_development_framework_keeps_hierarchy_lifecycle_and_checks():
     ]:
         assert phrase in text
 
-    assert "恰 24 個" in text
+    assert "恰 25 個" in text
     assert "恰 20 個" not in text
     assert "恰 19 個" not in text
     assert "恰 18 個" not in text

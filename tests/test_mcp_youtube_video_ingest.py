@@ -166,7 +166,9 @@ def test_live_registry_appends_youtube_ingest_as_tool_24():
     from podcast_ingest_core import mcp_server
 
     names = [tool.name for tool in asyncio.run(mcp_server.mcp.list_tools())]
-    assert len(names) == 24
-    assert names[-1] == "ingest_youtube_video"
-    assert names[-2] == "ingest_x_video"
-    assert names[:22][-1] == "generate_stock_lens_report"
+    # Slots, not tail positions: this registry is append-only, so asserting
+    # "youtube is last" breaks on the next tool rather than on a real change.
+    assert names[23] == "ingest_youtube_video"
+    assert names[22] == "ingest_x_video"
+    assert names[21] == "generate_stock_lens_report"
+    assert len(names) >= 24

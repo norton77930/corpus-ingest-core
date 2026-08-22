@@ -657,7 +657,7 @@ python scripts/new_mcp_eval_report.py --name codex-session-001
 The server builds a single `FastMCP` instance. Local Codex and Claude clients
 use stdio; the reviewed sidecar serves Streamable HTTP bound to
 `127.0.0.1:8767/mcp` only, with no legacy SSE and no published port. Both
-transports expose the same registry of exactly 24 reviewed tools.
+transports expose the same registry of exactly 25 reviewed tools.
 
 Read and query tools:
 
@@ -675,6 +675,7 @@ Read and query tools:
 - `generate_stock_lens_report` (Tool 22; deterministic stock lens, side-effect and dry-run first)
 - `ingest_x_video` (Tool 23; X video ingest, zero-write preview that reads public metadata)
 - `ingest_youtube_video` (Tool 24; YouTube video ingest, zero-write preview that reads public metadata)
+- `derive_workflow_bundle` (Tool 25; Spec 042 `05`/`06` workflow derivation, zero-write and zero-network preview; confirm calls an LLM and needs the exact `api_cost_ack`)
 
 Side-effect tools:
 
@@ -691,6 +692,15 @@ Side-effect tools:
 - `generate_stock_lens_report`
 - `ingest_x_video`
 - `ingest_youtube_video`
+- `derive_workflow_bundle`
+
+Tool 25, `derive_workflow_bundle`, is append-only; the contracts and order of
+Tools 1 through 24 are unchanged. Unlike Tools 23 and 24 its preview is also
+zero-network: it plans paths without constructing an LLM provider, so it needs
+no `api_cost_ack` and makes no call. Confirm forwards the operator's exact
+`api_cost_ack` to Core's gate. The tool accepts no provider, model, endpoint,
+credential, or workflow-context parameter — the last of those names a file
+whose contents reach an LLM prompt.
 
 Tool 24, `ingest_youtube_video`, is append-only; the contracts and order of
 Tools 1 through 23 are unchanged. An ingest preview is zero-write but resolves

@@ -6,9 +6,9 @@
 
 ## Project Summary
 
-Podcast Ingestion Core 是一個本機優先的通用 Podcast 擷取與研究核心：RSS episode listing、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive 摘要、opt-in 的 OpenAI-compatible LLM semantic summary、deterministic mention extraction、SQLite metadata cache / search、共用單一 FastMCP 的 stdio 與 loopback Streamable HTTP sidecar（目前恰好 24 個 reviewed tools），以及 deterministic research workflow（stock lens synthesis、external data boundary）。第一個 podcast profile 是 Gooaye 股癌，但核心程式不得寫死股癌；所有 podcast-specific 設定在 `config/podcasts.yaml`。本專案支援 evidence-based 研究整理，明確**不**提供投資建議。
+Podcast Ingestion Core 是一個本機優先的通用 Podcast 擷取與研究核心：RSS episode listing、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive 摘要、opt-in 的 OpenAI-compatible LLM semantic summary、deterministic mention extraction、SQLite metadata cache / search、共用單一 FastMCP 的 stdio 與 loopback Streamable HTTP sidecar（目前恰好 25 個 reviewed tools），以及 deterministic research workflow（stock lens synthesis、external data boundary）。第一個 podcast profile 是 Gooaye 股癌，但核心程式不得寫死股癌；所有 podcast-specific 設定在 `config/podcasts.yaml`。本專案支援 evidence-based 研究整理，明確**不**提供投資建議。
 Corpus packages 008–018 add local artifact indexing/planning, bounded intake/download/transcription/deterministic remediation, a one-stage fresh workflow, standalone `015-corpus-semantic-remediation-runner`, the human-controlled `016-corpus-episode-completion-workflow-runner`, `017-corpus-latest-episode-deterministic-workflow`, and `018-latest-episode-verified-research-report-workflow`. 016 previews in memory with strict zero-file behavior, 017 locks latest once and stops at `ready_for_semantic_summary`, and 018 validates a previewed exact episode reference plus exact acknowledgement before it pins, gates, researches, and atomically publishes a digest-versioned verified report bundle.
-The local stdio registry has exact 24 reviewed tools. Tool 24, `ingest_youtube_video`, is append-only after unchanged Tools 1–23. Tool 23, `ingest_x_video`, remains the X ingest preview/confirm tool. Preview is zero-write but resolves public metadata over the network. Tool 22, `generate_stock_lens_report`, remains a dry-run-first side-effect stock lens (no LLM, no `api_cost_ack`, no network, no live market API, no investment advice). Tool 21, `list_verified_report_gap_backlog`, remains a read-query inventory gap backlog (no confirm/ack). Tool 20 remains historical next-step suggestion. Tool 19 remains coverage join. Tool 18 remains exact-locator source revalidation. Tool 17 retains its catalog contract.
+The local stdio registry has exact 25 reviewed tools. Tool 25, `derive_workflow_bundle`, is append-only after unchanged Tools 1–24; its preview is zero-write and zero-network, and confirm calls an LLM and needs the exact `api_cost_ack`. Tool 24, `ingest_youtube_video`, is the YouTube ingest tool. Tool 23, `ingest_x_video`, remains the X ingest preview/confirm tool. Preview is zero-write but resolves public metadata over the network. Tool 22, `generate_stock_lens_report`, remains a dry-run-first side-effect stock lens (no LLM, no `api_cost_ack`, no network, no live market API, no investment advice). Tool 21, `list_verified_report_gap_backlog`, remains a read-query inventory gap backlog (no confirm/ack). Tool 20 remains historical next-step suggestion. Tool 19 remains coverage join. Tool 18 remains exact-locator source revalidation. Tool 17 retains its catalog contract.
 For historical context, 016 introduced 13 reviewed tools before 017 added the fourteenth tool; the registry therefore had exact 14 reviewed tools before 018 added the fifteenth; 019 added the sixteenth; 020 appends the seventeenth.
 
 ## First 10 Minutes（閱讀順序）
@@ -61,7 +61,7 @@ README.md 是 quick orientation 與 CLI 範例，不是 governance source。
 | No investment advice | 不得產生 buy/sell/hold、target price、guaranteed returns 或個人化投資建議；review gate 會拒絕 prohibited advice 輸出 | `tests/test_research_llm_smoke_review.py`、`tests/test_gooaye_lens.py` |
 | No automatic cache rebuild | Side-effect tools 完成後不得自動 `rebuild_cache`，只回 cache stale warning；rebuild 是手動操作 | `tests/test_cache_rebuild_guard.py` |
 | Thin CLI / thick core | Runtime 行為住在 `src/podcast_ingest_core`；`scripts/` 與 MCP tools 只解析輸入、呼叫 core、格式化輸出 | `tests/test_contracts.py` |
-| MCP JSON envelope | MCP responses 維持既有 envelope：`{"ok": true, "data": ...}`、`{"ok": false, ...}`、dry-run 含 `"dry_run": true`；目前恰好 24 個 reviewed tools | `tests/test_mcp_tool_registry_contract.py`、`tests/test_mcp_server.py` |
+| MCP JSON envelope | MCP responses 維持既有 envelope：`{"ok": true, "data": ...}`、`{"ok": false, ...}`、dry-run 含 `"dry_run": true`；目前恰好 25 個 reviewed tools | `tests/test_mcp_tool_registry_contract.py`、`tests/test_mcp_server.py` |
 | 019 explicit-episode verified report / Skill | Preview is strict zero-write for a named `episode_ref` (reject latest/next). Confirm assembles/publishes only when local artifacts and lineage already pass; no `api_cost_ack`, no LLM/RSS/download, no 015–017 chaining. Blocked lists missing/stale roles. historically MCP Tool 16 + portable Skill | `tests/test_episode_verified_research_report_workflow_runner.py`、`tests/test_episode_verified_research_report_skill.py`、`tests/test_mcp_tool_registry_contract.py` |
 | 025 path-safety 結構單一來源 | 路徑安全結構 regex 只得定義於 `path_safety.py`；四個 runner 的 `_is_safe_local_path` 是薄包裝、真值表凍結（含刻意保留的變體差異） | `tests/test_path_safety_boundary.py`、`tests/test_path_safety_characterization.py` |
 | 025 run-report 寫入協定單一來源 | `_write_run_report` 一律委派 `run_report_io` 弱協定或 `audit_report_pair` 強協定，禁止內嵌 `.part` staging；弱→強升級為後續獨立 spec | `tests/test_run_report_io_boundary.py` |
@@ -125,6 +125,21 @@ git diff --check
   不是設環境變數。換句話說整套測試本來就設計成在變數未設定下執行，那 9 個斷言與設計一致。剩下的只是
   失敗訊息不會自我解釋；若要改善，做法是在 `conftest.py` 於 session 啟動時偵測到該變數就以清楚訊息 fail fast，
   而不是動那 9 個測試。
+- **`deploy/hermes/README.md:3` 說「exact 21-tool registry」**（open, 2026-08-22）：已過期四個工具
+  （22/23/24/25 落地時都沒同步）。沒有任何測試盯它，所以它不會自己變紅。刻意留著沒在 spec 043 一併修：
+  那是 Hermes deploy 面、被稽核鏈雜湊、而該鏈處於 BLOCKED 凍結狀態，為一個既有的敘述過期去動它，
+  會讓 Tool 25 那次改動同時帶一份無關的稽核風險。修時要一併重算 `docs/install-and-porting.md`
+  digest 表裡它那一列。
+- **31 個被 spec manifest 雜湊的檔案沒有換行符釘選**（open, 2026-08-22）：`.gitattributes` 的政策是
+  「稽核鏈會雜湊的檔案一律 `-text`」，因為 GitHub Windows runner 以 `core.autocrlf=true` checkout、
+  而作者機器是 `input`，同一份檔案在兩邊位元組不同、digest 就不同。CI 第二次執行就是被這個打紅的
+  （`config/*.yaml` 三個檔，已修）。事後掃過 `specs/*/contracts/*.json` 列出的 224 個路徑，發現還有
+  32 個 `text: unspecified`；spec 043 只補了 `src/podcast_ingest_core/mcp_server.py`（因為那次改動要把
+  它的 digest 寫進 `docs/install-and-porting.md` 的表格，發布一個機器相依的 digest 本身就是缺陷）。
+  其餘 31 個包含 `storage.py`、`models.py`、`llm_provider.py`、`errors.py`、`config.py` 等核心模組，
+  以及 `docs/roadmap.md`、`specs/README.md`。它們今天不會壞，因為 Hermes 鏈預設不執行；一旦那條鏈
+  回到預設執行或有人在 Linux/CI 上跑稽核，就會整批失敗。修法是把它們加進 `.gitattributes`，
+  一次 commit、獨立驗證，不要混進功能改動。
 - **Spec 039 live confirm 留下的兩個 follow-up**（open, 2026-08-22）：完整證據見
   [`specs/039-youtube-video-corpus-ingestion/spec.md`](../specs/039-youtube-video-corpus-ingestion/spec.md)
   的 Live Confirm Record。一是 `video_acquire` 沒設 `format`，導致 YouTube 要先下載整支影片再合併才能抽音訊
@@ -430,6 +445,7 @@ defended by argument is not evidence. Do that.
 
 A–E, 040, 041, and 042 are on `main`. Spec 042 is the separate
 `workflow_derivation` family (`05`/`06`); it is not mixed into 038.
-Task F / Hermes 026–034 is untouched. Next optional work is a live
-YouTube confirm of Tool 24, or MCP exposure for 042 later. Do not
-casually start Hermes.
+Task F / Hermes 026–034 is untouched. Both of the options this line used to
+name are now done: Tool 24's live YouTube confirm is recorded in spec 039's
+Live Confirm Record, and spec 043 exposed 042 as Tool 25. What is left is in
+Known Risks above. Do not casually start Hermes.

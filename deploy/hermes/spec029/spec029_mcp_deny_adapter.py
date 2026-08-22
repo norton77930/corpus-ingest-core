@@ -15,7 +15,7 @@ _TRIPWIRE_COUNT = 0
 
 
 def _descriptor_json() -> tuple[str, ...]:
-    """Load one immutable, exact-24 descriptor snapshot or refuse import."""
+    """Load one immutable, exact-25 descriptor snapshot or refuse import."""
     try:
         raw = json.loads(_SNAPSHOT.read_text(encoding="utf-8"))
     except (OSError, ValueError) as error:
@@ -25,13 +25,13 @@ def _descriptor_json() -> tuple[str, ...]:
         or set(raw) != {"schema_version", "tools"}
         or raw.get("schema_version") != "spec029-mcp-tool-descriptor-snapshot-v1"
         or not isinstance(raw["tools"], list)
-        or len(raw["tools"]) != 24
+        or len(raw["tools"]) != 25
         or not all(isinstance(item, dict) for item in raw["tools"])
     ):
         raise RuntimeError("Spec029 descriptor snapshot invalid")
     descriptors = tuple(json.dumps(item, sort_keys=True, separators=(",", ":")) for item in raw["tools"])
     tools = tuple(types.Tool.model_validate_json(item) for item in descriptors)
-    if len({tool.name for tool in tools}) != 24:
+    if len({tool.name for tool in tools}) != 25:
         raise RuntimeError("Spec029 descriptor snapshot invalid")
     return descriptors
 

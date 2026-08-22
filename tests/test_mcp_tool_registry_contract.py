@@ -51,6 +51,7 @@ GAP_BACKLOG_TOOL = "list_verified_report_gap_backlog"
 STOCK_LENS_TOOL = "generate_stock_lens_report"
 X_VIDEO_INGEST_TOOL = "ingest_x_video"
 YOUTUBE_VIDEO_INGEST_TOOL = "ingest_youtube_video"
+WORKFLOW_DERIVATION_TOOL = "derive_workflow_bundle"
 LEGACY_TOOL_ORDER = [
     "list_episodes",
     "get_episode",
@@ -74,6 +75,7 @@ SIDE_EFFECT_TOOLS = LEGACY_SIDE_EFFECT_TOOLS | {
     STOCK_LENS_TOOL,
     X_VIDEO_INGEST_TOOL,
     YOUTUBE_VIDEO_INGEST_TOOL,
+    WORKFLOW_DERIVATION_TOOL,
 }
 EXPECTED_TOOLS = LEGACY_EXPECTED_TOOLS | {
     COMPLETION_WORKFLOW_TOOL,
@@ -88,6 +90,7 @@ EXPECTED_TOOLS = LEGACY_EXPECTED_TOOLS | {
     STOCK_LENS_TOOL,
     X_VIDEO_INGEST_TOOL,
     YOUTUBE_VIDEO_INGEST_TOOL,
+    WORKFLOW_DERIVATION_TOOL,
 }
 
 
@@ -100,7 +103,7 @@ def _registered_tool_names() -> set[str]:
 
 def test_mcp_registry_exposes_exactly_the_reviewed_tool_set():
     actual = _registered_tool_names()
-    assert len(actual) == 24
+    assert len(actual) == 25
     assert actual == EXPECTED_TOOLS
     assert LEGACY_EXPECTED_TOOLS <= actual
 
@@ -124,6 +127,7 @@ def test_workflow_tools_are_appended_after_the_preserved_twelve_tool_order():
         STOCK_LENS_TOOL,
         X_VIDEO_INGEST_TOOL,
         YOUTUBE_VIDEO_INGEST_TOOL,
+    WORKFLOW_DERIVATION_TOOL,
     ]
 
 
@@ -246,12 +250,13 @@ def test_readme_side_effect_list_matches_registry_side_effect_set():
 def test_each_client_setup_doc_locks_the_current_registry_contract():
     for filename in ("claude-mcp-setup.md", "codex-mcp-setup.md"):
         setup = (ROOT / "docs" / filename).read_text(encoding="utf-8")
-        assert "exactly 24 tools" in setup
+        assert "exactly 25 tools" in setup
         assert "`generate_stock_lens_report`" in setup
         assert "`ingest_x_video`" in setup
         assert "`ingest_youtube_video`" in setup
+        assert "`derive_workflow_bundle`" in setup
         assert "`list_verified_report_gap_backlog`" in setup
-        assert "Tools 1–23" in setup
+        assert "Tools 1–24" in setup
         assert "現在有 exact 13 個 reviewed tools" not in setup
         assert "current registry has exactly 17" not in setup
 
@@ -259,7 +264,7 @@ def test_each_client_setup_doc_locks_the_current_registry_contract():
         encoding="utf-8"
     )
     assert "恰 14 個" not in framework
-    assert "恰 24 個" in framework
+    assert "恰 25 個" in framework
 
 
 def test_mcp_workflow_tool_exposes_deliberate_core_parameter_subset():

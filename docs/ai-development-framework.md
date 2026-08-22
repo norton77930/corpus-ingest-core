@@ -56,7 +56,7 @@ constitution -> specify -> clarify -> plan -> checklist -> tasks -> analyze -> i
 | docs-only | 只改 `docs/`、README、AGENTS.md 等文件 | 不改 runtime；docs-only phase 必須有 docs tests 鎖定指引（constitution 原則 IX） |
 | spec-only | 只改 `specs/`、`.specify/` | 不留 template residue（`test_spec_kit_backfill_docs.py` 會擋） |
 | deterministic runtime | 改 `src/` 的 deterministic 行為 | TDD：先寫 targeted test；不改 public contracts 除非批准 |
-| MCP tool | 改 MCP tool 集合、參數或 envelope | tool 集合是 reviewed set（恰 24 個）；同步 registry guard、client setup、`docs/mcp-usage.md` 與 README tool 清單 |
+| MCP tool | 改 MCP tool 集合、參數或 envelope | tool 集合是 reviewed set（恰 25 個）；同步 registry guard、client setup、`docs/mcp-usage.md` 與 README tool 清單 |
 | LLM-facing | 改 LLM provider、prompt、ack、semantic pipeline | 不弱化 ack / no-leak / no-advice guards；不呼叫真實外部 API 測試 |
 | side-effect workflow | 改下載、轉錄、artifact 寫入、workflow 步驟 | 維持 dry-run first 與 manual cache rebuild |
 | safety-boundary | 改動 `docs/agent-handoff.md` 所列九條邊界之一 | **需人類批准**；評估 constitution 修訂；full pytest |

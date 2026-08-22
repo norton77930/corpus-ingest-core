@@ -203,6 +203,18 @@ Tool 24 appends after unchanged Tools 1–23. It exposes the existing Spec 039 Y
 python scripts/run_youtube_video_ingest.py --url "https://www.youtube.com/watch?v=<id>"
 ```
 
+### Workflow Derivation Tool
+
+- `derive_workflow_bundle` (Tool 25)
+
+Tool 25 appends after unchanged Tools 1–24. 它把 Spec 042 的 `05`/`06` derivation 接上 MCP,所以那個能力不再只能從終端機執行。`confirm=false` 是 **preview**:零寫入,而且**零網路** —— 它在建構 LLM provider 之前就返回,所以不需要 `api_cost_ack`,這一點與 Tools 23/24 不同。`confirm=true` 會呼叫外部 LLM 並產生費用,必須帶精確的 `api_cost_ack`;該門檻由 Core 的 `require_exact_api_cost_ack` 把關,這個工具只負責原樣轉交。確認重用既有的完整 `05`/`06` 配對時不會呼叫 provider,因此也不需要 ack。
+
+工具**不接受** `provider`、`model`、`base_url`、`api_key_env`、`reasoning_effort`、`read_timeout_seconds` 或 `workflow_context`。前六個是操作者環境的憑證與端點;最後一個指向一個**內容會被送進 LLM prompt 的檔案**,交給 agent 指定等於開一條讀取任意檔案的路。工作流程情境一律讀 `config/operator_workflow.yaml`。
+
+```powershell
+python scripts/run_workflow_derivation.py --podcast <id> --episode <ref>
+```
+
 ## Safety
 
 MCP tools 不接受任意本機檔案路徑，也不構成投資建議。

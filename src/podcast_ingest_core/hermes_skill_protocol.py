@@ -236,6 +236,7 @@ _MCP_TOOL_SOURCE_FILES = (
     "mcp_tools_stock_lens.py",
     "mcp_tools_x_video.py",
     "mcp_tools_youtube_video.py",
+    "mcp_tools_workflow_derivation.py",
 )
 def _is_direct_mcp_tool_reference(expression: ast.AST) -> bool:
     return (
@@ -382,7 +383,7 @@ def _registry_tool_names_from_source() -> frozenset[str] | None:
         return None
     source_tool_names = frozenset(names)
     if (
-        len(source_tool_names) != 24
+        len(source_tool_names) != 25
         or not frozenset(tool.value for tool in Tool) <= source_tool_names
     ):
         return None
@@ -390,7 +391,7 @@ def _registry_tool_names_from_source() -> frozenset[str] | None:
 
 
 def canonical_registry_tool_names_from_source() -> frozenset[str] | None:
-    """Return the offline AST-derived exact-24 registry without MCP import."""
+    """Return the offline AST-derived exact-25 registry without MCP import."""
 
     return _registry_tool_names_from_source()
 

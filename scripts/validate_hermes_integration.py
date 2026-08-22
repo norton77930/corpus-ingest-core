@@ -42,6 +42,7 @@ EXPECTED_TOOL_ORDER = [
     "generate_stock_lens_report",
     "ingest_x_video",
     "ingest_youtube_video",
+    "derive_workflow_bundle",
 ]
 SURFACE_NAMES = (
     "podcast_data",

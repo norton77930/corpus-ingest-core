@@ -876,7 +876,7 @@ def test_artifacts_require_an_exact_source_derived_registry_toolset():
     )
     source_tool_names = _registry_tool_names_from_source()
     assert source_tool_names is not None
-    assert len(source_tool_names) == 24
+    assert len(source_tool_names) == 25
     assert frozenset(tool.value for tool in Tool) <= source_tool_names
     assert "download_audio" in source_tool_names
 

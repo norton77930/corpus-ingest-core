@@ -3,9 +3,10 @@
 specs/025-core-consolidation FR-005: the single ``FastMCP`` instance lives in
 ``mcp_runtime``; tool functions live in the ``mcp_tools_*`` group modules
 that register on import, so the group import order below IS the registration
-order (Tools 1-24). Tests and clients keep reaching every tool function,
+order (Tools 1-25). Tests and clients keep reaching every tool function,
 envelope, and dependency-module alias through this module — the re-exports
-below are contract surface. Next-tool playbook (as used for Tool 22, spec 035 and Tool 23, spec 040):
+below are contract surface. Next-tool playbook (as used for Tool 22, spec 035, Tool 23, spec 040, and
+Tool 25, spec 043):
 add a group module imported LAST so existing slots keep their order, extend the
 re-exports here, move the size guard in
 ``hermes_skill_protocol._registry_tool_names_from_source``, regenerate the spec029
@@ -30,8 +31,11 @@ from .mcp_runtime import (
 
 # Registration order: read (1-6) -> side-effect (7-12) -> corpus workflows
 # (13-16) -> verified-report queries (17-21) -> stock lens (22) ->
-# x-video ingest (23) -> youtube-video ingest (24). Do not reorder these
-# imports; a new group is appended last so Tools 1-23 keep their slots.
+# x-video ingest (23) -> youtube-video ingest (24) -> workflow derivation
+# (25). Do not reorder these imports; a new group is appended last so Tools
+# 1-24 keep their slots. Append here, not only to the re-export block below:
+# a re-export happens to register too, but then this list stops being the
+# order it claims to be, and the next group appended here would take the slot.
 from . import mcp_tools_read
 from . import mcp_tools_side_effect
 from . import mcp_tools_corpus_workflows
@@ -39,6 +43,7 @@ from . import mcp_tools_verified_report_queries
 from . import mcp_tools_stock_lens
 from . import mcp_tools_x_video
 from . import mcp_tools_youtube_video
+from . import mcp_tools_workflow_derivation
 
 from .mcp_tools_read import (
     get_episode,
@@ -94,6 +99,7 @@ from .mcp_tools_stock_lens import (
 )
 from .mcp_tools_x_video import ingest_x_video
 from .mcp_tools_youtube_video import ingest_youtube_video
+from .mcp_tools_workflow_derivation import derive_workflow_bundle
 
 # Dependency-module aliases: tests monkeypatch through these shared module
 # objects (e.g. monkeypatch.setattr(mcp_server.feed_reader, ...)), and the

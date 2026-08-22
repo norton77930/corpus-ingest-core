@@ -1329,6 +1329,46 @@
         "title": "ingest_youtube_videoDictOutput",
         "type": "object"
       }
+    },
+    {
+      "description": "Side-effect tool\uff1aconfirm=false \u662f preview\uff08\u96f6\u5beb\u5165\u3001\u96f6\u7db2\u8def\uff09\u3002",
+      "inputSchema": {
+        "properties": {
+          "api_cost_ack": {
+            "default": "",
+            "title": "Api Cost Ack",
+            "type": "string"
+          },
+          "confirm": {
+            "default": false,
+            "title": "Confirm",
+            "type": "boolean"
+          },
+          "episode_ref": {
+            "default": "",
+            "title": "Episode Ref",
+            "type": "string"
+          },
+          "force": {
+            "default": false,
+            "title": "Force",
+            "type": "boolean"
+          },
+          "podcast_id": {
+            "default": "",
+            "title": "Podcast Id",
+            "type": "string"
+          }
+        },
+        "title": "derive_workflow_bundleArguments",
+        "type": "object"
+      },
+      "name": "derive_workflow_bundle",
+      "outputSchema": {
+        "additionalProperties": true,
+        "title": "derive_workflow_bundleDictOutput",
+        "type": "object"
+      }
     }
   ]
 }
