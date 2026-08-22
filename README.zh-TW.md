@@ -142,7 +142,8 @@ Hermes sidecar 整合(specs 026–034)目前只有離線驗證,runtime evidence 
   [`docs/codex-mcp-setup.md`](docs/codex-mcp-setup.md)、
   [`docs/mcp-troubleshooting.md`](docs/mcp-troubleshooting.md) — 接上 agent
 - [`docs/agent-handoff.md`](docs/agent-handoff.md) — 專案狀態、spec 歷史、blockers,
-  以及接手開發(不論是人或 agent)的入口
+  以及接手開發(不論是人或 agent)的入口,包含從根目錄移入的
+  [2026-08-19 session handoff](docs/agent-handoff.md#handoff--podcast-ingest-core-2026-08-19)
 - [`docs/ai-development-framework.md`](docs/ai-development-framework.md)、
   [`docs/verification-matrix.md`](docs/verification-matrix.md)、
   [`docs/architecture-decision-records/README.md`](docs/architecture-decision-records/README.md)、

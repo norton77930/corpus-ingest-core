@@ -158,7 +158,8 @@ remains blocked on runtime evidence. Details are in
   agent
 - [`docs/agent-handoff.md`](docs/agent-handoff.md) — project status, spec
   history, blockers, and the entry point for anyone (human or agent) picking up
-  development
+  development, including the
+  [2026-08-19 session handoff](docs/agent-handoff.md#handoff--podcast-ingest-core-2026-08-19) relocated from the repo root
 - [`docs/ai-development-framework.md`](docs/ai-development-framework.md),
   [`docs/verification-matrix.md`](docs/verification-matrix.md),
   [`docs/architecture-decision-records/README.md`](docs/architecture-decision-records/README.md),

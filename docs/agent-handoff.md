@@ -170,3 +170,249 @@ Phase 7D.1 是 Spec Kit Active Feature Guidance。此階段補清楚 official Sp
 **startup/plugin closed; credential_provider BLOCKED; overall BLOCKED**. Spec034 remains offline/static-only with H2 exactly 20 upstream paths at H1 SHA-256 `90ba45ccf11bbcbf446f7d16904964073e84837a04aaaa0c6f4887d3ea75109d`; no 21st path is authorized. The isolated child accepts only a regular no-link/reparse-free project snapshot as its payload cwd, changes there before sentinel/Pytest/product import, and retains capability snapshot then project snapshot then stdlib only. Consequently C6's three relative config reads use snapshot-approved bytes even if original workspace configs change after snapshotting. Public receipt projection has no injected verifier; private issuance recomputes current canonical facts. AST proof follows one owner-local package spec/module/loader/return/register/context flow. Bundle rename parent fsync precedes the `bundle_renamed` journal with an explicit platform best-effort fallback, and exact nonce-bound both-missing recovery alone is retry-safe. Runner/journal/trust tests remain non-final. Every prior root is not approval evidence. Fresh code and architecture re-reviews remain required; Main alone may run the documented one-shot command after both PASS, and it is not run here.
 
 > Spec034 Task #77 current terminal is **startup/plugin closed; credential_provider BLOCKED; overall BLOCKED**. Its H2-frozen exact 20-file official `NousResearch/hermes-agent` bundle is static/offline only: startup order and the fixed `security-guidance` plugin identity chain are closed, while credential/provider construction data flow, whole-program closure, dynamic/user/project/entry-point plugin paths, runtime/secret edges, and actual activation remain blocked or unobserved. `runtime_status=not_run`; `live_actions_authorized=false`. The fresh review-only bootstrap/final trust chain is reserved for Main after both reviews PASS and remains unrun.
+
+---
+
+## Handoff — podcast-ingest-core, 2026-08-19
+
+> Relocated from `HANDOFF-2026-08-19.md` in the repo root on 2026-08-22, so the
+> root holds only what a first-time reader needs. The text is unchanged; only the
+> heading levels moved one step down so the document nests under this one.
+
+Written for the next agent picking this repo up. Read this before `README.md`;
+it tells you what state the repo is actually in, which is not the same as what
+the docs describe in aggregate.
+
+### 1. Where the repo is right now
+
+Specs 036–042 (X/YouTube ingest, summary profiles, study-guide lecture,
+MCP tools 23–24, workflow derivation `05`/`06`) are on `main`. Task F /
+Hermes 026–034 remains blocked: those tests fail or hang on digest pins
+and nested sentinels. That is not a product regression. Do not start F
+to “fix” the suite.
+
+Copy `.env.example` to a local `.env` (gitignored). Never commit it.
+
+**Suite baseline:** the documented non-Hermes ignore set in
+`docs/install-and-porting.md` should pass. Unrestricted `python -m pytest`
+still enters the blocked Hermes chain.
+
+### 2. Environment traps that cost real time
+
+**`.env` is local-only.** It holds `API_KEY`, `MODEL`, and `BASE_URL`
+values. Committed `config/llm_profiles.yaml` stores only the environment
+*name* `api_key_env: API_KEY`, never a key or endpoint. The committed
+`gb10` profile is `unavailable: true`; `load_llm_profile("gb10")` fails
+closed and names `pro4500` as the replacement. Operator docs and
+`tests/test_architecture_spec_docs.py` pin `--llm-profile pro4500`.
+Isolated fixture YAMLs may still use the name `gb10` / model `GB10`;
+that is test data, not a working operator profile.
+
+**Diagnostic:** every semantic summary records the provider and model in
+its Metadata block. When an LLM call fails, read the last successful
+artifact before blaming the service.
+
+**Transcription** uses faster-whisper. CUDA (`--device cuda`) is
+optional and faster; CPU is the supported fallback.
+
+**Cache is never rebuilt automatically.** After any write that should
+become searchable, run `python scripts/rebuild_cache.py --podcast <id>`
+yourself. Every side-effect tool warns about this rather than doing it.
+
+### 3. The two constraints that will bite you if you don't know them
+
+**The rendered semantic summary Markdown is a contract, not a document.** Four
+modules read its structure:
+
+| Reader | Depends on |
+| --- | --- |
+| `semantic_review_artifact.py:143` | literal `## Chunk Summaries` |
+| `semantic_review_artifact.py:151` | `Summary mode: semantic-llm`, `Provider:`, `Model:`, `Transcript status:` |
+| `stock_lens_synthesis.py:494` | `re.split(r"(?im)^##\s+Chunk Summaries\s*$", …, maxsplit=1)` |
+| `verified_research_lineage.py:820` | `summary_mode == "semantic-llm"` |
+
+A summary profile may change what the LLM is asked to produce and the body text
+under `## 摘要限制`. It may not change a heading, the Metadata block, or
+`SUMMARY_MODE`. `tests/test_summary_profiles.py` enforces that no profile body
+line can start with `#`.
+
+**gooaye's output is a pinned fixed point.** Every published verified research
+report descends from a semantic summary, so drifting the `finance` prompts by
+one character is a data-integrity event, not a style change.
+`tests/test_summary_profiles.py:31-68` hardcodes the prompt literals and
+`tests/test_semantic_summarizer.py` pins the whole rendered document. If you
+change those tests to make them pass, you have caused the thing they exist to
+prevent.
+
+### 4. Candidate tasks
+
+Ordered by what the author of Spec 037 would pick up next. Each is
+independently shippable. **A, B, and D are spec-gated** — this repo runs
+Spec Kit (`specs/<nnn>-<name>/` with `spec.md`, `plan.md`, `tasks.md`,
+`checklists/`), and Specs 036 and 037 are the two best templates to imitate.
+
+#### Task A — `038`: the multi-document study guide *(highest value to the user)*
+
+**Why this one.** Spec 037 made a single semantic summary read as study
+material, and it works well. But the user's actual target has always been the
+hand-written sequence in `../prompt-engineering/output/`: `00_video_info.md`,
+`01_transcript_en.md`, `02_transcript_zh_tw.md`, `03_full_summary.md`,
+`04_learning_notes.md`, `05_prompt_examples.md`, `06_apply_to_my_workflow.md`,
+`07_final_study_guide.md`. Spec 036 Assumption 6 recorded that sequence as the
+**target, not something to redesign**.
+
+**What Spec 037 learned that constrains this.** The real learning-notes run
+disclosed in its own 不確定事項 section that its reusable-prompt examples were
+*reconstructed from spoken description, not quoted verbatim*. That is the
+honest behaviour, and it is also the reason `05_prompt_examples.md` and
+`06_apply_to_my_workflow.md` were held out of 037: they are workflow-specific
+derivations, not summarisation of a transcript. Forcing them into a
+summarisation prompt makes the model invent content the transcript does not
+contain, which the repo's evidence rule forbids. **A spec that treats all eight
+documents as one artifact family will produce fabrication in two of them.** The
+design question to answer first is which documents are evidence-bound and which
+are explicitly derivations, and whether derivations belong in this repo at all.
+
+**Scope.** New artifact family, new `corpus_index` families, new canonical-path
+rules, and a decision on whether translation (`02_transcript_zh_tw.md`) is in
+scope — Spec 037 explicitly excluded translation.
+
+#### Task B — `039`: YouTube as a third source, closing the `source_type` seam
+
+**Why together.** Spec 036 left a seam and named it precisely
+(`specs/036-x-video-corpus-ingestion/tasks.md:404-411`): `source_type` does not
+propagate through corpus index → remediation plan → runner. Today
+`corpus_remediation_plan.py` emits a "ready" audio action suggesting
+`scripts/download_episode.py` for an x-video episode with missing audio, and the
+seed's `has_audio_url=True` suppresses the "feed audio unavailable" blocker.
+Execution then fails soft with the source refusal. It is the first operational
+confusion an operator hits, and 036 called it **the seam the next source spec
+must close**. Adding a third source without closing it triples the confusion.
+
+**What is already reusable.** 036 proved the cheap route: `transcribe_episode`
+already accepts `audio_path`, which bypasses `download_audio` entirely, and uses
+its profile only for `language`. So a new source needs acquisition code and
+nothing else. `yt-dlp` is already a dependency and already handles YouTube.
+
+**Also in scope by necessity.** Divergent title provenance
+(`corpus_local_transcription_runner` passes no `title`, so re-transcribing writes
+a trio at `{ref}__{ref}.*` while the ingest flow derives paths from
+`seed.title`; `storage.find_transcript_asset_paths` then resolves the ambiguity
+by `sorted()[0]`). A third source makes this more likely, not less.
+
+#### Task C — clean up the `gb10` profile *(done)*
+
+Chose mark-unavailable over rename or silent repoint. Committed `gb10` keeps
+`model: GB10` plus `unavailable: true`; `load_llm_profile` raises
+`LLMProviderConfigError` and lists available profiles (`pro4500`). Operator
+docs and the architecture pin moved to `--llm-profile pro4500`. Isolated
+fixture YAMLs were left as `gb10`/`GB10`. Not spec-gated.
+
+#### Task D — `040`: MCP exposure for X ingestion (Tool 23) *(implemented in tree)*
+
+Spec 036 deliberately shipped Core plus a thin CLI and no MCP tool, on this
+repo's own precedent: Spec 004 built the stock lens Core and CLI, and exposure
+waited for Spec 035 as Tool 22. The registry count is a pinned chain running
+through the Hermes AST projection, the Spec 029 descriptor snapshot, the deny
+adapter, and the docs-count consistency check — they all move together.
+
+Spec 040 decided the envelope: preview keeps `"dry_run": true`, names
+`run_mode=preview`, and sets `network_read=true` /
+`network_read_scope=public_metadata_only`. Confirm persists a metadata-only
+run report. `XVideoIngestResult` now carries `run_mode` and
+`not_investment_advice`.
+
+#### Task E — `stock_lens_synthesis` profile gate *(done)*
+
+`generate_stock_lens_synthesis_report` now loads the podcast profile and refuses
+any `summary_profile` other than `finance` (and unknown podcast ids) before
+dry-run planning or provider construction. `run_research_workflow` applies the
+same helper when `include_stock_lens_synthesis=True`, so a learning-notes
+podcast cannot even plan that step. Deterministic stock lens, mentions,
+episode-intelligence, and industry-mapping still only read `display_name`;
+those remain a later gate if a fifth profile appears.
+
+#### Task 041 — YouTube ingest MCP (Tool 24) *(implemented in tree)*
+
+Append-only Tool 24 `ingest_youtube_video` copies the Spec 040 preview
+envelope (`dry_run` + `run_mode=preview` + `network_read`). Confirm wraps
+existing Spec 039 Core ingest and writes a metadata-only run report.
+Registry pin chain is 23→24. No Skill, no new dependency.
+
+#### Task F — the blocked Hermes chain *(do not start casually)*
+
+Package `026` is **Blocked**, and Spec 027's contract layer is complete while
+actual Hermes runtime routing is `BLOCKED` / `not_evaluated`. This is the source
+of the remaining Hermes 030–034 digest failures (12 failed + 034 g4 hang on
+this machine). `specs/README.md` records the state in detail, including which
+evidence grades are forbidden (live config values, session dumps, and raw
+responses are all disallowed as evidence). This is governance-grade work with a
+long paper trail; read `specs/026-hermes-mcp-integration/` and
+`specs/033-hermes-v019-pinned-source-loader-audit/` fully before touching it.
+Do not start this task to “fix” the suite.
+
+### 5. Smaller recorded follow-ups
+
+Genuine but not worth a spec on their own. Full context in
+`specs/037-semantic-summary-profiles/tasks.md` and
+`specs/036-x-video-corpus-ingestion/tasks.md`.
+
+- The default profile literal is duplicated: `models.py:22` hardcodes
+  `"finance"` while `summary_profiles.py:21` defines `DEFAULT_SUMMARY_PROFILE`.
+  Left as-is to keep `models.py` dependency-free.
+- `source_type` is not validated at load (`config.py:87` accepts any string;
+  enforcement lives at the RSS surfaces in `require_rss_profile`), while
+  `summary_profile` is. The asymmetry is principled — `summary_profile` has no
+  downstream enforcement surface — but the two philosophies now sit on adjacent
+  lines. The architecture review explicitly said not to reopen for it.
+- The profile is resolved three times and degraded back to a string in between
+  (`config.py` → `semantic_summarizer.py:66` → `:148` → `llm_provider.py:109`).
+  All O(1); the string-typed factory parameter is the price of source
+  compatibility. Cosmetic.
+- Whitespace-padded profile values (`" finance "`) are accepted and
+  canonicalised. Harmless, untested.
+- X identity is permanent: `x-{handle}` with `_`→`-` is baked into every on-disk
+  path. Injective for valid X handles, but a handle rename splits one account
+  across two podcast ids forever. Accepted knowingly.
+
+### 6. How this repo expects you to work
+
+Read `.specify/memory/constitution.md` — nine numbered principles, and plans are
+expected to state explicitly how they satisfy each. The ones that most often
+decide a design here:
+
+- **III Dry-run first.** Side-effect workflows return a plan and write nothing
+  without `confirm=true`. Spec 036 shipped a dry-run plan that *claimed a write
+  it would not perform* (it would have reused existing audio); that was caught
+  only because the operator asked to see the plan before running. A plan that
+  promises something that will not happen defeats the requirement's reason to
+  exist.
+- **IV LLM opt-in.** Any LLM call requires the exact `api_cost_ack` string, and
+  the guard runs before provider construction. Do not move it, and do not let
+  any new argument resolve before it.
+- **VI No investment advice.** Note the shape of this after Spec 037: the
+  enforcing check is `matched_investment_advice_guard`, which strips disclaimers
+  *before* it scans. It is a prohibition detector, not a disclaimer requirement.
+  A summary cannot become compliant by carrying a disclaimer.
+- **IX TDD.** One focused RED before GREEN, per slice.
+
+Risk classification is real here. Cross-module correctness, error-handling
+paths, and non-breaking interface changes get a `code-reviewer` pass;
+architectural boundaries add `architecture-reviewer`. Both reviews on Spec 037
+found things the implementing session could not see from inside, including two
+doc-drift defects where the spec package described a mechanism opposite to what
+shipped.
+
+**Verification is evidence, not assertion.** When Spec 037 needed to claim
+"gooaye's corpus index is unchanged", reasoning was sufficient to dismiss the
+concern (`corpus_index` never imports `config`) — the claim was tested anyway by
+stashing the change and regenerating with pre-change code, because a claim
+defended by argument is not evidence. Do that.
+
+### 7. Immediate next action
+
+A–E, 040, 041, and 042 are on `main`. Spec 042 is the separate
+`workflow_derivation` family (`05`/`06`); it is not mixed into 038.
+Task F / Hermes 026–034 is untouched. Next optional work is a live
+YouTube confirm of Tool 24, or MCP exposure for 042 later. Do not
+casually start Hermes.
