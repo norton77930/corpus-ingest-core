@@ -15,8 +15,15 @@ Validation only. Do not run a live YouTube download until targeted tests are gre
 - Public video (guest token; no cookies)
 
 `test_contracts.py::test_loads_registered_profiles_from_yaml` asserts the exact profile set of
-the committed config, so it fails for as long as the `yt-…` profile is registered. Remove the
-profile when the run is done and it goes green again.
+the committed config, so registering the `yt-…` profile there turns it red until you remove it
+again. Avoid that entirely by putting the profile in a gitignored file instead:
+
+```powershell
+$env:PODCAST_INGEST_CONFIG = "config/podcasts.local.yaml"
+```
+
+`config/*.local.yaml` is already gitignored, and the committed config stays untouched, so the
+suite stays green throughout the run.
 
 ## Dry-run (always first)
 

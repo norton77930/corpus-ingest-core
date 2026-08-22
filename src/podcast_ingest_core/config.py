@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 from pathlib import Path
 import re
 from typing import Any
@@ -11,7 +12,16 @@ from .models import PodcastProfile
 from .summary_profiles import UNSET as _SUMMARY_PROFILE_UNSET, resolve_summary_profile
 
 
-DEFAULT_CONFIG_PATH = Path("config/podcasts.yaml")
+# Same shape as storage.DATA_DIR: an operator can point the profile registry
+# somewhere gitignored instead of editing the committed config. That matters
+# because tests/test_contracts.py asserts the exact profile set of the
+# committed file -- a deliberate guard against committing a personal profile
+# by accident -- while a live confirm (spec 039) needs a profile registered
+# first. Without this the only route was edit-run-remember-to-revert.
+#
+# Read at import time, so a subprocess is the only way to exercise it; see
+# tests/test_data_dir_fixture_contract.py.
+DEFAULT_CONFIG_PATH = Path(os.environ.get("PODCAST_INGEST_CONFIG") or "config/podcasts.yaml")
 RSS_SOURCE_TYPE = "rss"
 _SAFE_SLUG_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 

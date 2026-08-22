@@ -127,6 +127,42 @@ def test_data_dir_honors_environment_override():
     assert _data_dir_in_subprocess({"PODCAST_INGEST_DATA_DIR": override}) == override
 
 
+
+
+def _config_path_in_subprocess(extra_env: dict[str, str]) -> str:
+    """Same subprocess shape as the data-dir pair: DEFAULT_CONFIG_PATH is read
+    at import time, so an in-process monkeypatch would not exercise it.
+    """
+
+    env = {
+        key: value
+        for key, value in os.environ.items()
+        if key != "PODCAST_INGEST_CONFIG"
+    }
+    env.update(extra_env)
+    env["PYTHONPATH"] = str(REPO_ROOT / "src")
+    completed = subprocess.run(
+        [
+            sys.executable,
+            "-c",
+            "from podcast_ingest_core import config; print(config.DEFAULT_CONFIG_PATH)",
+        ],
+        capture_output=True,
+        text=True,
+        cwd=REPO_ROOT,
+        env=env,
+        check=True,
+    )
+    return completed.stdout.strip()
+
+
+def test_config_path_default_is_unchanged_without_env_override():
+    assert _config_path_in_subprocess({}) == str(Path("config/podcasts.yaml"))
+
+
+def test_config_path_honors_environment_override():
+    override = str(Path("local-profiles.yaml"))
+    assert _config_path_in_subprocess({"PODCAST_INGEST_CONFIG": override}) == override
 def test_evals_reports_dir_literal_is_defined_only_in_storage():
     pattern = re.compile(r'Path\(\s*"evals"\s*\)')
     src_dir = REPO_ROOT / "src" / "podcast_ingest_core"

@@ -140,12 +140,16 @@ git diff --check
   以及 `docs/roadmap.md`、`specs/README.md`。它們今天不會壞，因為 Hermes 鏈預設不執行；一旦那條鏈
   回到預設執行或有人在 Linux/CI 上跑稽核，就會整批失敗。修法是把它們加進 `.gitattributes`，
   一次 commit、獨立驗證，不要混進功能改動。
-- **Spec 039 live confirm 留下的兩個 follow-up**（open, 2026-08-22）：完整證據見
+- **Spec 039 live confirm 留下的兩個 follow-up**（第二項已解決 2026-08-22）：完整證據見
   [`specs/039-youtube-video-corpus-ingestion/spec.md`](../specs/039-youtube-video-corpus-ingestion/spec.md)
   的 Live Confirm Record。一是 `video_acquire` 沒設 `format`，導致 YouTube 要先下載整支影片再合併才能抽音訊
   （實測 32.30 MiB 影片 + 1.26 MiB 音訊，影片隨即丟棄）；改成只取音訊可省頻寬並移除 ffmpeg 依賴，但那段程式碼
-  與 X 共用，屬跨模組改動。二是 `run_youtube_video_ingest` 沒有替代設定檔路徑參數，所以 live confirm 一定要
-  改動已 commit 的 `config/podcasts.yaml`，而 `test_contracts.py` 對它有精確集合斷言。
+  與 X 共用，屬跨模組改動。**這一項仍未做。**
+  二是 live confirm 一定要改動已 commit 的 `config/podcasts.yaml`（`test_contracts.py` 對它有精確集合斷言）——
+  **已解決**：`config.py` 的 `DEFAULT_CONFIG_PATH` 現在讀 `PODCAST_INGEST_CONFIG`，與 `storage.DATA_DIR` 同形。
+  沒有走「給每個 runner 加 `--config` 參數」那條路：讀 profile 的呼叫點散在 14 個模組且都不傳 path，
+  穿透它們會改到已被 MCP 工具與契約測試綁住的簽章。環境變數只改一行，而且 `config/*.local.yaml`
+  早就在 `.gitignore` 內，慣例現成。
 
 ---
 
