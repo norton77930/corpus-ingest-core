@@ -45,8 +45,16 @@ pyproject.toml -text
 # Sidecar deployment surface (Dockerfile, compose, runbook, helper shell).
 deploy/** -text
 
-# Runtime modules the chain hashes.
+# Runtime modules the chain hashes. The mcp_* entries are the MCP runtime and
+# its tool groups: spec 032's predecessor-digests.json pins their bytes, and a
+# glob would not cover them because mcp_tools_x_video.py and
+# mcp_tools_youtube_video.py are not in that manifest.
 src/podcast_ingest_core/hermes_*.py -text
+src/podcast_ingest_core/mcp_runtime.py -text
+src/podcast_ingest_core/mcp_tools_corpus_workflows.py -text
+src/podcast_ingest_core/mcp_tools_read.py -text
+src/podcast_ingest_core/mcp_tools_side_effect.py -text
+src/podcast_ingest_core/mcp_tools_verified_report_queries.py -text
 
 # Tests: the Hermes suites, the transport suite they share, and the
 # non-test_ helper module that spec034's final acceptance imports.
@@ -61,6 +69,7 @@ tests/test_spec_03*.py -text
 # under both naming conventions.
 scripts/*hermes*.py -text
 scripts/*spec_03*.py -text
+scripts/verify_spec_029.py -text
 scripts/build_hermes_sidecar.sh -text
 scripts/export_spec029_tool_descriptor_snapshot.py -text
 scripts/run_mcp_deny_interposer.py -text
