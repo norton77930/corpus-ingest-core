@@ -1,3 +1,5 @@
+# Line-ending policy for the digest-pinned Hermes audit surface.
+#
 # The Spec 026-034 audit chain pins file bytes with SHA-256: reviewed-artifact
 # manifests, source-bundle manifests, predecessor digests, and the pinned
 # upstream bundle are all hashed verbatim. This repository is authored on
@@ -8,6 +10,16 @@
 # security regression rather than an end-of-line conversion.
 #
 # Keep every digest-pinned surface byte-identical on all platforms.
+#
+# Every rule below sets the same attribute, so the grouping and the ordering
+# inside each group exist only to make the list reviewable: there are no
+# overriding later rules, and no path depends on where it appears. Adding a
+# hashed path to the "wrong" group still pins it; leaving one out silently
+# un-pins a file the audit chain hashes, which is the failure this file exists
+# to prevent. When a new Hermes or spec-03x surface lands, add it to the group
+# it belongs to and keep that group sorted.
+
+# The audit chain itself: spec packages 026-034.
 specs/026-hermes-mcp-integration/** -text
 specs/027-hermes-skill-routing-contracts/** -text
 specs/028-hermes-runtime-skill-routing-observation/** -text
@@ -17,17 +29,28 @@ specs/031-hermes-g2-credentialless-activation-gate/** -text
 specs/032-hermes-g2-offline-attempt-executor/** -text
 specs/033-hermes-v019-pinned-source-loader-audit/** -text
 specs/034-hermes-v019-pinned-startup-source-graph/** -text
+
+# Sidecar deployment surface (Dockerfile, compose, runbook, helper shell).
 deploy/** -text
+
+# Runtime modules the chain hashes.
 src/podcast_ingest_core/hermes_*.py -text
+
+# Tests: the Hermes suites, the transport suite they share, and the
+# non-test_ helper module that spec034's final acceptance imports.
+tests/spec034_final_c6_support.py -text
 tests/test_hermes_*.py -text
 tests/test_mcp_http_transport.py -text
 tests/test_spec_02[6-9]*.py -text
 tests/test_spec_03*.py -text
-tests/spec034_final_c6_support.py -text
+
+# Scripts: the offline entry points and the servers they drive. Both
+# `spec_03`/`spec03` spellings are listed on purpose -- the chain shipped
+# under both naming conventions.
 scripts/*hermes*.py -text
 scripts/*spec_03*.py -text
-scripts/spec03*.py -text
+scripts/build_hermes_sidecar.sh -text
 scripts/export_spec029_tool_descriptor_snapshot.py -text
 scripts/run_mcp_deny_interposer.py -text
 scripts/run_mcp_http_server.py -text
-scripts/build_hermes_sidecar.sh -text
+scripts/spec03*.py -text

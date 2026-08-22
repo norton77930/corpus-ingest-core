@@ -1,24 +1,48 @@
-# Source-control and local environments
+# Build-context exclusions for the MCP sidecar image (deploy/hermes/Dockerfile).
+#
+# The Dockerfile never runs `COPY .`. It copies pyproject.toml, README.md,
+# src/, config/, and scripts/run_mcp_http_server.py by name, and
+# tests/test_hermes_deployment_contract.py asserts it keeps doing so. That
+# explicit COPY list, not this file, is what keeps `.env` out of the image.
+# This file is the second line: it keeps secrets and local state out of the
+# build context that is handed to the daemon in the first place, and keeps
+# that context small enough for rebuilds to stay fast.
+#
+# Patterns are matched from the context root and are not recursive on their
+# own, so anything that can appear at any depth is written with `**/`.
+
+# Source control and local environments
 .git/
+.gitattributes
+.gitignore
 .venv/
-__pycache__/
-*.py[cod]
+**/__pycache__/
+**/*.py[cod]
+**/*.egg-info/
 
 # Secrets and machine-local configuration
 .env
 .env.*
 
 # Runtime artifacts and test state
-data/
-evals/
+.coverage
+.mypy_cache/
 .pytest-tmp/
 .pytest_cache/
-.coverage
+.tmp/
+data/
+evals/
 htmlcov/
 
-# Not required by the sidecar image
+# Agent, spec, and editor tooling metadata: never read at runtime
 .agents/
 .claude/
+.playwright-mcp/
+.specify/
+.superpowers/
+
+# Not required by the sidecar image
+deploy/
 docs/
 specs/
 tests/
