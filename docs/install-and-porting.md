@@ -134,17 +134,17 @@ $env:PODCAST_INGEST_DATA_DIR = "D:\podcast-data"
 > 「變數未設定時 `storage.DATA_DIR` 維持 `Path("data")`」列為受保護不變量，測試要隔離路徑時
 > 認可的方式是 `tests/conftest.py` 的 `tmp_data_dirs` fixture，不是這個環境變數。
 
-**B2b. 節目清單也可以放在別處**
-
-```powershell
-$env:PODCAST_INGEST_CONFIG = "config/podcasts.local.yaml"
-```
-
-`config.py` 讀這個環境變數，未設定時預設為 `config/podcasts.yaml`。用途是**不要為了跑一次
-擷取而編輯已進版控的節目清單**：`tests/test_contracts.py` 對那個檔案做精確集合斷言（刻意的守衛，
-防止私人 profile 被 commit），所以在裡面加一個 `yt-…` 或 `x-…` profile 會讓它變紅，跑完還得記得
-刪掉。`config/*.local.yaml` 已在 `.gitignore` 內，所以私人清單不會進版控。
-
+**B2b. 節目清單也可以放在別處**
+
+```powershell
+$env:PODCAST_INGEST_CONFIG = "config/podcasts.local.yaml"
+```
+
+`config.py` 讀這個環境變數，未設定時預設為 `config/podcasts.yaml`。用途是**不要為了跑一次
+擷取而編輯已進版控的節目清單**：`tests/test_contracts.py` 對那個檔案做精確集合斷言（刻意的守衛，
+防止私人 profile 被 commit），所以在裡面加一個 `yt-…` 或 `x-…` profile 會讓它變紅，跑完還得記得
+刪掉。`config/*.local.yaml` 已在 `.gitignore` 內，所以私人清單不會進版控。
+
 **B3. 重新 ingest（乾淨開始）**
 
 不複製任何東西，在新機器重跑一次擷取流程。轉錄會耗大量時間與算力。
