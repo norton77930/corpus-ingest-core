@@ -30,6 +30,17 @@ specs/032-hermes-g2-offline-attempt-executor/** -text
 specs/033-hermes-v019-pinned-source-loader-audit/** -text
 specs/034-hermes-v019-pinned-startup-source-graph/** -text
 
+# Files the chain hashes that are not themselves part of a spec package.
+# spec034's C6 support module reads these three configs back from the child
+# snapshot and compares SHA-256; pyproject.toml is byte-length pinned. They were
+# missing here until CI caught it: a GitHub Windows runner checks out with
+# core.autocrlf=true, which rewrote LF to CRLF and changed every one of those
+# digests, while an authoring machine using core.autocrlf=input never saw it.
+config/external_data_boundary.yaml -text
+config/gooaye_lens.yaml -text
+config/industry_chain_mappings.yaml -text
+pyproject.toml -text
+
 # Sidecar deployment surface (Dockerfile, compose, runbook, helper shell).
 deploy/** -text
 
