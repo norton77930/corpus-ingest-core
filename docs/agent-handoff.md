@@ -144,7 +144,10 @@ git diff --check
   [`specs/039-youtube-video-corpus-ingestion/spec.md`](../specs/039-youtube-video-corpus-ingestion/spec.md)
   的 Live Confirm Record。一是 `video_acquire` 沒設 `format`，導致 YouTube 要先下載整支影片再合併才能抽音訊
   （實測 32.30 MiB 影片 + 1.26 MiB 音訊，影片隨即丟棄）；改成只取音訊可省頻寬並移除 ffmpeg 依賴，但那段程式碼
-  與 X 共用，屬跨模組改動。**這一項仍未做。**
+  與 X 共用，屬跨模組改動。**已完成 2026-08-22**：`format: bestaudio/best`。實測(ffmpeg 移出 PATH)
+  YouTube 727.90 KiB、X 31.02 MiB。順帶更正了原本的判斷：X 並非只送預先混流的 MP4,它兩種都送,
+  只是 yt-dlp 預設偏好漸進式那個——所以 X 從不需要 ffmpeg,卻在下載 2.42 GiB 只為了 30.58 MiB 的音訊,
+  而且沒有任何錯誤訊息會指出這件事。
   二是 live confirm 一定要改動已 commit 的 `config/podcasts.yaml`（`test_contracts.py` 對它有精確集合斷言）——
   **已解決**：`config.py` 的 `DEFAULT_CONFIG_PATH` 現在讀 `PODCAST_INGEST_CONFIG`，與 `storage.DATA_DIR` 同形。
   沒有走「給每個 runner 加 `--config` 參數」那條路：讀 profile 的呼叫點散在 14 個模組且都不傳 path，

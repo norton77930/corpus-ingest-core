@@ -23,13 +23,15 @@ itself but nothing it spawns. Without the install those tests fail with
 `ModuleNotFoundError: No module named 'podcast_ingest_core'`, and the cause is
 not obvious from the message.
 
-Video ingestion needs two more things that are easy to miss:
+Video ingestion has one extra setup detail that is easy to miss:
 
-- **`ffmpeg` on `PATH`**, for YouTube only. yt-dlp has to merge YouTube's
-  separate video and audio streams; X serves pre-muxed MP4 and never needs it.
 - **A recent `yt-dlp`.** YouTube breaks older releases, and the failure is
   confusing: metadata resolves fine and then the media URL returns `HTTP 403`.
   `pip install -U yt-dlp` before a live run.
+
+The current X and YouTube ingest path does not require an `ffmpeg` executable
+on `PATH`. It asks yt-dlp for `bestaudio/best`, so no selector branch merges
+streams; PyAV converts the selected source media to the corpus WAV.
 
 Full setup and porting notes, including GPU transcription, are in
 [`docs/install-and-porting.md`](docs/install-and-porting.md).

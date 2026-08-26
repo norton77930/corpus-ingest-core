@@ -139,8 +139,8 @@ A YouTube channel is registered with `source_type: yt-video` and no `rss_url`. R
 ### Acquisition
 
 - **FR-001**: The system MUST resolve a public YouTube URL's metadata, yielding at minimum video title, upload date, duration, channel handle or channel id, and canonical watch URL.
-- **FR-002**: The system MUST download the video with yt-dlp using a guest token and extract a mono 16 kHz PCM WAV with PyAV to `storage.audio_asset_path(podcast_id, episode_ref, title, ".wav")`.
-- **FR-003**: The downloaded source video MUST NOT be written anywhere under `data/`; only the extracted audio is a corpus artifact.
+- **FR-002** *(amended 2026-08-22)*: The system MUST ask yt-dlp for `bestaudio/best` using a guest token, download the selected source media without a merge selector, and extract a mono 16 kHz PCM WAV with PyAV to `storage.audio_asset_path(podcast_id, episode_ref, title, ".wav")`.
+- **FR-003**: The downloaded source media MUST NOT be written anywhere under `data/`; only the extracted audio is a corpus artifact.
 - **FR-004**: The system MUST write a `CorpusEpisodeSeed` at `storage.corpus_episode_seed_asset_path(podcast_id, episode_ref)` with `seed_source="yt-video"`, the canonical watch URL as `selector`, `has_audio_url=true`, and `published_at` from the resolved upload date when present.
 - **FR-005**: Transcription MUST reuse `transcribe_episode(..., audio_path=..., title=...)`. No second transcript writer.
 
@@ -244,11 +244,12 @@ preconditions this run tested:
 1. **yt-dlp goes stale against YouTube.** 2026.06.09 returned `HTTP 403` on the media URL
    while metadata still resolved. 2026.08.19 downloads. A CI job that runs a live confirm has
    to upgrade yt-dlp per run rather than pin it.
-2. **ffmpeg is an undeclared prerequisite, and only YouTube trips it.**
-   `video_acquire.guest_download_options` sets no `format`, so yt-dlp's default selector
-   merges separate streams. X serves pre-muxed MP4 and never needs the merge; YouTube serves
-   DASH and always does. `specs/036-x-video-corpus-ingestion/tasks.md:266` shows ffmpeg was
-   present when 036 was written, which is why it was never written down.
+2. **yt-dlp's default fetched media the pipeline immediately discarded.**
+   At the time of this run, `video_acquire.guest_download_options` set no `format`. On the
+   tested YouTube source the default selected separate video and audio streams and required
+   ffmpeg to merge them. On the tested X source it silently preferred one 2.42 GiB
+   progressive stream even though a 30.58 MiB audio-only rendition was available. The
+   measurements below supersede the original inference that X published only pre-muxed MP4.
 3. **The documented procedure turns `test_contracts.py` red.** That test asserts
    `set(profiles) == {"gooaye", "x-raytar"}` against the real config file, while Assumption 5
    requires the operator to add a `yt-…` profile to it, and `run_youtube_video_ingest` takes
@@ -257,13 +258,16 @@ preconditions this run tested:
 
 Two follow-ups, neither in this spec's scope:
 
-- Request an audio-only `format` in `video_acquire`, updating `DOWNLOAD_OPTION_KEYS` and the
-  subset assertion at `tests/test_video_acquire.py:22` with it. This run fetched 32.30 MiB of
-  video plus 1.26 MiB of audio, merged them, and discarded the video; the audio alone would
-  have done. It drops the ffmpeg dependency, and it touches the X path too, so it needs its
-  own change and review.
-- Give the runner an alternate config path, so a live confirm no longer has to edit the
-  committed profile file.
+- ~~Request an audio-only `format` in `video_acquire`~~ **Done 2026-08-22.** This run fetched
+  32.30 MiB of video plus 1.26 MiB of audio, merged them, and discarded the video. Confirmed
+  live afterwards with ffmpeg off `PATH`: 727.90 KiB, no muxer.
+
+  X publishes progressive and separated renditions both, and yt-dlp's default simply
+  preferred the progressive one, which is why X never needed ffmpeg. But that stream measured
+  2.42 GiB against a 30.58 MiB audio-only rendition of the same post, so X was wasting more
+  than YouTube, silently, and no ffmpeg error ever pointed at it. After the change: 31.02 MiB.
+- ~~Give the runner an alternate config path~~ **Done 2026-08-22.** `DEFAULT_CONFIG_PATH`
+  honors `PODCAST_INGEST_CONFIG`, so a live confirm can use a gitignored local profile file.
 
 One observation: `planned_writes` listed seven paths and the run wrote eight. The extra file
 is `data/corpus/yt-nasa/.episode-claims/BOvyerl_0cE.writer.claim`, the writer lock. Whether a

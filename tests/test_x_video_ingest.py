@@ -327,20 +327,19 @@ def test_confirmed_run_lands_audio_and_seed_then_transcribes_under_the_title(
     assert captured["title"] == "Code with Claude Prompt Engineering Breakout"
 
 
-def test_download_uses_the_real_merged_filepath_not_the_predicted_name(
+def test_download_uses_the_real_requested_filepath_not_the_predicted_name(
     monkeypatch, tmp_path
 ):
-    """yt-dlp merges bestvideo+bestaudio when ffmpeg is present.
+    """The selected download's path can differ from ``prepare_filename``.
 
-    The merged container's extension can differ from what ``prepare_filename``
-    predicts, so trusting it can hand back a path that does not exist and kill the
-    run in audio extraction. ``requested_downloads[0]['filepath']`` is the field
-    that reports what was actually written.
+    Trusting the prediction can hand audio extraction a path that does not exist.
+    ``requested_downloads[0]['filepath']`` is the field that reports what yt-dlp
+    actually wrote, including for the explicit audio-only selector.
     """
 
     from podcast_ingest_core import x_video_ingest
 
-    real_path = tmp_path / "work" / "2071290493581840707.mkv"
+    real_path = tmp_path / "work" / "2071290493581840707.m4a"
     predicted_path = tmp_path / "work" / "2071290493581840707.mp4"
 
     class FakeClient:
@@ -352,7 +351,7 @@ def test_download_uses_the_real_merged_filepath_not_the_predicted_name(
 
         def extract_info(self, _url, download=False):
             real_path.parent.mkdir(parents=True, exist_ok=True)
-            real_path.write_bytes(b"merged video")
+            real_path.write_bytes(b"audio rendition")
             return {"requested_downloads": [{"filepath": str(real_path)}]}
 
         def prepare_filename(self, _info):

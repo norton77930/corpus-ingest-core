@@ -47,7 +47,7 @@ Stdout: metadata-only JSON (`dataclasses.asdict`). Exit 1 on `PodcastIngestCoreE
 
 | | dry-run | confirm, WAV missing | confirm, WAV exists |
 | --- | --- | --- | --- |
-| network | metadata only | metadata + video download | metadata only (reuse WAV) |
+| network | metadata only | metadata + selected source-media download | metadata only (reuse WAV) |
 | filesystem writes | 0 | seed + WAV + transcript trio | seed + transcript trio |
 | transcription | never | yes | yes |
 | video under `data/` | never | never | never |

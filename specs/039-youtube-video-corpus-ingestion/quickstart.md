@@ -8,9 +8,10 @@ Validation only. Do not run a live YouTube download until targeted tests are gre
 - **`yt-dlp` upgraded immediately before the run.** YouTube breaks older releases: a version
   ten weeks old resolved metadata fine and then returned `HTTP 403` on the media URL. Run
   `pip install -U yt-dlp` first rather than trusting whatever is installed.
-- **`ffmpeg` on `PATH`.** `video_acquire` sets no `format`, so yt-dlp's default selector
-  merges YouTube's separate video and audio streams before PyAV ever sees the file. X videos
-  are pre-muxed and never need this, which is why Spec 036 did not surface the requirement.
+- No `ffmpeg` executable is required on `PATH`. `video_acquire` requests
+  `bestaudio/best`, whose branches select one file and never merge streams; PyAV converts the
+  selected source media to the 16 kHz mono WAV. The `best` fallback preserves support for a
+  source with no audio-only rendition, but still does not invoke a muxer.
 - A `config/podcasts.yaml` profile whose id equals the derived `yt-{handle-slug}` and whose `source_type` is `yt-video`
 - Public video (guest token; no cookies)
 

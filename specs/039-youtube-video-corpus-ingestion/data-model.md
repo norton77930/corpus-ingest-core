@@ -23,7 +23,7 @@ data/transcripts/{podcast_id}/{episode_ref}__{title_slug}.{txt,srt,json}
 data/corpus/{podcast_id}/episode-seeds/{episode_ref}.episode-seed.json
 ```
 
-The source video is written outside `data/` and is not a corpus artifact.
+The selected source media is written outside `data/` and is not a corpus artifact.
 
 ## `CorpusEpisodeSeed` mapping
 

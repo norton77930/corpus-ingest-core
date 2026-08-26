@@ -38,7 +38,7 @@
 | Git | 任意近期版本 | |
 | WSL2 + Docker | **僅 C 段需要** | Hermes sidecar 與驗證器都必須在 POSIX 環境跑 |
 | NVIDIA 驅動 + cuBLAS/cuDNN | **僅 GPU 轉錄需要** | 見「已知限制」 |
-| `ffmpeg` 在 `PATH` | **僅 YouTube 影片擷取需要** | yt-dlp 要合併 YouTube 的分離影音流；X 影片是混流 MP4，不需要 |
+| `ffmpeg` 在 `PATH` | **目前的影片擷取不需要** | X / YouTube 共用 `bestaudio/best`，不合併影音流；PyAV 負責轉成 corpus WAV |
 | `yt-dlp` 保持最新 | **僅影片擷取需要** | YouTube 會讓舊版失效；實測十週前的版本 metadata 正常但媒體網址回 `403` |
 
 ---

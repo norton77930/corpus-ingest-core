@@ -29,7 +29,27 @@ DOWNLOAD_OPTION_KEYS: tuple[str, ...] = (
     "no_warnings",
     "outtmpl",
     "ignoreconfig",
+    "format",
 )
+
+# Only the audio is ever used: download_video hands the file to extract_audio,
+# which writes a 16 kHz mono WAV and drops the rest. Without an explicit format
+# yt-dlp applies its own default and both sources waste almost everything they
+# fetch, for different reasons -- measured on 2026-08-22:
+#
+#   YouTube  default resolves to a bestvideo+bestaudio pair. The + is a merge
+#            instruction, so it needs ffmpeg and pulls the video too: 32.30 MiB
+#            of video beside 1.26 MiB of audio, then discards the video.
+#   X        default resolves to one progressive http-* stream, so no merge and
+#            no ffmpeg -- but that stream was 2.42 GiB where the audio-only HLS
+#            rendition of the same post is 30.58 MiB.
+#
+# X publishes both progressive and separated renditions; the claim that it is
+# pre-muxed only is wrong, and it is why bestaudio matches there directly rather
+# than falling through. `best` remains the fallback for a source that really
+# does publish no audio-only stream. Neither branch contains a +, so this can
+# never reintroduce the muxer requirement.
+AUDIO_ONLY_FORMAT = "bestaudio/best"
 _FORBIDDEN_CREDENTIAL_KEYS = frozenset(
     {"cookiefile", "cookiesfrombrowser", "username", "password", "videopassword"}
 )
@@ -41,6 +61,7 @@ def guest_download_options(target_dir: Path) -> dict[str, Any]:
         "no_warnings": True,
         "ignoreconfig": True,
         "outtmpl": str(target_dir / "%(id)s.%(ext)s"),
+        "format": AUDIO_ONLY_FORMAT,
     }
 
 
