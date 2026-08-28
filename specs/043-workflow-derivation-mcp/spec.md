@@ -4,7 +4,7 @@
 
 **Created**: 2026-08-22
 
-**Status**: Draft — specification only. No implementation yet.
+**Status**: Implemented. Tool 25 `derive_workflow_bundle` shipped in commit `2ff16a4`; preview is zero-write and zero-network, confirm forwards the exact `api_cost_ack` to Core unchanged, and the MCP surface exposes no provider, model, endpoint, credential, or `workflow_context` parameter.
 
 **Input**: Spec 042 shipped the `05`/`06` workflow derivation family with Core and a thin CLI, and closed with "No MCP tool; registry stays at 24". The capability therefore exists but no agent can reach it: an operator has to run `scripts/run_workflow_derivation.py` by hand. This spec appends Tool 25 so the derivation joins the same preview-then-confirm surface every other side-effect tool already uses.
 
