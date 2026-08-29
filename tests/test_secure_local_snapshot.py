@@ -207,14 +207,26 @@ def test_directory_listing_rejects_names_absent_after_enumeration(
     directory = root / "podcast"
     directory.mkdir(parents=True)
     (directory / "safe.json").write_text("safe", encoding="utf-8")
-    original_listdir = snapshots.os.listdir
-
+    # The stub answers unconditionally rather than matching on the argument,
+    # which lets this test drop a `monkeypatch.setattr(snapshots.os, "name",
+    # "nt")` it used to need.
+    #
+    # That patch existed so `_list_directory_while_open` would take the Windows
+    # branch and call os.listdir(directory) instead of os.listdir(descriptor),
+    # because the old stub only recognised a path argument. But `snapshots.os`
+    # *is* the os module, so the patch was global: on Python 3.11 pathlib then
+    # believed it was on Windows and every subsequent Path() raised
+    # NotImplementedError: cannot instantiate 'WindowsPath'. It aborted the
+    # whole session inside pytest's failure reporting, so no test name was ever
+    # printed. Python 3.12's rewritten pathlib does not consult os.name the
+    # same way, which is why only the 3.11 job went red.
+    #
+    # Neither branch is what this test is about -- the assertion is that
+    # post-validation rejects a name the enumerator reported but the directory
+    # does not contain. That holds on either platform.
     def swapped_names(path: object) -> list[str]:
-        if path == directory:
-            return ["HOSTILE-SWAP-RESTORE-SENTINEL.json"]
-        return original_listdir(path)
+        return ["HOSTILE-SWAP-RESTORE-SENTINEL.json"]
 
-    monkeypatch.setattr(snapshots.os, "name", "nt")
     monkeypatch.setattr(snapshots, "_open_directory_descriptor", lambda path: 0)
     monkeypatch.setattr(snapshots.os, "fstat", lambda descriptor: directory.lstat())
     monkeypatch.setattr(snapshots, "_opened_handle_is_contained", lambda root, descriptor: True)
