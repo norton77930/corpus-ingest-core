@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -893,6 +894,15 @@ def test_windows_final_path_normalizer_accepts_only_safe_dos_or_unc_forms(
     assert catalog._normalize_windows_final_path(raw_path) == normalized
 
 
+@pytest.mark.skipif(
+    os.name != "nt",
+    reason=(
+        "exercises the Windows GetFinalPathNameByHandleW ctypes ABI; "
+        "ctypes.wintypes does not exist on other platforms. The path "
+        "normalizer this feeds is plain string parsing and is covered "
+        "everywhere by test_windows_final_path_normalizer_*."
+    ),
+)
 def test_windows_handle_final_path_uses_pointer_sized_ctypes_abi(monkeypatch: pytest.MonkeyPatch) -> None:
     import ctypes
     import sys
@@ -937,6 +947,15 @@ def test_windows_handle_final_path_uses_pointer_sized_ctypes_abi(monkeypatch: py
     assert observed["handle"].value == 0x1_0000_0001
 
 
+@pytest.mark.skipif(
+    os.name != "nt",
+    reason=(
+        "exercises the Windows GetFinalPathNameByHandleW ctypes ABI; "
+        "ctypes.wintypes does not exist on other platforms. The path "
+        "normalizer this feeds is plain string parsing and is covered "
+        "everywhere by test_windows_final_path_normalizer_*."
+    ),
+)
 def test_windows_handle_final_path_api_failure_fails_closed(monkeypatch: pytest.MonkeyPatch) -> None:
     import ctypes
     import sys

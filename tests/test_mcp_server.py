@@ -21,8 +21,12 @@ def test_to_jsonable_handles_dataclass_path_list_and_dict():
 
     assert to_jsonable(payload) == {
         "sample": {
-            "path": "data\\test.txt",
-            "values": ["data\\a.txt", 1],
+            # str(Path), not a literal: to_jsonable renders a Path with
+            # str(), so the expected separator is whatever the running
+            # platform uses. These were hardcoded to backslashes and passed
+            # for as long as CI was Windows-only.
+            "path": str(Path("data/test.txt")),
+            "values": [str(Path("data/a.txt")), 1],
         }
     }
 
@@ -83,10 +87,12 @@ def test_to_jsonable_handles_side_effect_asset_dataclasses():
 
     jsonable = to_jsonable(payload)
 
-    assert jsonable[0]["local_path"] == "data\\audio\\gooaye\\audio.mp3"
-    assert jsonable[1]["json_path"] == "data\\transcripts\\gooaye\\EP672.json"
-    assert jsonable[2]["summary_path"] == "data\\summaries\\gooaye\\EP672.md"
-    assert jsonable[3]["mentions_json_path"] == "data\\mentions\\gooaye\\EP672.mentions.json"
+    assert jsonable[0]["local_path"] == str(Path("data/audio/gooaye/audio.mp3"))
+    assert jsonable[1]["json_path"] == str(Path("data/transcripts/gooaye/EP672.json"))
+    assert jsonable[2]["summary_path"] == str(Path("data/summaries/gooaye/EP672.md"))
+    assert jsonable[3]["mentions_json_path"] == str(
+        Path("data/mentions/gooaye/EP672.mentions.json")
+    )
 
 
 def test_mcp_server_imports_and_exposes_server_object():
@@ -1497,7 +1503,9 @@ def test_to_jsonable_handles_semantic_summary_asset():
 
     jsonable = to_jsonable(asset)
 
-    assert jsonable["summary_path"] == "data\\summaries\\gooaye\\EP672.semantic.md"
+    assert jsonable["summary_path"] == str(
+        Path("data/summaries/gooaye/EP672.semantic.md")
+    )
     assert jsonable["provider"] == "openai-compatible"
     assert jsonable["model"] == "test-model"
     assert jsonable["chunk_count"] == 2

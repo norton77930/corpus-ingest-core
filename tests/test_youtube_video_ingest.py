@@ -285,6 +285,15 @@ def test_work_dir_alt_case_under_data_is_refused(monkeypatch, tmp_data_dirs: Pat
     swapped = data.with_name(data.name.swapcase())
     if swapped.name == data.name:
         pytest.skip("path name has no case variant")
+    # The refusal being asserted only happens where the filesystem resolves a
+    # case-swapped name to the same directory. That is a property of the
+    # filesystem, not of the OS -- Windows and macOS are usually
+    # case-insensitive, Linux usually is not -- so probe it rather than
+    # branching on os.name. Where it is case-sensitive there is nothing to
+    # refuse: swapped/ is simply a different directory, and the guard is right
+    # not to fire.
+    if not swapped.exists():
+        pytest.skip("filesystem is case-sensitive; there is no alias to refuse")
     forbidden = swapped / "scratch"
     with pytest.raises(YoutubeVideoIngestFailedError, match="data"):
         youtube_video_ingest.run_youtube_video_ingest(
