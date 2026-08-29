@@ -32,8 +32,8 @@ Podcast 內容很難引用。三個月前某一集裡你只記得一半的說法
 需要 Python 3.11 以上。範例使用 PowerShell,其他 shell 同樣適用。
 
 ```powershell
-git clone https://github.com/<your-account>/podcast-ingest-core.git
-cd podcast-ingest-core
+git clone https://github.com/<your-account>/corpus-ingest-core.git
+cd corpus-ingest-core
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e .[dev]
@@ -142,7 +142,7 @@ fixture — 沒有 live market API,要加入的話必須是一次明確且經過
   [`docs/mcp-troubleshooting.md`](docs/mcp-troubleshooting.md) — 接上 agent
 - [`docs/agent-handoff.md`](docs/agent-handoff.md) — 專案狀態、spec 歷史、blockers,
   以及接手開發(不論是人或 agent)的入口,包含從根目錄移入的
-  [2026-08-19 session handoff](docs/agent-handoff.md#handoff--podcast-ingest-core-2026-08-19)
+  [2026-08-19 session handoff](docs/agent-handoff.md#handoff--corpus-ingest-core-2026-08-19)
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — 環境設定、如何驗證一個變更、
   不可跨越的產品邊界,以及被雜湊釘選、不可編輯的檔案
 - [`SECURITY.md`](SECURITY.md) — 私下通報漏洞
@@ -168,7 +168,7 @@ python -m compileall src scripts
 
 沒有 `--ignore` 清單:整套測試都會執行,而且應該全綠。
 
-Scripts 維持 thin:只負責解析參數並呼叫 `podcast_ingest_core`。新行為採 test-first
+Scripts 維持 thin:只負責解析參數並呼叫 `corpus_ingest_core`。新行為採 test-first
 開發。`.env` 只存在本機,絕不可 commit。
 
 ## 免責聲明

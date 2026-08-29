@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from podcast_ingest_core.study_guide_profiles import (
+from corpus_ingest_core.study_guide_profiles import (
     BUNDLE_KEYS,
     FINANCE_HEADINGS,
     GUIDE_HEADINGS,

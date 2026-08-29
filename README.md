@@ -34,8 +34,8 @@ Two properties follow from that goal and shape the whole design:
 Requires Python 3.11+. Examples use PowerShell; any shell works.
 
 ```powershell
-git clone https://github.com/<your-account>/podcast-ingest-core.git
-cd podcast-ingest-core
+git clone https://github.com/<your-account>/corpus-ingest-core.git
+cd corpus-ingest-core
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e .[dev]
@@ -157,7 +157,7 @@ feature.
 - [`docs/agent-handoff.md`](docs/agent-handoff.md) — project status, spec
   history, blockers, and the entry point for anyone (human or agent) picking up
   development, including the
-  [2026-08-19 session handoff](docs/agent-handoff.md#handoff--podcast-ingest-core-2026-08-19) relocated from the repo root
+  [2026-08-19 session handoff](docs/agent-handoff.md#handoff--corpus-ingest-core-2026-08-19) relocated from the repo root
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — setup, how to verify a change, the
   product boundaries a change must not cross, and the hash-pinned files that
   must not be edited
@@ -186,7 +186,7 @@ python -m compileall src scripts
 
 There is no `--ignore` list: the whole suite runs and is expected to be green.
 
-Scripts stay thin: they parse arguments and call `podcast_ingest_core`. New
+Scripts stay thin: they parse arguments and call `corpus_ingest_core`. New
 behaviour is developed test-first. `.env` is local-only and must never be
 committed.
 

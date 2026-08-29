@@ -66,8 +66,8 @@ def test_cli_no_publish_forwards_false_without_changing_loopback_routing(monkeyp
 
 
 def test_confirmed_cli_no_publish_forwards_ack_and_hides_core_failure(monkeypatch, capsys):
-    from podcast_ingest_core import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
-    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    from corpus_ingest_core import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     from scripts import run_latest_episode_verified_research_report_workflow as cli
 
     captured = {}
@@ -95,7 +95,7 @@ def test_confirmed_cli_no_publish_forwards_ack_and_hides_core_failure(monkeypatc
 
 def test_red_cli_rejects_remote_base_url_before_core_and_hides_host(monkeypatch, capsys):
     from scripts import run_latest_episode_verified_research_report_workflow as cli
-    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     monkeypatch.setattr(
         cli,
@@ -168,7 +168,7 @@ def test_cli_rejects_bad_confirmed_ack_before_core(monkeypatch, capsys):
 
 
 def test_mcp_tool_is_fifteenth_bounded_dry_run_surface(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     signature = inspect.signature(mcp_server.run_latest_episode_verified_research_report_workflow)
     assert list(signature.parameters) == [
@@ -201,7 +201,7 @@ def test_mcp_tool_is_fifteenth_bounded_dry_run_surface(monkeypatch):
 
 
 def test_mcp_bad_confirmed_request_is_rejected_before_core(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     monkeypatch.setattr(
         mcp_server.verified_research_report_workflow_runner,

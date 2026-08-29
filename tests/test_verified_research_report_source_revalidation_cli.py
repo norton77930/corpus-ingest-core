@@ -70,7 +70,7 @@ def test_cli_invalid_argv_is_bounded_json_without_usage_path_or_traceback(tmp_pa
 
 def test_cli_oversized_locator_uses_core_fixed_error_without_storage_access(monkeypatch, capsys):
     cli = _load_cli()
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     monkeypatch.setattr(
         revalidation, "_exact_bundle_evidence", lambda locator: (_ for _ in ()).throw(

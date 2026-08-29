@@ -7,7 +7,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import (
+from corpus_ingest_core import (
     CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError,
     corpus_latest_episode_deterministic_workflow_result_to_dict as result_to_dict,
     run_corpus_latest_episode_deterministic_workflow,

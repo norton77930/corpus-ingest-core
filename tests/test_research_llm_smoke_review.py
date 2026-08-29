@@ -15,7 +15,7 @@ def _write_synthesis_artifacts(
     payload_extra: dict | None = None,
     corrupt_json: bool = False,
 ) -> tuple[Path, Path]:
-    import podcast_ingest_core.storage as storage
+    import corpus_ingest_core.storage as storage
 
     monkeypatch.setattr(storage, "STOCK_LENS_DIR", tmp_path / "stock-lens")
     json_path, markdown_path = _synthesis_paths(tmp_path)
@@ -68,7 +68,7 @@ def _synthesis_paths(tmp_path: Path) -> tuple[Path, Path]:
 
 
 def test_review_research_llm_smoke_generates_passed_report(monkeypatch, tmp_path):
-    import podcast_ingest_core.research_llm_smoke_review as review
+    import corpus_ingest_core.research_llm_smoke_review as review
 
     json_path, markdown_path = _write_synthesis_artifacts(monkeypatch, tmp_path)
     reports_dir = tmp_path / "evals" / "research-llm-smoke" / "reports"
@@ -94,7 +94,7 @@ def test_review_research_llm_smoke_generates_passed_report(monkeypatch, tmp_path
 def test_review_research_llm_smoke_accepts_reviewed_semantic_boundary(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.research_llm_smoke_review as review
+    import corpus_ingest_core.research_llm_smoke_review as review
 
     _write_synthesis_artifacts(
         monkeypatch,
@@ -159,7 +159,7 @@ def test_review_research_llm_smoke_accepts_reviewed_semantic_boundary(
 def test_review_research_llm_smoke_fails_inconsistent_semantic_boundary(
     monkeypatch, tmp_path, payload_extra
 ):
-    import podcast_ingest_core.research_llm_smoke_review as review
+    import corpus_ingest_core.research_llm_smoke_review as review
 
     _write_synthesis_artifacts(monkeypatch, tmp_path, payload_extra=payload_extra)
     monkeypatch.setattr(review, "REPORTS_DIR", tmp_path / "reports")
@@ -175,8 +175,8 @@ def test_review_research_llm_smoke_fails_inconsistent_semantic_boundary(
 
 
 def test_review_research_llm_smoke_blocks_missing_artifacts(monkeypatch, tmp_path):
-    import podcast_ingest_core.storage as storage
-    import podcast_ingest_core.research_llm_smoke_review as review
+    import corpus_ingest_core.storage as storage
+    import corpus_ingest_core.research_llm_smoke_review as review
 
     monkeypatch.setattr(storage, "STOCK_LENS_DIR", tmp_path / "stock-lens")
     monkeypatch.setattr(review, "REPORTS_DIR", tmp_path / "reports")
@@ -190,7 +190,7 @@ def test_review_research_llm_smoke_blocks_missing_artifacts(monkeypatch, tmp_pat
 
 
 def test_review_research_llm_smoke_blocks_corrupt_json(monkeypatch, tmp_path):
-    import podcast_ingest_core.research_llm_smoke_review as review
+    import corpus_ingest_core.research_llm_smoke_review as review
 
     _write_synthesis_artifacts(monkeypatch, tmp_path, corrupt_json=True)
     monkeypatch.setattr(review, "REPORTS_DIR", tmp_path / "reports")
@@ -215,7 +215,7 @@ def test_review_research_llm_smoke_blocks_corrupt_json(monkeypatch, tmp_path):
 def test_review_research_llm_smoke_fails_safety_issues(
     monkeypatch, tmp_path, markdown_extra, expected_check
 ):
-    import podcast_ingest_core.research_llm_smoke_review as review
+    import corpus_ingest_core.research_llm_smoke_review as review
 
     _write_synthesis_artifacts(monkeypatch, tmp_path, markdown_extra=markdown_extra)
     monkeypatch.setattr(review, "REPORTS_DIR", tmp_path / "reports")
@@ -233,7 +233,7 @@ def test_review_research_llm_smoke_fails_safety_issues(
 def test_review_research_llm_smoke_warns_when_external_status_context_is_missing(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.research_llm_smoke_review as review
+    import corpus_ingest_core.research_llm_smoke_review as review
 
     _write_synthesis_artifacts(
         monkeypatch,
@@ -253,7 +253,7 @@ def test_review_research_llm_smoke_warns_when_external_status_context_is_missing
 
 
 def test_review_research_llm_smoke_cli_parses_arguments(monkeypatch, tmp_path, capsys):
-    from podcast_ingest_core.models import ResearchLLMSmokeReviewResult
+    from corpus_ingest_core.models import ResearchLLMSmokeReviewResult
     from scripts import review_research_llm_smoke as cli
 
     captured = {}

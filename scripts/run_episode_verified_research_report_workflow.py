@@ -9,7 +9,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core.episode_verified_research_report_workflow_runner import (
+from corpus_ingest_core.episode_verified_research_report_workflow_runner import (
     result_to_dict,
     run_episode_verified_research_report_workflow,
 )

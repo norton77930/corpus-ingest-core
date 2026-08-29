@@ -7,7 +7,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import validate_transcript
+from corpus_ingest_core import validate_transcript
 
 
 def main() -> None:

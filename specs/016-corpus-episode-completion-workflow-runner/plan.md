@@ -23,7 +23,7 @@ human approval, exact confirmation, report, and stop.
 **Language/Version**: Python 3.11+; repository verification environment uses
 Python 3.12.
 
-**Primary Dependencies**: Existing `podcast_ingest_core` modules, Python
+**Primary Dependencies**: Existing `corpus_ingest_core` modules, Python
 standard library, FastMCP from `mcp[cli]>=1.27,<2`, feedparser, PyYAML, and
 requests. No new dependency.
 
@@ -65,7 +65,7 @@ Corpus scanning remains bounded by the existing one-podcast 008/009 builders.
   paths, states, counts, warnings, and execution outcome.
 - **II. Thin Interfaces over Thick Core — PASS**: Selection, validation,
   dispatch, filtering, serialization, and report rendering live in
-  `src/podcast_ingest_core`; CLI and MCP only map inputs and envelopes.
+  `src/corpus_ingest_core`; CLI and MCP only map inputs and envelopes.
 - **III. Dry-Run First Side Effects — PASS**: Dry-run exposes planned
   reads/writes, confirmation, blockers, and risks while writing zero files and
   calling zero executors/providers/loaders.
@@ -109,7 +109,7 @@ specs/016-corpus-episode-completion-workflow-runner/
 ### Source Code (repository root)
 
 ```text
-src/podcast_ingest_core/
+src/corpus_ingest_core/
 ├── corpus_episode_completion_workflow_runner.py  # new coordinator and reports
 ├── corpus_episode_workflow_runner.py             # package-private snapshot preview seam
 ├── corpus_semantic_remediation_runner.py         # package-private snapshot preview seam

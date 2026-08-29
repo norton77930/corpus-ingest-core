@@ -7,20 +7,20 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import (
+from corpus_ingest_core import (
     CorpusSemanticRemediationRunnerFailedError,
     PodcastIngestCoreError,
     load_llm_profile,
     run_corpus_semantic_remediation,
 )
-from podcast_ingest_core.corpus_semantic_remediation_runner import result_to_dict
-from podcast_ingest_core.llm_profiles import DEFAULT_LLM_PROFILES_CONFIG_PATH
-from podcast_ingest_core.local_env import (
+from corpus_ingest_core.corpus_semantic_remediation_runner import result_to_dict
+from corpus_ingest_core.llm_profiles import DEFAULT_LLM_PROFILES_CONFIG_PATH
+from corpus_ingest_core.local_env import (
     DEFAULT_LOCAL_ENV_PATH,
     empty_local_env_result,
     load_local_env,
 )
-from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
 
 def build_parser() -> argparse.ArgumentParser:

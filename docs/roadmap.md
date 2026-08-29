@@ -64,7 +64,7 @@
 
 ## Phase 5B：MCP Tool-use Eval Prompt Suite
 
-新增 MCP tool-use eval prompt suite、pass/fail rubric 與 report template，用於實測 Codex 是否正確選用 `podcast-ingest-core` MCP tools。此階段只建立實測流程與文件，不新增工具、不改 MCP server 行為，也不呼叫外部 LLM。
+新增 MCP tool-use eval prompt suite、pass/fail rubric 與 report template，用於實測 Codex 是否正確選用 `corpus-ingest-core` MCP tools。此階段只建立實測流程與文件，不新增工具、不改 MCP server 行為，也不呼叫外部 LLM。
 
 ## Phase 5C：Codex MCP Session Eval Report Capture
 

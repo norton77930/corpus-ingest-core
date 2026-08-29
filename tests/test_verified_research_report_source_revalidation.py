@@ -15,7 +15,7 @@ _DIGEST = "a" * 64
 def test_oversized_locator_is_rejected_before_exact_bundle_evidence(
     monkeypatch: pytest.MonkeyPatch, field: str
 ) -> None:
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     monkeypatch.setattr(
         revalidation, "_exact_bundle_evidence", lambda locator: pytest.fail("oversized locator read storage")
@@ -31,9 +31,9 @@ def test_missing_bundle_stops_before_any_current_source_or_lineage_read(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """A missing exact bundle is not evidence that permits external reads."""
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
-    from podcast_ingest_core import revalidate_verified_research_report_sources
+    from corpus_ingest_core import storage
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
+    from corpus_ingest_core import revalidate_verified_research_report_sources
 
     monkeypatch.setattr(storage, "RESEARCH_REPORTS_DIR", tmp_path / "research-reports")
     monkeypatch.setattr(
@@ -70,7 +70,7 @@ def _valid_evidence_and_snapshot(
 ):
     from types import SimpleNamespace
 
-    from podcast_ingest_core.verified_research_report import _safe_path, _source_digest
+    from corpus_ingest_core.verified_research_report import _safe_path, _source_digest
 
     sources = []
     for index, role in enumerate(roles):
@@ -119,7 +119,7 @@ def _valid_evidence_and_snapshot(
 def test_valid_bundle_requires_matching_current_lineage_sources_and_shared_digest(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     digest, evidence, snapshot = _valid_evidence_and_snapshot(tmp_path)
     monkeypatch.setattr(revalidation, "_exact_bundle_evidence", lambda locator: evidence)
@@ -143,7 +143,7 @@ def test_valid_bundle_requires_matching_current_lineage_sources_and_shared_diges
 def test_published_hostile_source_path_is_comparison_only_not_a_read_authority(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     digest, evidence, snapshot = _valid_evidence_and_snapshot(tmp_path)
     hostile = "HOSTILE-MANIFEST-PATH-SENTINEL"
@@ -175,8 +175,8 @@ def test_stock_lens_input_set_requires_core_derived_paths_before_any_read(
     """Stock artifact metadata must not turn a hostile path into read authority."""
     import hashlib
 
-    from podcast_ingest_core import VerifiedResearchReportInputError
-    import podcast_ingest_core.verified_research_lineage as lineage
+    from corpus_ingest_core import VerifiedResearchReportInputError
+    import corpus_ingest_core.verified_research_lineage as lineage
 
     expected_mapping = tmp_path / "canonical-mapping.json"
     expected_boundary = tmp_path / "canonical-boundary.json"
@@ -211,8 +211,8 @@ def test_stock_lens_input_set_requires_core_derived_paths_before_any_read(
 
 
 def test_safe_serializer_omits_tainted_values_and_keeps_only_bounded_contract() -> None:
-    from podcast_ingest_core.models import VerifiedResearchReportSourceRevalidation
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    from corpus_ingest_core.models import VerifiedResearchReportSourceRevalidation
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     result = VerifiedResearchReportSourceRevalidation(
         locator={"podcast_id": "show", "episode_ref": "EP1", "source_digest": _DIGEST},
@@ -244,7 +244,7 @@ def test_safe_serializer_omits_tainted_values_and_keeps_only_bounded_contract() 
 def test_publisher_manifest_preserves_legacy_safe_source_path_representation() -> None:
     from types import SimpleNamespace
 
-    from podcast_ingest_core.verified_research_report import (
+    from corpus_ingest_core.verified_research_report import (
         _manifest_payload_from_metadata,
         _safe_path,
     )
@@ -278,7 +278,7 @@ def test_current_source_snapshot_uses_fresh_evidence_not_persisted_lineage_paths
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     from types import SimpleNamespace
-    import podcast_ingest_core.verified_research_report as report
+    import corpus_ingest_core.verified_research_report as report
 
     roles = (
         "transcript", "semantic_summary", "semantic_review", "mentions",
@@ -326,7 +326,7 @@ def test_publisher_lineage_manifest_keeps_sidecar_and_generation_proofs(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     from tests.test_latest_episode_verified_research_report_workflow_runner import _write_completed_artifacts
-    from podcast_ingest_core.verified_research_report import assemble_verified_research_report
+    from corpus_ingest_core.verified_research_report import assemble_verified_research_report
 
     _write_completed_artifacts(monkeypatch, tmp_path)
 
@@ -348,8 +348,8 @@ def test_external_default_fixture_path_supports_public_assembly_and_revalidation
         _record_current_018_lineage,
         _write_completed_artifacts,
     )
-    from podcast_ingest_core import revalidate_verified_research_report_sources
-    from podcast_ingest_core.verified_research_report import (
+    from corpus_ingest_core import revalidate_verified_research_report_sources
+    from corpus_ingest_core.verified_research_report import (
         assemble_verified_research_report,
         publish_verified_research_report_bundle,
     )
@@ -378,8 +378,8 @@ def test_external_default_fixture_symlink_is_rejected_by_public_assembly(
         _record_current_018_lineage,
         _write_completed_artifacts,
     )
-    from podcast_ingest_core import VerifiedResearchReportInputError
-    from podcast_ingest_core.verified_research_report import assemble_verified_research_report
+    from corpus_ingest_core import VerifiedResearchReportInputError
+    from corpus_ingest_core.verified_research_report import assemble_verified_research_report
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     fixture = _mark_boundary_fixture_verified(monkeypatch, tmp_path)
@@ -406,8 +406,8 @@ def test_public_revalidation_accepts_an_unchanged_publisher_bundle_without_write
         _write_completed_artifacts,
     )
 
-    from podcast_ingest_core import revalidate_verified_research_report_sources
-    from podcast_ingest_core.verified_research_report import (
+    from corpus_ingest_core import revalidate_verified_research_report_sources
+    from corpus_ingest_core.verified_research_report import (
         assemble_verified_research_report,
         publish_verified_research_report_bundle,
     )
@@ -434,9 +434,9 @@ def test_fixture_marker_paths_are_rejected_before_any_fixture_or_snapshot_read(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, hostile_field: str
 ) -> None:
     """Lineage marker paths remain comparison data, never read selectors."""
-    import podcast_ingest_core.verified_research_lineage as lineage
-    from podcast_ingest_core import storage
-    from podcast_ingest_core import VerifiedResearchReportInputError
+    import corpus_ingest_core.verified_research_lineage as lineage
+    from corpus_ingest_core import storage
+    from corpus_ingest_core import VerifiedResearchReportInputError
 
     fixture = tmp_path / "canonical-fixture.yaml"
     corpus = tmp_path / "corpus"
@@ -476,8 +476,8 @@ def test_fixture_marker_rejects_non_sha_boundary_digest_before_any_read(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """A marker digest is shape-validated before constructing any snapshot selector."""
-    import podcast_ingest_core.verified_research_lineage as lineage
-    from podcast_ingest_core import VerifiedResearchReportInputError, storage
+    import corpus_ingest_core.verified_research_lineage as lineage
+    from corpus_ingest_core import VerifiedResearchReportInputError, storage
 
     fixture = tmp_path / "fixture.yaml"
     corpus = tmp_path / "corpus"
@@ -516,8 +516,8 @@ def test_invalid_bundle_stops_before_any_current_source_or_lineage_read(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """Invalid exact bundle evidence cannot authorize downstream artifact reads."""
-    from podcast_ingest_core import revalidate_verified_research_report_sources, storage
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    from corpus_ingest_core import revalidate_verified_research_report_sources, storage
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     bundle = tmp_path / "research-reports" / "show" / "EP1" / f"v1-{_DIGEST}"
     bundle.mkdir(parents=True)
@@ -549,7 +549,7 @@ def test_invalid_bundle_stops_before_any_current_source_or_lineage_read(
 def test_public_seam_rejects_invalid_or_reserved_exact_locator(
     podcast_id: str, episode_ref: str, digest: str
 ) -> None:
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         VerifiedResearchReportSourceRevalidationInputError,
         revalidate_verified_research_report_sources,
     )
@@ -561,7 +561,7 @@ def test_public_seam_rejects_invalid_or_reserved_exact_locator(
 def test_unsupported_assembly_options_short_circuit_before_current_lineage(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     digest, evidence, _snapshot = _valid_evidence_and_snapshot(tmp_path)
     evidence.manifest["assembly_options"] = {"stock_query": "SECRET-STOCK"}
@@ -590,8 +590,8 @@ def test_unsupported_assembly_options_short_circuit_before_current_lineage(
 def test_current_lineage_failure_is_bounded_and_classified(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, message: str, status: str
 ) -> None:
-    from podcast_ingest_core import VerifiedResearchReportInputError
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    from corpus_ingest_core import VerifiedResearchReportInputError
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     digest, evidence, _snapshot = _valid_evidence_and_snapshot(tmp_path)
     monkeypatch.setattr(revalidation, "_exact_bundle_evidence", lambda locator: evidence)
@@ -615,8 +615,8 @@ def test_malformed_empty_current_snapshot_cannot_be_reported_current(
 ) -> None:
     from types import SimpleNamespace
 
-    from podcast_ingest_core.verified_research_report import _source_digest
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    from corpus_ingest_core.verified_research_report import _source_digest
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     lineage = {"schema_version": "lineage-v2", "artifacts": {}}
     digest = _source_digest(
@@ -652,7 +652,7 @@ def test_malformed_empty_current_snapshot_cannot_be_reported_current(
 def test_published_lineage_and_digest_mismatches_have_closed_failed_roles(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     digest, evidence, snapshot = _valid_evidence_and_snapshot(tmp_path)
     evidence.manifest["lineage"] = {"hostile": "published-lineage"}
@@ -673,7 +673,7 @@ def test_published_lineage_and_digest_mismatches_have_closed_failed_roles(
 def test_malformed_or_tampered_source_metadata_never_becomes_current(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, mutation: str
 ) -> None:
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     digest, evidence, snapshot = _valid_evidence_and_snapshot(
         tmp_path, roles=("transcript", "mentions")
@@ -711,7 +711,7 @@ def test_second_snapshot_replacement_race_fails_closed_with_source_role(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     from types import SimpleNamespace
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     digest, evidence, first = _valid_evidence_and_snapshot(tmp_path)
     original = first.source_artifacts[0]
@@ -736,7 +736,7 @@ def test_second_snapshot_replacement_race_fails_closed_with_source_role(
 def test_second_snapshot_lineage_replacement_downgrades_lineage_verdict(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     digest, evidence, first = _valid_evidence_and_snapshot(tmp_path)
     second = SimpleNamespace(
@@ -760,7 +760,7 @@ def test_second_snapshot_lineage_replacement_downgrades_lineage_verdict(
 def test_second_snapshot_exception_downgrades_lineage_verdict(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     digest, evidence, first = _valid_evidence_and_snapshot(tmp_path)
     calls = iter((first, RuntimeError("second snapshot sentinel")))
@@ -785,7 +785,7 @@ def test_second_snapshot_exception_downgrades_lineage_verdict(
 def test_public_seam_accepts_legacy_safe_and_canonical_published_paths(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     digest, evidence, snapshot = _valid_evidence_and_snapshot(tmp_path, legacy_safe_paths=True)
     monkeypatch.setattr(revalidation, "_exact_bundle_evidence", lambda locator: evidence)
@@ -804,8 +804,8 @@ def test_public_seam_accepts_legacy_safe_and_canonical_published_paths(
 def test_safe_metadata_discloses_stock_presence_without_stock_query_value(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core.models import VerifiedResearchReportCatalogItem
-    import podcast_ingest_core.verified_research_report_source_revalidation as revalidation
+    from corpus_ingest_core.models import VerifiedResearchReportCatalogItem
+    import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     digest, evidence, snapshot = _valid_evidence_and_snapshot(tmp_path, stock_query="SECRET-STOCK")
     evidence.safe_metadata = VerifiedResearchReportCatalogItem(

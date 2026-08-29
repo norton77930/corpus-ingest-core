@@ -9,7 +9,7 @@ import pytest
 
 
 def _use_tmp_dirs(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     for name, directory in (
         ("AUDIO_DIR", "audio"),
@@ -32,7 +32,7 @@ def _write_json(path: Path, payload: dict[str, object]) -> None:
 
 
 def _write_transcript_variants(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> dict[str, object]:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     _use_tmp_dirs(monkeypatch, tmp_path)
     variants: dict[str, object] = {}
@@ -67,8 +67,8 @@ def test_red_stale_sidecar_and_manifest_cannot_select_ambiguous_transcript(
 ) -> None:
     """018 self-authored metadata is not an external transcript trust root."""
 
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.canonical_transcript import (
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.canonical_transcript import (
         CanonicalTranscriptResolutionError,
         resolve_canonical_transcript_asset_paths,
     )
@@ -125,10 +125,10 @@ def test_red_seeded_corrected_transcript_is_actual_semantic_and_research_input(
 ) -> None:
     """A seed-selected canonical path must defeat every legacy filename glob."""
 
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.entity_extractor import extract_mentions
-    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK
-    import podcast_ingest_core.semantic_summarizer as semantic
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.entity_extractor import extract_mentions
+    from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK
+    import corpus_ingest_core.semantic_summarizer as semantic
 
     variants = _write_transcript_variants(monkeypatch, tmp_path)
     corrected = variants["EP700 Corrected"]
@@ -173,7 +173,7 @@ def test_red_audit_report_pair_rejects_second_replace_half_commit(
 ) -> None:
     """015--017 fixed report paths need a JSON-last verifiable commit marker."""
 
-    from podcast_ingest_core.audit_report_pair import (
+    from corpus_ingest_core.audit_report_pair import (
         is_complete_audit_report_pair,
         write_atomic_audit_report_pair,
     )
@@ -215,7 +215,7 @@ def test_red_audit_pair_replace_failure_restores_last_complete_generation(
 ) -> None:
     """A replacement failure must not permanently leave old JSON with new Markdown."""
 
-    from podcast_ingest_core.audit_report_pair import (
+    from corpus_ingest_core.audit_report_pair import (
         read_complete_audit_report_pair,
         write_atomic_audit_report_pair,
     )
@@ -249,7 +249,7 @@ def test_red_summary_lineage_records_only_a_safe_base_url_identity(
     """The output-affecting endpoint is lineage-bound without persisting its URL."""
 
     import hashlib
-    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     base_url = "https://semantic.example.test/v1"
     filters = runner._filters(
@@ -278,9 +278,9 @@ def test_red_progressive_lineage_survives_later_audit_or_research_failure(
 ) -> None:
     """A committed child is reusable after a later report/stage writer fails."""
 
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.generation_proof import notify_child_artifact_committed
-    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.generation_proof import notify_child_artifact_committed
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _use_tmp_dirs(monkeypatch, tmp_path)
     transcript = storage.transcript_asset_paths("gooaye", "EP700", "EP700 Alpha")
@@ -375,9 +375,9 @@ def test_red_same_episode_direct_semantic_calls_share_one_cost_claim(
     from threading import Barrier, Lock, Thread
     import time
 
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK
-    import podcast_ingest_core.semantic_summarizer as semantic
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK
+    import corpus_ingest_core.semantic_summarizer as semantic
 
     _use_tmp_dirs(monkeypatch, tmp_path)
     paths = storage.transcript_asset_paths("gooaye", "EP700", "EP700 Alpha")

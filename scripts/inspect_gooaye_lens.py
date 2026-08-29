@@ -8,7 +8,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import GooayeLensConfigError, load_gooaye_lens_model
+from corpus_ingest_core import GooayeLensConfigError, load_gooaye_lens_model
 
 
 def main() -> None:

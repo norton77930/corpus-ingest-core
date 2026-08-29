@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-from podcast_ingest_core.corpus_audio_download_runner import (
+from corpus_ingest_core.corpus_audio_download_runner import (
     CorpusAudioDownloadRunFilter,
     _audio_outcome,
     _row_for_episode_audio,
 )
-from podcast_ingest_core.corpus_local_transcription_runner import (
+from corpus_ingest_core.corpus_local_transcription_runner import (
     CorpusLocalTranscriptionRunFilter,
     _planned_transcript_writes,
     _row_for_episode_transcript,
 )
-from podcast_ingest_core.corpus_remediation_plan import _build_action
-from podcast_ingest_core.storage import transcript_asset_paths
+from corpus_ingest_core.corpus_remediation_plan import _build_action
+from corpus_ingest_core.storage import transcript_asset_paths
 
 
 def _seed_meta(seed_source: str, selector: str, *, has_audio_url: bool = True) -> dict:

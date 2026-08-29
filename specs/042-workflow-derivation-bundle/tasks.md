@@ -11,7 +11,7 @@
 ## Phase 2: Foundational
 
 - [x] T003 RED `tests/test_workflow_derivation_profiles.py`: prompts forbid transcript and unnamed tools
-- [x] T004 GREEN `src/podcast_ingest_core/workflow_derivation_profiles.py` as pure data
+- [x] T004 GREEN `src/corpus_ingest_core/workflow_derivation_profiles.py` as pure data
 - [x] T005 RED/GREEN error + result types in `errors.py` and `models.py`
 - [x] T006 RED/GREEN `storage.py` paths for `05`/`06` and run reports
 - [x] T007 Export runner from `__init__.py` when it exists

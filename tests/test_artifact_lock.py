@@ -13,7 +13,7 @@ import pytest
 def _hold_artifact_claim(lock_path: str, acquired: Event, release: Event) -> None:
     """Spawn-safe worker that holds a claim until the parent releases it."""
 
-    from podcast_ingest_core.artifact_lock import exclusive_artifact_claim
+    from corpus_ingest_core.artifact_lock import exclusive_artifact_claim
 
     with exclusive_artifact_claim(Path(lock_path), timeout_seconds=10.0):
         acquired.set()
@@ -25,8 +25,8 @@ def _hold_episode_writer_claim(
 ) -> None:
     """Spawn-safe worker for the podcast-and-episode shared claim key."""
 
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.episode_claim import episode_writer_claim
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.episode_claim import episode_writer_claim
 
     storage.CORPUS_DIR = Path(corpus_dir)
     with episode_writer_claim("gooaye", "EP700", timeout_seconds=10.0):
@@ -39,8 +39,8 @@ def test_spawned_process_blocks_same_episode_writer_claim(
 ) -> None:
     """Same episode blocks cross-process despite disparate fixed output paths."""
 
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.episode_claim import episode_writer_claim
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.episode_claim import episode_writer_claim
 
     monkeypatch.setattr(storage, "CORPUS_DIR", tmp_path / "corpus")
     context = multiprocessing.get_context("spawn")
@@ -68,7 +68,7 @@ def test_spawned_process_blocks_same_episode_writer_claim(
 def test_spawned_process_blocks_same_artifact_claim(tmp_path: Path) -> None:
     """Windows/POSIX OS lock remains authoritative beyond process-local mutexes."""
 
-    from podcast_ingest_core.artifact_lock import exclusive_artifact_claim
+    from corpus_ingest_core.artifact_lock import exclusive_artifact_claim
 
     context = multiprocessing.get_context("spawn")
     acquired = context.Event()
@@ -112,8 +112,8 @@ def test_red_episode_claim_rejects_unsafe_identity_before_any_mkdir(
 ) -> None:
     """Claim addressing must never turn untrusted identifiers into directories."""
 
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.episode_claim import episode_writer_claim
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.episode_claim import episode_writer_claim
 
     corpus_dir = tmp_path / "corpus"
     monkeypatch.setattr(storage, "CORPUS_DIR", corpus_dir)

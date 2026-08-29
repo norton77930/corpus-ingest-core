@@ -12,7 +12,7 @@ import pytest
 
 
 def test_public_runner_is_exported_with_dry_run_first_local_options():
-    from podcast_ingest_core import run_corpus_latest_episode_deterministic_workflow
+    from corpus_ingest_core import run_corpus_latest_episode_deterministic_workflow
 
     signature = inspect.signature(run_corpus_latest_episode_deterministic_workflow)
 
@@ -31,10 +31,10 @@ def test_public_runner_is_exported_with_dry_run_first_local_options():
 
 
 def _install_semantic_only_residual_fixture(monkeypatch, tmp_path: Path) -> None:
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.models import Episode
-    import podcast_ingest_core.corpus_episode_intake as intake
-    import podcast_ingest_core.corpus_index as corpus_index
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.models import Episode
+    import corpus_ingest_core.corpus_episode_intake as intake
+    import corpus_ingest_core.corpus_index as corpus_index
 
     for name, directory in (
         ("AUDIO_DIR", "audio"),
@@ -176,10 +176,10 @@ def _install_semantic_only_residual_fixture(monkeypatch, tmp_path: Path) -> None
 def test_semantic_only_residual_hands_off_without_confirmed_executor_calls(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     _install_semantic_only_residual_fixture(monkeypatch, tmp_path)
 
@@ -236,7 +236,7 @@ def test_probe_fails_closed_when_selector_does_not_return_pinned_episode(
     monkeypatch,
     selection,
 ):
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     monkeypatch.setattr(
         runner,
@@ -253,7 +253,7 @@ def test_probe_fails_closed_when_selector_does_not_return_pinned_episode(
 
 
 def test_probe_fails_closed_on_malformed_selected_action_identity(monkeypatch):
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     malformed_action_id = "EP677:mentions/invalid"
     monkeypatch.setattr(
@@ -360,7 +360,7 @@ def _stage_result(
 
 
 def test_confirmed_run_pins_latest_and_advances_every_deterministic_stage(monkeypatch):
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     monkeypatch.setattr(runner, "resolve_canonical_transcript_asset_paths", lambda *args: object())
     calls: list[tuple[str, str, bool]] = []
@@ -437,7 +437,7 @@ def test_confirmed_run_pins_latest_and_advances_every_deterministic_stage(monkey
 
 
 def test_execution_composition_ignores_non_target_episode_rows():
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     selected_row = runner._row_from_source(
         "ep100",
@@ -488,7 +488,7 @@ def test_execution_composition_ignores_non_target_episode_rows():
 
 
 def test_execution_composition_fails_closed_on_action_id_mismatch():
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     selected_row = runner._row_from_source(
         "ep100",
@@ -548,7 +548,7 @@ def test_execution_composition_fails_closed_on_malformed_action_identity(
     source_action_id,
     expected_action_id,
 ):
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     selected_row = replace(
         runner._row_from_source(
@@ -590,7 +590,7 @@ def test_execution_composition_fails_closed_on_malformed_action_identity(
 
 
 def test_execution_composition_uses_downloaded_winner_metadata():
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     selected_row = runner._row_from_source(
         "ep100",
@@ -640,7 +640,7 @@ def test_execution_composition_uses_downloaded_winner_metadata():
 
 
 def test_execution_composition_uses_failed_winner_metadata():
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     selected_row = runner._row_from_source(
         "ep100",
@@ -690,7 +690,7 @@ def test_execution_composition_uses_failed_winner_metadata():
 
 
 def test_execution_composition_uses_unknown_blocked_winner_metadata():
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     selected_row = runner._row_from_source(
         "ep100",
@@ -740,7 +740,7 @@ def test_execution_composition_uses_unknown_blocked_winner_metadata():
 
 
 def test_execution_composition_uses_first_metadata_for_deterministic_tie():
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     selected_row = runner._row_from_source(
         "ep100",
@@ -806,7 +806,7 @@ def test_execution_composition_uses_target_episode_status_priority(
     statuses,
     expected_status,
 ):
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     selected_row = runner._row_from_source(
         "ep100",
@@ -823,7 +823,7 @@ def test_execution_composition_uses_target_episode_status_priority(
 
 
 def test_execution_composition_fails_closed_when_target_episode_is_absent():
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     selected_row = runner._row_from_source(
         "ep100",
@@ -861,7 +861,7 @@ def test_execution_composition_fails_closed_when_target_episode_is_absent():
 
 
 def test_dry_run_resolves_latest_once_without_dispatching_stage_executor(monkeypatch):
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     monkeypatch.setattr(
         runner,
@@ -891,7 +891,7 @@ def test_dry_run_resolves_latest_once_without_dispatching_stage_executor(monkeyp
 
 
 def test_failed_stage_stops_before_later_transcription_or_remediation(monkeypatch):
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     monkeypatch.setattr(
         runner,
@@ -933,7 +933,7 @@ def test_failed_stage_stops_before_later_transcription_or_remediation(monkeypatc
 
 
 def test_partial_episode_resumes_at_first_missing_stage(monkeypatch):
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     monkeypatch.setattr(runner, "resolve_canonical_transcript_asset_paths", lambda *args: object())
     stages = iter(["local_transcription", "completed"])
@@ -974,7 +974,7 @@ def test_partial_episode_resumes_at_first_missing_stage(monkeypatch):
 
 
 def test_already_deterministic_ready_episode_runs_no_stage_executor(monkeypatch):
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     monkeypatch.setattr(runner, "resolve_canonical_transcript_asset_paths", lambda *args: object())
     monkeypatch.setattr(
@@ -1011,7 +1011,7 @@ def test_already_deterministic_ready_episode_runs_no_stage_executor(monkeypatch)
 
 
 def test_failed_remediation_action_stops_without_second_remediation_probe(monkeypatch):
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     probe_calls = 0
 
@@ -1050,8 +1050,8 @@ def test_failed_remediation_action_stops_without_second_remediation_probe(monkey
 
 
 def test_repeated_remediation_action_stops_without_automatic_retry(monkeypatch):
-    from podcast_ingest_core.models import CorpusEpisodeWorkflowRunRow
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    from corpus_ingest_core.models import CorpusEpisodeWorkflowRunRow
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     remediation_calls = 0
     selected_public_row = CorpusEpisodeWorkflowRunRow(
@@ -1106,8 +1106,8 @@ def test_repeated_remediation_action_stops_without_automatic_retry(monkeypatch):
 
 
 def test_remediation_execution_cap_blocks_sixth_action_before_executor(monkeypatch):
-    from podcast_ingest_core.models import CorpusEpisodeWorkflowRunRow
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    from corpus_ingest_core.models import CorpusEpisodeWorkflowRunRow
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     remediation_calls = 0
     probe_calls = 0
@@ -1176,7 +1176,7 @@ def test_blocked_deterministic_stage_stops_without_later_executor(
     selected_stage,
     executor_name,
 ):
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     calls = []
 
@@ -1226,7 +1226,7 @@ def test_blocked_deterministic_stage_stops_without_later_executor(
 
 
 def test_latest_runner_has_no_llm_env_or_automatic_cache_dependencies():
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     source = Path(runner.__file__).read_text(encoding="utf-8")
     for forbidden in (
@@ -1240,7 +1240,7 @@ def test_latest_runner_has_no_llm_env_or_automatic_cache_dependencies():
 
 
 def test_result_and_confirmed_report_omit_url_query_and_secret_like_text(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     report_paths = SimpleNamespace(
         json_path=tmp_path / "latest.json",
@@ -1292,7 +1292,7 @@ def test_result_and_confirmed_report_omit_url_query_and_secret_like_text(monkeyp
 
 
 def test_execution_metadata_keeps_only_safe_paths_labels_and_text():
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     secret = "sk-" + "not-for-output"
     selected_row = runner._row_from_source(
@@ -1369,7 +1369,7 @@ def test_execution_metadata_keeps_only_safe_paths_labels_and_text():
 def test_execution_metadata_omits_sensitive_assignments_and_uri_query_fragments(
     unsafe_text,
 ):
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     selected_row = runner._row_from_source(
         "ep100",

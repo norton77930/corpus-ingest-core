@@ -7,7 +7,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import PodcastIngestCoreError, generate_industry_chain_mapping
+from corpus_ingest_core import PodcastIngestCoreError, generate_industry_chain_mapping
 
 
 def main() -> None:

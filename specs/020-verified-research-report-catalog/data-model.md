@@ -60,7 +60,7 @@ An entry cap of 1,000 applies separately at each enumerated level. Traversal is 
 | `safe_metadata` | Projection above, only when parsed and safe |
 | `not_investment_advice` | Boolean when safely derived; otherwise omitted |
 
-`valid` requires exactly `report.json`, `report.md`, and `manifest.json`, all regular in-root non-reparse files; JSON manifest object; `schema_version == REPORT_SCHEMA_VERSION == "latest-episode-verified-research-report-v1"` from `src/podcast_ingest_core/verified_research_report.py`; manifest locator equals directory locator; `report_version == "v1-{source_digest}"`; report JSON identity equals locator; and SHA-256/size of both report files equals `manifest.bundle_files` metadata. `manifest.json` is capped at 1 MiB and each report snapshot at 16 MiB; an exceeded bound is invalid. It does not validate report narrative content, source artifacts, lineage, or freshness.
+`valid` requires exactly `report.json`, `report.md`, and `manifest.json`, all regular in-root non-reparse files; JSON manifest object; `schema_version == REPORT_SCHEMA_VERSION == "latest-episode-verified-research-report-v1"` from `src/corpus_ingest_core/verified_research_report.py`; manifest locator equals directory locator; `report_version == "v1-{source_digest}"`; report JSON identity equals locator; and SHA-256/size of both report files equals `manifest.bundle_files` metadata. `manifest.json` is capped at 1 MiB and each report snapshot at 16 MiB; an exceeded bound is invalid. It does not validate report narrative content, source artifacts, lineage, or freshness.
 
 ## Rejected data
 

@@ -1,22 +1,21 @@
 from __future__ import annotations
 
 import argparse
-import os
 from pathlib import Path
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core.mcp_server import StreamableHttpConfig, run_streamable_http
+from corpus_ingest_core.local_env_names import MCP_PORT_ENV as PORT_ENV, read_env
+from corpus_ingest_core.mcp_server import StreamableHttpConfig, run_streamable_http
 
 
 DEFAULT_PORT = 8767
-PORT_ENV = "PODCAST_INGEST_MCP_PORT"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="以 loopback Streamable HTTP 啟動 podcast-ingest-core MCP server。"
+        description="以 loopback Streamable HTTP 啟動 corpus-ingest-core MCP server。"
     )
     parser.add_argument(
         "--port",
@@ -33,7 +32,7 @@ def main() -> None:
 
 
 def _port_from_environment() -> int:
-    raw = os.environ.get(PORT_ENV)
+    raw = read_env(PORT_ENV)
     if raw is None or not raw.strip():
         return DEFAULT_PORT
     try:

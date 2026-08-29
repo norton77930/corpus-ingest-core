@@ -6,7 +6,7 @@ This document reflects the Phase 7C system shape. Podcast Ingestion Core is stil
 
 ## Core Principles
 
-- CLI scripts parse arguments and call `podcast_ingest_core` core functions; runtime behavior belongs in the package.
+- CLI scripts parse arguments and call `corpus_ingest_core` core functions; runtime behavior belongs in the package.
 - Podcast-specific configuration stays in `config/podcasts.yaml`; core modules must accept a generic `podcast_id`.
 - Source artifacts remain local files under `data/`; SQLite cache and eval reports are derived or audit artifacts.
 - Side-effect operations are dry-run first where practical. LLM calls require explicit acknowledgement.

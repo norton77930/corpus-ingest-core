@@ -9,7 +9,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import (
+from corpus_ingest_core import (
     VerifiedReportGapBacklogInputError,
     list_verified_report_gap_backlog,
     verified_report_gap_backlog_result_to_dict,

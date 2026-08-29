@@ -1,4 +1,4 @@
-"""Facade for the podcast-ingest-core MCP server.
+"""Facade for the corpus-ingest-core MCP server.
 
 specs/025-core-consolidation FR-005: the single ``FastMCP`` instance lives in
 ``mcp_runtime``; tool functions live in the ``mcp_tools_*`` group modules

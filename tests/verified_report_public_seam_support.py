@@ -17,8 +17,8 @@ import pytest
 
 
 def _use_tmp_dirs(monkeypatch, tmp_path: Path) -> None:
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.semantic_summary_smoke_review as semantic_review
+    from corpus_ingest_core import storage
+    import corpus_ingest_core.semantic_summary_smoke_review as semantic_review
 
     for name, directory in (
         ("AUDIO_DIR", "audio"),
@@ -52,7 +52,7 @@ def _write_completed_artifacts(
     stock_query: str | None = None,
     with_lineage: bool = True,
 ) -> None:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     _use_tmp_dirs(monkeypatch, tmp_path)
     title = "EP700 Alpha"
@@ -93,7 +93,7 @@ def _write_completed_artifacts(
     )
     # Passing fixtures are produced by the same deterministic writer/neutral
     # evaluator as production, never by a hand-authored all-pass payload.
-    from podcast_ingest_core.semantic_summary_smoke_review import (
+    from corpus_ingest_core.semantic_summary_smoke_review import (
         review_semantic_summary_smoke,
     )
 
@@ -215,7 +215,7 @@ def _write_completed_artifacts(
         )
         stock.markdown_path.write_text("# stock", encoding="utf-8")
     if with_lineage:
-        from podcast_ingest_core.verified_research_lineage import (
+        from corpus_ingest_core.verified_research_lineage import (
             record_current_verified_research_lineage,
         )
 
@@ -285,8 +285,8 @@ def _independent_source_digest(assembly) -> str:
 
 
 def _record_lineage(*, stock_query: str) -> None:
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.verified_research_lineage import record_current_verified_research_lineage
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.verified_research_lineage import record_current_verified_research_lineage
 
     title = "EP700 Alpha"
     paths = {
@@ -298,8 +298,8 @@ def _record_lineage(*, stock_query: str) -> None:
         "external_boundary": storage.external_data_boundary_asset_paths("gooaye", "EP700", title).json_path,
         "stock_lens": storage.stock_lens_report_asset_paths("gooaye", stock_query).json_path,
     }
-    from podcast_ingest_core.semantic_review_artifact import inspect_semantic_review
-    from podcast_ingest_core.semantic_summary_smoke_review import REPORTS_DIR
+    from corpus_ingest_core.semantic_review_artifact import inspect_semantic_review
+    from corpus_ingest_core.semantic_summary_smoke_review import REPORTS_DIR
     review = inspect_semantic_review("gooaye", "EP700", semantic_summary_path=paths["semantic_summary"], review_reports_dir=REPORTS_DIR)
     assert review.review_path is not None
     paths["semantic_review"] = review.review_path
@@ -311,8 +311,8 @@ def _record_lineage(*, stock_query: str) -> None:
 
 
 def run_verified_report_public_workflow(monkeypatch, tmp_path: Path) -> None:
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.verified_research_report import assemble_verified_research_report, publish_verified_research_report_bundle
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.verified_research_report import assemble_verified_research_report, publish_verified_research_report_bundle
 
     # Guards are installed before fixture preparation: no network, provider
     # constructor, external verifier, market lookup, or ambient config reader
@@ -320,10 +320,10 @@ def run_verified_report_public_workflow(monkeypatch, tmp_path: Path) -> None:
     def forbidden(*_args, **_kwargs):
         pytest.fail("product regression crossed an external/provider/config seam")
 
-    monkeypatch.setattr("podcast_ingest_core.llm_provider.create_provider", forbidden)
-    monkeypatch.setattr("podcast_ingest_core.llm_provider.OpenAICompatibleProvider", forbidden)
-    monkeypatch.setattr("podcast_ingest_core.external_data_verification.verify_external_data_boundary", forbidden)
-    monkeypatch.setattr("podcast_ingest_core.stock_lens.generate_stock_lens_report", forbidden)
+    monkeypatch.setattr("corpus_ingest_core.llm_provider.create_provider", forbidden)
+    monkeypatch.setattr("corpus_ingest_core.llm_provider.OpenAICompatibleProvider", forbidden)
+    monkeypatch.setattr("corpus_ingest_core.external_data_verification.verify_external_data_boundary", forbidden)
+    monkeypatch.setattr("corpus_ingest_core.stock_lens.generate_stock_lens_report", forbidden)
     _write_completed_artifacts(monkeypatch, tmp_path, stock_query="NVDA")
     stock_path = storage.stock_lens_report_asset_paths("gooaye", "NVDA").json_path
     stock = json.loads(stock_path.read_text(encoding="utf-8"))

@@ -99,7 +99,7 @@ An operator gives exact `podcast_id`, `episode_ref`, and `source_digest` to insp
 ## Assumptions
 
 1. `data/research-reports/{podcast_id}/{episode_ref}/v1-{source_digest}/` remains the local bundle layout defined by 018/019.
-2. The accepted manifest `schema_version` is the current `REPORT_SCHEMA_VERSION` from `src/podcast_ingest_core/verified_research_report.py`: `latest-episode-verified-research-report-v1`; a future manifest schema requires a separately approved compatibility rule.
+2. The accepted manifest `schema_version` is the current `REPORT_SCHEMA_VERSION` from `src/corpus_ingest_core/verified_research_report.py`: `latest-episode-verified-research-report-v1`; a future manifest schema requires a separately approved compatibility rule.
 3. The chosen default/max limits (50/100) and per-level entry cap (1,000) are v1 contract constants, not configuration or user-supplied paths.
 4. A manifest can establish self-consistency only for its contained files; checking current source artifacts is deliberately out of scope.
 

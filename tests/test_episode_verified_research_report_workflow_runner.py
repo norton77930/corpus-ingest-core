@@ -9,7 +9,7 @@ import pytest
 
 
 def test_public_signature_requires_episode_ref_and_defaults_confirm_false():
-    from podcast_ingest_core import run_episode_verified_research_report_workflow
+    from corpus_ingest_core import run_episode_verified_research_report_workflow
 
     sig = inspect.signature(run_episode_verified_research_report_workflow)
     assert list(sig.parameters)[:2] == ["podcast_id", "episode_ref"]
@@ -19,7 +19,7 @@ def test_public_signature_requires_episode_ref_and_defaults_confirm_false():
 
 def test_preview_is_strict_zero_write(monkeypatch, tmp_path):
     from tests import test_latest_episode_verified_research_report_workflow_runner as t018
-    from podcast_ingest_core import run_episode_verified_research_report_workflow
+    from corpus_ingest_core import run_episode_verified_research_report_workflow
 
     t018._write_completed_artifacts(monkeypatch, tmp_path)
     t018._record_current_018_lineage()
@@ -37,8 +37,8 @@ def test_preview_is_strict_zero_write(monkeypatch, tmp_path):
 
 @pytest.mark.parametrize("selector", ("latest", "LATEST", "next", "Next"))
 def test_reserved_selectors_rejected(selector):
-    from podcast_ingest_core import run_episode_verified_research_report_workflow
-    from podcast_ingest_core.errors import (
+    from corpus_ingest_core import run_episode_verified_research_report_workflow
+    from corpus_ingest_core.errors import (
         EpisodeVerifiedResearchReportWorkflowRunnerFailedError,
     )
 
@@ -51,7 +51,7 @@ def test_reserved_selectors_rejected(selector):
 
 def test_blocked_when_lineage_missing(monkeypatch, tmp_path):
     from tests import test_latest_episode_verified_research_report_workflow_runner as t018
-    from podcast_ingest_core import run_episode_verified_research_report_workflow
+    from corpus_ingest_core import run_episode_verified_research_report_workflow
 
     t018._write_completed_artifacts(monkeypatch, tmp_path, with_lineage=False)
     before = t018._manifest(tmp_path)
@@ -73,8 +73,8 @@ def test_blocked_when_lineage_missing(monkeypatch, tmp_path):
 
 def test_confirm_publishes_and_reuses_without_provider(monkeypatch, tmp_path):
     from tests import test_latest_episode_verified_research_report_workflow_runner as t018
-    from podcast_ingest_core import run_episode_verified_research_report_workflow
-    import podcast_ingest_core.llm_provider as llm_provider
+    from corpus_ingest_core import run_episode_verified_research_report_workflow
+    import corpus_ingest_core.llm_provider as llm_provider
 
     t018._write_completed_artifacts(monkeypatch, tmp_path)
     t018._record_current_018_lineage()
@@ -99,8 +99,8 @@ def test_confirm_publishes_and_reuses_without_provider(monkeypatch, tmp_path):
 
 
 def test_mcp_tool_rejects_latest_before_core(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    import podcast_ingest_core.mcp_episode_verified_research_report as adapter
+    from corpus_ingest_core import mcp_server
+    import corpus_ingest_core.mcp_episode_verified_research_report as adapter
 
     called = []
 
@@ -124,7 +124,7 @@ def test_mcp_tool_rejects_latest_before_core(monkeypatch):
 
 
 def test_owned_lineage_error_maps_to_structured_roles():
-    from podcast_ingest_core.episode_verified_research_report_workflow_runner import (
+    from corpus_ingest_core.episode_verified_research_report_workflow_runner import (
         issues_from_verified_report_message,
     )
 
@@ -146,7 +146,7 @@ def test_post_publish_source_mutation_blocks_stale_reuse(monkeypatch, tmp_path):
     """US3: mutating a lineage-bound source must not silently reuse the old bundle."""
 
     from tests import test_latest_episode_verified_research_report_workflow_runner as t018
-    from podcast_ingest_core import run_episode_verified_research_report_workflow, storage
+    from corpus_ingest_core import run_episode_verified_research_report_workflow, storage
 
     t018._write_completed_artifacts(monkeypatch, tmp_path)
     t018._record_current_018_lineage()
@@ -175,8 +175,8 @@ def test_post_publish_source_mutation_blocks_stale_reuse(monkeypatch, tmp_path):
 
 
 def test_blank_episode_ref_rejected():
-    from podcast_ingest_core import run_episode_verified_research_report_workflow
-    from podcast_ingest_core.errors import (
+    from corpus_ingest_core import run_episode_verified_research_report_workflow
+    from corpus_ingest_core.errors import (
         EpisodeVerifiedResearchReportWorkflowRunnerFailedError,
     )
 
@@ -190,7 +190,7 @@ def test_blank_episode_ref_rejected():
 def test_result_to_dict_is_metadata_only(monkeypatch, tmp_path):
     import json
     from tests import test_latest_episode_verified_research_report_workflow_runner as t018
-    from podcast_ingest_core.episode_verified_research_report_workflow_runner import (
+    from corpus_ingest_core.episode_verified_research_report_workflow_runner import (
         result_to_dict,
         run_episode_verified_research_report_workflow,
     )
@@ -224,21 +224,21 @@ def test_all_terminal_paths_do_not_dispatch_upstream_workflows(
     """019 only reads verified inputs, then optionally publishes its own bundle."""
 
     from tests import test_latest_episode_verified_research_report_workflow_runner as t018
-    from podcast_ingest_core import run_episode_verified_research_report_workflow
-    import podcast_ingest_core.cache as cache
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as completion
-    import podcast_ingest_core.corpus_episode_workflow_runner as episode_workflow
-    import podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner as latest_deterministic
-    import podcast_ingest_core.corpus_remediation_runner as remediation
-    import podcast_ingest_core.corpus_semantic_remediation_runner as semantic_remediation
-    import podcast_ingest_core.downloader as downloader
-    import podcast_ingest_core.feed_reader as feed_reader
-    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as latest_verified
-    import podcast_ingest_core.llm_provider as llm_provider
-    import podcast_ingest_core.research_workflow as research_workflow
-    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
-    import podcast_ingest_core.stock_lens_synthesis as stock_lens_synthesis
-    import podcast_ingest_core.transcriber as transcriber
+    from corpus_ingest_core import run_episode_verified_research_report_workflow
+    import corpus_ingest_core.cache as cache
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as completion
+    import corpus_ingest_core.corpus_episode_workflow_runner as episode_workflow
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as latest_deterministic
+    import corpus_ingest_core.corpus_remediation_runner as remediation
+    import corpus_ingest_core.corpus_semantic_remediation_runner as semantic_remediation
+    import corpus_ingest_core.downloader as downloader
+    import corpus_ingest_core.feed_reader as feed_reader
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as latest_verified
+    import corpus_ingest_core.llm_provider as llm_provider
+    import corpus_ingest_core.research_workflow as research_workflow
+    import corpus_ingest_core.semantic_summarizer as semantic_summarizer
+    import corpus_ingest_core.stock_lens_synthesis as stock_lens_synthesis
+    import corpus_ingest_core.transcriber as transcriber
 
     t018._write_completed_artifacts(monkeypatch, tmp_path, with_lineage=with_lineage)
 

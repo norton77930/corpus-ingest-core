@@ -11,13 +11,13 @@ HTTP_RUNNER = ROOT / "scripts" / "run_mcp_http_server.py"
 
 
 def test_streamable_http_reuses_the_facade_mcp_instance():
-    from podcast_ingest_core import mcp_runtime, mcp_server
+    from corpus_ingest_core import mcp_runtime, mcp_server
 
     assert mcp_server.mcp is mcp_runtime.mcp
 
 
 def test_streamable_http_config_accepts_only_the_approved_listener():
-    from podcast_ingest_core.mcp_runtime import StreamableHttpConfig
+    from corpus_ingest_core.mcp_runtime import StreamableHttpConfig
 
     assert StreamableHttpConfig() == StreamableHttpConfig(
         host="127.0.0.1",
@@ -36,7 +36,7 @@ def test_streamable_http_config_accepts_only_the_approved_listener():
 
 
 def test_streamable_http_sets_public_settings_and_runs_the_existing_server(monkeypatch):
-    from podcast_ingest_core import mcp_runtime
+    from corpus_ingest_core import mcp_runtime
 
     calls: list[tuple[str, str, int, str]] = []
     security = mcp_runtime.mcp.settings.transport_security
@@ -68,7 +68,7 @@ def test_streamable_http_sets_public_settings_and_runs_the_existing_server(monke
 
 
 def test_stdio_run_remains_the_default_transport(monkeypatch):
-    from podcast_ingest_core import mcp_runtime
+    from corpus_ingest_core import mcp_runtime
 
     calls = []
     monkeypatch.setattr(mcp_runtime.mcp, "run", lambda *args, **kwargs: calls.append((args, kwargs)))

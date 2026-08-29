@@ -93,7 +93,7 @@ teaches nothing.
       FR-014 in content and order; both profiles contain 不確定事項 and a
       timestamp-traceability constraint (FR-015); `learning-notes.limitation_lines`
       contains no investment disclaimer (FR-012).
-- [x] T010 GREEN `src/podcast_ingest_core/summary_profiles.py`: frozen dataclass,
+- [x] T010 GREEN `src/corpus_ingest_core/summary_profiles.py`: frozen dataclass,
       two-entry mapping, `resolve_summary_profile`, error type in `.errors`.
       Imports limited to `dataclasses`, `typing`, and `.errors`.
 

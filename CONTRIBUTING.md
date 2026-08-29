@@ -20,7 +20,7 @@ pip install -e .[dev]
 Python 3.11 or newer. **Do not skip `pip install -e .`** — several tests spawn
 subprocesses, and `pythonpath = ["src"]` in `pyproject.toml` covers pytest
 itself but nothing it spawns. Without the install those tests fail with
-`ModuleNotFoundError: No module named 'podcast_ingest_core'`, and the cause is
+`ModuleNotFoundError: No module named 'corpus_ingest_core'`, and the cause is
 not obvious from the message.
 
 Video ingestion has one extra setup detail that is easy to miss:
@@ -69,7 +69,7 @@ will not be merged regardless of how good the code is.
 - **Never auto-rebuild the SQLite cache** after a side-effect tool. Warn that
   the cache may be stale and let the operator rebuild.
 - **Thin CLI, thick core.** Scripts parse arguments and call
-  `podcast_ingest_core`. Logic does not live in `scripts/`.
+  `corpus_ingest_core`. Logic does not live in `scripts/`.
 - **TDD for new behavior**, and keep the change surgical.
 
 ## Traps specific to this repository

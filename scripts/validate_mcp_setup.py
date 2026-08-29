@@ -11,9 +11,9 @@ from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import storage
-from podcast_ingest_core.errors import PodcastIngestCoreError
-from podcast_ingest_core.search import search_mentions, search_transcripts
+from corpus_ingest_core import storage
+from corpus_ingest_core.errors import PodcastIngestCoreError
+from corpus_ingest_core.search import search_mentions, search_transcripts
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -74,14 +74,14 @@ def run_validation(podcast_id: str = "gooaye", query: str = DEFAULT_QUERY) -> di
 
     mcp_server = None
     try:
-        import podcast_ingest_core  # noqa: F401
+        import corpus_ingest_core  # noqa: F401
 
         _add_check(checks, "package_import", True)
     except Exception as exc:
         _add_check(checks, "package_import", False, message=str(exc))
 
     try:
-        from podcast_ingest_core import mcp_server as imported_mcp_server
+        from corpus_ingest_core import mcp_server as imported_mcp_server
 
         mcp_server = imported_mcp_server
         _add_check(checks, "mcp_server_import", True)
@@ -93,7 +93,7 @@ def run_validation(podcast_id: str = "gooaye", query: str = DEFAULT_QUERY) -> di
         _add_check(
             checks,
             "mcp_server_object",
-            server_name == "podcast-ingest-core",
+            server_name == "corpus-ingest-core",
             server_name=server_name,
         )
     else:

@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from podcast_ingest_core.workflow_derivation_profiles import (
+from corpus_ingest_core.workflow_derivation_profiles import (
     BUNDLE_KEYS,
     WORKFLOW_DERIVATION_PROFILE,
 )

@@ -1,12 +1,12 @@
 # MCP Tool-use Eval
 
-本文件定義如何在 Codex MCP session 中人工或半自動驗證 `podcast-ingest-core` MCP tool use。此 eval 不要求真實呼叫外部 LLM API，也不要求真的執行下載、轉錄或寫 artifacts。
+本文件定義如何在 Codex MCP session 中人工或半自動驗證 `corpus-ingest-core` MCP tool use。此 eval 不要求真實呼叫外部 LLM API，也不要求真的執行下載、轉錄或寫 artifacts。
 
 ## 1. 目的
 
 本 eval 用來確認：
 
-- Codex 能看到 `podcast-ingest-core` MCP server。
+- Codex 能看到 `corpus-ingest-core` MCP server。
 - Codex 會使用正確 MCP tool。
 - Codex 不會在不需要時呼叫 side-effect tool。
 - Codex 對 side-effect tool 先走 dry-run。
@@ -36,7 +36,7 @@ python scripts/search_mentions.py --podcast gooaye --query 台積電 --type comp
 
 ## 3. Codex Session 前置條件
 
-- Codex `/mcp` 應能看到 `podcast-ingest-core`。
+- Codex `/mcp` 應能看到 `corpus-ingest-core`。
 - MCP server 狀態應為 active。
 - 若 tool list 看不到，先看 [`mcp-troubleshooting.md`](mcp-troubleshooting.md)。
 - 不要在 eval 中使用真實 API key。

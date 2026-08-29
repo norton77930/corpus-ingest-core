@@ -61,7 +61,7 @@ I understand this may call an external LLM API, send transcript text outside thi
 
 建議：
 
-- 使用正斜線 `/`，例如 `D:/path/to/podcast-ingest-core/scripts/run_mcp_server.py`。
+- 使用正斜線 `/`，例如 `D:/path/to/corpus-ingest-core/scripts/run_mcp_server.py`。
 - 或使用 escaped backslash。
 - 儘量設定 `cwd`。
 - 先在 PowerShell 直接跑：

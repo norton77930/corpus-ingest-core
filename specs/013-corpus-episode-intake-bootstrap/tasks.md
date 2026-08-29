@@ -31,11 +31,11 @@
 
 **CRITICAL**: No user story implementation can begin until this phase is complete.
 
-- [X] T005 Add episode intake filter, counts, row, seed, result, and warning models in `src/podcast_ingest_core/models.py`
-- [X] T006 Add episode intake error type in `src/podcast_ingest_core/errors.py`
-- [X] T007 Add `CorpusEpisodeIntakeRunAssetPaths`, `corpus_episode_seed_asset_path(podcast_id, episode_ref)`, and `corpus_episode_intake_run_asset_paths(podcast_id)` in `src/podcast_ingest_core/storage.py`
-- [X] T008 Create `src/podcast_ingest_core/corpus_episode_intake.py` with public function signature, run mode constants, selector constants, and no-op-safe module skeleton
-- [X] T009 Export episode intake public function, error, storage helper, and model types from `src/podcast_ingest_core/__init__.py`
+- [X] T005 Add episode intake filter, counts, row, seed, result, and warning models in `src/corpus_ingest_core/models.py`
+- [X] T006 Add episode intake error type in `src/corpus_ingest_core/errors.py`
+- [X] T007 Add `CorpusEpisodeIntakeRunAssetPaths`, `corpus_episode_seed_asset_path(podcast_id, episode_ref)`, and `corpus_episode_intake_run_asset_paths(podcast_id)` in `src/corpus_ingest_core/storage.py`
+- [X] T008 Create `src/corpus_ingest_core/corpus_episode_intake.py` with public function signature, run mode constants, selector constants, and no-op-safe module skeleton
+- [X] T009 Export episode intake public function, error, storage helper, and model types from `src/corpus_ingest_core/__init__.py`
 - [X] T010 Run foundational targeted tests `python -m pytest tests/test_corpus_episode_intake.py -k "contract or storage or error" --basetemp=.pytest-tmp/run-013-foundation`
 
 **Checkpoint**: Public contracts and module boundaries exist, but intake behavior is not complete.
@@ -59,10 +59,10 @@
 
 ### Implementation for User Story 1
 
-- [X] T017 [US1] Implement selector normalization for missing, blank, `latest`, and explicit episode refs in `src/podcast_ingest_core/corpus_episode_intake.py`
-- [X] T018 [US1] Implement feed resolution through existing `get_episode(podcast_id, episode_ref)` in `src/podcast_ingest_core/corpus_episode_intake.py`
-- [X] T019 [US1] Implement safe metadata extraction that omits source URLs, audio URLs, query strings, raw descriptions, and feed HTML body in `src/podcast_ingest_core/corpus_episode_intake.py`
-- [X] T020 [US1] Implement dry-run result serialization with null report paths, planned seed/report writes only, and no artifact writes in `src/podcast_ingest_core/corpus_episode_intake.py`
+- [X] T017 [US1] Implement selector normalization for missing, blank, `latest`, and explicit episode refs in `src/corpus_ingest_core/corpus_episode_intake.py`
+- [X] T018 [US1] Implement feed resolution through existing `get_episode(podcast_id, episode_ref)` in `src/corpus_ingest_core/corpus_episode_intake.py`
+- [X] T019 [US1] Implement safe metadata extraction that omits source URLs, audio URLs, query strings, raw descriptions, and feed HTML body in `src/corpus_ingest_core/corpus_episode_intake.py`
+- [X] T020 [US1] Implement dry-run result serialization with null report paths, planned seed/report writes only, and no artifact writes in `src/corpus_ingest_core/corpus_episode_intake.py`
 - [X] T021 [US1] Implement thin dry-run CLI `scripts/run_corpus_episode_intake.py`
 - [X] T022 [US1] Add CLI dry-run stdout contract test for selector, resolved episode, output paths, and counts in `tests/test_corpus_episode_intake.py`
 - [X] T023 [US1] Run User Story 1 targeted tests `python -m pytest tests/test_corpus_episode_intake.py -k "dry_run or latest or explicit or selector or no_write or generated_at or cli" --basetemp=.pytest-tmp/run-013-us1`
@@ -89,13 +89,13 @@
 
 ### Implementation for User Story 2
 
-- [X] T031 [US2] Implement deterministic seed JSON writer with atomic `.part` replace in `src/podcast_ingest_core/corpus_episode_intake.py`
-- [X] T032 [US2] Implement seed reuse detection and reused outcome mapping in `src/podcast_ingest_core/corpus_episode_intake.py`
-- [X] T033 [US2] Implement confirmed rejected report behavior for unresolved selectors without seed writes in `src/podcast_ingest_core/corpus_episode_intake.py`
-- [X] T034 [US2] Implement deterministic intake run JSON and Markdown report writers in `src/podcast_ingest_core/corpus_episode_intake.py`
-- [X] T035 [US2] Extend 008 episode discovery and title metadata to include seed metadata in `src/podcast_ingest_core/corpus_index.py`
-- [X] T036 [US2] Extend 009 audio action readiness logic for seeded missing-audio episodes with feed audio availability and no-audio feed metadata in `src/podcast_ingest_core/corpus_remediation_plan.py`
-- [X] T037 [US2] Ensure 012 audio runner selection accepts seeded ready audio actions without requiring local audio in `src/podcast_ingest_core/corpus_audio_download_runner.py`
+- [X] T031 [US2] Implement deterministic seed JSON writer with atomic `.part` replace in `src/corpus_ingest_core/corpus_episode_intake.py`
+- [X] T032 [US2] Implement seed reuse detection and reused outcome mapping in `src/corpus_ingest_core/corpus_episode_intake.py`
+- [X] T033 [US2] Implement confirmed rejected report behavior for unresolved selectors without seed writes in `src/corpus_ingest_core/corpus_episode_intake.py`
+- [X] T034 [US2] Implement deterministic intake run JSON and Markdown report writers in `src/corpus_ingest_core/corpus_episode_intake.py`
+- [X] T035 [US2] Extend 008 episode discovery and title metadata to include seed metadata in `src/corpus_ingest_core/corpus_index.py`
+- [X] T036 [US2] Extend 009 audio action readiness logic for seeded missing-audio episodes with feed audio availability and no-audio feed metadata in `src/corpus_ingest_core/corpus_remediation_plan.py`
+- [X] T037 [US2] Ensure 012 audio runner selection accepts seeded ready audio actions without requiring local audio in `src/corpus_ingest_core/corpus_audio_download_runner.py`
 - [X] T038 [US2] Extend CLI parsing for `--confirm` and `--episode` in `scripts/run_corpus_episode_intake.py`
 - [X] T039 [US2] Add CLI confirmed stdout and stderr contract tests in `tests/test_corpus_episode_intake.py`
 - [X] T040 [US2] Run User Story 2 targeted tests `python -m pytest tests/test_corpus_episode_intake.py tests/test_corpus_index.py tests/test_corpus_remediation_plan.py tests/test_corpus_audio_download_runner.py -k "seed or seeded or reuse or rejected or corpus_episode_intake or (ready and audio)" --basetemp=.pytest-tmp/run-013-us2`
@@ -120,9 +120,9 @@
 
 ### Implementation for User Story 3
 
-- [X] T046 [US3] Implement bounded feed resolution exception capture without raw exception text or traceback leakage in `src/podcast_ingest_core/corpus_episode_intake.py`
-- [X] T047 [US3] Harden JSON, Markdown, stdout, stderr, and seed serialization against full URLs, query strings, raw descriptions, prompts, raw LLM output, secrets, traceback bodies, market facts, and investment advice in `src/podcast_ingest_core/corpus_episode_intake.py` and `scripts/run_corpus_episode_intake.py`
-- [X] T048 [US3] Add manual follow-up warning metadata for confirmed seed writes or reuse without calling index, remediation plan, audio download, transcription, downstream remediation, or cache rebuild in `src/podcast_ingest_core/corpus_episode_intake.py`
+- [X] T046 [US3] Implement bounded feed resolution exception capture without raw exception text or traceback leakage in `src/corpus_ingest_core/corpus_episode_intake.py`
+- [X] T047 [US3] Harden JSON, Markdown, stdout, stderr, and seed serialization against full URLs, query strings, raw descriptions, prompts, raw LLM output, secrets, traceback bodies, market facts, and investment advice in `src/corpus_ingest_core/corpus_episode_intake.py` and `scripts/run_corpus_episode_intake.py`
+- [X] T048 [US3] Add manual follow-up warning metadata for confirmed seed writes or reuse without calling index, remediation plan, audio download, transcription, downstream remediation, or cache rebuild in `src/corpus_ingest_core/corpus_episode_intake.py`
 - [X] T049 [US3] Run User Story 3 targeted tests `python -m pytest tests/test_corpus_episode_intake.py -k "failure or leak or boundary or investment or follow_up or cache" --basetemp=.pytest-tmp/run-013-us3`
 
 **Checkpoint**: Feed intake failure and unsafe metadata are isolated and safety boundaries remain explicit.

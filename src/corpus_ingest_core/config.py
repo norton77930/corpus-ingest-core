@@ -3,6 +3,8 @@ from __future__ import annotations
 import os
 from pathlib import Path
 import re
+
+from .local_env_names import CONFIG_ENV, read_env
 from typing import Any
 
 import yaml
@@ -21,7 +23,7 @@ from .summary_profiles import UNSET as _SUMMARY_PROFILE_UNSET, resolve_summary_p
 #
 # Read at import time, so a subprocess is the only way to exercise it; see
 # tests/test_data_dir_fixture_contract.py.
-DEFAULT_CONFIG_PATH = Path(os.environ.get("PODCAST_INGEST_CONFIG") or "config/podcasts.yaml")
+DEFAULT_CONFIG_PATH = Path(read_env(CONFIG_ENV) or "config/podcasts.yaml")
 RSS_SOURCE_TYPE = "rss"
 _SAFE_SLUG_PATTERN = re.compile(r"^[a-z0-9][a-z0-9-]*$")
 

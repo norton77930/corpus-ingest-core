@@ -30,11 +30,11 @@
 
 **CRITICAL**: No user story work can begin until this phase is complete.
 
-- [X] T004 Add corpus index result and row models in `src/podcast_ingest_core/models.py`
-- [X] T005 Add corpus index error type in `src/podcast_ingest_core/errors.py`
-- [X] T006 Add `corpus_index_asset_paths(podcast_id)` helper in `src/podcast_ingest_core/storage.py`
-- [X] T007 Create empty `src/podcast_ingest_core/corpus_index.py` module with public function signature and constant names
-- [X] T008 Export corpus index public function and error/model types in `src/podcast_ingest_core/__init__.py`
+- [X] T004 Add corpus index result and row models in `src/corpus_ingest_core/models.py`
+- [X] T005 Add corpus index error type in `src/corpus_ingest_core/errors.py`
+- [X] T006 Add `corpus_index_asset_paths(podcast_id)` helper in `src/corpus_ingest_core/storage.py`
+- [X] T007 Create empty `src/corpus_ingest_core/corpus_index.py` module with public function signature and constant names
+- [X] T008 Export corpus index public function and error/model types in `src/corpus_ingest_core/__init__.py`
 - [X] T009 Run foundational targeted tests in `tests/test_corpus_index.py`
 
 **Checkpoint**: Foundation ready - user story implementation can now begin.
@@ -55,9 +55,9 @@
 
 ### Implementation for User Story 1
 
-- [X] T013 [US1] Implement local per-episode artifact discovery for audio, transcripts, summaries, mentions, reports, mappings, and external boundaries in `src/podcast_ingest_core/corpus_index.py`
-- [X] T014 [US1] Implement corpus summary counts and episode row assembly in `src/podcast_ingest_core/corpus_index.py`
-- [X] T015 [US1] Implement deterministic JSON and Markdown writers in `src/podcast_ingest_core/corpus_index.py`
+- [X] T013 [US1] Implement local per-episode artifact discovery for audio, transcripts, summaries, mentions, reports, mappings, and external boundaries in `src/corpus_ingest_core/corpus_index.py`
+- [X] T014 [US1] Implement corpus summary counts and episode row assembly in `src/corpus_ingest_core/corpus_index.py`
+- [X] T015 [US1] Implement deterministic JSON and Markdown writers in `src/corpus_ingest_core/corpus_index.py`
 - [X] T016 [US1] Implement thin CLI `scripts/generate_corpus_index.py`
 - [X] T017 [US1] Add CLI stdout contract test in `tests/test_corpus_index.py`
 - [X] T018 [US1] Run User Story 1 targeted tests in `tests/test_corpus_index.py`
@@ -80,9 +80,9 @@
 
 ### Implementation for User Story 2
 
-- [X] T022 [US2] Implement stable `missing_artifacts` calculation in `src/podcast_ingest_core/corpus_index.py`
-- [X] T023 [US2] Implement unreadable JSON handling and warning aggregation in `src/podcast_ingest_core/corpus_index.py`
-- [X] T024 [US2] Implement duplicate candidate counting and deterministic selection in `src/podcast_ingest_core/corpus_index.py`
+- [X] T022 [US2] Implement stable `missing_artifacts` calculation in `src/corpus_ingest_core/corpus_index.py`
+- [X] T023 [US2] Implement unreadable JSON handling and warning aggregation in `src/corpus_ingest_core/corpus_index.py`
+- [X] T024 [US2] Implement duplicate candidate counting and deterministic selection in `src/corpus_ingest_core/corpus_index.py`
 - [X] T025 [US2] Run User Story 2 targeted tests in `tests/test_corpus_index.py`
 
 **Checkpoint**: User Story 1 and User Story 2 both work independently.
@@ -103,8 +103,8 @@
 
 ### Implementation for User Story 3
 
-- [X] T029 [US3] Implement semantic summary path discovery and metadata-only status in `src/podcast_ingest_core/corpus_index.py`
-- [X] T030 [US3] Implement latest semantic review report selection and check count extraction in `src/podcast_ingest_core/corpus_index.py`
+- [X] T029 [US3] Implement semantic summary path discovery and metadata-only status in `src/corpus_ingest_core/corpus_index.py`
+- [X] T030 [US3] Implement latest semantic review report selection and check count extraction in `src/corpus_ingest_core/corpus_index.py`
 - [X] T031 [US3] Run User Story 3 targeted tests in `tests/test_corpus_index.py`
 
 **Checkpoint**: All user stories are independently testable.
@@ -154,7 +154,7 @@
 ## Parallel Opportunities
 
 - T032, T033, T034, and T035 touch separate documentation files and can run in parallel after implementation behavior is stable.
-- US2 and US3 can proceed in parallel after Phase 2 if coordination avoids concurrent edits to `src/podcast_ingest_core/corpus_index.py`.
+- US2 and US3 can proceed in parallel after Phase 2 if coordination avoids concurrent edits to `src/corpus_ingest_core/corpus_index.py`.
 
 ## Implementation Strategy
 

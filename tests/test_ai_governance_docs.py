@@ -122,7 +122,7 @@ def test_adr_index_and_core_adrs_exist_with_short_format():
 
 
 def test_core_adrs_align_with_runtime_and_guard_facts():
-    assert "src/podcast_ingest_core" in _read(ADR / "ADR-0001-thin-cli-thick-core.md")
+    assert "src/corpus_ingest_core" in _read(ADR / "ADR-0001-thin-cli-thick-core.md")
 
     adr_0002 = _read(ADR / "ADR-0002-dry-run-confirm-boundary.md")
     assert "confirm=False" in adr_0002

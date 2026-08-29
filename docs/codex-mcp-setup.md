@@ -44,13 +44,13 @@ python scripts/validate_mcp_setup.py --podcast gooaye --query 台積電
 
 ## 3. Codex User-level Config 範例
 
-以下是 placeholder 範例。請把 `D:/path/to/podcast-ingest-core` 換成你的 repo 實際路徑。
+以下是 placeholder 範例。請把 `D:/path/to/corpus-ingest-core` 換成你的 repo 實際路徑。
 
 ```toml
-[mcp_servers.podcast-ingest-core]
+[mcp_servers.corpus-ingest-core]
 command = "python"
-args = ["D:/path/to/podcast-ingest-core/scripts/run_mcp_server.py"]
-cwd = "D:/path/to/podcast-ingest-core"
+args = ["D:/path/to/corpus-ingest-core/scripts/run_mcp_server.py"]
+cwd = "D:/path/to/corpus-ingest-core"
 startup_timeout_sec = 20
 tool_timeout_sec = 120
 enabled = true
@@ -69,7 +69,7 @@ default_tools_approval_mode = "prompt"
 也可以用 Codex CLI 新增 server：
 
 ```powershell
-codex mcp add podcast-ingest-core -- python D:/path/to/podcast-ingest-core/scripts/run_mcp_server.py
+codex mcp add corpus-ingest-core -- python D:/path/to/corpus-ingest-core/scripts/run_mcp_server.py
 ```
 
 使用 `config.toml` 可更明確指定 `cwd`、timeout 與 approval mode。若用 CLI add 後仍需要調整 `cwd`，建議打開 `~/.codex/config.toml` 手動補上。
@@ -78,11 +78,11 @@ codex mcp add podcast-ingest-core -- python D:/path/to/podcast-ingest-core/scrip
 
 1. 啟動 `codex`
 2. 輸入 `/mcp`
-3. 確認 `podcast-ingest-core` server active
+3. 確認 `corpus-ingest-core` server active
 4. 詢問 Codex：
 
 ```text
-請用 podcast-ingest-core 搜尋股癌 EP672 有沒有提到台積電。
+請用 corpus-ingest-core 搜尋股癌 EP672 有沒有提到台積電。
 ```
 
 5. 確認它使用 `search_transcripts` 或 `search_mentions` tool。
@@ -90,15 +90,15 @@ codex mcp add podcast-ingest-core -- python D:/path/to/podcast-ingest-core/scrip
 ## 6. 建議測試 Prompt
 
 ```text
-請用 podcast-ingest-core MCP 搜尋 gooaye 裡提到「台積電」的 transcript evidence。
+請用 corpus-ingest-core MCP 搜尋 gooaye 裡提到「台積電」的 transcript evidence。
 ```
 
 ```text
-請用 podcast-ingest-core MCP 查 gooaye EP672 的 transcript validation 狀態。
+請用 corpus-ingest-core MCP 查 gooaye EP672 的 transcript validation 狀態。
 ```
 
 ```text
-請用 podcast-ingest-core MCP 搜尋 mentions 中 type=company 且 query=台積電 的結果。
+請用 corpus-ingest-core MCP 搜尋 mentions 中 type=company 且 query=台積電 的結果。
 ```
 
 ```text

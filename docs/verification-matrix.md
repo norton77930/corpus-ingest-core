@@ -29,7 +29,7 @@ pytest 已在 `pyproject.toml` 設定 repo-local basetemp（`--basetemp=.pytest-
 | Run-report 寫入協定單一來源 | `tests/test_run_report_io_boundary.py` | 全部 `_write_run_report` 必須委派 `run_report_io` 弱協定或 `audit_report_pair` 強協定；函式體內禁止內嵌 `.part` staging（specs/025-core-consolidation） |
 | MCP facade 邊界 | `tests/test_mcp_server_facade_boundary.py` | `src` 僅一處 `FastMCP(`（`mcp_runtime.py`）；`@mcp.tool()` 僅存在四個 `mcp_tools_*` 群組模組；群組模組禁止 import `mcp_server`；facade re-export 別名契約完整；completion 拒絕訊息單一來源於 Core（specs/025-core-consolidation） |
 | Docs 計數與 registry 一致 | `tests/test_docs_registry_count_consistency.py` | 受治理文件（README、docs/、specs/README）的 tool 計數宣稱必須等於 live registry 數，或該行帶 historical 標記；`*closeout*` 檔整檔豁免（specs/025-core-consolidation） |
-| 測試資料目錄 fixture 契約 | `tests/test_data_dir_fixture_contract.py` | `tests/conftest.py` fixture 以反射覆蓋全部 storage `*_DIR` 常數與 evals 旁路常數；`PODCAST_INGEST_DATA_DIR` 未設時 `storage.DATA_DIR` 預設不變；新測試檔禁止再複製 `_use_tmp_data_dirs` helper（specs/025-core-consolidation） |
+| 測試資料目錄 fixture 契約 | `tests/test_data_dir_fixture_contract.py` | `tests/conftest.py` fixture 以反射覆蓋全部 storage `*_DIR` 常數與 evals 旁路常數；`CORPUS_INGEST_DATA_DIR`（舊名 `PODCAST_INGEST_DATA_DIR` 仍受支援）未設時 `storage.DATA_DIR` 預設不變；新測試檔禁止再複製 `_use_tmp_data_dirs` helper（specs/025-core-consolidation） |
 | HTTP transport boundary | `tests/test_mcp_http_transport.py` | stdio 與 HTTP 共用單一 FastMCP instance；HTTP runner 只接受經核准的 loopback Streamable HTTP listener，stdio 仍是預設 transport，且 `run_mcp_http_server.py` 維持薄 facade |
 
 Targeted 指令（可合併執行）：

@@ -27,7 +27,10 @@ INPUT_BOUNDARY = "phase-6f-stock-lens-json-only"
 REVIEWED_SEMANTIC_INPUT_BOUNDARY = (
     "phase-6f-stock-lens-json-plus-reviewed-semantic-summary"
 )
-DEBUG_OUTPUT_PATH_ENV = "PODCAST_INGEST_STOCK_LENS_SYNTHESIS_DEBUG_OUTPUT_PATH"
+from .local_env_names import (
+    STOCK_LENS_SYNTHESIS_DEBUG_OUTPUT_PATH_ENV as DEBUG_OUTPUT_PATH_ENV,
+    read_env,
+)
 from .storage import EVALS_RESEARCH_SMOKE_REPORTS_DIR as SEMANTIC_REVIEW_REPORTS_DIR
 SEMANTIC_CONTEXT_TRUNCATION_MARKER = "\n[semantic context truncated]"
 _SECRET_LIKE_PATTERN = re.compile(r"\bsk-[A-Za-z0-9_-]{8,}\b")
@@ -594,7 +597,7 @@ def _matched_prohibited_guard(text: str) -> str | None:
 
 
 def _write_debug_output_if_requested(text: str) -> None:
-    raw_path = os.environ.get(DEBUG_OUTPUT_PATH_ENV, "").strip()
+    raw_path = (read_env(DEBUG_OUTPUT_PATH_ENV) or "").strip()
     if not raw_path:
         return
     output_path = Path(raw_path)

@@ -42,9 +42,9 @@ no `.env`, no live market API, no auto cache rebuild, no investment advice.
 ## Files
 
 ```text
-src/podcast_ingest_core/mcp_tools_workflow_derivation.py   (new, imported last)
-src/podcast_ingest_core/mcp_server.py                      (facade wiring)
-src/podcast_ingest_core/hermes_skill_protocol.py           (AST source list + size)
+src/corpus_ingest_core/mcp_tools_workflow_derivation.py   (new, imported last)
+src/corpus_ingest_core/mcp_server.py                      (facade wiring)
+src/corpus_ingest_core/hermes_skill_protocol.py           (AST source list + size)
 deploy/hermes/spec029/spec029_mcp_deny_adapter.py          (exact-24 -> exact-25)
 deploy/hermes/spec029/contracts/mcp-tool-descriptor-snapshot.json  (regenerated)
 scripts/validate_mcp_setup.py                              (registry check)

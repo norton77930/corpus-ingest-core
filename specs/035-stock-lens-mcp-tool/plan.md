@@ -41,9 +41,9 @@ digest-pinned surfaces move as a result and are recorded for re-baseline in
 
 ```text
 specs/035-stock-lens-mcp-tool/
-src/podcast_ingest_core/mcp_tools_stock_lens.py
-src/podcast_ingest_core/mcp_server.py                     (facade wiring)
-src/podcast_ingest_core/hermes_skill_protocol.py          (AST source list + size)
+src/corpus_ingest_core/mcp_tools_stock_lens.py
+src/corpus_ingest_core/mcp_server.py                     (facade wiring)
+src/corpus_ingest_core/hermes_skill_protocol.py          (AST source list + size)
 deploy/hermes/spec029/spec029_mcp_deny_adapter.py         (exact-22)
 deploy/hermes/spec029/contracts/mcp-tool-descriptor-snapshot.json  (regenerated)
 scripts/validate_mcp_setup.py                             (registry check)

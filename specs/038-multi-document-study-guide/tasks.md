@@ -38,16 +38,16 @@ Non-goals: `01`/`02`/`05`/`06`, MCP, 015 chain, review-passed gate, Hermes, YouT
 ## Phase 2: Foundational
 
 - [ ] T003 RED `tests/test_study_guide_profiles.py`: heading lists for `03`/`04`/`07` match FR-010–012; prompt forbids 05/06 workflow advice and transcript invention
-- [ ] T004 GREEN `src/podcast_ingest_core/study_guide_profiles.py` as pure data (stdlib + `.errors` only)
-- [ ] T005 RED/GREEN `src/podcast_ingest_core/errors.py` + `models.py`: `StudyGuideBundleError`, `StudyGuideBundleResult`
-- [ ] T006 RED/GREEN `src/podcast_ingest_core/storage.py`: `STUDY_GUIDES_DIR` and `study_guide_bundle_paths(podcast_id, episode_ref, title)`
-- [ ] T007 Export error + runner placeholder from `src/podcast_ingest_core/__init__.py` only when the function exists (T010)
+- [ ] T004 GREEN `src/corpus_ingest_core/study_guide_profiles.py` as pure data (stdlib + `.errors` only)
+- [ ] T005 RED/GREEN `src/corpus_ingest_core/errors.py` + `models.py`: `StudyGuideBundleError`, `StudyGuideBundleResult`
+- [ ] T006 RED/GREEN `src/corpus_ingest_core/storage.py`: `STUDY_GUIDES_DIR` and `study_guide_bundle_paths(podcast_id, episode_ref, title)`
+- [ ] T007 Export error + runner placeholder from `src/corpus_ingest_core/__init__.py` only when the function exists (T010)
 
 ## Phase 3: US2 Dry-run (P1)
 
 - [ ] T008 [US2] RED `tests/test_study_guide_bundle.py`: dry-run on a fixture learning-notes episode lists planned reads/writes, writes zero files, constructs no provider
 - [ ] T009 [US2] RED reuse dry-run says reuse when all four files exist
-- [ ] T010 [US2] GREEN `src/podcast_ingest_core/study_guide_bundle.py` dry-run path
+- [ ] T010 [US2] GREEN `src/corpus_ingest_core/study_guide_bundle.py` dry-run path
 
 ## Phase 4: US3 Refuse (P1)
 
@@ -74,7 +74,7 @@ Non-goals: `01`/`02`/`05`/`06`, MCP, 015 chain, review-passed gate, Hermes, YouT
 
 ## Phase 7: Index + CLI + contracts
 
-- [ ] T025 RED/GREEN `src/podcast_ingest_core/corpus_index.py`: append `study_guide`; `partial` counts as unreadable; update `tests/test_corpus_index.py` missing-list contract
+- [ ] T025 RED/GREEN `src/corpus_ingest_core/corpus_index.py`: append `study_guide`; `partial` counts as unreadable; update `tests/test_corpus_index.py` missing-list contract
 - [ ] T026 Assert `ARTIFACT_LADDER` unchanged in `tests/test_corpus_remediation_plan.py` or the new test file
 - [ ] T027 Thin CLI `scripts/run_study_guide_bundle.py` + no-leak stdout test
 - [ ] T028 `tests/test_contracts.py`: pin `run_study_guide_bundle` signature; export the error

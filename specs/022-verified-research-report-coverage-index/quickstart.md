@@ -3,7 +3,7 @@
 ## Core
 
 ```python
-from podcast_ingest_core import list_verified_research_report_coverage
+from corpus_ingest_core import list_verified_research_report_coverage
 
 page = list_verified_research_report_coverage("gooaye", has_bundle=False, limit=50)
 for row in page.items:

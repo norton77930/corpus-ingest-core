@@ -6,9 +6,9 @@ from types import SimpleNamespace
 
 import pytest
 
-from podcast_ingest_core.errors import YoutubeVideoIngestFailedError
-from podcast_ingest_core.models import PodcastProfile
-from podcast_ingest_core.youtube_video_ingest import (
+from corpus_ingest_core.errors import YoutubeVideoIngestFailedError
+from corpus_ingest_core.models import PodcastProfile
+from corpus_ingest_core.youtube_video_ingest import (
     build_seed,
     derive_youtube_identity,
     parse_youtube_video_id,
@@ -46,7 +46,7 @@ def test_playlist_without_video_id_is_refused() -> None:
 
 
 def test_non_youtube_url_is_refused_before_metadata(monkeypatch) -> None:
-    from podcast_ingest_core import youtube_video_ingest
+    from corpus_ingest_core import youtube_video_ingest
 
     def refuse(_url):
         raise AssertionError("must not resolve metadata")
@@ -149,7 +149,7 @@ def _yt_profile(podcast_id: str) -> PodcastProfile:
 
 
 def test_dry_run_returns_a_plan_and_touches_nothing(monkeypatch, tmp_data_dirs: Path) -> None:
-    from podcast_ingest_core import youtube_video_ingest
+    from corpus_ingest_core import youtube_video_ingest
 
     _stub_acquisition(monkeypatch, youtube_video_ingest)
     result = youtube_video_ingest.run_youtube_video_ingest(_WATCH_URL)
@@ -172,7 +172,7 @@ def test_dry_run_returns_a_plan_and_touches_nothing(monkeypatch, tmp_data_dirs: 
 
 
 def test_dry_run_reuses_existing_wav(monkeypatch, tmp_data_dirs: Path) -> None:
-    from podcast_ingest_core import storage, youtube_video_ingest
+    from corpus_ingest_core import storage, youtube_video_ingest
 
     _stub_acquisition(monkeypatch, youtube_video_ingest)
     identity = derive_youtube_identity(_WATCH_URL, _SAMPLE_INFO)
@@ -188,7 +188,7 @@ def test_dry_run_reuses_existing_wav(monkeypatch, tmp_data_dirs: Path) -> None:
 
 
 def test_unregistered_source_is_refused_before_download(monkeypatch, tmp_data_dirs: Path) -> None:
-    from podcast_ingest_core import youtube_video_ingest
+    from corpus_ingest_core import youtube_video_ingest
 
     _stub_acquisition(monkeypatch, youtube_video_ingest)
     with pytest.raises(YoutubeVideoIngestFailedError, match="podcasts.yaml"):
@@ -196,7 +196,7 @@ def test_unregistered_source_is_refused_before_download(monkeypatch, tmp_data_di
 
 
 def test_wrong_source_type_is_refused_before_download(monkeypatch, tmp_data_dirs: Path) -> None:
-    from podcast_ingest_core import youtube_video_ingest
+    from corpus_ingest_core import youtube_video_ingest
 
     _stub_acquisition(monkeypatch, youtube_video_ingest)
     monkeypatch.setattr(
@@ -216,7 +216,7 @@ def test_wrong_source_type_is_refused_before_download(monkeypatch, tmp_data_dirs
 
 
 def test_confirm_writes_seed_wav_and_reuses_transcriber(monkeypatch, tmp_data_dirs: Path) -> None:
-    from podcast_ingest_core import storage, youtube_video_ingest
+    from corpus_ingest_core import storage, youtube_video_ingest
 
     sibling = tmp_data_dirs / "corpus" / "gooaye" / "keep.txt"
     sibling.parent.mkdir(parents=True, exist_ok=True)
@@ -273,7 +273,7 @@ def test_confirm_writes_seed_wav_and_reuses_transcriber(monkeypatch, tmp_data_di
 def test_work_dir_alt_case_under_data_is_refused(monkeypatch, tmp_data_dirs: Path) -> None:
     import os
 
-    from podcast_ingest_core import storage, youtube_video_ingest
+    from corpus_ingest_core import storage, youtube_video_ingest
 
     _stub_acquisition(monkeypatch, youtube_video_ingest)
     monkeypatch.setattr(
@@ -293,7 +293,7 @@ def test_work_dir_alt_case_under_data_is_refused(monkeypatch, tmp_data_dirs: Pat
 
 
 def test_work_dir_under_data_is_refused_before_download(monkeypatch, tmp_data_dirs: Path) -> None:
-    from podcast_ingest_core import storage, youtube_video_ingest
+    from corpus_ingest_core import storage, youtube_video_ingest
 
     _stub_acquisition(monkeypatch, youtube_video_ingest)
     monkeypatch.setattr(

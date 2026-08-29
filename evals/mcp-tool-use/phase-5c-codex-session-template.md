@@ -23,7 +23,7 @@
 
 ## MCP Server Visibility
 
-- `/mcp` shows podcast-ingest-core:
+- `/mcp` shows corpus-ingest-core:
 - Tool count visible:
 - Tools visible:
   - list_episodes:

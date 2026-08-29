@@ -41,7 +41,7 @@ LLM synthesis boundaries.
 
 ### II. Thin Interfaces over Thick Core
 
-Runtime behavior MUST live in `src/podcast_ingest_core`. CLI scripts and MCP
+Runtime behavior MUST live in `src/corpus_ingest_core`. CLI scripts and MCP
 tools MUST remain thin wrappers that parse inputs, call core functions, and
 format responses. Public core functions MUST keep stable contracts unless a
 future approved phase explicitly changes them with tests and documentation.

@@ -33,12 +33,12 @@
 
 **CRITICAL**: No preview or confirmed behavior starts until this phase is green.
 
-- [X] T007 Add `CorpusSemanticRemediationRunFilter`, counts, warning, row, and result dataclasses in `src/podcast_ingest_core/models.py`
-- [X] T008 Add `CorpusSemanticRemediationRunnerFailedError` in `src/podcast_ingest_core/errors.py`
-- [X] T009 Add `CorpusSemanticRemediationRunAssetPaths` and `corpus_semantic_remediation_run_asset_paths()` without filesystem creation in `src/podcast_ingest_core/storage.py`
-- [X] T010 Add 2 MiB-bounded full UTF-8 semantic-summary readability metadata without retaining body content or changing legacy semantic status, 009 actions, or extractive-summary behavior in `src/podcast_ingest_core/corpus_index.py`
-- [X] T011 Create `src/podcast_ingest_core/corpus_semantic_remediation_runner.py` with constants, exact public signature, additive serializer skeleton, and no side effects
-- [X] T012 Export the new Core API, models, error, and storage helper from `src/podcast_ingest_core/__init__.py`
+- [X] T007 Add `CorpusSemanticRemediationRunFilter`, counts, warning, row, and result dataclasses in `src/corpus_ingest_core/models.py`
+- [X] T008 Add `CorpusSemanticRemediationRunnerFailedError` in `src/corpus_ingest_core/errors.py`
+- [X] T009 Add `CorpusSemanticRemediationRunAssetPaths` and `corpus_semantic_remediation_run_asset_paths()` without filesystem creation in `src/corpus_ingest_core/storage.py`
+- [X] T010 Add 2 MiB-bounded full UTF-8 semantic-summary readability metadata without retaining body content or changing legacy semantic status, 009 actions, or extractive-summary behavior in `src/corpus_ingest_core/corpus_index.py`
+- [X] T011 Create `src/corpus_ingest_core/corpus_semantic_remediation_runner.py` with constants, exact public signature, additive serializer skeleton, and no side effects
+- [X] T012 Export the new Core API, models, error, and storage helper from `src/corpus_ingest_core/__init__.py`
 - [X] T013 Run foundational targeted tests in `tests/test_contracts.py`, `tests/test_corpus_index.py`, and `tests/test_corpus_semantic_remediation_runner.py`
 
 **Checkpoint**: Additive contracts and 008 readability metadata are green; no semantic runner execution exists yet.
@@ -67,11 +67,11 @@
 
 ### Implementation for User Story 1
 
-- [X] T025 [US1] Implement safe podcast, explicit episode, action, provider/model identifier, credential-variable-name, and positive chunk-setting normalization in `src/podcast_ingest_core/corpus_semantic_remediation_runner.py`
-- [X] T026 [US1] Build one private 008 snapshot and one private 009 snapshot from the same result/payload without calling persisters in `src/podcast_ingest_core/corpus_semantic_remediation_runner.py`
-- [X] T027 [US1] Isolate the canonical episode and implement the dedicated fail-closed semantic state reducer in `src/podcast_ingest_core/corpus_semantic_remediation_runner.py`
-- [X] T028 [US1] Implement bounded dry-run rows, counts, risk/ack flags, safe planned reads/writes, warnings, and null report paths in `src/podcast_ingest_core/corpus_semantic_remediation_runner.py`
-- [X] T029 [US1] Implement JSON-compatible allowlisted result serialization and category-only snapshot failure containment in `src/podcast_ingest_core/corpus_semantic_remediation_runner.py`
+- [X] T025 [US1] Implement safe podcast, explicit episode, action, provider/model identifier, credential-variable-name, and positive chunk-setting normalization in `src/corpus_ingest_core/corpus_semantic_remediation_runner.py`
+- [X] T026 [US1] Build one private 008 snapshot and one private 009 snapshot from the same result/payload without calling persisters in `src/corpus_ingest_core/corpus_semantic_remediation_runner.py`
+- [X] T027 [US1] Isolate the canonical episode and implement the dedicated fail-closed semantic state reducer in `src/corpus_ingest_core/corpus_semantic_remediation_runner.py`
+- [X] T028 [US1] Implement bounded dry-run rows, counts, risk/ack flags, safe planned reads/writes, warnings, and null report paths in `src/corpus_ingest_core/corpus_semantic_remediation_runner.py`
+- [X] T029 [US1] Implement JSON-compatible allowlisted result serialization and category-only snapshot failure containment in `src/corpus_ingest_core/corpus_semantic_remediation_runner.py`
 - [X] T030 [US1] Run the full US1 state-table, zero-file manifest, snapshot identity, validation, and no-leak tests
 
 **Checkpoint**: Core dry-run is independently usable and provably creates, modifies, and deletes zero files.
@@ -96,11 +96,11 @@
 
 ### Implementation for User Story 2
 
-- [X] T038 [US2] Validate exact summary acknowledgement before snapshot/provider work and reject confirmed `next` in `src/podcast_ingest_core/corpus_semantic_remediation_runner.py`
-- [X] T039 [US2] Implement explicit-action equality gating and exact-once `semantic_summarize_episode()` dispatch with supported option forwarding in `src/podcast_ingest_core/corpus_semantic_remediation_runner.py`
-- [X] T040 [US2] Map semantic executor executed, reused, and category-only failed outcomes without rescan, review, retry, or fallback in `src/podcast_ingest_core/corpus_semantic_remediation_runner.py`
-- [X] T041 [US2] Implement confirmed-only latest JSON/Markdown rendering and atomic runner-report writes in `src/podcast_ingest_core/corpus_semantic_remediation_runner.py`
-- [X] T042 [US2] Add bounded stale index/plan/cache warnings after confirmed attempts in `src/podcast_ingest_core/corpus_semantic_remediation_runner.py`
+- [X] T038 [US2] Validate exact summary acknowledgement before snapshot/provider work and reject confirmed `next` in `src/corpus_ingest_core/corpus_semantic_remediation_runner.py`
+- [X] T039 [US2] Implement explicit-action equality gating and exact-once `semantic_summarize_episode()` dispatch with supported option forwarding in `src/corpus_ingest_core/corpus_semantic_remediation_runner.py`
+- [X] T040 [US2] Map semantic executor executed, reused, and category-only failed outcomes without rescan, review, retry, or fallback in `src/corpus_ingest_core/corpus_semantic_remediation_runner.py`
+- [X] T041 [US2] Implement confirmed-only latest JSON/Markdown rendering and atomic runner-report writes in `src/corpus_ingest_core/corpus_semantic_remediation_runner.py`
+- [X] T042 [US2] Add bounded stale index/plan/cache warnings after confirmed attempts in `src/corpus_ingest_core/corpus_semantic_remediation_runner.py`
 - [X] T043 [US2] Run the confirmed summary, acknowledgement order, real semantic core, report, no-chain, and cache-boundary tests
 
 **Checkpoint**: One explicit summary action can execute or reuse exactly once and always stops before semantic review.
@@ -124,9 +124,9 @@
 
 ### Implementation for User Story 3
 
-- [X] T050 [US3] Implement exact-once `review_semantic_summary_smoke()` dispatch that ignores LLM options and never calls summary/provider/env surfaces in `src/podcast_ingest_core/corpus_semantic_remediation_runner.py`
-- [X] T051 [US3] Map review passed, failed, blocked, and category-only failed outcomes while preserving executor-owned timestamped paths in `src/podcast_ingest_core/corpus_semantic_remediation_runner.py`
-- [X] T052 [US3] Preserve existing review pair-write/partial-failure ownership without cleanup, rescan, retry, or fallback in `src/podcast_ingest_core/corpus_semantic_remediation_runner.py`
+- [X] T050 [US3] Implement exact-once `review_semantic_summary_smoke()` dispatch that ignores LLM options and never calls summary/provider/env surfaces in `src/corpus_ingest_core/corpus_semantic_remediation_runner.py`
+- [X] T051 [US3] Map review passed, failed, blocked, and category-only failed outcomes while preserving executor-owned timestamped paths in `src/corpus_ingest_core/corpus_semantic_remediation_runner.py`
+- [X] T052 [US3] Preserve existing review pair-write/partial-failure ownership without cleanup, rescan, retry, or fallback in `src/corpus_ingest_core/corpus_semantic_remediation_runner.py`
 - [X] T053 [US3] Run the confirmed deterministic review, no-LLM, timestamped-contract, terminal-state, and failure tests
 
 **Checkpoint**: One explicit deterministic review can execute exactly once without any LLM configuration or fallback action.
@@ -151,7 +151,7 @@
 
 - [X] T061 Implement thin `scripts/run_corpus_semantic_remediation.py` argument parsing, Core call, sanitized JSON output, and bounded error exits
 - [X] T062 Implement CLI ordering so invalid summary acknowledgement precedes profile/`.env` loading, dry-run bypasses both profile and `.env` resolution, and confirmed review bypasses all LLM resolution in `scripts/run_corpus_semantic_remediation.py`
-- [X] T063 Harden safe path, warning, provider/model, progress, failure-category, Markdown, stdout, and stderr allowlists in `src/podcast_ingest_core/corpus_semantic_remediation_runner.py` and `scripts/run_corpus_semantic_remediation.py`
+- [X] T063 Harden safe path, warning, provider/model, progress, failure-category, Markdown, stdout, and stderr allowlists in `src/corpus_ingest_core/corpus_semantic_remediation_runner.py` and `scripts/run_corpus_semantic_remediation.py`
 - [X] T064 Run CLI, acknowledgement, no-leak, MCP, cache, provider-factory, secret-boundary, 010, and 014 targeted safety suites
 
 ---

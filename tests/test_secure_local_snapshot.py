@@ -9,7 +9,7 @@ import pytest
 
 
 def test_secure_reader_rejects_out_of_root_symlink_before_body_read(tmp_path: Path) -> None:
-    from podcast_ingest_core.secure_local_snapshot import secure_read_bytes
+    from corpus_ingest_core.secure_local_snapshot import secure_read_bytes
 
     root = tmp_path / "root"
     root.mkdir()
@@ -25,7 +25,7 @@ def test_secure_reader_rejects_out_of_root_symlink_before_body_read(tmp_path: Pa
 
 
 def test_secure_reader_returns_core_derived_regular_file_bytes(tmp_path: Path) -> None:
-    from podcast_ingest_core.secure_local_snapshot import secure_read_bytes
+    from corpus_ingest_core.secure_local_snapshot import secure_read_bytes
 
     root = tmp_path / "root"
     root.mkdir()
@@ -38,7 +38,7 @@ def test_secure_reader_returns_core_derived_regular_file_bytes(tmp_path: Path) -
 def test_secure_reader_rejects_mocked_windows_reparse_before_open(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    import podcast_ingest_core.secure_local_snapshot as snapshots
+    import corpus_ingest_core.secure_local_snapshot as snapshots
 
     root = tmp_path / "root"
     root.mkdir()
@@ -59,7 +59,7 @@ def test_secure_reader_rejects_opened_handle_identity_race(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     import os
-    import podcast_ingest_core.secure_local_snapshot as snapshots
+    import corpus_ingest_core.secure_local_snapshot as snapshots
 
     root = tmp_path / "root"
     root.mkdir()
@@ -89,7 +89,7 @@ def test_secure_reader_rejects_opened_handle_identity_race(
 def test_secure_directory_listing_rejects_out_of_root_directory_symlink(
     tmp_path: Path,
 ) -> None:
-    from podcast_ingest_core.secure_local_snapshot import secure_directory_names
+    from corpus_ingest_core.secure_local_snapshot import secure_directory_names
 
     root = tmp_path / "root"
     root.mkdir()
@@ -108,7 +108,7 @@ def test_secure_directory_listing_rejects_out_of_root_directory_symlink(
 def test_secure_reader_rejects_mocked_reparse_in_root_ancestor_chain(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    import podcast_ingest_core.secure_local_snapshot as snapshots
+    import corpus_ingest_core.secure_local_snapshot as snapshots
 
     root = tmp_path / "root"
     root.mkdir()
@@ -128,9 +128,9 @@ def test_secure_reader_rejects_mocked_reparse_in_root_ancestor_chain(
 def test_canonical_and_review_discovery_reject_directory_symlinks(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.canonical_transcript import resolve_canonical_transcript_asset_paths
-    from podcast_ingest_core.semantic_review_artifact import semantic_review_candidates
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.canonical_transcript import resolve_canonical_transcript_asset_paths
+    from corpus_ingest_core.semantic_review_artifact import semantic_review_candidates
 
     transcript_root = tmp_path / "transcripts"
     transcript_root.mkdir()
@@ -159,7 +159,7 @@ def test_secure_directory_listing_rejects_mocked_reparse_and_identity_race(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     import os
-    import podcast_ingest_core.secure_local_snapshot as snapshots
+    import corpus_ingest_core.secure_local_snapshot as snapshots
 
     root = tmp_path / "root"
     directory = root / "podcast"
@@ -199,7 +199,7 @@ def test_directory_listing_rejects_names_absent_after_enumeration(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """Post-validation rejects an enumerator result absent from the checked directory."""
-    import podcast_ingest_core.secure_local_snapshot as snapshots
+    import corpus_ingest_core.secure_local_snapshot as snapshots
 
     root = tmp_path / "root"
     directory = root / "podcast"
@@ -225,8 +225,8 @@ def test_directory_listing_rejects_names_absent_after_enumeration(
 def test_lineage_sidecar_source_and_config_reads_only_use_secure_snapshot_boundary(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.verified_research_lineage as lineage
+    from corpus_ingest_core import storage
+    import corpus_ingest_core.verified_research_lineage as lineage
 
     corpus = tmp_path / "corpus"
     source = tmp_path / "transcripts" / "show" / "EP1.json"

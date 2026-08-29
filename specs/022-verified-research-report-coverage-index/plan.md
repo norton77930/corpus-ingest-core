@@ -34,8 +34,8 @@ Add a Core-owned, read-only/offline episode-centric coverage join: local invento
 
 ```text
 specs/022-verified-research-report-coverage-index/
-src/podcast_ingest_core/verified_research_report_coverage.py  # NEW
-src/podcast_ingest_core/mcp_verified_research_report_coverage.py  # NEW
+src/corpus_ingest_core/verified_research_report_coverage.py  # NEW
+src/corpus_ingest_core/mcp_verified_research_report_coverage.py  # NEW
 scripts/query_verified_research_report_coverage.py  # NEW
 tests/test_verified_research_report_coverage.py
 tests/test_verified_research_report_coverage_cli.py

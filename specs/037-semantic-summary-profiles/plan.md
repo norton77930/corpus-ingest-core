@@ -16,7 +16,7 @@ body vary.
 ## Constitution Check
 
 Local artifacts, unchanged paths, unchanged evidence-timestamp discipline (I);
-all logic in `src/podcast_ingest_core`, no CLI or MCP surface added (II); this
+all logic in `src/corpus_ingest_core`, no CLI or MCP surface added (II); this
 feature adds no side-effect workflow, and the one it touches keeps its existing
 `force` gate (III); the LLM step stays opt-in and `require_exact_api_cost_ack`
 keeps its position as the first statement of both `semantic_summarize_episode`
@@ -96,14 +96,14 @@ out of scope.
 
 ```text
 specs/037-semantic-summary-profiles/
-src/podcast_ingest_core/summary_profiles.py     (new: frozen registry, pure data + lookup)
-src/podcast_ingest_core/models.py               (PodcastProfile.summary_profile)
-src/podcast_ingest_core/config.py               (_parse_profile validates the value)
-src/podcast_ingest_core/errors.py               (reuse or add the config error type)
-src/podcast_ingest_core/llm_provider.py         (prompts read from the registry; factory takes the profile)
-src/podcast_ingest_core/semantic_summarizer.py  (resolve profile -> factory; 摘要限制 body from the profile)
-src/podcast_ingest_core/summarizer.py           (extractive prompt block from the profile)
-src/podcast_ingest_core/__init__.py             (export the registry lookup if the package exports peers)
+src/corpus_ingest_core/summary_profiles.py     (new: frozen registry, pure data + lookup)
+src/corpus_ingest_core/models.py               (PodcastProfile.summary_profile)
+src/corpus_ingest_core/config.py               (_parse_profile validates the value)
+src/corpus_ingest_core/errors.py               (reuse or add the config error type)
+src/corpus_ingest_core/llm_provider.py         (prompts read from the registry; factory takes the profile)
+src/corpus_ingest_core/semantic_summarizer.py  (resolve profile -> factory; 摘要限制 body from the profile)
+src/corpus_ingest_core/summarizer.py           (extractive prompt block from the profile)
+src/corpus_ingest_core/__init__.py             (export the registry lookup if the package exports peers)
 config/podcasts.yaml                            (x-raytar: summary_profile: learning-notes)
 tests/test_summary_profiles.py                  (new: registry, lookup, unknown-value refusal,
                                                  finance prompts pinned to hardcoded literals)

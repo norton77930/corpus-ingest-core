@@ -42,7 +42,7 @@
 
 The plan MUST explicitly pass these project gates from the constitution:
 
-- Core logic stays in `src/podcast_ingest_core`; CLI and MCP remain thin wrappers.
+- Core logic stays in `src/corpus_ingest_core`; CLI and MCP remain thin wrappers.
 - Side-effect workflows include dry-run behavior with planned reads/writes,
   confirmation, and risk metadata.
 - Any LLM step is opt-in, requires exact `api_cost_ack`, and preserves the

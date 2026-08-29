@@ -107,8 +107,8 @@ safety_rules:
 
 
 def test_load_gooaye_lens_model_loads_valid_config(tmp_path):
-    from podcast_ingest_core.gooaye_lens import load_gooaye_lens_model
-    from podcast_ingest_core.models import GooayeLensModel
+    from corpus_ingest_core.gooaye_lens import load_gooaye_lens_model
+    from corpus_ingest_core.models import GooayeLensModel
 
     config_path = _write_lens_config(tmp_path)
 
@@ -122,7 +122,7 @@ def test_load_gooaye_lens_model_loads_valid_config(tmp_path):
 
 
 def test_gooaye_lens_model_contains_expected_core_dimensions():
-    from podcast_ingest_core.gooaye_lens import load_gooaye_lens_model
+    from corpus_ingest_core.gooaye_lens import load_gooaye_lens_model
 
     model = load_gooaye_lens_model()
     dimension_ids = {dimension.id for dimension in model.dimensions}
@@ -138,7 +138,7 @@ def test_gooaye_lens_model_contains_expected_core_dimensions():
 
 
 def test_gooaye_lens_dimensions_are_complete(tmp_path):
-    from podcast_ingest_core.gooaye_lens import load_gooaye_lens_model
+    from corpus_ingest_core.gooaye_lens import load_gooaye_lens_model
 
     model = load_gooaye_lens_model(_write_lens_config(tmp_path))
 
@@ -152,7 +152,7 @@ def test_gooaye_lens_dimensions_are_complete(tmp_path):
 
 
 def test_gooaye_lens_safety_rules_cover_research_boundaries(tmp_path):
-    from podcast_ingest_core.gooaye_lens import load_gooaye_lens_model
+    from corpus_ingest_core.gooaye_lens import load_gooaye_lens_model
 
     model = load_gooaye_lens_model(_write_lens_config(tmp_path))
     safety_text = "\n".join(model.safety_rules).lower()
@@ -165,8 +165,8 @@ def test_gooaye_lens_safety_rules_cover_research_boundaries(tmp_path):
 
 
 def test_load_gooaye_lens_model_rejects_missing_and_malformed_config(tmp_path):
-    from podcast_ingest_core.errors import GooayeLensConfigError
-    from podcast_ingest_core.gooaye_lens import load_gooaye_lens_model
+    from corpus_ingest_core.errors import GooayeLensConfigError
+    from corpus_ingest_core.gooaye_lens import load_gooaye_lens_model
 
     with pytest.raises(GooayeLensConfigError, match="missing"):
         load_gooaye_lens_model(tmp_path / "missing.yaml")
@@ -178,8 +178,8 @@ def test_load_gooaye_lens_model_rejects_missing_and_malformed_config(tmp_path):
 
 
 def test_load_gooaye_lens_model_rejects_incomplete_config(tmp_path):
-    from podcast_ingest_core.errors import GooayeLensConfigError
-    from podcast_ingest_core.gooaye_lens import load_gooaye_lens_model
+    from corpus_ingest_core.errors import GooayeLensConfigError
+    from corpus_ingest_core.gooaye_lens import load_gooaye_lens_model
 
     with pytest.raises(GooayeLensConfigError, match="output_guidance"):
         load_gooaye_lens_model(_write_lens_config(tmp_path, incomplete=True))

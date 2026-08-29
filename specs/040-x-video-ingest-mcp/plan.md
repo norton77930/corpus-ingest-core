@@ -60,11 +60,11 @@ Do not run live Hermes, C6, or the final verifier.
 
 ```text
 specs/040-x-video-ingest-mcp/
-src/podcast_ingest_core/mcp_tools_x_video.py
-src/podcast_ingest_core/mcp_server.py
-src/podcast_ingest_core/x_video_ingest.py
-src/podcast_ingest_core/storage.py
-src/podcast_ingest_core/hermes_skill_protocol.py
+src/corpus_ingest_core/mcp_tools_x_video.py
+src/corpus_ingest_core/mcp_server.py
+src/corpus_ingest_core/x_video_ingest.py
+src/corpus_ingest_core/storage.py
+src/corpus_ingest_core/hermes_skill_protocol.py
 deploy/hermes/spec029/spec029_mcp_deny_adapter.py
 deploy/hermes/spec029/contracts/mcp-tool-descriptor-snapshot.json
 tests/test_x_video_ingest.py

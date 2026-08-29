@@ -15,7 +15,7 @@ def _write_semantic_summary(
     include_timestamp: bool = True,
     include_chunks: bool = True,
 ) -> Path:
-    import podcast_ingest_core.storage as storage
+    import corpus_ingest_core.storage as storage
 
     monkeypatch.setattr(storage, "SUMMARIES_DIR", tmp_path / "summaries")
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
@@ -65,7 +65,7 @@ def _write_semantic_summary(
 
 
 def test_review_semantic_summary_smoke_generates_passed_report(monkeypatch, tmp_path):
-    import podcast_ingest_core.semantic_summary_smoke_review as review
+    import corpus_ingest_core.semantic_summary_smoke_review as review
 
     summary_path = _write_semantic_summary(monkeypatch, tmp_path)
     monkeypatch.setattr(review, "REPORTS_DIR", tmp_path / "reports")
@@ -85,8 +85,8 @@ def test_review_semantic_summary_smoke_generates_passed_report(monkeypatch, tmp_
 
 
 def test_review_semantic_summary_smoke_blocks_missing_artifact(monkeypatch, tmp_path):
-    import podcast_ingest_core.storage as storage
-    import podcast_ingest_core.semantic_summary_smoke_review as review
+    import corpus_ingest_core.storage as storage
+    import corpus_ingest_core.semantic_summary_smoke_review as review
 
     monkeypatch.setattr(storage, "SUMMARIES_DIR", tmp_path / "summaries")
     monkeypatch.setattr(review, "REPORTS_DIR", tmp_path / "reports")
@@ -100,7 +100,7 @@ def test_review_semantic_summary_smoke_blocks_missing_artifact(monkeypatch, tmp_
 
 
 def test_review_semantic_summary_smoke_fails_safety_issues(monkeypatch, tmp_path):
-    import podcast_ingest_core.semantic_summary_smoke_review as review
+    import corpus_ingest_core.semantic_summary_smoke_review as review
 
     _write_semantic_summary(
         monkeypatch,
@@ -121,7 +121,7 @@ def test_review_semantic_summary_smoke_fails_safety_issues(monkeypatch, tmp_path
 def test_review_semantic_summary_smoke_allows_transcript_derived_trade_descriptions(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.semantic_summary_smoke_review as review
+    import corpus_ingest_core.semantic_summary_smoke_review as review
 
     _write_semantic_summary(
         monkeypatch,
@@ -149,7 +149,7 @@ def test_review_semantic_summary_smoke_allows_transcript_derived_trade_descripti
 def test_review_semantic_summary_smoke_rejects_direct_trade_advice(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.semantic_summary_smoke_review as review
+    import corpus_ingest_core.semantic_summary_smoke_review as review
 
     _write_semantic_summary(
         monkeypatch,
@@ -185,12 +185,12 @@ def test_review_semantic_summary_smoke_rejects_direct_trade_advice(
     ),
 )
 def test_red_review_and_assembler_share_personalized_advice_guard(monkeypatch, tmp_path, advice):
-    from podcast_ingest_core.verified_research_report import (
+    from corpus_ingest_core.verified_research_report import (
         VerifiedResearchReportInputError,
         _assert_safe_source_bytes,
         _source_artifact,
     )
-    import podcast_ingest_core.semantic_summary_smoke_review as review
+    import corpus_ingest_core.semantic_summary_smoke_review as review
 
     summary_path = _write_semantic_summary(monkeypatch, tmp_path, extra=advice)
     monkeypatch.setattr(review, "REPORTS_DIR", tmp_path / "reports")
@@ -203,7 +203,7 @@ def test_red_review_and_assembler_share_personalized_advice_guard(monkeypatch, t
 
 
 def test_review_semantic_summary_smoke_allows_attributed_quoted_historical_advice(monkeypatch, tmp_path):
-    import podcast_ingest_core.semantic_summary_smoke_review as review
+    import corpus_ingest_core.semantic_summary_smoke_review as review
 
     _write_semantic_summary(
         monkeypatch,
@@ -220,7 +220,7 @@ def test_review_semantic_summary_smoke_allows_attributed_quoted_historical_advic
 def test_review_semantic_summary_smoke_rejects_target_price_and_guaranteed_return(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.semantic_summary_smoke_review as review
+    import corpus_ingest_core.semantic_summary_smoke_review as review
 
     _write_semantic_summary(
         monkeypatch,
@@ -242,7 +242,7 @@ def test_review_semantic_summary_smoke_rejects_target_price_and_guaranteed_retur
 def test_review_semantic_summary_smoke_warns_for_missing_quality_signals(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.semantic_summary_smoke_review as review
+    import corpus_ingest_core.semantic_summary_smoke_review as review
 
     _write_semantic_summary(
         monkeypatch,
@@ -262,7 +262,7 @@ def test_review_semantic_summary_smoke_warns_for_missing_quality_signals(
 
 
 def test_review_semantic_summary_smoke_cli_parses_arguments(monkeypatch, tmp_path, capsys):
-    from podcast_ingest_core.models import SemanticSummarySmokeReviewResult
+    from corpus_ingest_core.models import SemanticSummarySmokeReviewResult
     from scripts import review_semantic_summary_smoke as cli
 
     captured = {}
@@ -305,7 +305,7 @@ def test_review_semantic_summary_smoke_cli_parses_arguments(monkeypatch, tmp_pat
 
 
 def test_review_binds_summary_hash_and_rejects_extended_credential_forms(monkeypatch, tmp_path):
-    import podcast_ingest_core.semantic_summary_smoke_review as review
+    import corpus_ingest_core.semantic_summary_smoke_review as review
 
     summary_path = _write_semantic_summary(
         monkeypatch,
@@ -331,7 +331,7 @@ def test_review_binds_summary_hash_and_rejects_extended_credential_forms(monkeyp
 
 
 def test_review_rejects_json_and_yaml_quoted_credential_assignments(monkeypatch, tmp_path):
-    import podcast_ingest_core.semantic_summary_smoke_review as review
+    import corpus_ingest_core.semantic_summary_smoke_review as review
 
     _write_semantic_summary(
         monkeypatch,
@@ -359,7 +359,7 @@ def test_review_rejects_json_and_yaml_quoted_credential_assignments(monkeypatch,
     ),
 )
 def test_red_attributed_quote_exception_only_excludes_the_matched_quote_content(quoted_advice):
-    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+    from corpus_ingest_core.report_safety import matched_investment_advice_guard
 
     assert matched_investment_advice_guard(quoted_advice) is None
     assert (
@@ -377,7 +377,7 @@ def test_red_attributed_quote_exception_only_excludes_the_matched_quote_content(
     ),
 )
 def test_red_mismatched_quote_never_receives_the_attributed_advice_exception(mismatched_quote_advice):
-    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+    from corpus_ingest_core.report_safety import matched_investment_advice_guard
 
     assert matched_investment_advice_guard(mismatched_quote_advice) == "trade_action"
 
@@ -392,7 +392,7 @@ def test_red_mismatched_quote_never_receives_the_attributed_advice_exception(mis
     ),
 )
 def test_red_disclaimer_never_bypasses_direct_trade_command(text):
-    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+    from corpus_ingest_core.report_safety import matched_investment_advice_guard
 
     assert matched_investment_advice_guard(text) == "trade_action"
 
@@ -405,7 +405,7 @@ def test_red_disclaimer_never_bypasses_direct_trade_command(text):
     ),
 )
 def test_disclaimer_without_trade_command_is_not_rejected(disclaimer):
-    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+    from corpus_ingest_core.report_safety import matched_investment_advice_guard
 
     assert matched_investment_advice_guard(disclaimer) is None
 
@@ -421,7 +421,7 @@ def test_disclaimer_without_trade_command_is_not_rejected(disclaimer):
     ),
 )
 def test_red_attribution_exception_fails_closed_for_unrelated_or_ambiguous_quotes(text):
-    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+    from corpus_ingest_core.report_safety import matched_investment_advice_guard
 
     assert matched_investment_advice_guard(text) == "trade_action"
 
@@ -434,7 +434,7 @@ def test_red_attribution_exception_fails_closed_for_unrelated_or_ambiguous_quote
     ),
 )
 def test_direct_single_quote_attribution_remains_a_historical_exception(text):
-    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+    from corpus_ingest_core.report_safety import matched_investment_advice_guard
 
     assert matched_investment_advice_guard(text) is None
 
@@ -453,7 +453,7 @@ def test_direct_single_quote_attribution_remains_a_historical_exception(text):
     ),
 )
 def test_red_sentence_or_clause_boundary_rejects_trade_commands_after_colons_and_semicolons(text):
-    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+    from corpus_ingest_core.report_safety import matched_investment_advice_guard
 
     assert matched_investment_advice_guard(text) == "trade_action"
 
@@ -466,7 +466,7 @@ def test_red_sentence_or_clause_boundary_rejects_trade_commands_after_colons_and
     ),
 )
 def test_red_colon_or_semicolon_disclaimer_without_command_remains_allowed(disclaimer):
-    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+    from corpus_ingest_core.report_safety import matched_investment_advice_guard
 
     assert matched_investment_advice_guard(disclaimer) is None
 
@@ -479,7 +479,7 @@ def test_red_colon_or_semicolon_disclaimer_without_command_remains_allowed(discl
     ),
 )
 def test_red_subjectless_quote_attribution_never_receives_historical_exception(text):
-    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+    from corpus_ingest_core.report_safety import matched_investment_advice_guard
 
     assert matched_investment_advice_guard(text) == "trade_action"
 
@@ -494,7 +494,7 @@ def test_red_subjectless_quote_attribution_never_receives_historical_exception(t
     ),
 )
 def test_red_explicit_quote_attribution_subjects_remain_historical_exceptions(text):
-    from podcast_ingest_core.report_safety import matched_investment_advice_guard
+    from corpus_ingest_core.report_safety import matched_investment_advice_guard
 
     assert matched_investment_advice_guard(text) is None
 
@@ -503,8 +503,8 @@ def test_single_review_inspector_rejects_valid_external_review_path(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """A caller-provided file path must not authorize an arbitrary review directory."""
-    import podcast_ingest_core.semantic_review_artifact as artifact
-    import podcast_ingest_core.semantic_summary_smoke_review as smoke_review
+    import corpus_ingest_core.semantic_review_artifact as artifact
+    import corpus_ingest_core.semantic_summary_smoke_review as smoke_review
 
     trusted_reports = tmp_path / "trusted-reports"
     external_reports = tmp_path / "external-reports"
@@ -569,7 +569,7 @@ _LEARNING_NOTES_SUMMARY = "\n".join(
 
 
 def _prohibited_advice_status(markdown: str) -> str:
-    from podcast_ingest_core.semantic_review_artifact import (
+    from corpus_ingest_core.semantic_review_artifact import (
         evaluate_semantic_review_bytes,
     )
 

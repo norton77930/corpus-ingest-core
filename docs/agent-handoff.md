@@ -31,7 +31,7 @@ For historical context, 016 introduced 13 reviewed tools before 017 added the fo
 | 驗證指令 | `docs/verification-matrix.md` |
 | 功能規格 | `specs/`（`specs/README.md` 是 registry） |
 | 架構決策 | `docs/architecture-decision-records/README.md` |
-| Runtime 行為 | `src/podcast_ingest_core/`（CLI/MCP 只是 thin wrappers） |
+| Runtime 行為 | `src/corpus_ingest_core/`（CLI/MCP 只是 thin wrappers） |
 | Podcast/LLM/boundary 設定 | `config/*.yaml` |
 
 README.md 是 quick orientation 與 CLI 範例，不是 governance source。
@@ -59,14 +59,14 @@ README.md 是 quick orientation 與 CLI 範例，不是 governance source。
 | 018 verified research report / Skill | Preview is strict zero-write. Confirmed work must supply the previewed `expected_episode_ref` and exact `api_cost_ack` before RSS, environment/provider, writer, or child-stage access. The Core pins latest once, requires semantic review exact `passed`, fixes research options, validates source/provenance, and atomically publishes/reuses/fails closed a digest-versioned bundle. The portable Skill uses preview → explicit approval → one confirmed MCP call → report and stop; it has no CLI/terminal fallback, retry, scheduler, live market API, automatic cache rebuild, or investment advice | `tests/test_latest_episode_verified_research_report_workflow_runner.py`、`tests/test_latest_episode_verified_research_report_skill.py`、`tests/test_mcp_tool_registry_contract.py`、`tests/test_mcp_setup_validation.py` |
 | No investment advice | 不得產生 buy/sell/hold、target price、guaranteed returns 或個人化投資建議；review gate 會拒絕 prohibited advice 輸出 | `tests/test_research_llm_smoke_review.py`、`tests/test_gooaye_lens.py` |
 | No automatic cache rebuild | Side-effect tools 完成後不得自動 `rebuild_cache`，只回 cache stale warning；rebuild 是手動操作 | `tests/test_cache_rebuild_guard.py` |
-| Thin CLI / thick core | Runtime 行為住在 `src/podcast_ingest_core`；`scripts/` 與 MCP tools 只解析輸入、呼叫 core、格式化輸出 | `tests/test_contracts.py` |
+| Thin CLI / thick core | Runtime 行為住在 `src/corpus_ingest_core`；`scripts/` 與 MCP tools 只解析輸入、呼叫 core、格式化輸出 | `tests/test_contracts.py` |
 | MCP JSON envelope | MCP responses 維持既有 envelope：`{"ok": true, "data": ...}`、`{"ok": false, ...}`、dry-run 含 `"dry_run": true`；目前恰好 25 個 reviewed tools | `tests/test_mcp_tool_registry_contract.py`、`tests/test_mcp_server.py` |
 | 019 explicit-episode verified report / Skill | Preview is strict zero-write for a named `episode_ref` (reject latest/next). Confirm assembles/publishes only when local artifacts and lineage already pass; no `api_cost_ack`, no LLM/RSS/download, no 015–017 chaining. Blocked lists missing/stale roles. historically MCP Tool 16 + portable Skill | `tests/test_episode_verified_research_report_workflow_runner.py`、`tests/test_episode_verified_research_report_skill.py`、`tests/test_mcp_tool_registry_contract.py` |
 | 025 path-safety 結構單一來源 | 路徑安全結構 regex 只得定義於 `path_safety.py`；四個 runner 的 `_is_safe_local_path` 是薄包裝、真值表凍結（含刻意保留的變體差異） | `tests/test_path_safety_boundary.py`、`tests/test_path_safety_characterization.py` |
 | 025 run-report 寫入協定單一來源 | `_write_run_report` 一律委派 `run_report_io` 弱協定或 `audit_report_pair` 強協定，禁止內嵌 `.part` staging；弱→強升級為後續獨立 spec | `tests/test_run_report_io_boundary.py` |
 | 025 MCP facade 邊界 | `src` 僅一處 `FastMCP(`；`@mcp.tool()` 只存在 `mcp_tools_*` 群組模組；群組不得 import `mcp_server`；facade re-export 別名契約完整；completion 拒絕訊息單一來源於 Core | `tests/test_mcp_server_facade_boundary.py` |
 | 025 docs 計數一致性 | 受治理文件的 tool 計數宣稱必須等於 live registry 數或帶 historical 標記；`*closeout*` 檔豁免 | `tests/test_docs_registry_count_consistency.py` |
-| 025 測試資料目錄 fixture | conftest fixture 反射覆蓋全部 storage `*_DIR` 與 evals 旁路常數；`PODCAST_INGEST_DATA_DIR` 未設時預設不變；新測試檔不得再複製 `_use_tmp_data_dirs` | `tests/test_data_dir_fixture_contract.py` |
+| 025 測試資料目錄 fixture | conftest fixture 反射覆蓋全部 storage `*_DIR` 與 evals 旁路常數；`CORPUS_INGEST_DATA_DIR`（含舊名別名）未設時預設不變；新測試檔不得再複製 `_use_tmp_data_dirs` | `tests/test_data_dir_fixture_contract.py` |
 
 ## How to Start a New Feature
 
@@ -110,7 +110,7 @@ git diff --check
   完整 core function 清單、輸出路徑、CLI 與 MCP registry 移到 [`docs/api.md`](api.md)；agent handoff 狀態、Spec 編號、
   blocked 標記與 Phase 6H–7D.1 階段史移到本文件下方的 Relocated from README 區段。原本 pin README 的 exact-substring
   docs tests 已改為斷言新的 canonical 位置，邊界內容一字未鬆綁。
-- **`PODCAST_INGEST_DATA_DIR` 與路徑契約測試相衝**（open, 2026-08-22）：9 個測試把 `data/` 寫成字面值
+- **`CORPUS_INGEST_DATA_DIR` 與路徑契約測試相衝**（open, 2026-08-22；變數於 0.2.0 由 `PODCAST_INGEST_DATA_DIR` 更名，舊名仍為別名，兩者都會觸發本條）：9 個測試把 `data/` 寫成字面值
   （`tests/test_contracts.py::test_storage_paths_are_deterministic_and_under_data` 與 7 個
   `*_asset_paths_contract`），而 `docs/install-and-porting.md` 的 B2 方案正是叫操作者設這個變數把 `data/`
   搬到別處。照做後跑 pytest 得到 9 failed / 1639 passed，且失敗訊息完全看不出與環境變數有關。已在 B2
@@ -137,7 +137,7 @@ git diff --check
   只是 yt-dlp 預設偏好漸進式那個——所以 X 從不需要 ffmpeg,卻在下載 2.42 GiB 只為了 30.58 MiB 的音訊,
   而且沒有任何錯誤訊息會指出這件事。
   二是 live confirm 一定要改動已 commit 的 `config/podcasts.yaml`（`test_contracts.py` 對它有精確集合斷言）——
-  **已解決**：`config.py` 的 `DEFAULT_CONFIG_PATH` 現在讀 `PODCAST_INGEST_CONFIG`，與 `storage.DATA_DIR` 同形。
+  **已解決**：`config.py` 的 `DEFAULT_CONFIG_PATH` 現在讀 `CORPUS_INGEST_CONFIG`（當時叫 `PODCAST_INGEST_CONFIG`，0.2.0 更名並保留舊名別名），與 `storage.DATA_DIR` 同形。
   沒有走「給每個 runner 加 `--config` 參數」那條路：讀 profile 的呼叫點散在 14 個模組且都不傳 path，
   穿透它們會改到已被 MCP 工具與契約測試綁住的簽章。環境變數只改一行，而且 `config/*.local.yaml`
   早就在 `.gitignore` 內，慣例現成。
@@ -189,7 +189,7 @@ Phase 7D.1 是 Spec Kit Active Feature Guidance。此階段補清楚 official Sp
 
 ---
 
-## Handoff — podcast-ingest-core, 2026-08-19
+## Handoff — corpus-ingest-core, 2026-08-19
 
 > Relocated from `HANDOFF-2026-08-19.md` in the repo root on 2026-08-22, so the
 > root holds only what a first-time reader needs. The text is unchanged; only the

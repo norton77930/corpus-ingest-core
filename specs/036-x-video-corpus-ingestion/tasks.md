@@ -176,7 +176,7 @@ green test suite.
 
 ## T007/T008 evidence (2026-08-15)
 
-`src/podcast_ingest_core/segment_grouping.py` + `tests/test_segment_grouping.py`,
+`src/corpus_ingest_core/segment_grouping.py` + `tests/test_segment_grouping.py`,
 built in two red→green cycles (soft break, then hard cap) plus two behaviour pins
 (empty input; an over-long single segment stays whole, because the first segment
 of a group is admitted without a break check).

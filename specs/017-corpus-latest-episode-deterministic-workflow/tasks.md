@@ -18,8 +18,8 @@
 **Purpose**: Add the immutable, safe public contract before user-story behavior.
 
 - [x] T004 Add failing public-contract and zero-write dry-run tests in `tests/test_corpus_latest_episode_deterministic_workflow_runner.py`
-- [x] T005 Add workflow models, dedicated error, storage report paths, package exports, and safe result serialization in `src/podcast_ingest_core/models.py`, `errors.py`, `storage.py`, and `__init__.py`
-- [x] T006 Add the minimal importable `run_corpus_latest_episode_deterministic_workflow` runner in `src/podcast_ingest_core/corpus_latest_episode_deterministic_workflow_runner.py` and make T004 green
+- [x] T005 Add workflow models, dedicated error, storage report paths, package exports, and safe result serialization in `src/corpus_ingest_core/models.py`, `errors.py`, `storage.py`, and `__init__.py`
+- [x] T006 Add the minimal importable `run_corpus_latest_episode_deterministic_workflow` runner in `src/corpus_ingest_core/corpus_latest_episode_deterministic_workflow_runner.py` and make T004 green
 
 **Checkpoint**: The new public entry point has a dry-run-first immutable contract.
 
@@ -33,9 +33,9 @@ download, transcription, and one-at-a-time deterministic remediation in order,
 then returns `ready_for_semantic_summary` without LLM or secret access.
 
 - [x] T007 [US1] Add failing pinned-selector, ordered-stage, remediation-loop, and semantic-boundary tests in `tests/test_corpus_latest_episode_deterministic_workflow_runner.py`
-- [x] T008 [US1] Implement canonical latest snapshot, stage probe/dispatch loop, one-action remediation loop, confirmed report writing, and semantic boundary result in `src/podcast_ingest_core/corpus_latest_episode_deterministic_workflow_runner.py`
+- [x] T008 [US1] Implement canonical latest snapshot, stage probe/dispatch loop, one-action remediation loop, confirmed report writing, and semantic boundary result in `src/corpus_ingest_core/corpus_latest_episode_deterministic_workflow_runner.py`
 - [x] T009 [US1] Add RED MCP wrapper and 14-tool registry contract cases in `tests/test_mcp_server.py` and `tests/test_mcp_tool_registry_contract.py`
-- [x] T010 [US1] Add `run_corpus_latest_episode_deterministic_workflow` to `src/podcast_ingest_core/mcp_server.py` and update registry/docs-count guards in `tests/test_mcp_tool_registry_contract.py` and `tests/test_ai_governance_docs.py`
+- [x] T010 [US1] Add `run_corpus_latest_episode_deterministic_workflow` to `src/corpus_ingest_core/mcp_server.py` and update registry/docs-count guards in `tests/test_mcp_tool_registry_contract.py` and `tests/test_ai_governance_docs.py`
 - [x] T011 [US1] Add the thin CLI and its red/green contract coverage in `scripts/run_corpus_latest_episode_deterministic_workflow.py` and `tests/test_corpus_latest_episode_deterministic_workflow_runner.py`
 - [x] T012 [US1] Add the `corpus-latest-episode-processing` portable Skill and its metadata/no-fallback coverage in `.agents/skills/corpus-latest-episode-processing/SKILL.md` and `tests/test_corpus_latest_episode_processing_skill.py`
 
@@ -52,7 +52,7 @@ already-ready deterministic episode.
 step executes, or that no executor is called.
 
 - [x] T013 [US2] Add failing partial-artifact resume and already-ready no-op tests in `tests/test_corpus_latest_episode_deterministic_workflow_runner.py`
-- [x] T014 [US2] Extend the core runner's state classification and aggregate result rows in `src/podcast_ingest_core/corpus_latest_episode_deterministic_workflow_runner.py` to make T013 green
+- [x] T014 [US2] Extend the core runner's state classification and aggregate result rows in `src/corpus_ingest_core/corpus_latest_episode_deterministic_workflow_runner.py` to make T013 green
 
 **Checkpoint**: Repeat requests preserve valid work and surface the semantic
 handoff boundary without duplicate deterministic writes.
@@ -66,7 +66,7 @@ without fallback or later work.
 failure and assert no later stage executor is called.
 
 - [x] T015 [US3] Add failing failed/blocked selector, stage, remediation-action, safe-output, `.env`/provider, and cache-rebuild guard tests in `tests/test_corpus_latest_episode_deterministic_workflow_runner.py`
-- [x] T016 [US3] Implement fail-closed aggregation, repeated-action bound, sanitization, manual-cache warning, and no-LLM/no-secret enforcement in `src/podcast_ingest_core/corpus_latest_episode_deterministic_workflow_runner.py`
+- [x] T016 [US3] Implement fail-closed aggregation, repeated-action bound, sanitization, manual-cache warning, and no-LLM/no-secret enforcement in `src/corpus_ingest_core/corpus_latest_episode_deterministic_workflow_runner.py`
 
 **Checkpoint**: All unsafe or failed paths produce bounded metadata and stop.
 

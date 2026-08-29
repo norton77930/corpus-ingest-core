@@ -30,7 +30,7 @@ class FakeSynthesisProvider:
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "STOCK_LENS_DIR", tmp_path / "stock-lens", raising=False)
 
@@ -44,7 +44,7 @@ def _write_stock_lens(
     report_status="final",
     report_mode="deterministic-stock-lens-v1",
 ):
-    from podcast_ingest_core.storage import stock_lens_report_asset_paths
+    from corpus_ingest_core.storage import stock_lens_report_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = stock_lens_report_asset_paths(podcast_id, stock_query)
@@ -175,8 +175,8 @@ def _write_semantic_context(
     review_status="passed",
     body_extra="",
 ):
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
+    from corpus_ingest_core import storage
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     monkeypatch.setattr(storage, "SUMMARIES_DIR", tmp_path / "summaries", raising=False)
     monkeypatch.setattr(
@@ -231,7 +231,7 @@ def _write_semantic_context(
 def test_stock_lens_synthesis_dry_run_requires_ack_and_writes_nothing(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     _write_stock_lens(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -254,8 +254,8 @@ def test_stock_lens_synthesis_dry_run_requires_ack_and_writes_nothing(
 
 
 def test_stock_lens_synthesis_refuses_non_finance_summary_profile(monkeypatch, tmp_path):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
-    from podcast_ingest_core.errors import StockLensSynthesisInputError
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
+    from corpus_ingest_core.errors import StockLensSynthesisInputError
 
     _write_stock_lens(monkeypatch, tmp_path, podcast_id="x-raytar")
     monkeypatch.setattr(
@@ -277,8 +277,8 @@ def test_stock_lens_synthesis_refuses_non_finance_summary_profile(monkeypatch, t
 
 
 def test_stock_lens_synthesis_refuses_unknown_podcast_before_provider(monkeypatch, tmp_path):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
-    from podcast_ingest_core.errors import StockLensSynthesisInputError
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
+    from corpus_ingest_core.errors import StockLensSynthesisInputError
 
     _write_stock_lens(monkeypatch, tmp_path, podcast_id="no-such-podcast")
     monkeypatch.setattr(
@@ -294,8 +294,8 @@ def test_stock_lens_synthesis_refuses_unknown_podcast_before_provider(monkeypatc
 def test_stock_lens_synthesis_confirm_requires_exact_ack_before_writes(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
-    from podcast_ingest_core.errors import StockLensSynthesisInputError
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
+    from corpus_ingest_core.errors import StockLensSynthesisInputError
 
     _write_stock_lens(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -316,7 +316,7 @@ def test_stock_lens_synthesis_confirm_requires_exact_ack_before_writes(
 
 
 def test_stock_lens_synthesis_confirm_writes_json_and_markdown(monkeypatch, tmp_path):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     monkeypatch.delenv(synthesis.DEBUG_OUTPUT_PATH_ENV, raising=False)
     _write_stock_lens(monkeypatch, tmp_path)
@@ -355,7 +355,7 @@ def test_stock_lens_synthesis_confirm_writes_json_and_markdown(monkeypatch, tmp_
 def test_stock_lens_synthesis_can_include_reviewed_semantic_context(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     _write_stock_lens(monkeypatch, tmp_path)
     _write_semantic_context(monkeypatch, tmp_path)
@@ -388,7 +388,7 @@ def test_stock_lens_synthesis_can_include_reviewed_semantic_context(
 def test_stock_lens_synthesis_semantic_context_requires_passed_review(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     _write_stock_lens(monkeypatch, tmp_path)
     _write_semantic_context(monkeypatch, tmp_path, review_status="failed")
@@ -415,7 +415,7 @@ def test_stock_lens_synthesis_semantic_context_requires_passed_review(
 def test_stock_lens_synthesis_semantic_context_truncates_with_warning(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     _write_stock_lens(monkeypatch, tmp_path)
     _write_semantic_context(monkeypatch, tmp_path, body_extra="X" * 200)
@@ -442,7 +442,7 @@ def test_stock_lens_synthesis_semantic_context_truncates_with_warning(
 def test_stock_lens_synthesis_debug_output_writes_success_response(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     response = "debug raw synthesis text"
     raw_path = tmp_path / "raw" / "success.llm-output.md"
@@ -467,8 +467,8 @@ def test_stock_lens_synthesis_debug_output_writes_success_response(
 def test_stock_lens_synthesis_debug_output_writes_before_guard_failure(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
-    from podcast_ingest_core.errors import StockLensSynthesisInputError
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
+    from corpus_ingest_core.errors import StockLensSynthesisInputError
 
     response = "Buy 台積電 now."
     raw_path = tmp_path / "raw" / "blocked.llm-output.md"
@@ -497,8 +497,8 @@ def test_stock_lens_synthesis_debug_output_writes_before_guard_failure(
 def test_stock_lens_synthesis_debug_output_invalid_path_fails_cleanly(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
-    from podcast_ingest_core.errors import StockLensSynthesisFailedError
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
+    from corpus_ingest_core.errors import StockLensSynthesisFailedError
 
     raw_path = tmp_path / "raw-directory"
     raw_path.mkdir()
@@ -518,7 +518,7 @@ def test_stock_lens_synthesis_debug_output_invalid_path_fails_cleanly(
 def test_stock_lens_synthesis_preserves_no_evidence_inference_and_external_status(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     _write_stock_lens(
         monkeypatch,
@@ -550,8 +550,8 @@ def test_stock_lens_synthesis_preserves_no_evidence_inference_and_external_statu
 
 
 def test_stock_lens_synthesis_handles_partial_source(monkeypatch, tmp_path):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
-    from podcast_ingest_core.errors import StockLensSynthesisInputError
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
+    from corpus_ingest_core.errors import StockLensSynthesisInputError
 
     _write_stock_lens(monkeypatch, tmp_path, report_status="partial-draft")
     monkeypatch.setattr(synthesis, "_build_provider", lambda **kwargs: FakeSynthesisProvider())
@@ -577,8 +577,8 @@ def test_stock_lens_synthesis_handles_partial_source(monkeypatch, tmp_path):
 
 
 def test_stock_lens_synthesis_reuses_existing_without_force(monkeypatch, tmp_path):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
-    from podcast_ingest_core.storage import stock_lens_synthesis_asset_paths
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
+    from corpus_ingest_core.storage import stock_lens_synthesis_asset_paths
 
     _write_stock_lens(monkeypatch, tmp_path)
     paths = stock_lens_synthesis_asset_paths("gooaye", "台積電")
@@ -614,9 +614,9 @@ def test_stock_lens_synthesis_reuses_existing_without_force(monkeypatch, tmp_pat
 
 
 def test_stock_lens_synthesis_rejects_bad_source_inputs(monkeypatch, tmp_path):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
-    from podcast_ingest_core.errors import StockLensSynthesisInputError
-    from podcast_ingest_core.storage import stock_lens_report_asset_paths
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
+    from corpus_ingest_core.errors import StockLensSynthesisInputError
+    from corpus_ingest_core.storage import stock_lens_report_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     with pytest.raises(StockLensSynthesisInputError, match="missing"):
@@ -650,8 +650,8 @@ def test_stock_lens_synthesis_rejects_bad_source_inputs(monkeypatch, tmp_path):
 
 
 def test_stock_lens_synthesis_provider_failures_and_output_guard(monkeypatch, tmp_path):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
-    from podcast_ingest_core.errors import LLMProviderConfigError, StockLensSynthesisInputError
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
+    from corpus_ingest_core.errors import LLMProviderConfigError, StockLensSynthesisInputError
 
     _write_stock_lens(monkeypatch, tmp_path)
 
@@ -699,7 +699,7 @@ def test_stock_lens_synthesis_provider_failures_and_output_guard(monkeypatch, tm
 def test_stock_lens_synthesis_allows_safety_disclaimers(
     monkeypatch, tmp_path, response
 ):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     _write_stock_lens(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -737,8 +737,8 @@ def test_stock_lens_synthesis_allows_safety_disclaimers(
 def test_stock_lens_synthesis_rejects_trade_advice_patterns(
     monkeypatch, tmp_path, response
 ):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
-    from podcast_ingest_core.errors import StockLensSynthesisInputError
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
+    from corpus_ingest_core.errors import StockLensSynthesisInputError
 
     _write_stock_lens(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -757,8 +757,8 @@ def test_stock_lens_synthesis_rejects_trade_advice_patterns(
 
 
 def test_stock_lens_synthesis_rejects_prompt_over_limit(monkeypatch, tmp_path):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
-    from podcast_ingest_core.errors import StockLensSynthesisInputError
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
+    from corpus_ingest_core.errors import StockLensSynthesisInputError
 
     _write_stock_lens(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -778,7 +778,7 @@ def test_stock_lens_synthesis_rejects_prompt_over_limit(monkeypatch, tmp_path):
 
 
 def test_stock_lens_synthesis_path_removes_illegal_characters_and_emoji():
-    from podcast_ingest_core.storage import stock_lens_synthesis_asset_paths
+    from corpus_ingest_core.storage import stock_lens_synthesis_asset_paths
 
     paths = stock_lens_synthesis_asset_paths("gooaye", ' bad <stock> 🐣 : / \\ | ? * ok ')
 
@@ -791,8 +791,8 @@ def test_stock_lens_synthesis_path_removes_illegal_characters_and_emoji():
 def test_stock_lens_synthesis_cli_parses_options_and_outputs_json(
     monkeypatch, tmp_path, capsys
 ):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
-    from podcast_ingest_core.models import StockLensSynthesisResult
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
+    from corpus_ingest_core.models import StockLensSynthesisResult
     from scripts import generate_stock_lens_synthesis_report
 
     config_path = tmp_path / "llm_profiles.yaml"
@@ -904,7 +904,7 @@ profiles:
 
 
 def test_stock_lens_synthesis_cli_loads_env_file(monkeypatch, tmp_path, capsys):
-    from podcast_ingest_core.models import StockLensSynthesisResult
+    from corpus_ingest_core.models import StockLensSynthesisResult
     from scripts import generate_stock_lens_synthesis_report
 
     env_path = tmp_path / ".env"

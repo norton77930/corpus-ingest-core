@@ -23,9 +23,9 @@ python scripts/run_mcp_server.py
 請把路徑改成你本機 repo 的實際位置，不要把個人絕對路徑 commit 進專案。
 
 ```toml
-[mcp_servers.podcast-ingest-core]
+[mcp_servers.corpus-ingest-core]
 command = "python"
-args = ["D:/path/to/podcast-ingest-core/scripts/run_mcp_server.py"]
+args = ["D:/path/to/corpus-ingest-core/scripts/run_mcp_server.py"]
 ```
 
 ## Tools

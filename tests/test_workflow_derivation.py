@@ -8,9 +8,9 @@ from pathlib import Path
 import pytest
 import yaml
 
-from podcast_ingest_core.errors import LLMProviderConfigError, WorkflowDerivationError
-from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK
-from podcast_ingest_core.workflow_derivation import (
+from corpus_ingest_core.errors import LLMProviderConfigError, WorkflowDerivationError
+from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK
+from corpus_ingest_core.workflow_derivation import (
     result_to_dict,
     run_workflow_derivation,
 )
@@ -34,7 +34,7 @@ def _write_json(path: Path, payload: dict) -> None:
 
 
 def _ready_lecture(tmp_data_dirs: Path) -> None:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     seed = storage.corpus_episode_seed_asset_path(PODCAST, EPISODE)
     _write_json(
@@ -165,7 +165,7 @@ def test_dry_run_writes_nothing_and_does_not_construct_provider(
         raise AssertionError("provider must not be constructed")
 
     monkeypatch.setattr(
-        "podcast_ingest_core.workflow_derivation.create_provider", boom
+        "corpus_ingest_core.workflow_derivation.create_provider", boom
     )
     result = run_workflow_derivation(
         PODCAST, EPISODE, workflow_context=context
@@ -190,7 +190,7 @@ def test_finance_profile_is_refused(tmp_data_dirs):
 
 
 def test_missing_lecture_is_refused(tmp_data_dirs):
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     _ready_lecture(tmp_data_dirs)
     stem = storage.semantic_summary_asset_path(PODCAST, EPISODE, TITLE).name.removesuffix(
@@ -218,10 +218,10 @@ def test_confirm_writes_pair_and_omits_tools_absent_from_context(
     context = _context(tmp_data_dirs, ["Claude Code", "Codex"])
     captured: list = []
     monkeypatch.setattr(
-        "podcast_ingest_core.workflow_derivation.create_provider",
+        "corpus_ingest_core.workflow_derivation.create_provider",
         lambda *_args, **_kwargs: _FakeProvider(_valid_payload(), captured),
     )
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     lecture_before = {
         name: (storage.study_guide_bundle_paths_from_stem(
@@ -263,7 +263,7 @@ def test_confirm_rejects_payload_that_advises_omitted_tool(
     _ready_lecture(tmp_data_dirs)
     context = _context(tmp_data_dirs, ["Claude Code", "Codex"])
     monkeypatch.setattr(
-        "podcast_ingest_core.workflow_derivation.create_provider",
+        "corpus_ingest_core.workflow_derivation.create_provider",
         lambda *_args, **_kwargs: _FakeProvider(_valid_payload(copilot=True), []),
     )
     with pytest.raises(WorkflowDerivationError, match="absent from context"):
@@ -277,14 +277,14 @@ def test_confirm_rejects_payload_that_advises_omitted_tool(
 
 
 def test_artifact_ladder_does_not_include_workflow_derivation():
-    from podcast_ingest_core.corpus_remediation_plan import ARTIFACT_LADDER
+    from corpus_ingest_core.corpus_remediation_plan import ARTIFACT_LADDER
 
     assert "workflow_derivation" not in ARTIFACT_LADDER
 
 
 def test_lecture_stays_available_without_derivation_files(tmp_data_dirs):
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.corpus_index import generate_corpus_index
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.corpus_index import generate_corpus_index
 
     _ready_lecture(tmp_data_dirs)
     result = generate_corpus_index(PODCAST)
@@ -307,7 +307,7 @@ def test_wrong_ack_never_constructs_provider(tmp_data_dirs, monkeypatch):
         raise AssertionError("provider must not be constructed")
 
     monkeypatch.setattr(
-        "podcast_ingest_core.workflow_derivation.create_provider", boom
+        "corpus_ingest_core.workflow_derivation.create_provider", boom
     )
     with pytest.raises(LLMProviderConfigError):
         run_workflow_derivation(

@@ -7,7 +7,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import get_episode, list_episodes
+from corpus_ingest_core import get_episode, list_episodes
 
 
 def main() -> None:

@@ -31,7 +31,7 @@ FAKE_KEY_VALUE = "fake-key-value-71249"
 
 
 def _write_marker_transcript(monkeypatch, tmp_path, *, podcast_id="gooaye", episode_ref="EP672"):
-    from podcast_ingest_core.storage import transcript_asset_paths
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     title = f"{episode_ref} title"

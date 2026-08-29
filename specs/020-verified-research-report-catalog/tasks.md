@@ -26,15 +26,15 @@
 - [x] T005 [P] Add RED filesystem fixture tests for missing root zero-write, exact filters, sort, limits, per-level caps, canonical `v1-[a-f0-9]{64}`, symlink/junction rejection, and out-of-root containment in `tests/test_verified_research_report_catalog.py`.
 - [x] T006 [P] Add RED body-read guard tests proving list/search never read `report.json`, `report.md`, transcript, or source artifact bodies in `tests/test_verified_research_report_catalog.py`.
 - [x] T007 [P] Add RED inspect tests for exact three files, manifest schema, directory/manifest/report identity, SHA-256/size mismatches, malformed manifests, and mandatory `source_currentness_status=not_evaluated` in `tests/test_verified_research_report_catalog.py`.
-- [x] T008 Add result models, errors, exports, and bounded input validation stubs in `src/podcast_ingest_core/models.py`, `errors.py`, and `__init__.py` only as required to make RED imports resolve.
+- [x] T008 Add result models, errors, exports, and bounded input validation stubs in `src/corpus_ingest_core/models.py`, `errors.py`, and `__init__.py` only as required to make RED imports resolve.
 
 ## Phase 3: User Story 1 — List Canonical Bundles (P1) [US1] — C2
 
 **Goal**: Discover eligible local canonical bundle summaries without write or path disclosure.
 **Independent test**: Fixture tree with matching/nonmatching/malicious candidates returns sorted bounded safe summaries and no writes.
 
-- [x] T009 [US1] Implement non-reparse, contained, bounded level-by-level catalog traversal in `src/podcast_ingest_core/verified_research_report_catalog.py`.
-- [x] T010 [US1] Implement safe manifest projection and eligibility validation without report/transcript/source-body reads in `src/podcast_ingest_core/verified_research_report_catalog.py`.
+- [x] T009 [US1] Implement non-reparse, contained, bounded level-by-level catalog traversal in `src/corpus_ingest_core/verified_research_report_catalog.py`.
+- [x] T010 [US1] Implement safe manifest projection and eligibility validation without report/transcript/source-body reads in `src/corpus_ingest_core/verified_research_report_catalog.py`.
 - [x] T011 [US1] Implement `list_verified_research_reports` exact filters, 50 default/100 maximum limit, deterministic ordering, and missing-root empty result.
 - [x] T012 [US1] GREEN: run and pass T004–T006 list-related tests.
 
@@ -43,7 +43,7 @@
 **Goal**: Search only the safe projection without widening the read boundary.
 **Independent test**: Body-read guards remain untouched while known safe metadata terms match in deterministic bounded order.
 
-- [x] T013 [US2] Implement query normalization and safe scalar matching for `search_verified_research_reports` in `src/podcast_ingest_core/verified_research_report_catalog.py`.
+- [x] T013 [US2] Implement query normalization and safe scalar matching for `search_verified_research_reports` in `src/corpus_ingest_core/verified_research_report_catalog.py`.
 - [x] T014 [US2] Reject blank/unsafe/oversize query and preserve exact optional filters, bounds, and deterministic sort.
 - [x] T015 [US2] GREEN: run focused search/body-read safety tests from `tests/test_verified_research_report_catalog.py`.
 
@@ -52,7 +52,7 @@
 **Goal**: Verify only local bundle self-consistency for an exact locator.
 **Independent test**: Valid fixture succeeds; each structural or integrity mutation returns a bounded invalid verdict with currentness not evaluated.
 
-- [x] T016 [US3] Implement exact canonical locator resolution and pre-read containment/reparse checks in `src/podcast_ingest_core/verified_research_report_catalog.py`.
+- [x] T016 [US3] Implement exact canonical locator resolution and pre-read containment/reparse checks in `src/corpus_ingest_core/verified_research_report_catalog.py`.
 - [x] T017 [US3] Implement exact-three-file, manifest schema/identity, report JSON identity, and manifest SHA-256/size validation.
 - [x] T018 [US3] Implement sanitized inspection result with category-only failures and mandatory `source_currentness_status=not_evaluated`.
 - [x] T019 [US3] GREEN: run and pass T007 inspect tests, including tampering and no raw-manifest/absolute-path assertions.
@@ -62,7 +62,7 @@
 - [x] T020 [P] Add CLI RED tests in `tests/test_verified_research_report_catalog_cli.py` for `list/search/inspect`, input parsing, one-Core-call delegation, and JSON-safe output.
 - [x] T021 [P] Add MCP registry/adapter RED tests in `tests/test_mcp_tool_registry_contract.py` and `tests/test_mcp_server.py` for append-only Tool 17, existing envelope, and unchanged Tools 1–16.
 - [x] T022 [C5] Implement thin `scripts/query_verified_research_report_catalog.py`; no output/export/path/network/provider options.
-- [x] T023 [C6] Append thin `query_verified_research_report_catalog` MCP adapter as Tool 17 in `src/podcast_ingest_core/mcp_server.py`; do not alter Tool 1–16.
+- [x] T023 [C6] Append thin `query_verified_research_report_catalog` MCP adapter as Tool 17 in `src/corpus_ingest_core/mcp_server.py`; do not alter Tool 1–16.
 - [x] T024 [C5] GREEN: run CLI focused tests.
 - [x] T025 [C6] GREEN: run MCP adapter and registry focused tests.
 

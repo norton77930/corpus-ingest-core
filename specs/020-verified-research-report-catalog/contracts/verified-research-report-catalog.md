@@ -33,7 +33,7 @@ Traversal is bounded one level at a time under the canonical root and accepts ve
 
 List/search return only safe manifest-derived scalar metadata. They MUST NOT read report, transcript, or source-artifact bodies. Results omit raw manifest, paths (including absolute paths), unsafe URIs, secrets, and traceback bodies.
 
-Inspect requires the exact locator. It validates directory and manifest identity, `schema_version == REPORT_SCHEMA_VERSION == "latest-episode-verified-research-report-v1"` from `src/podcast_ingest_core/verified_research_report.py`, exactly `report.json`, `report.md`, and `manifest.json`, and manifest-recorded SHA-256/size for report JSON and Markdown. `manifest.json` is capped at 1 MiB and each report snapshot at 16 MiB; a size-bound failure is invalid. A success means bundle self-consistency only and always includes `source_currentness_status=not_evaluated`; it does not revalidate sources or lineage.
+Inspect requires the exact locator. It validates directory and manifest identity, `schema_version == REPORT_SCHEMA_VERSION == "latest-episode-verified-research-report-v1"` from `src/corpus_ingest_core/verified_research_report.py`, exactly `report.json`, `report.md`, and `manifest.json`, and manifest-recorded SHA-256/size for report JSON and Markdown. `manifest.json` is capped at 1 MiB and each report snapshot at 16 MiB; a size-bound failure is invalid. A success means bundle self-consistency only and always includes `source_currentness_status=not_evaluated`; it does not revalidate sources or lineage.
 
 ## CLI
 

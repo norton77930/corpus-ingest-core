@@ -3,7 +3,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from podcast_ingest_core.x_video_ingest import build_seed, derive_identity
+from corpus_ingest_core.x_video_ingest import build_seed, derive_identity
 
 
 def test_derives_podcast_id_and_episode_ref_from_a_status_url():
@@ -165,7 +165,7 @@ def _stub_acquisition(monkeypatch, module, *, info=None):
 def test_dry_run_returns_a_plan_and_touches_nothing(monkeypatch, tmp_data_dirs):
     """FR-014: the plan comes from metadata alone — no video, no transcription."""
 
-    from podcast_ingest_core import x_video_ingest
+    from corpus_ingest_core import x_video_ingest
 
     _stub_acquisition(monkeypatch, x_video_ingest)
 
@@ -204,8 +204,8 @@ def test_unregistered_source_is_refused_before_anything_is_downloaded(
     this test fails loudly if the check ever moves after acquisition.
     """
 
-    from podcast_ingest_core import x_video_ingest
-    from podcast_ingest_core.errors import XVideoIngestFailedError
+    from corpus_ingest_core import x_video_ingest
+    from corpus_ingest_core.errors import XVideoIngestFailedError
 
     _stub_acquisition(monkeypatch, x_video_ingest)
 
@@ -226,9 +226,9 @@ def test_a_profile_registered_as_rss_is_refused_by_the_x_surface(
     would be refused by RSS surfaces yet accepted by this one.
     """
 
-    from podcast_ingest_core import x_video_ingest
-    from podcast_ingest_core.errors import XVideoIngestFailedError
-    from podcast_ingest_core.models import PodcastProfile
+    from corpus_ingest_core import x_video_ingest
+    from corpus_ingest_core.errors import XVideoIngestFailedError
+    from corpus_ingest_core.models import PodcastProfile
 
     _stub_acquisition(monkeypatch, x_video_ingest)
     monkeypatch.setattr(
@@ -251,7 +251,7 @@ def test_a_profile_registered_as_rss_is_refused_by_the_x_surface(
 def test_unregistered_source_is_only_a_warning_during_a_dry_run(
     monkeypatch, tmp_data_dirs
 ):
-    from podcast_ingest_core import x_video_ingest
+    from corpus_ingest_core import x_video_ingest
 
     _stub_acquisition(monkeypatch, x_video_ingest)
 
@@ -269,7 +269,7 @@ def test_confirmed_run_lands_audio_and_seed_then_transcribes_under_the_title(
     import json
     from types import SimpleNamespace
 
-    from podcast_ingest_core import storage, x_video_ingest
+    from corpus_ingest_core import storage, x_video_ingest
 
     monkeypatch.setattr(
         x_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO)
@@ -337,7 +337,7 @@ def test_download_uses_the_real_requested_filepath_not_the_predicted_name(
     actually wrote, including for the explicit audio-only selector.
     """
 
-    from podcast_ingest_core import x_video_ingest
+    from corpus_ingest_core import x_video_ingest
 
     real_path = tmp_path / "work" / "2071290493581840707.m4a"
     predicted_path = tmp_path / "work" / "2071290493581840707.mp4"
@@ -377,8 +377,8 @@ def test_a_metadata_failure_is_wrapped_even_in_a_dry_run(monkeypatch, tmp_data_d
     ``ERROR: [twitter] 1: No video could be found in this tweet``.
     """
 
-    from podcast_ingest_core import x_video_ingest
-    from podcast_ingest_core.errors import XVideoIngestFailedError
+    from corpus_ingest_core import x_video_ingest
+    from corpus_ingest_core.errors import XVideoIngestFailedError
 
     def explode(*_args, **_kwargs):
         raise RuntimeError("No video could be found in this tweet")
@@ -396,8 +396,8 @@ def test_a_download_failure_is_wrapped_not_leaked_raw(monkeypatch, tmp_data_dirs
     third-party traceback the CLI's `except PodcastIngestCoreError` will miss.
     """
 
-    from podcast_ingest_core import x_video_ingest
-    from podcast_ingest_core.errors import XVideoIngestFailedError
+    from corpus_ingest_core import x_video_ingest
+    from corpus_ingest_core.errors import XVideoIngestFailedError
 
     class FakeDownloadError(Exception):
         pass
@@ -422,8 +422,8 @@ def test_an_extraction_failure_leaves_no_part_file_behind(monkeypatch, tmp_data_
     fail, so cleanup must not hang off an ``OSError``-only branch.
     """
 
-    from podcast_ingest_core import storage, x_video_ingest
-    from podcast_ingest_core.errors import XVideoIngestFailedError
+    from corpus_ingest_core import storage, x_video_ingest
+    from corpus_ingest_core.errors import XVideoIngestFailedError
 
     monkeypatch.setattr(
         x_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO)
@@ -458,7 +458,7 @@ def test_dry_run_plan_reflects_that_existing_audio_will_be_reused(
     a large download is reading fiction.
     """
 
-    from podcast_ingest_core import storage, x_video_ingest
+    from corpus_ingest_core import storage, x_video_ingest
 
     _stub_acquisition(monkeypatch, x_video_ingest)
 
@@ -487,7 +487,7 @@ def test_an_existing_audio_asset_is_not_downloaded_again(monkeypatch, tmp_data_d
 
     from types import SimpleNamespace
 
-    from podcast_ingest_core import storage, x_video_ingest
+    from corpus_ingest_core import storage, x_video_ingest
 
     monkeypatch.setattr(
         x_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO)
@@ -527,7 +527,7 @@ def test_a_failed_seed_write_leaves_no_partial_seed(monkeypatch, tmp_data_dirs):
 
     from types import SimpleNamespace
 
-    from podcast_ingest_core import storage, x_video_ingest
+    from corpus_ingest_core import storage, x_video_ingest
 
     monkeypatch.setattr(
         x_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO)

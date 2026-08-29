@@ -16,7 +16,7 @@ The current stack is a Python package with thin CLI scripts, local file artifact
 
 ## Architecture Decisions
 
-- Keep core behavior in `src/podcast_ingest_core`; scripts remain thin wrappers.
+- Keep core behavior in `src/corpus_ingest_core`; scripts remain thin wrappers.
 - Preserve local artifacts as the source of truth for the research layer.
 - Keep deterministic research steps separate from optional LLM steps.
 - Keep stock lens synthesis input constrained to `phase-6f-stock-lens-json-only` by default; Phase 6V opt-in reviewed semantic context must use `phase-6f-stock-lens-json-plus-reviewed-semantic-summary` and pass Phase 6V.1 boundary/context consistency checks.

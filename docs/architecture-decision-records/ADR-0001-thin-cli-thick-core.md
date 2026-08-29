@@ -10,7 +10,7 @@ Accepted（constitution v1.0.0 原則 II）
 
 ## Decision
 
-Runtime 行為一律住在 `src/podcast_ingest_core`。`scripts/` 與 MCP tools 是 thin wrappers：解析輸入、呼叫 core functions、格式化輸出。範例：`scripts/run_research_workflow.py` 只做 argparse 與 JSON 輸出，實際工作在 `podcast_ingest_core.run_research_workflow`。Public core functions 維持穩定 contract，變更需批准的 phase 加上測試與文件。
+Runtime 行為一律住在 `src/corpus_ingest_core`。`scripts/` 與 MCP tools 是 thin wrappers：解析輸入、呼叫 core functions、格式化輸出。範例：`scripts/run_research_workflow.py` 只做 argparse 與 JSON 輸出，實際工作在 `corpus_ingest_core.run_research_workflow`。Public core functions 維持穩定 contract，變更需批准的 phase 加上測試與文件。
 
 ## Consequences
 

@@ -30,11 +30,11 @@
 
 **CRITICAL**: No user story implementation can begin until this phase is complete.
 
-- [X] T004 Add corpus remediation plan result, episode row, action, blocker, and count models in `src/podcast_ingest_core/models.py`
-- [X] T005 Add corpus remediation plan error type in `src/podcast_ingest_core/errors.py`
-- [X] T006 Add `CorpusRemediationPlanAssetPaths` and `corpus_remediation_plan_asset_paths(podcast_id)` in `src/podcast_ingest_core/storage.py`
-- [X] T007 Create `src/podcast_ingest_core/corpus_remediation_plan.py` with public function signature, artifact family constants, and no-op-safe module skeleton
-- [X] T008 Export corpus remediation public function, error, and model types from `src/podcast_ingest_core/__init__.py`
+- [X] T004 Add corpus remediation plan result, episode row, action, blocker, and count models in `src/corpus_ingest_core/models.py`
+- [X] T005 Add corpus remediation plan error type in `src/corpus_ingest_core/errors.py`
+- [X] T006 Add `CorpusRemediationPlanAssetPaths` and `corpus_remediation_plan_asset_paths(podcast_id)` in `src/corpus_ingest_core/storage.py`
+- [X] T007 Create `src/corpus_ingest_core/corpus_remediation_plan.py` with public function signature, artifact family constants, and no-op-safe module skeleton
+- [X] T008 Export corpus remediation public function, error, and model types from `src/corpus_ingest_core/__init__.py`
 - [X] T009 Run foundational targeted tests in `tests/test_corpus_remediation_plan.py`
 
 **Checkpoint**: Public contracts and module boundaries exist, but remediation behavior is not complete.
@@ -56,9 +56,9 @@
 
 ### Implementation for User Story 1
 
-- [X] T014 [US1] Implement refreshed corpus index loading and empty corpus handling in `src/podcast_ingest_core/corpus_remediation_plan.py`
-- [X] T015 [US1] Implement full-ladder action ordering, per-episode rows, and summary counts in `src/podcast_ingest_core/corpus_remediation_plan.py`
-- [X] T016 [US1] Implement deterministic JSON and Markdown writers in `src/podcast_ingest_core/corpus_remediation_plan.py`
+- [X] T014 [US1] Implement refreshed corpus index loading and empty corpus handling in `src/corpus_ingest_core/corpus_remediation_plan.py`
+- [X] T015 [US1] Implement full-ladder action ordering, per-episode rows, and summary counts in `src/corpus_ingest_core/corpus_remediation_plan.py`
+- [X] T016 [US1] Implement deterministic JSON and Markdown writers in `src/corpus_ingest_core/corpus_remediation_plan.py`
 - [X] T017 [US1] Implement thin CLI `scripts/generate_corpus_remediation_plan.py`
 - [X] T018 [US1] Add CLI stdout contract test for output paths and summary counts in `tests/test_corpus_remediation_plan.py`
 - [X] T019 [US1] Run User Story 1 targeted tests in `tests/test_corpus_remediation_plan.py`
@@ -81,9 +81,9 @@
 
 ### Implementation for User Story 2
 
-- [X] T023 [US2] Implement transcript and upstream blocker generation in `src/podcast_ingest_core/corpus_remediation_plan.py`
-- [X] T024 [US2] Implement warning propagation from corpus index rows into remediation row and summary warnings in `src/podcast_ingest_core/corpus_remediation_plan.py`
-- [X] T025 [US2] Implement advisory command text for download, transcribe, and deterministic downstream actions without executing commands in `src/podcast_ingest_core/corpus_remediation_plan.py`
+- [X] T023 [US2] Implement transcript and upstream blocker generation in `src/corpus_ingest_core/corpus_remediation_plan.py`
+- [X] T024 [US2] Implement warning propagation from corpus index rows into remediation row and summary warnings in `src/corpus_ingest_core/corpus_remediation_plan.py`
+- [X] T025 [US2] Implement advisory command text for download, transcribe, and deterministic downstream actions without executing commands in `src/corpus_ingest_core/corpus_remediation_plan.py`
 - [X] T026 [US2] Run User Story 2 targeted tests in `tests/test_corpus_remediation_plan.py`
 
 **Checkpoint**: Broken or incomplete episodes remain visible, with blockers and warnings isolated to affected rows.
@@ -104,9 +104,9 @@
 
 ### Implementation for User Story 3
 
-- [X] T030 [US3] Implement semantic summary and semantic review gated action metadata in `src/podcast_ingest_core/corpus_remediation_plan.py`
-- [X] T031 [US3] Include semantic review status, path, check counts, failed counts, and warning counts from the refreshed corpus index in `src/podcast_ingest_core/corpus_remediation_plan.py`
-- [X] T032 [US3] Harden JSON and Markdown serialization against raw transcript, evidence, semantic body, prompt, raw LLM output, and secret leakage in `src/podcast_ingest_core/corpus_remediation_plan.py`
+- [X] T030 [US3] Implement semantic summary and semantic review gated action metadata in `src/corpus_ingest_core/corpus_remediation_plan.py`
+- [X] T031 [US3] Include semantic review status, path, check counts, failed counts, and warning counts from the refreshed corpus index in `src/corpus_ingest_core/corpus_remediation_plan.py`
+- [X] T032 [US3] Harden JSON and Markdown serialization against raw transcript, evidence, semantic body, prompt, raw LLM output, and secret leakage in `src/corpus_ingest_core/corpus_remediation_plan.py`
 - [X] T033 [US3] Run User Story 3 targeted tests in `tests/test_corpus_remediation_plan.py`
 
 **Checkpoint**: Semantic remediation is visible but clearly optional/gated and leak-safe.
@@ -196,4 +196,4 @@ Task: "Add failing deterministic regeneration and no generated_at test in tests/
 
 ## Phase 7: Convergence
 
-- [X] T044 Add external boundary transitive transcript blocker coverage and implementation in `tests/test_corpus_remediation_plan.py` and `src/podcast_ingest_core/corpus_remediation_plan.py` per FR-010 / Edge Cases / data-model ladder (partial)
+- [X] T044 Add external boundary transitive transcript blocker coverage and implementation in `tests/test_corpus_remediation_plan.py` and `src/corpus_ingest_core/corpus_remediation_plan.py` per FR-010 / Edge Cases / data-model ladder (partial)

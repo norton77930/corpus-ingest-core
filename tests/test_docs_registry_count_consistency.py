@@ -73,7 +73,7 @@ def _governed_files() -> list[Path]:
 
 
 def _live_tool_count() -> int:
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     return len(asyncio.run(mcp_server.mcp.list_tools()))
 

@@ -37,7 +37,7 @@ def _fake_feed(entries):
 
 
 def test_list_episodes_normalizes_mock_rss(monkeypatch):
-    from podcast_ingest_core import feed_reader
+    from corpus_ingest_core import feed_reader
 
     monkeypatch.setattr(
         feed_reader.feedparser,
@@ -75,7 +75,7 @@ def test_list_episodes_normalizes_mock_rss(monkeypatch):
 
 
 def test_list_episodes_respects_limit(monkeypatch):
-    from podcast_ingest_core import feed_reader
+    from corpus_ingest_core import feed_reader
 
     monkeypatch.setattr(
         feed_reader.feedparser,
@@ -91,7 +91,7 @@ def test_list_episodes_respects_limit(monkeypatch):
 
 
 def test_get_episode_supports_latest_and_case_insensitive_lookup(monkeypatch):
-    from podcast_ingest_core import feed_reader
+    from corpus_ingest_core import feed_reader
 
     monkeypatch.setattr(
         feed_reader.feedparser,
@@ -108,7 +108,7 @@ def test_get_episode_supports_latest_and_case_insensitive_lookup(monkeypatch):
 
 
 def test_get_episode_searches_beyond_default_list_limit(monkeypatch):
-    from podcast_ingest_core import feed_reader
+    from corpus_ingest_core import feed_reader
 
     entries = [_entry(f"EP{672 - index} 近期集數") for index in range(10)]
     entries.append(_entry("EP600 較舊集數"))
@@ -120,8 +120,8 @@ def test_get_episode_searches_beyond_default_list_limit(monkeypatch):
 
 
 def test_get_episode_raises_clear_error_when_not_found(monkeypatch):
-    from podcast_ingest_core import feed_reader
-    from podcast_ingest_core.errors import EpisodeNotFoundError
+    from corpus_ingest_core import feed_reader
+    from corpus_ingest_core.errors import EpisodeNotFoundError
 
     monkeypatch.setattr(
         feed_reader.feedparser,
@@ -134,7 +134,7 @@ def test_get_episode_raises_clear_error_when_not_found(monkeypatch):
 
 
 def test_mapping_config_format_is_supported(tmp_path):
-    from podcast_ingest_core.config import load_podcast_profiles
+    from corpus_ingest_core.config import load_podcast_profiles
 
     config_path = tmp_path / "podcasts.yaml"
     config_path.write_text(
@@ -161,25 +161,25 @@ def test_list_episodes_refuses_a_non_rss_source_with_a_source_aware_error():
     inside feedparser, which told the caller nothing about why.
     """
 
-    from podcast_ingest_core import feed_reader
-    from podcast_ingest_core.errors import UnsupportedSourceTypeError
+    from corpus_ingest_core import feed_reader
+    from corpus_ingest_core.errors import UnsupportedSourceTypeError
 
     with pytest.raises(UnsupportedSourceTypeError, match="x-video"):
         feed_reader.list_episodes("x-raytar")
 
 
 def test_get_episode_refuses_a_non_rss_source_with_a_source_aware_error():
-    from podcast_ingest_core import feed_reader
-    from podcast_ingest_core.errors import UnsupportedSourceTypeError
+    from corpus_ingest_core import feed_reader
+    from corpus_ingest_core.errors import UnsupportedSourceTypeError
 
     with pytest.raises(UnsupportedSourceTypeError, match="x-raytar"):
         feed_reader.get_episode("x-raytar", "2071290493581840707")
 
 
 def test_list_episodes_refuses_youtube_and_names_the_ingest_path(monkeypatch):
-    from podcast_ingest_core import config, feed_reader
-    from podcast_ingest_core.errors import UnsupportedSourceTypeError
-    from podcast_ingest_core.models import PodcastProfile
+    from corpus_ingest_core import config, feed_reader
+    from corpus_ingest_core.errors import UnsupportedSourceTypeError
+    from corpus_ingest_core.models import PodcastProfile
 
     monkeypatch.setattr(
         config,

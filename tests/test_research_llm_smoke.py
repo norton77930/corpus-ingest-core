@@ -15,7 +15,7 @@ ACK = (
 
 
 def _workflow_result(*, dry_run: bool, confirm: bool):
-    from podcast_ingest_core.models import ResearchWorkflowResult, ResearchWorkflowStep
+    from corpus_ingest_core.models import ResearchWorkflowResult, ResearchWorkflowStep
 
     return ResearchWorkflowResult(
         podcast_id="gooaye",
@@ -159,7 +159,7 @@ def test_research_llm_smoke_confirm_requires_exact_ack_before_workflow(
 def test_research_llm_smoke_confirm_passes_expected_workflow_options(
     monkeypatch, capsys
 ):
-    import podcast_ingest_core.stock_lens_synthesis as synthesis
+    import corpus_ingest_core.stock_lens_synthesis as synthesis
     from scripts import run_research_llm_smoke
 
     calls = []

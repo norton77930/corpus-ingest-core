@@ -10,8 +10,8 @@ import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> None:
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_index as corpus_index
+    from corpus_ingest_core import storage
+    import corpus_ingest_core.corpus_index as corpus_index
 
     monkeypatch.setattr(storage, "AUDIO_DIR", tmp_path / "audio")
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
@@ -44,7 +44,7 @@ def _write_episode_seed(
     title: str = "EP677 Alpha",
     has_audio_url: bool = True,
 ) -> Path:
-    from podcast_ingest_core.storage import corpus_episode_seed_asset_path
+    from corpus_ingest_core.storage import corpus_episode_seed_asset_path
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     return _write_json(
@@ -154,12 +154,12 @@ def _fake_plan_refresh(
     payload: dict,
     calls: list[str] | None = None,
 ):
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.models import (
         CorpusRemediationActionCounts,
         CorpusRemediationPlanResult,
     )
-    import podcast_ingest_core.corpus_audio_download_runner as runner
+    import corpus_ingest_core.corpus_audio_download_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
 
@@ -201,7 +201,7 @@ def _audio_asset(
     source_url: str = "https://example.invalid/audio.mp3?token=secret-value",
     local_name: str | None = None,
 ):
-    from podcast_ingest_core.models import AudioAsset
+    from corpus_ingest_core.models import AudioAsset
 
     local_path = tmp_path / "audio" / "gooaye" / (local_name or f"{episode_ref}__Alpha.mp3")
     local_path.parent.mkdir(parents=True, exist_ok=True)
@@ -240,12 +240,12 @@ def _rows_by_episode(result) -> dict[str, object]:
 def test_preview_corpus_audio_download_from_in_memory_plan(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.models import (
         CorpusRemediationActionCounts,
         CorpusRemediationPlanResult,
     )
-    import podcast_ingest_core.corpus_audio_download_runner as runner
+    import corpus_ingest_core.corpus_audio_download_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     payload = _plan_payload([_episode_payload("EP677", title="EP677 Alpha")])
@@ -283,8 +283,8 @@ def test_preview_corpus_audio_download_from_in_memory_plan(
 def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_audio_download_runner as runner
+    from corpus_ingest_core import storage
+    import corpus_ingest_core.corpus_audio_download_runner as runner
 
     _write_episode_seed(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -317,7 +317,7 @@ def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(
 
 
 def test_corpus_audio_download_run_asset_paths_contract():
-    from podcast_ingest_core.storage import corpus_audio_download_run_asset_paths
+    from corpus_ingest_core.storage import corpus_audio_download_run_asset_paths
 
     paths = corpus_audio_download_run_asset_paths("gooaye")
 
@@ -326,7 +326,7 @@ def test_corpus_audio_download_run_asset_paths_contract():
 
 
 def test_corpus_audio_download_public_result_contract_exports(tmp_path):
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         CorpusAudioDownloadOutcomeCounts,
         CorpusAudioDownloadRunFilter,
         CorpusAudioDownloadRunResult,
@@ -390,7 +390,7 @@ def test_corpus_audio_download_public_result_contract_exports(tmp_path):
 
 
 def test_corpus_audio_download_runner_error_contract():
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         CorpusAudioDownloadRunnerFailedError,
         PodcastIngestCoreError,
     )
@@ -399,10 +399,10 @@ def test_corpus_audio_download_runner_error_contract():
 
 
 def test_dry_run_empty_corpus_writes_no_report(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
-    from podcast_ingest_core.storage import corpus_audio_download_run_asset_paths
+    from corpus_ingest_core.storage import corpus_audio_download_run_asset_paths
 
     _fake_plan_refresh(monkeypatch, tmp_path, _plan_payload([]))
 
@@ -420,7 +420,7 @@ def test_dry_run_empty_corpus_writes_no_report(monkeypatch, tmp_path):
 
 
 def test_dry_run_refreshes_remediation_plan_before_selection(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 
@@ -440,7 +440,7 @@ def test_dry_run_refreshes_remediation_plan_before_selection(monkeypatch, tmp_pa
 
 
 def test_dry_run_selects_only_missing_audio_ready_actions(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 
@@ -473,7 +473,7 @@ def test_dry_run_selects_only_missing_audio_ready_actions(monkeypatch, tmp_path)
 def test_dry_run_selects_seeded_ready_audio_and_skips_seeded_no_audio(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 
@@ -502,7 +502,7 @@ def test_dry_run_selects_seeded_ready_audio_and_skips_seeded_no_audio(
 
 
 def test_dry_run_skips_unsafe_states_and_other_families(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 
@@ -553,11 +553,11 @@ def test_dry_run_skips_unsafe_states_and_other_families(monkeypatch, tmp_path):
 
 
 def test_dry_run_no_rss_network_downloader_or_report_write(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_audio_download_runner as runner
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    import corpus_ingest_core.corpus_audio_download_runner as runner
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
-    from podcast_ingest_core.storage import corpus_audio_download_run_asset_paths
+    from corpus_ingest_core.storage import corpus_audio_download_run_asset_paths
 
     _fake_plan_refresh(monkeypatch, tmp_path, _plan_payload([_episode_payload("EP001")]))
 
@@ -575,7 +575,7 @@ def test_dry_run_no_rss_network_downloader_or_report_write(monkeypatch, tmp_path
 
 
 def test_dry_run_is_deterministic_and_has_no_generated_at(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 
@@ -598,7 +598,7 @@ def test_dry_run_is_deterministic_and_has_no_generated_at(monkeypatch, tmp_path)
 def test_run_corpus_audio_download_cli_dry_run_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core.models import (
         CorpusAudioDownloadOutcomeCounts,
         CorpusAudioDownloadRunFilter,
         CorpusAudioDownloadRunResult,
@@ -652,9 +652,9 @@ def test_run_corpus_audio_download_cli_dry_run_outputs_json(
 def test_confirmed_execution_rejects_missing_or_blank_episode_before_download(
     monkeypatch, tmp_path, episode_ref
 ):
-    import podcast_ingest_core.corpus_audio_download_runner as runner
-    from podcast_ingest_core import CorpusAudioDownloadRunnerFailedError
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    import corpus_ingest_core.corpus_audio_download_runner as runner
+    from corpus_ingest_core import CorpusAudioDownloadRunnerFailedError
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 
@@ -671,8 +671,8 @@ def test_confirmed_execution_rejects_missing_or_blank_episode_before_download(
 def test_confirmed_execution_records_absent_requested_episode_as_rejected(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_audio_download_runner as runner
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    import corpus_ingest_core.corpus_audio_download_runner as runner
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 
@@ -693,8 +693,8 @@ def test_confirmed_execution_records_absent_requested_episode_as_rejected(
 def test_confirmed_execution_records_non_selected_episode_as_rejected(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_audio_download_runner as runner
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    import corpus_ingest_core.corpus_audio_download_runner as runner
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 
@@ -718,8 +718,8 @@ def test_confirmed_execution_records_non_selected_episode_as_rejected(
 def test_confirmed_execution_calls_download_audio_once_without_shell(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_audio_download_runner as runner
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    import corpus_ingest_core.corpus_audio_download_runner as runner
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 
@@ -743,7 +743,7 @@ def test_confirmed_execution_calls_download_audio_once_without_shell(
     assert calls == [("gooaye", "EP001")]
     assert result.counts.downloaded_count == 1
     assert result.rows[0].local_audio_path is not None
-    source = Path("src/podcast_ingest_core/corpus_audio_download_runner.py").read_text(
+    source = Path("src/corpus_ingest_core/corpus_audio_download_runner.py").read_text(
         encoding="utf-8"
     )
     assert "subprocess" not in source
@@ -752,8 +752,8 @@ def test_confirmed_execution_calls_download_audio_once_without_shell(
 def test_confirmed_execution_maps_downloaded_and_reused_outcomes(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_audio_download_runner as runner
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    import corpus_ingest_core.corpus_audio_download_runner as runner
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 
@@ -779,8 +779,8 @@ def test_confirmed_execution_maps_downloaded_and_reused_outcomes(
 
 
 def test_confirmed_run_report_json_and_markdown_are_written(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_audio_download_runner as runner
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    import corpus_ingest_core.corpus_audio_download_runner as runner
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 
@@ -806,8 +806,8 @@ def test_confirmed_run_report_json_and_markdown_are_written(monkeypatch, tmp_pat
 
 
 def test_cli_confirmed_stdout_and_stderr_contract(monkeypatch, capsys, tmp_path):
-    from podcast_ingest_core import CorpusAudioDownloadRunnerFailedError
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core import CorpusAudioDownloadRunnerFailedError
+    from corpus_ingest_core.models import (
         CorpusAudioDownloadOutcomeCounts,
         CorpusAudioDownloadRunFilter,
         CorpusAudioDownloadRunResult,
@@ -862,8 +862,8 @@ def test_cli_confirmed_stdout_and_stderr_contract(monkeypatch, capsys, tmp_path)
 def test_download_failure_records_metadata_without_traceback_or_url(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_audio_download_runner as runner
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    import corpus_ingest_core.corpus_audio_download_runner as runner
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 
@@ -890,8 +890,8 @@ def test_download_failure_records_metadata_without_traceback_or_url(
 def test_outputs_do_not_leak_source_url_secret_prompt_llm_or_traceback(
     monkeypatch, tmp_path, capsys
 ):
-    import podcast_ingest_core.corpus_audio_download_runner as runner
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    import corpus_ingest_core.corpus_audio_download_runner as runner
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
     from scripts import run_corpus_audio_download as cli
@@ -950,8 +950,8 @@ def test_outputs_do_not_leak_source_url_secret_prompt_llm_or_traceback(
 def test_confirmed_output_sanitizes_secret_like_local_audio_path(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_audio_download_runner as runner
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    import corpus_ingest_core.corpus_audio_download_runner as runner
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 
@@ -982,8 +982,8 @@ def test_confirmed_output_sanitizes_secret_like_local_audio_path(
 def test_boundary_guard_excludes_forbidden_surfaces_without_execution(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_audio_download_runner as runner
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    import corpus_ingest_core.corpus_audio_download_runner as runner
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 
@@ -997,7 +997,7 @@ def test_boundary_guard_excludes_forbidden_surfaces_without_execution(
     result = run_corpus_audio_download("gooaye", confirm=True, episode_ref="EP001")
 
     assert result.counts.downloaded_count == 1
-    source = Path("src/podcast_ingest_core/corpus_audio_download_runner.py").read_text(
+    source = Path("src/corpus_ingest_core/corpus_audio_download_runner.py").read_text(
         encoding="utf-8"
     )
     forbidden_fragments = [
@@ -1023,8 +1023,8 @@ def test_boundary_guard_excludes_forbidden_surfaces_without_execution(
 def test_confirmed_writes_manual_follow_up_warning_without_downstream_calls(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_audio_download_runner as runner
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    import corpus_ingest_core.corpus_audio_download_runner as runner
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 
@@ -1039,7 +1039,7 @@ def test_confirmed_writes_manual_follow_up_warning_without_downstream_calls(
 
     assert any("manual" in warning.message.lower() for warning in result.warnings)
     assert any("cache" in warning.message.lower() for warning in result.warnings)
-    source = Path("src/podcast_ingest_core/corpus_audio_download_runner.py").read_text(
+    source = Path("src/corpus_ingest_core/corpus_audio_download_runner.py").read_text(
         encoding="utf-8"
     )
     assert "rebuild_cache(" not in source
@@ -1047,8 +1047,8 @@ def test_confirmed_writes_manual_follow_up_warning_without_downstream_calls(
 
 
 def test_outputs_keep_no_investment_advice_boundary(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_audio_download_runner as runner
-    from podcast_ingest_core.corpus_audio_download_runner import (
+    import corpus_ingest_core.corpus_audio_download_runner as runner
+    from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
 

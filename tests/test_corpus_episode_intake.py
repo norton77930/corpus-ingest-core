@@ -8,8 +8,8 @@ import sys
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> None:
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_index as corpus_index
+    from corpus_ingest_core import storage
+    import corpus_ingest_core.corpus_index as corpus_index
 
     monkeypatch.setattr(storage, "AUDIO_DIR", tmp_path / "audio")
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
@@ -41,7 +41,7 @@ def _episode(
     source_url: str | None = "https://source.example.invalid/episode?token=secret",
     description: str | None = "raw description must not leak",
 ):
-    from podcast_ingest_core.models import Episode
+    from corpus_ingest_core.models import Episode
 
     return Episode(
         podcast_id="gooaye",
@@ -58,13 +58,13 @@ def _episode(
 
 
 def _payload(result) -> dict:
-    from podcast_ingest_core.corpus_episode_intake import result_to_dict
+    from corpus_ingest_core.corpus_episode_intake import result_to_dict
 
     return result_to_dict(result)
 
 
 def test_corpus_episode_seed_storage_paths_contract():
-    from podcast_ingest_core.storage import (
+    from corpus_ingest_core.storage import (
         corpus_episode_intake_run_asset_paths,
         corpus_episode_seed_asset_path,
     )
@@ -84,7 +84,7 @@ def test_corpus_episode_seed_storage_paths_contract():
 
 
 def test_corpus_episode_intake_public_result_contract_exports(tmp_path):
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         CorpusEpisodeIntakeFilter,
         CorpusEpisodeIntakeOutcomeCounts,
         CorpusEpisodeIntakeRunResult,
@@ -166,7 +166,7 @@ def test_corpus_episode_intake_public_result_contract_exports(tmp_path):
 
 
 def test_corpus_episode_intake_error_contract():
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         CorpusEpisodeIntakeFailedError,
         PodcastIngestCoreError,
     )
@@ -175,9 +175,9 @@ def test_corpus_episode_intake_error_contract():
 
 
 def test_dry_run_latest_resolution_writes_no_seed_or_report(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_episode_intake as runner
-    from podcast_ingest_core.corpus_episode_intake import run_corpus_episode_intake
-    from podcast_ingest_core.storage import (
+    import corpus_ingest_core.corpus_episode_intake as runner
+    from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
+    from corpus_ingest_core.storage import (
         corpus_episode_intake_run_asset_paths,
         corpus_episode_seed_asset_path,
     )
@@ -208,8 +208,8 @@ def test_dry_run_latest_resolution_writes_no_seed_or_report(monkeypatch, tmp_pat
 
 
 def test_dry_run_explicit_episode_resolution(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_episode_intake as runner
-    from podcast_ingest_core.corpus_episode_intake import run_corpus_episode_intake
+    import corpus_ingest_core.corpus_episode_intake as runner
+    from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     calls: list[str] = []
@@ -229,8 +229,8 @@ def test_dry_run_explicit_episode_resolution(monkeypatch, tmp_path):
 
 
 def test_dry_run_blank_selector_defaults_to_latest(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_episode_intake as runner
-    from podcast_ingest_core.corpus_episode_intake import run_corpus_episode_intake
+    import corpus_ingest_core.corpus_episode_intake as runner
+    from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     calls: list[str] = []
@@ -249,10 +249,10 @@ def test_dry_run_blank_selector_defaults_to_latest(monkeypatch, tmp_path):
 
 
 def test_dry_run_unresolved_selector_is_rejected_without_writes(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_episode_intake as runner
-    from podcast_ingest_core.corpus_episode_intake import run_corpus_episode_intake
-    from podcast_ingest_core.errors import EpisodeNotFoundError
-    from podcast_ingest_core.storage import (
+    import corpus_ingest_core.corpus_episode_intake as runner
+    from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
+    from corpus_ingest_core.errors import EpisodeNotFoundError
+    from corpus_ingest_core.storage import (
         corpus_episode_intake_run_asset_paths,
         corpus_episode_seed_asset_path,
     )
@@ -279,8 +279,8 @@ def test_dry_run_unresolved_selector_is_rejected_without_writes(monkeypatch, tmp
 
 
 def test_dry_run_does_not_call_side_effect_boundaries(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_episode_intake as runner
-    from podcast_ingest_core.corpus_episode_intake import run_corpus_episode_intake
+    import corpus_ingest_core.corpus_episode_intake as runner
+    from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     calls: list[str] = []
@@ -316,8 +316,8 @@ def test_dry_run_does_not_call_side_effect_boundaries(monkeypatch, tmp_path):
 
 
 def test_dry_run_is_deterministic_and_has_no_generated_at(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_episode_intake as runner
-    from podcast_ingest_core.corpus_episode_intake import run_corpus_episode_intake
+    import corpus_ingest_core.corpus_episode_intake as runner
+    from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -341,7 +341,7 @@ def test_dry_run_is_deterministic_and_has_no_generated_at(monkeypatch, tmp_path)
 def test_run_corpus_episode_intake_cli_dry_run_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core.models import (
         CorpusEpisodeIntakeFilter,
         CorpusEpisodeIntakeOutcomeCounts,
         CorpusEpisodeIntakeRunResult,
@@ -394,9 +394,9 @@ def test_run_corpus_episode_intake_cli_dry_run_outputs_json(
 def test_confirmed_run_writes_deterministic_seed_metadata_and_report(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_episode_intake as runner
-    from podcast_ingest_core.corpus_episode_intake import run_corpus_episode_intake
-    from podcast_ingest_core.storage import (
+    import corpus_ingest_core.corpus_episode_intake as runner
+    from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
+    from corpus_ingest_core.storage import (
         corpus_episode_intake_run_asset_paths,
         corpus_episode_seed_asset_path,
     )
@@ -447,9 +447,9 @@ def test_confirmed_run_writes_deterministic_seed_metadata_and_report(
 def test_repeated_confirmed_run_records_reused_without_duplicate_seed(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_episode_intake as runner
-    from podcast_ingest_core.corpus_episode_intake import run_corpus_episode_intake
-    from podcast_ingest_core.storage import corpus_episode_seed_asset_path
+    import corpus_ingest_core.corpus_episode_intake as runner
+    from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
+    from corpus_ingest_core.storage import corpus_episode_seed_asset_path
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -472,10 +472,10 @@ def test_repeated_confirmed_run_records_reused_without_duplicate_seed(
 def test_confirmed_unresolved_selector_writes_rejected_report_without_seed(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_episode_intake as runner
-    from podcast_ingest_core.corpus_episode_intake import run_corpus_episode_intake
-    from podcast_ingest_core.errors import EpisodeNotFoundError
-    from podcast_ingest_core.storage import (
+    import corpus_ingest_core.corpus_episode_intake as runner
+    from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
+    from corpus_ingest_core.errors import EpisodeNotFoundError
+    from corpus_ingest_core.storage import (
         corpus_episode_intake_run_asset_paths,
         corpus_episode_seed_asset_path,
     )
@@ -502,8 +502,8 @@ def test_confirmed_unresolved_selector_writes_rejected_report_without_seed(
 
 
 def test_confirmed_intake_does_not_call_downstream_side_effects(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_episode_intake as runner
-    from podcast_ingest_core.corpus_episode_intake import run_corpus_episode_intake
+    import corpus_ingest_core.corpus_episode_intake as runner
+    from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     calls: list[str] = []
@@ -538,7 +538,7 @@ def test_confirmed_intake_does_not_call_downstream_side_effects(monkeypatch, tmp
 def test_run_corpus_episode_intake_cli_confirmed_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core.models import (
         CorpusEpisodeIntakeFilter,
         CorpusEpisodeIntakeOutcomeCounts,
         CorpusEpisodeIntakeRunResult,
@@ -600,9 +600,9 @@ def test_run_corpus_episode_intake_cli_confirmed_outputs_json(
 def test_no_unsafe_feed_content_leaks(
     monkeypatch, capsys, tmp_path
 ):
-    import podcast_ingest_core.corpus_episode_intake as runner
-    from podcast_ingest_core import CorpusEpisodeIntakeFailedError
-    from podcast_ingest_core.corpus_episode_intake import run_corpus_episode_intake
+    import corpus_ingest_core.corpus_episode_intake as runner
+    from corpus_ingest_core import CorpusEpisodeIntakeFailedError
+    from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
     from scripts import run_corpus_episode_intake as cli
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -665,8 +665,8 @@ def test_no_unsafe_feed_content_leaks(
 
 
 def test_feed_reader_dependency_failure_is_bounded(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_episode_intake as runner
-    from podcast_ingest_core.corpus_episode_intake import run_corpus_episode_intake
+    import corpus_ingest_core.corpus_episode_intake as runner
+    from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
 
@@ -690,7 +690,7 @@ def test_feed_reader_dependency_failure_is_bounded(monkeypatch, tmp_path):
 
 
 def test_episode_intake_boundary_source_has_no_side_effect_imports():
-    import podcast_ingest_core.corpus_episode_intake as runner
+    import corpus_ingest_core.corpus_episode_intake as runner
 
     source = inspect.getsource(runner).lower()
 
@@ -711,8 +711,8 @@ def test_episode_intake_boundary_source_has_no_side_effect_imports():
 
 
 def test_no_investment_advice_or_market_claims(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_episode_intake as runner
-    from podcast_ingest_core.corpus_episode_intake import run_corpus_episode_intake
+    import corpus_ingest_core.corpus_episode_intake as runner
+    from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -744,8 +744,8 @@ def test_no_investment_advice_or_market_claims(monkeypatch, tmp_path):
 def test_confirmed_seed_adds_manual_follow_up_warning_without_running_chain(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_episode_intake as runner
-    from podcast_ingest_core.corpus_episode_intake import run_corpus_episode_intake
+    import corpus_ingest_core.corpus_episode_intake as runner
+    from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     monkeypatch.setattr(

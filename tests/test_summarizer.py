@@ -20,7 +20,7 @@ def _write_transcript(
     segment_count=None,
     completed=None,
 ):
-    from podcast_ingest_core.storage import transcript_asset_paths
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     if segments is None:
@@ -59,7 +59,7 @@ def _write_transcript(
 
 
 def test_summarize_episode_generates_markdown_from_transcript(monkeypatch, tmp_path):
-    import podcast_ingest_core.summarizer as summarizer
+    import corpus_ingest_core.summarizer as summarizer
 
     _write_transcript(monkeypatch, tmp_path)
 
@@ -76,8 +76,8 @@ def test_summarize_episode_generates_markdown_from_transcript(monkeypatch, tmp_p
 
 
 def test_summarize_episode_raises_when_transcript_missing(monkeypatch, tmp_path):
-    import podcast_ingest_core.summarizer as summarizer
-    from podcast_ingest_core.errors import TranscriptMissingError
+    import corpus_ingest_core.summarizer as summarizer
+    from corpus_ingest_core.errors import TranscriptMissingError
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
 
@@ -86,9 +86,9 @@ def test_summarize_episode_raises_when_transcript_missing(monkeypatch, tmp_path)
 
 
 def test_summarize_episode_raises_when_transcript_json_invalid(monkeypatch, tmp_path):
-    import podcast_ingest_core.summarizer as summarizer
-    from podcast_ingest_core.errors import TranscriptParseError
-    from podcast_ingest_core.storage import transcript_asset_paths
+    import corpus_ingest_core.summarizer as summarizer
+    from corpus_ingest_core.errors import TranscriptParseError
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = transcript_asset_paths("gooaye", "EP672", "EP672 title")
@@ -102,7 +102,7 @@ def test_summarize_episode_raises_when_transcript_json_invalid(monkeypatch, tmp_
 
 
 def test_summarize_episode_generates_empty_segment_summary(monkeypatch, tmp_path):
-    import podcast_ingest_core.summarizer as summarizer
+    import corpus_ingest_core.summarizer as summarizer
 
     _write_transcript(
         monkeypatch,
@@ -121,7 +121,7 @@ def test_summarize_episode_generates_empty_segment_summary(monkeypatch, tmp_path
 
 
 def test_summarize_episode_generates_timeline_and_quotes(monkeypatch, tmp_path):
-    import podcast_ingest_core.summarizer as summarizer
+    import corpus_ingest_core.summarizer as summarizer
 
     _write_transcript(monkeypatch, tmp_path)
 
@@ -139,8 +139,8 @@ def test_summarize_episode_generates_timeline_and_quotes(monkeypatch, tmp_path):
 
 
 def test_summarize_episode_skips_existing_summary_without_force(monkeypatch, tmp_path):
-    import podcast_ingest_core.summarizer as summarizer
-    from podcast_ingest_core.storage import summary_asset_path
+    import corpus_ingest_core.summarizer as summarizer
+    from corpus_ingest_core.storage import summary_asset_path
 
     _write_transcript(monkeypatch, tmp_path)
     path = summary_asset_path("gooaye", "EP672", "EP672 title")
@@ -155,8 +155,8 @@ def test_summarize_episode_skips_existing_summary_without_force(monkeypatch, tmp
 
 
 def test_summarize_episode_force_regenerates_existing_summary(monkeypatch, tmp_path):
-    import podcast_ingest_core.summarizer as summarizer
-    from podcast_ingest_core.storage import summary_asset_path
+    import corpus_ingest_core.summarizer as summarizer
+    from corpus_ingest_core.storage import summary_asset_path
 
     _write_transcript(monkeypatch, tmp_path)
     path = summary_asset_path("gooaye", "EP672", "EP672 title")
@@ -171,8 +171,8 @@ def test_summarize_episode_force_regenerates_existing_summary(monkeypatch, tmp_p
 
 
 def test_summarize_episode_rejects_partial_by_default(monkeypatch, tmp_path):
-    import podcast_ingest_core.summarizer as summarizer
-    from podcast_ingest_core.errors import TranscriptParseError
+    import corpus_ingest_core.summarizer as summarizer
+    from corpus_ingest_core.errors import TranscriptParseError
 
     _write_transcript(monkeypatch, tmp_path, completed=False)
 
@@ -181,7 +181,7 @@ def test_summarize_episode_rejects_partial_by_default(monkeypatch, tmp_path):
 
 
 def test_summarize_episode_allows_partial_when_requested(monkeypatch, tmp_path):
-    import podcast_ingest_core.summarizer as summarizer
+    import corpus_ingest_core.summarizer as summarizer
 
     _write_transcript(monkeypatch, tmp_path, completed=False)
 
@@ -193,7 +193,7 @@ def test_summarize_episode_allows_partial_when_requested(monkeypatch, tmp_path):
 
 
 def test_summary_path_removes_illegal_characters_and_emoji():
-    from podcast_ingest_core.storage import summary_asset_path
+    from corpus_ingest_core.storage import summary_asset_path
 
     path = summary_asset_path("gooaye", "EP672", ' bad <title> 🐣 : / \\ | ? * ok ')
 
@@ -203,9 +203,9 @@ def test_summary_path_removes_illegal_characters_and_emoji():
 
 
 def test_summarize_episode_cleans_part_file_on_write_failure(monkeypatch, tmp_path):
-    import podcast_ingest_core.summarizer as summarizer
-    from podcast_ingest_core.errors import SummaryFailedError
-    from podcast_ingest_core.storage import summary_asset_path
+    import corpus_ingest_core.summarizer as summarizer
+    from corpus_ingest_core.errors import SummaryFailedError
+    from corpus_ingest_core.storage import summary_asset_path
 
     _write_transcript(monkeypatch, tmp_path)
     path = summary_asset_path("gooaye", "EP672", "EP672 title")
@@ -226,7 +226,7 @@ def test_summarize_episode_cleans_part_file_on_write_failure(monkeypatch, tmp_pa
 
 
 def test_summarize_cli_parses_options_and_outputs_json(monkeypatch, capsys, tmp_path):
-    from podcast_ingest_core.models import SummaryAsset
+    from corpus_ingest_core.models import SummaryAsset
     from scripts import summarize_episode
 
     asset = SummaryAsset(
@@ -306,7 +306,7 @@ _FINANCE_EXTRACTIVE_BLOCK = "\n".join(
 
 
 def _profile_with_summary(summary_profile):
-    from podcast_ingest_core.models import PodcastProfile
+    from corpus_ingest_core.models import PodcastProfile
 
     return PodcastProfile(
         podcast_id="gooaye",
@@ -319,7 +319,7 @@ def _profile_with_summary(summary_profile):
 
 
 def test_extractive_finance_prompt_block_is_byte_identical(monkeypatch, tmp_path):
-    import podcast_ingest_core.summarizer as summarizer
+    import corpus_ingest_core.summarizer as summarizer
 
     _write_transcript(monkeypatch, tmp_path)
 
@@ -332,7 +332,7 @@ def test_extractive_finance_prompt_block_is_byte_identical(monkeypatch, tmp_path
 def test_extractive_learning_notes_prompt_block_drops_the_market_sections(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.summarizer as summarizer
+    import corpus_ingest_core.summarizer as summarizer
 
     _write_transcript(monkeypatch, tmp_path)
     monkeypatch.setattr(

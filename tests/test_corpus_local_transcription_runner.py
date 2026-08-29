@@ -10,8 +10,8 @@ import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> None:
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_index as corpus_index
+    from corpus_ingest_core import storage
+    import corpus_ingest_core.corpus_index as corpus_index
 
     monkeypatch.setattr(storage, "SUMMARIES_DIR", tmp_path / "summaries")
     monkeypatch.setattr(storage, "MENTIONS_DIR", tmp_path / "mentions")
@@ -117,12 +117,12 @@ def _extra_action(episode_ref: str, family: str, status: str = "ready") -> dict:
 
 
 def _fake_plan_refresh(monkeypatch, tmp_path: Path, payload: dict, calls: list[str] | None = None):
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.models import (
         CorpusRemediationActionCounts,
         CorpusRemediationPlanResult,
     )
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
 
@@ -177,7 +177,7 @@ def _transcript_asset(
     episode_ref: str = "EP001",
     already_exists: bool = False,
 ):
-    from podcast_ingest_core.models import TranscriptAsset
+    from corpus_ingest_core.models import TranscriptAsset
 
     return TranscriptAsset(
         podcast_id="gooaye",
@@ -198,12 +198,12 @@ def _transcript_asset(
 def test_preview_corpus_local_transcription_from_in_memory_plan(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.models import (
         CorpusRemediationActionCounts,
         CorpusRemediationPlanResult,
     )
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     audio_path = storage.AUDIO_DIR / "gooaye" / "EP677__Alpha.mp3"
@@ -247,8 +247,8 @@ def test_preview_corpus_local_transcription_from_in_memory_plan(
 def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core import storage
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_json(
@@ -297,7 +297,7 @@ def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(
 
 
 def test_corpus_local_transcription_run_asset_paths_contract():
-    from podcast_ingest_core.storage import corpus_local_transcription_run_asset_paths
+    from corpus_ingest_core.storage import corpus_local_transcription_run_asset_paths
 
     paths = corpus_local_transcription_run_asset_paths("gooaye")
 
@@ -306,7 +306,7 @@ def test_corpus_local_transcription_run_asset_paths_contract():
 
 
 def test_corpus_local_transcription_public_result_contract_exports(tmp_path):
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         CorpusLocalTranscriptionOutcomeCounts,
         CorpusLocalTranscriptionRunFilter,
         CorpusLocalTranscriptionRunResult,
@@ -371,7 +371,7 @@ def test_corpus_local_transcription_public_result_contract_exports(tmp_path):
 
 
 def test_corpus_local_transcription_runner_error_contract():
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         CorpusLocalTranscriptionRunnerFailedError,
         PodcastIngestCoreError,
     )
@@ -380,10 +380,10 @@ def test_corpus_local_transcription_runner_error_contract():
 
 
 def test_dry_run_empty_corpus_writes_no_report(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
-    from podcast_ingest_core.storage import corpus_local_transcription_run_asset_paths
+    from corpus_ingest_core.storage import corpus_local_transcription_run_asset_paths
 
     _fake_plan_refresh(monkeypatch, tmp_path, _plan_payload([]))
 
@@ -401,7 +401,7 @@ def test_dry_run_empty_corpus_writes_no_report(monkeypatch, tmp_path):
 
 
 def test_dry_run_refreshes_remediation_plan_before_selection(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -424,7 +424,7 @@ def test_dry_run_refreshes_remediation_plan_before_selection(monkeypatch, tmp_pa
 
 
 def test_dry_run_selects_only_local_audio_transcript_missing(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -459,7 +459,7 @@ def test_dry_run_selects_only_local_audio_transcript_missing(monkeypatch, tmp_pa
 
 
 def test_dry_run_skips_unsafe_transcript_states_and_other_families(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -511,11 +511,11 @@ def test_dry_run_skips_unsafe_transcript_states_and_other_families(monkeypatch, 
 def test_dry_run_no_transcription_download_model_load_or_report_write(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
-    from podcast_ingest_core.storage import corpus_local_transcription_run_asset_paths
+    from corpus_ingest_core.storage import corpus_local_transcription_run_asset_paths
 
     audio = tmp_path / "audio" / "EP001.mp3"
     audio.parent.mkdir(parents=True)
@@ -540,7 +540,7 @@ def test_dry_run_no_transcription_download_model_load_or_report_write(
 
 
 def test_dry_run_is_deterministic_and_has_no_generated_at(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -566,7 +566,7 @@ def test_dry_run_is_deterministic_and_has_no_generated_at(monkeypatch, tmp_path)
 def test_run_corpus_local_transcription_cli_dry_run_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core.models import (
         CorpusLocalTranscriptionOutcomeCounts,
         CorpusLocalTranscriptionRunFilter,
         CorpusLocalTranscriptionRunResult,
@@ -623,9 +623,9 @@ def test_run_corpus_local_transcription_cli_dry_run_outputs_json(
 def test_confirmed_execution_rejects_missing_episode_before_transcription(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
-    from podcast_ingest_core import CorpusLocalTranscriptionRunnerFailedError
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core import CorpusLocalTranscriptionRunnerFailedError
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -648,9 +648,9 @@ def test_confirmed_execution_rejects_missing_episode_before_transcription(
 def test_confirmed_execution_rejects_blank_episode_before_transcription(
     monkeypatch, tmp_path, episode_ref
 ):
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
-    from podcast_ingest_core import CorpusLocalTranscriptionRunnerFailedError
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core import CorpusLocalTranscriptionRunnerFailedError
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -667,8 +667,8 @@ def test_confirmed_execution_rejects_blank_episode_before_transcription(
 def test_confirmed_execution_records_absent_requested_episode_as_rejected(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -695,8 +695,8 @@ def test_confirmed_execution_records_absent_requested_episode_as_rejected(
 def test_confirmed_execution_records_non_eligible_episode_without_transcription(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -726,8 +726,8 @@ def test_confirmed_execution_records_non_eligible_episode_without_transcription(
 def test_dry_run_planned_writes_match_local_transcriber_output_paths(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -761,8 +761,8 @@ def test_dry_run_planned_writes_match_local_transcriber_output_paths(
 def test_confirmed_execution_passes_explicit_audio_path_and_force_false(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -801,8 +801,8 @@ def test_confirmed_execution_passes_explicit_audio_path_and_force_false(
 
 
 def test_confirmed_execution_never_calls_download_or_shell(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -828,7 +828,7 @@ def test_confirmed_execution_never_calls_download_or_shell(monkeypatch, tmp_path
 
     result = run_corpus_local_transcription("gooaye", confirm=True, episode_ref="EP001")
 
-    source = Path("src/podcast_ingest_core/corpus_local_transcription_runner.py").read_text(
+    source = Path("src/corpus_ingest_core/corpus_local_transcription_runner.py").read_text(
         encoding="utf-8"
     )
     assert "download_audio" not in source
@@ -837,8 +837,8 @@ def test_confirmed_execution_never_calls_download_or_shell(monkeypatch, tmp_path
 
 
 def test_confirmed_execution_propagates_runtime_options(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -875,8 +875,8 @@ def test_confirmed_execution_propagates_runtime_options(monkeypatch, tmp_path):
 
 
 def test_confirmed_run_report_json_and_markdown_are_written(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -909,8 +909,8 @@ def test_confirmed_run_report_json_and_markdown_are_written(monkeypatch, tmp_pat
 
 
 def test_cli_confirmed_stdout_and_stderr_contract(monkeypatch, capsys, tmp_path):
-    from podcast_ingest_core import CorpusLocalTranscriptionRunnerFailedError
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core import CorpusLocalTranscriptionRunnerFailedError
+    from corpus_ingest_core.models import (
         CorpusLocalTranscriptionOutcomeCounts,
         CorpusLocalTranscriptionRunFilter,
         CorpusLocalTranscriptionRunResult,
@@ -985,8 +985,8 @@ def test_cli_confirmed_stdout_and_stderr_contract(monkeypatch, capsys, tmp_path)
 
 
 def test_transcription_failure_records_metadata_without_traceback(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -1017,8 +1017,8 @@ def test_transcription_failure_records_metadata_without_traceback(monkeypatch, t
 def test_outputs_do_not_leak_raw_transcript_prompt_llm_secret_or_traceback(
     monkeypatch, tmp_path, capsys
 ):
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
     from scripts import run_corpus_local_transcription as cli
@@ -1092,8 +1092,8 @@ def test_outputs_do_not_leak_raw_transcript_prompt_llm_secret_or_traceback(
 def test_boundary_guard_excludes_forbidden_surfaces_without_execution(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -1131,7 +1131,7 @@ def test_boundary_guard_excludes_forbidden_surfaces_without_execution(
 
     assert calls == ["transcribe"]
     assert result.counts.executed_count == 1
-    source = Path("src/podcast_ingest_core/corpus_local_transcription_runner.py").read_text(
+    source = Path("src/corpus_ingest_core/corpus_local_transcription_runner.py").read_text(
         encoding="utf-8"
     )
     forbidden_fragments = [
@@ -1154,8 +1154,8 @@ def test_boundary_guard_excludes_forbidden_surfaces_without_execution(
 def test_confirmed_writes_manual_cache_stale_warning_without_rebuild(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 
@@ -1176,15 +1176,15 @@ def test_confirmed_writes_manual_cache_stale_warning_without_rebuild(
     result = run_corpus_local_transcription("gooaye", confirm=True, episode_ref="EP001")
 
     assert any("cache" in warning.message.lower() for warning in result.warnings)
-    source = Path("src/podcast_ingest_core/corpus_local_transcription_runner.py").read_text(
+    source = Path("src/corpus_ingest_core/corpus_local_transcription_runner.py").read_text(
         encoding="utf-8"
     )
     assert "rebuild_cache(" not in source
 
 
 def test_outputs_keep_no_investment_advice_boundary(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_local_transcription_runner as runner
-    from podcast_ingest_core.corpus_local_transcription_runner import (
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
 

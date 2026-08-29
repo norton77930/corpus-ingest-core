@@ -18,7 +18,7 @@ from pathlib import Path
 
 import pytest
 
-from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK
+from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK
 from tests.test_workflow_derivation import (
     EPISODE,
     PODCAST,
@@ -32,7 +32,7 @@ from tests.test_workflow_derivation import (
 
 def _default_context(monkeypatch, tmp_data_dirs: Path) -> None:
     """Point Core's default context at the fixture, since MCP takes no override."""
-    from podcast_ingest_core import workflow_derivation
+    from corpus_ingest_core import workflow_derivation
 
     monkeypatch.setattr(
         workflow_derivation,
@@ -53,12 +53,12 @@ def _refuse_provider(monkeypatch) -> None:
         raise AssertionError("no provider may be constructed on this path")
 
     monkeypatch.setattr(
-        "podcast_ingest_core.workflow_derivation.create_provider", refuse
+        "corpus_ingest_core.workflow_derivation.create_provider", refuse
     )
 
 
 def test_preview_is_zero_write_and_declares_zero_network(monkeypatch, tmp_data_dirs):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     _ready_lecture(tmp_data_dirs)
     _default_context(monkeypatch, tmp_data_dirs)
@@ -80,7 +80,7 @@ def test_preview_is_zero_write_and_declares_zero_network(monkeypatch, tmp_data_d
 
 
 def test_preview_needs_no_api_cost_ack(monkeypatch, tmp_data_dirs):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     _ready_lecture(tmp_data_dirs)
     _default_context(monkeypatch, tmp_data_dirs)
@@ -94,7 +94,7 @@ def test_preview_needs_no_api_cost_ack(monkeypatch, tmp_data_dirs):
 def test_confirm_without_the_exact_ack_fails_before_any_provider(
     monkeypatch, tmp_data_dirs
 ):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     _ready_lecture(tmp_data_dirs)
     _default_context(monkeypatch, tmp_data_dirs)
@@ -111,13 +111,13 @@ def test_confirm_without_the_exact_ack_fails_before_any_provider(
 
 
 def test_confirm_writes_the_pair_and_returns_metadata_only(monkeypatch, tmp_data_dirs):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     _ready_lecture(tmp_data_dirs)
     _default_context(monkeypatch, tmp_data_dirs)
     payload = _valid_payload()
     monkeypatch.setattr(
-        "podcast_ingest_core.workflow_derivation.create_provider",
+        "corpus_ingest_core.workflow_derivation.create_provider",
         lambda *_args, **_kwargs: _FakeProvider(payload, []),
     )
 
@@ -134,7 +134,7 @@ def test_confirm_writes_the_pair_and_returns_metadata_only(monkeypatch, tmp_data
 
 
 def test_tool_takes_no_provider_endpoint_credential_or_context_path():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     parameters = inspect.signature(mcp_server.derive_workflow_bundle).parameters
     assert list(parameters) == [
@@ -159,7 +159,7 @@ def test_tool_takes_no_provider_endpoint_credential_or_context_path():
     ],
 )
 def test_core_parameter_stays_off_the_mcp_surface(forbidden):
-    from podcast_ingest_core import mcp_server, workflow_derivation
+    from corpus_ingest_core import mcp_server, workflow_derivation
 
     assert forbidden in inspect.signature(
         workflow_derivation.run_workflow_derivation
@@ -173,7 +173,7 @@ def test_core_parameter_stays_off_the_mcp_surface(forbidden):
 def test_live_registry_appends_workflow_derivation_as_tool_25():
     import asyncio
 
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     names = [tool.name for tool in asyncio.run(mcp_server.mcp.list_tools())]
     assert len(names) == 25

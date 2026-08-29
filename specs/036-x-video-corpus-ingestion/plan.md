@@ -13,7 +13,7 @@ does everything after that. Non-RSS sources become explicit through a
 ## Constitution Check
 
 Local artifacts with preserved segment timestamps (I); runtime in
-`src/podcast_ingest_core` behind a thin CLI (II); dry-run-first with a `confirm`
+`src/corpus_ingest_core` behind a thin CLI (II); dry-run-first with a `confirm`
 gate (III); no LLM, no `api_cost_ack`, no `.env`, no credentials — yt-dlp uses a
 guest token only (IV); the prototype's `[不確定：<guess>]` marking for unclear
 audio is retained, keeping evidence separate from inference (V); no investment
@@ -68,13 +68,13 @@ needs editing, the change has drifted out of scope.
 
 ```text
 specs/036-x-video-corpus-ingestion/
-src/podcast_ingest_core/x_video_ingest.py     (new: metadata resolve, download, extract, orchestrate)
-src/podcast_ingest_core/segment_grouping.py   (new: ported group_segments, pure)
-src/podcast_ingest_core/models.py             (PodcastProfile.source_type; rss fields optional)
-src/podcast_ingest_core/config.py             (_parse_profile becomes source-aware)
-src/podcast_ingest_core/feed_reader.py        (source-aware refusal for non-RSS)
-src/podcast_ingest_core/downloader.py         (source-aware refusal for non-RSS)
-src/podcast_ingest_core/transcriber.py        (optional title through the audio_path branch)
+src/corpus_ingest_core/x_video_ingest.py     (new: metadata resolve, download, extract, orchestrate)
+src/corpus_ingest_core/segment_grouping.py   (new: ported group_segments, pure)
+src/corpus_ingest_core/models.py             (PodcastProfile.source_type; rss fields optional)
+src/corpus_ingest_core/config.py             (_parse_profile becomes source-aware)
+src/corpus_ingest_core/feed_reader.py        (source-aware refusal for non-RSS)
+src/corpus_ingest_core/downloader.py         (source-aware refusal for non-RSS)
+src/corpus_ingest_core/transcriber.py        (optional title through the audio_path branch)
 config/podcasts.yaml                          (x-raytar profile, source_type: x-video)
 pyproject.toml                                (yt-dlp, av)
 scripts/run_x_video_ingest.py                 (thin CLI, dry-run first)

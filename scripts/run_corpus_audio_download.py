@@ -7,8 +7,8 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import PodcastIngestCoreError, run_corpus_audio_download
-from podcast_ingest_core.corpus_audio_download_runner import result_to_dict
+from corpus_ingest_core import PodcastIngestCoreError, run_corpus_audio_download
+from corpus_ingest_core.corpus_audio_download_runner import result_to_dict
 
 
 def main(argv: list[str] | None = None) -> int:

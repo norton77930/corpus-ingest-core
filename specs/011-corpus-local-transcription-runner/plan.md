@@ -12,7 +12,7 @@ Add a dry-run-first local transcription runner for one podcast. The feature refr
 
 **Language/Version**: Python 3.11+
 
-**Primary Dependencies**: Existing package only; use standard library plus existing `podcast_ingest_core` modules. No new dependency.
+**Primary Dependencies**: Existing package only; use standard library plus existing `corpus_ingest_core` modules. No new dependency.
 
 **Storage**: Confirmed runs write latest derived artifacts under `data/corpus/{podcast_id}/corpus-local-transcription-run.json` and `.md`. Dry-runs write no artifacts.
 
@@ -32,7 +32,7 @@ Add a dry-run-first local transcription runner for one podcast. The feature refr
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- Core logic stays in `src/podcast_ingest_core`; CLI remains a thin wrapper that parses args, calls the core runner, and formats result metadata.
+- Core logic stays in `src/corpus_ingest_core`; CLI remains a thin wrapper that parses args, calls the core runner, and formats result metadata.
 - Side effects are dry-run first. Dry-run lists selected/skipped rows and planned reads/writes but writes no artifacts and does not load transcription models. Confirmed execution is explicit and single-episode bounded.
 - LLM work is excluded. The runner must not construct providers, read `.env`, print secrets, call LLM APIs, or execute semantic actions.
 - Research outputs keep evidence separation by reporting metadata, paths, counts, statuses, warnings, and outcomes only; no transcript text or model body text is copied.
@@ -65,7 +65,7 @@ specs/011-corpus-local-transcription-runner/
 ### Source Code (repository root)
 
 ```text
-src/podcast_ingest_core/
+src/corpus_ingest_core/
 ├── corpus_local_transcription_runner.py
 ├── corpus_remediation_plan.py
 ├── transcriber.py

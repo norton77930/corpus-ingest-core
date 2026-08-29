@@ -12,7 +12,7 @@ Add a deterministic, offline corpus remediation plan for one podcast. The featur
 
 **Language/Version**: Python 3.11+
 
-**Primary Dependencies**: Existing package only; use standard library plus existing `podcast_ingest_core` modules. No new dependency.
+**Primary Dependencies**: Existing package only; use standard library plus existing `corpus_ingest_core` modules. No new dependency.
 
 **Storage**: Local derived artifacts under `data/corpus/{podcast_id}/corpus-remediation-plan.json` and `.md`, plus refreshed 008 corpus index artifacts under the same corpus directory.
 
@@ -32,7 +32,7 @@ Add a deterministic, offline corpus remediation plan for one podcast. The featur
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- Core logic stays in `src/podcast_ingest_core`; CLI remains a thin wrapper that parses `--podcast`, calls the core function, and formats result metadata.
+- Core logic stays in `src/corpus_ingest_core`; CLI remains a thin wrapper that parses `--podcast`, calls the core function, and formats result metadata.
 - Remediation actions are plan-only and non-executing. The generator writes only derived plan artifacts; listed actions that would perform side effects are marked manual, dry-run-style, optional, or gated.
 - LLM semantic actions are opt-in future work only. The plan may mark exact `api_cost_ack` as required for later execution, but this feature must not construct providers, read `.env`, print secrets, or call LLM APIs.
 - Research outputs keep evidence separation by reporting status, paths, blockers, warnings, and action metadata only; no podcast evidence text or model body text is copied.
@@ -65,7 +65,7 @@ specs/009-corpus-remediation-plan/
 ### Source Code (repository root)
 
 ```text
-src/podcast_ingest_core/
+src/corpus_ingest_core/
 ├── corpus_remediation_plan.py
 ├── corpus_index.py
 ├── storage.py

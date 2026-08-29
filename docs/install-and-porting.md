@@ -1,6 +1,6 @@
 # 安裝與移植指南
 
-把 podcast-ingest-core 的 25 個 MCP tools 與 portable Skills 裝到一台新電腦上。
+把 corpus-ingest-core 的 25 個 MCP tools 與 portable Skills 裝到一台新電腦上。
 
 本文件分三段：**A 裝核心**（任何機器都要做）、**B 搬資料**、**C 驗收**。
 最後一段是**已知限制**，動手前請先看過。
@@ -10,7 +10,7 @@
 > 驗證器腳本與 digest 基準表都不在這個 repo 裡了。完整內容保存在 git tag `archive/hermes-audit-chain`。
 
 > **A 段已實測驗證。** 在一個模擬全新 clone 的乾淨環境（無 `data/`、全新 venv）中從頭跑過一次：
-> `pip install -e .[dev]` 成功、`import podcast_ingest_core` 成功、`validate_mcp_setup.py` 回 `"ok": true`。
+> `pip install -e .[dev]` 成功、`import corpus_ingest_core` 成功、`validate_mcp_setup.py` 回 `"ok": true`。
 >
 > ⚠️ **`python -m pytest` 在正確安裝的環境下全綠。** `pyproject.toml` 的
 > `[tool.pytest.ini_options]` 沒有任何 `--ignore`：`tests/` 下每一個測試都會跑到。
@@ -23,7 +23,7 @@
 > | 症狀 | 原因 | 修法 |
 > |---|---|---|
 > | `test_mcp_http_transport` 三個測試全紅 | `mcp` 裝的是 1.10.1，低於宣告的 `>=1.27` | `pip install -U "mcp[cli]>=1.27,<2"` |
-> | `ModuleNotFoundError: No module named 'podcast_ingest_core'` | A2 的 `pip install -e .` 從未執行；`pythonpath = ["src"]` 只對 pytest 本身有效 | `pip install -e .[dev]` |
+> | `ModuleNotFoundError: No module named 'corpus_ingest_core'` | A2 的 `pip install -e .` 從未執行；`pythonpath = ["src"]` 只對 pytest 本身有效 | `pip install -e .[dev]` |
 >
 > 兩個補上後這些紅燈全部消失。
 >
@@ -49,8 +49,8 @@
 ### A1. 取得原始碼
 
 ```powershell
-git clone <repo-url> podcast-ingest-core
-cd podcast-ingest-core
+git clone <repo-url> corpus-ingest-core
+cd corpus-ingest-core
 ```
 
 ### A2. 建立獨立環境並安裝
@@ -121,10 +121,11 @@ python -m pytest -q
 **B2. 放在別的位置**
 
 ```powershell
-$env:PODCAST_INGEST_DATA_DIR = "D:\podcast-data"
+$env:CORPUS_INGEST_DATA_DIR = "D:\corpus-data"
 ```
 
-`storage.py` 讀這個環境變數，未設定時預設為 `./data`。
+`storage.py` 讀這個環境變數，未設定時預設為 `./data`。0.2.0 之前叫
+`PODCAST_INGEST_DATA_DIR`，舊名到 0.3.0 之前仍然有效；兩個都設時以新名為準。
 
 > ⚠️ **跑測試前要把這個變數取消。** 有 9 個路徑契約測試把 `data/` 寫成字面值
 > （例如 `tests/test_contracts.py` 的 `assert audio_path("gooaye", "ep-001") ==`
@@ -138,10 +139,10 @@ $env:PODCAST_INGEST_DATA_DIR = "D:\podcast-data"
 **B2b. 節目清單也可以放在別處**
 
 ```powershell
-$env:PODCAST_INGEST_CONFIG = "config/podcasts.local.yaml"
+$env:CORPUS_INGEST_CONFIG = "config/podcasts.local.yaml"
 ```
 
-`config.py` 讀這個環境變數，未設定時預設為 `config/podcasts.yaml`。用途是**不要為了跑一次
+`config.py` 讀這個環境變數，未設定時預設為 `config/podcasts.yaml`。0.2.0 之前叫 `PODCAST_INGEST_CONFIG`，舊名同樣沿用到 0.3.0。用途是**不要為了跑一次
 擷取而編輯已進版控的節目清單**：`tests/test_contracts.py` 對那個檔案做精確集合斷言（刻意的守衛，
 防止私人 profile 被 commit），所以在裡面加一個 `yt-…` 或 `x-…` profile 會讓它變紅，跑完還得記得
 刪掉。`config/*.local.yaml` 已在 `.gitignore` 內，所以私人清單不會進版控。

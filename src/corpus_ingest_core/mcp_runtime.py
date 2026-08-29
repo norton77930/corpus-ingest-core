@@ -23,7 +23,7 @@ MAX_LIMIT = 50
 MAX_CONTEXT_SEGMENTS = 5
 SEMANTIC_API_COST_ACK = semantic_summarizer.SEMANTIC_API_COST_ACK
 
-mcp = FastMCP("podcast-ingest-core")
+mcp = FastMCP("corpus-ingest-core")
 
 
 @dataclass(frozen=True)

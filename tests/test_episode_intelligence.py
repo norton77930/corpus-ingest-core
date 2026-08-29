@@ -8,7 +8,7 @@ import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
     monkeypatch.setattr(storage, "MENTIONS_DIR", tmp_path / "mentions")
@@ -30,7 +30,7 @@ def _write_transcript(
     write_json=True,
     json_text=None,
 ):
-    from podcast_ingest_core.storage import transcript_asset_paths
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     if segments is None:
@@ -98,7 +98,7 @@ def _write_mentions(
     episode_ref="EP672",
     title="EP672 title",
 ):
-    from podcast_ingest_core.storage import mention_asset_paths
+    from corpus_ingest_core.storage import mention_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = mention_asset_paths(podcast_id, episode_ref, title)
@@ -169,7 +169,7 @@ def _write_mentions(
 def test_generate_episode_intelligence_report_writes_json_and_markdown(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.episode_intelligence import (
+    from corpus_ingest_core.episode_intelligence import (
         generate_episode_intelligence_report,
     )
 
@@ -200,7 +200,7 @@ def test_generate_episode_intelligence_report_writes_json_and_markdown(
 def test_generate_episode_intelligence_report_warns_when_mentions_missing(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.episode_intelligence import (
+    from corpus_ingest_core.episode_intelligence import (
         generate_episode_intelligence_report,
     )
 
@@ -217,10 +217,10 @@ def test_generate_episode_intelligence_report_warns_when_mentions_missing(
 def test_generate_episode_intelligence_report_rejects_invalid_transcripts(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.episode_intelligence import (
+    from corpus_ingest_core.episode_intelligence import (
         generate_episode_intelligence_report,
     )
-    from podcast_ingest_core.errors import TranscriptMissingError, TranscriptParseError
+    from corpus_ingest_core.errors import TranscriptMissingError, TranscriptParseError
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     with pytest.raises(TranscriptMissingError):
@@ -238,10 +238,10 @@ def test_generate_episode_intelligence_report_rejects_invalid_transcripts(
 def test_generate_episode_intelligence_report_handles_partial_transcript(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.episode_intelligence import (
+    from corpus_ingest_core.episode_intelligence import (
         generate_episode_intelligence_report,
     )
-    from podcast_ingest_core.errors import TranscriptParseError
+    from corpus_ingest_core.errors import TranscriptParseError
 
     _write_transcript(monkeypatch, tmp_path, completed=False)
 
@@ -261,10 +261,10 @@ def test_generate_episode_intelligence_report_handles_partial_transcript(
 def test_generate_episode_intelligence_report_reuses_existing_without_force(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.episode_intelligence import (
+    from corpus_ingest_core.episode_intelligence import (
         generate_episode_intelligence_report,
     )
-    from podcast_ingest_core.storage import episode_intelligence_report_asset_paths
+    from corpus_ingest_core.storage import episode_intelligence_report_asset_paths
 
     _write_transcript(monkeypatch, tmp_path)
     paths = episode_intelligence_report_asset_paths("gooaye", "EP672", "EP672 title")
@@ -284,7 +284,7 @@ def test_generate_episode_intelligence_report_reuses_existing_without_force(
 
 
 def test_episode_intelligence_report_path_removes_illegal_characters_and_emoji():
-    from podcast_ingest_core.storage import episode_intelligence_report_asset_paths
+    from corpus_ingest_core.storage import episode_intelligence_report_asset_paths
 
     paths = episode_intelligence_report_asset_paths(
         "gooaye", "EP672", ' bad <title> 🐣 : / \\ | ? * ok '
@@ -299,7 +299,7 @@ def test_episode_intelligence_report_path_removes_illegal_characters_and_emoji()
 def test_episode_intelligence_cli_parses_options_and_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from podcast_ingest_core.models import EpisodeIntelligenceReportAsset
+    from corpus_ingest_core.models import EpisodeIntelligenceReportAsset
     from scripts import generate_episode_intelligence_report
 
     asset = EpisodeIntelligenceReportAsset(

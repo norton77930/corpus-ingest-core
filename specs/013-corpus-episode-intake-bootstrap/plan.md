@@ -12,7 +12,7 @@ Add a dry-run-first episode intake bootstrap feature for one podcast. The featur
 
 **Language/Version**: Python 3.11+
 
-**Primary Dependencies**: Existing package only; use standard library plus existing `podcast_ingest_core` modules and existing feed reader. No new dependency.
+**Primary Dependencies**: Existing package only; use standard library plus existing `corpus_ingest_core` modules and existing feed reader. No new dependency.
 
 **Storage**: Confirmed runs write one seed metadata artifact under `data/corpus/{podcast_id}/episode-seeds/` and latest derived reports under `data/corpus/{podcast_id}/corpus-episode-intake-run.json` and `.md`. Dry-runs write no artifacts.
 
@@ -32,7 +32,7 @@ Add a dry-run-first episode intake bootstrap feature for one podcast. The featur
 
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
-- Core logic stays in `src/podcast_ingest_core`; CLI remains a thin wrapper that parses args, calls the core intake runner, and formats result metadata.
+- Core logic stays in `src/corpus_ingest_core`; CLI remains a thin wrapper that parses args, calls the core intake runner, and formats result metadata.
 - Side effects are dry-run first. Dry-run resolves feed metadata but writes no artifacts. Confirmed execution is explicit and one-episode bounded.
 - LLM work is excluded. The runner must not construct providers, read `.env`, print secrets, call LLM APIs, or execute semantic actions.
 - Research outputs keep evidence separation by reporting metadata, paths, counts, statuses, warnings, and outcomes only; no transcript text, prompt text, LLM body text, raw feed descriptions, or full source URL is copied.
@@ -65,7 +65,7 @@ specs/013-corpus-episode-intake-bootstrap/
 ### Source Code (repository root)
 
 ```text
-src/podcast_ingest_core/
+src/corpus_ingest_core/
 ├── corpus_episode_intake.py
 ├── corpus_index.py
 ├── corpus_remediation_plan.py

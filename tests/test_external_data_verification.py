@@ -10,10 +10,10 @@ import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "EXTERNAL_DIR", tmp_path / "external")
-    import podcast_ingest_core.external_data_verification as external_verification
+    import corpus_ingest_core.external_data_verification as external_verification
 
     monkeypatch.setattr(
         external_verification, "PREVERIFICATION_BOUNDARIES_DIR", tmp_path / "corpus"
@@ -36,7 +36,7 @@ def _write_boundary(
     corrupt=False,
     verified=False,
 ):
-    from podcast_ingest_core.storage import external_data_boundary_asset_paths
+    from corpus_ingest_core.storage import external_data_boundary_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = external_data_boundary_asset_paths(podcast_id, episode_ref, title)
@@ -148,7 +148,7 @@ candidates:
 
 
 def test_verify_external_data_boundary_dry_run_writes_nothing(monkeypatch, tmp_path):
-    from podcast_ingest_core.external_data_verification import verify_external_data_boundary
+    from corpus_ingest_core.external_data_verification import verify_external_data_boundary
 
     paths = _write_boundary(monkeypatch, tmp_path)
     fixture_path = _write_fixture(tmp_path)
@@ -175,7 +175,7 @@ def test_verify_external_data_boundary_dry_run_writes_nothing(monkeypatch, tmp_p
 def test_verify_external_data_boundary_confirm_updates_fixture_matches(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.external_data_verification import verify_external_data_boundary
+    from corpus_ingest_core.external_data_verification import verify_external_data_boundary
 
     paths = _write_boundary(monkeypatch, tmp_path)
     fixture_path = _write_fixture(tmp_path)
@@ -218,7 +218,7 @@ def test_verify_external_data_boundary_confirm_updates_fixture_matches(
 def test_verify_external_data_boundary_missing_fixture_warns_without_fabricating(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.external_data_verification import verify_external_data_boundary
+    from corpus_ingest_core.external_data_verification import verify_external_data_boundary
 
     paths = _write_boundary(monkeypatch, tmp_path)
 
@@ -242,7 +242,7 @@ def test_verify_external_data_boundary_missing_fixture_warns_without_fabricating
 def test_verify_external_data_boundary_unmatched_candidate_warns(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.external_data_verification import verify_external_data_boundary
+    from corpus_ingest_core.external_data_verification import verify_external_data_boundary
 
     paths = _write_boundary(monkeypatch, tmp_path)
     fixture_path = _write_fixture(tmp_path, include_nvidia=False)
@@ -265,8 +265,8 @@ def test_verify_external_data_boundary_unmatched_candidate_warns(
 def test_verify_external_data_boundary_rejects_missing_corrupt_and_unsupported(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.errors import ExternalDataVerificationInputError
-    from podcast_ingest_core.external_data_verification import verify_external_data_boundary
+    from corpus_ingest_core.errors import ExternalDataVerificationInputError
+    from corpus_ingest_core.external_data_verification import verify_external_data_boundary
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     with pytest.raises(ExternalDataVerificationInputError, match="external boundary"):
@@ -282,8 +282,8 @@ def test_verify_external_data_boundary_rejects_missing_corrupt_and_unsupported(
 
 
 def test_verify_external_data_boundary_handles_partial_boundary(monkeypatch, tmp_path):
-    from podcast_ingest_core.errors import ExternalDataVerificationInputError
-    from podcast_ingest_core.external_data_verification import verify_external_data_boundary
+    from corpus_ingest_core.errors import ExternalDataVerificationInputError
+    from corpus_ingest_core.external_data_verification import verify_external_data_boundary
 
     _write_boundary(monkeypatch, tmp_path, boundary_status="partial-draft")
     fixture_path = _write_fixture(tmp_path)
@@ -305,7 +305,7 @@ def test_verify_external_data_boundary_handles_partial_boundary(monkeypatch, tmp
 def test_verify_external_data_boundary_reuses_verified_artifact_unless_force(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.external_data_verification import verify_external_data_boundary
+    from corpus_ingest_core.external_data_verification import verify_external_data_boundary
 
     paths = _write_boundary(monkeypatch, tmp_path, verified=True)
     fixture_path = _write_fixture(tmp_path)
@@ -344,8 +344,8 @@ def test_verify_external_data_boundary_reuses_verified_artifact_unless_force(
 
 
 def test_verify_external_data_boundary_rejects_unsupported_provider(monkeypatch, tmp_path):
-    from podcast_ingest_core.errors import ExternalDataVerificationInputError
-    from podcast_ingest_core.external_data_verification import verify_external_data_boundary
+    from corpus_ingest_core.errors import ExternalDataVerificationInputError
+    from corpus_ingest_core.external_data_verification import verify_external_data_boundary
 
     _write_boundary(monkeypatch, tmp_path)
 
@@ -358,7 +358,7 @@ def test_verify_external_data_boundary_rejects_unsupported_provider(monkeypatch,
 
 
 def test_verify_external_data_boundary_output_contains_no_advice(monkeypatch, tmp_path):
-    from podcast_ingest_core.external_data_verification import verify_external_data_boundary
+    from corpus_ingest_core.external_data_verification import verify_external_data_boundary
 
     paths = _write_boundary(monkeypatch, tmp_path)
     fixture_path = _write_fixture(tmp_path)
@@ -386,7 +386,7 @@ def test_verify_external_data_boundary_output_contains_no_advice(monkeypatch, tm
 def test_verify_external_data_boundary_cli_parses_options_and_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from podcast_ingest_core.models import ExternalDataVerificationAsset
+    from corpus_ingest_core.models import ExternalDataVerificationAsset
     from scripts import verify_external_data_boundary
 
     asset = ExternalDataVerificationAsset(

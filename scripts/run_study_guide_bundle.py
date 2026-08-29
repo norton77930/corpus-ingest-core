@@ -7,12 +7,12 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import (
+from corpus_ingest_core import (
     PodcastIngestCoreError,
     run_study_guide_bundle,
     study_guide_bundle_result_to_dict,
 )
-from podcast_ingest_core.local_env import load_local_env
+from corpus_ingest_core.local_env import load_local_env
 
 
 def build_parser() -> argparse.ArgumentParser:

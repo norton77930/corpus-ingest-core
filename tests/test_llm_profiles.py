@@ -7,7 +7,7 @@ import pytest
 
 
 def test_load_llm_profile_from_yaml(tmp_path):
-    from podcast_ingest_core.llm_profiles import load_llm_profile
+    from corpus_ingest_core.llm_profiles import load_llm_profile
 
     config_path = tmp_path / "llm_profiles.yaml"
     config_path.write_text(
@@ -32,8 +32,8 @@ profiles:
 
 
 def test_load_llm_profile_rejects_unavailable_profile(tmp_path):
-    from podcast_ingest_core.errors import LLMProviderConfigError
-    from podcast_ingest_core.llm_profiles import load_llm_profile
+    from corpus_ingest_core.errors import LLMProviderConfigError
+    from corpus_ingest_core.llm_profiles import load_llm_profile
 
     config_path = tmp_path / "llm_profiles.yaml"
     config_path.write_text(
@@ -61,15 +61,15 @@ profiles:
 
 
 def test_committed_gb10_llm_profile_is_unavailable():
-    from podcast_ingest_core.errors import LLMProviderConfigError
-    from podcast_ingest_core.llm_profiles import load_llm_profile
+    from corpus_ingest_core.errors import LLMProviderConfigError
+    from corpus_ingest_core.llm_profiles import load_llm_profile
 
     with pytest.raises(LLMProviderConfigError, match=r"unavailable: gb10.*pro4500"):
         load_llm_profile("gb10")
 
 
 def test_committed_pro4500_llm_profile_config_loads():
-    from podcast_ingest_core.llm_profiles import load_llm_profile
+    from corpus_ingest_core.llm_profiles import load_llm_profile
 
     profile = load_llm_profile("pro4500")
 
@@ -80,8 +80,8 @@ def test_committed_pro4500_llm_profile_config_loads():
 
 
 def test_load_llm_profile_rejects_missing_file_or_profile(tmp_path):
-    from podcast_ingest_core.errors import LLMProviderConfigError
-    from podcast_ingest_core.llm_profiles import load_llm_profile
+    from corpus_ingest_core.errors import LLMProviderConfigError
+    from corpus_ingest_core.llm_profiles import load_llm_profile
 
     with pytest.raises(LLMProviderConfigError, match="missing"):
         load_llm_profile("gb10", tmp_path / "missing.yaml")
@@ -94,8 +94,8 @@ def test_load_llm_profile_rejects_missing_file_or_profile(tmp_path):
 
 
 def test_load_llm_profile_rejects_malformed_yaml(tmp_path):
-    from podcast_ingest_core.errors import LLMProviderConfigError
-    from podcast_ingest_core.llm_profiles import load_llm_profile
+    from corpus_ingest_core.errors import LLMProviderConfigError
+    from corpus_ingest_core.llm_profiles import load_llm_profile
 
     config_path = tmp_path / "llm_profiles.yaml"
     config_path.write_text("profiles: [", encoding="utf-8")
@@ -106,8 +106,8 @@ def test_load_llm_profile_rejects_malformed_yaml(tmp_path):
 
 @pytest.mark.parametrize("field_name", ["api_key", "token", "secret"])
 def test_load_llm_profile_rejects_secret_like_fields(tmp_path, field_name):
-    from podcast_ingest_core.errors import LLMProviderConfigError
-    from podcast_ingest_core.llm_profiles import load_llm_profile
+    from corpus_ingest_core.errors import LLMProviderConfigError
+    from corpus_ingest_core.llm_profiles import load_llm_profile
 
     config_path = tmp_path / "llm_profiles.yaml"
     config_path.write_text(

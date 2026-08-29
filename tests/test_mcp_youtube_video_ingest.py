@@ -4,7 +4,7 @@ import inspect
 from pathlib import Path
 from types import SimpleNamespace
 
-from podcast_ingest_core.models import PodcastProfile
+from corpus_ingest_core.models import PodcastProfile
 
 
 _VIDEO_ID = "dQw4w9WgXcQ"
@@ -30,7 +30,7 @@ def _yt_profile(podcast_id: str) -> PodcastProfile:
 
 
 def _stub_preview(monkeypatch) -> None:
-    from podcast_ingest_core import youtube_video_ingest
+    from corpus_ingest_core import youtube_video_ingest
 
     def refuse(*_args, **_kwargs):
         raise AssertionError("preview must not download or extract")
@@ -48,7 +48,7 @@ def _stub_preview(monkeypatch) -> None:
 
 
 def test_preview_returns_network_read_plan_and_writes_nothing(monkeypatch, tmp_data_dirs: Path):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     _stub_preview(monkeypatch)
     before = {path.relative_to(tmp_data_dirs) for path in tmp_data_dirs.rglob("*") if path.is_file()}
@@ -70,7 +70,7 @@ def test_preview_returns_network_read_plan_and_writes_nothing(monkeypatch, tmp_d
 
 
 def test_confirm_writes_storage_paths_and_warns_cache_stale(monkeypatch, tmp_data_dirs: Path):
-    from podcast_ingest_core import mcp_server, storage, youtube_video_ingest
+    from corpus_ingest_core import mcp_server, storage, youtube_video_ingest
 
     monkeypatch.setattr(
         youtube_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO)
@@ -117,7 +117,7 @@ def test_confirm_writes_storage_paths_and_warns_cache_stale(monkeypatch, tmp_dat
 
 
 def test_invalid_url_preview_returns_error_envelope():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     response = mcp_server.ingest_youtube_video(
         url="https://example.com/not-youtube", confirm=False
@@ -129,7 +129,7 @@ def test_invalid_url_preview_returns_error_envelope():
 
 
 def test_wrong_source_type_confirm_returns_error_envelope(monkeypatch, tmp_data_dirs: Path):
-    from podcast_ingest_core import mcp_server, youtube_video_ingest
+    from corpus_ingest_core import mcp_server, youtube_video_ingest
 
     monkeypatch.setattr(
         youtube_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO)
@@ -154,7 +154,7 @@ def test_wrong_source_type_confirm_returns_error_envelope(monkeypatch, tmp_data_
 
 
 def test_mcp_signature_hides_work_dir_and_device():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     parameters = inspect.signature(mcp_server.ingest_youtube_video).parameters
     assert list(parameters) == ["url", "confirm", "title", "force"]
@@ -163,7 +163,7 @@ def test_mcp_signature_hides_work_dir_and_device():
 def test_live_registry_appends_youtube_ingest_as_tool_24():
     import asyncio
 
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     names = [tool.name for tool in asyncio.run(mcp_server.mcp.list_tools())]
     # Slots, not tail positions: this registry is append-only, so asserting

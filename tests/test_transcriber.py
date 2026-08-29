@@ -6,7 +6,7 @@ import sys
 
 import pytest
 
-from podcast_ingest_core.models import AudioAsset
+from corpus_ingest_core.models import AudioAsset
 
 
 class FakeSegment:
@@ -71,7 +71,7 @@ def _audio_asset(tmp_path, *, exists=True, title="EP672 | 🐣"):
 
 
 def _use_tmp_transcripts_dir(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     transcript_dir = tmp_path / "transcripts"
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", transcript_dir)
@@ -79,7 +79,7 @@ def _use_tmp_transcripts_dir(monkeypatch, tmp_path):
 
 
 def _install_fake_faster_whisper(monkeypatch, model_class=FakeWhisperModel):
-    import podcast_ingest_core.transcriber as transcriber
+    import corpus_ingest_core.transcriber as transcriber
 
     if hasattr(model_class, "constructors"):
         model_class.constructors.clear()
@@ -89,7 +89,7 @@ def _install_fake_faster_whisper(monkeypatch, model_class=FakeWhisperModel):
 
 
 def test_transcribe_episode_downloads_audio_asset(monkeypatch, tmp_path):
-    import podcast_ingest_core.transcriber as transcriber
+    import corpus_ingest_core.transcriber as transcriber
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
     requested = []
@@ -109,7 +109,7 @@ def test_transcribe_episode_downloads_audio_asset(monkeypatch, tmp_path):
 
 
 def test_transcribe_episode_defaults_to_tiny_cpu_int8(monkeypatch, tmp_path):
-    import podcast_ingest_core.transcriber as transcriber
+    import corpus_ingest_core.transcriber as transcriber
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
     monkeypatch.setattr(transcriber, "download_audio", lambda *_args: _audio_asset(tmp_path))
@@ -129,7 +129,7 @@ def test_transcribe_episode_defaults_to_tiny_cpu_int8(monkeypatch, tmp_path):
 def test_transcribe_episode_passes_runtime_options_to_whisper(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.transcriber as transcriber
+    import corpus_ingest_core.transcriber as transcriber
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
     monkeypatch.setattr(transcriber, "download_audio", lambda *_args: _audio_asset(tmp_path))
@@ -154,8 +154,8 @@ def test_transcribe_episode_passes_runtime_options_to_whisper(
 
 
 def test_transcribe_episode_raises_when_audio_file_missing(monkeypatch, tmp_path):
-    import podcast_ingest_core.transcriber as transcriber
-    from podcast_ingest_core.errors import AudioFileMissingError
+    import corpus_ingest_core.transcriber as transcriber
+    from corpus_ingest_core.errors import AudioFileMissingError
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -169,8 +169,8 @@ def test_transcribe_episode_raises_when_audio_file_missing(monkeypatch, tmp_path
 
 
 def test_transcribe_episode_raises_dependency_error(monkeypatch, tmp_path):
-    import podcast_ingest_core.transcriber as transcriber
-    from podcast_ingest_core.errors import TranscriptionDependencyError
+    import corpus_ingest_core.transcriber as transcriber
+    from corpus_ingest_core.errors import TranscriptionDependencyError
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
     monkeypatch.setattr(transcriber, "download_audio", lambda *_args: _audio_asset(tmp_path))
@@ -185,7 +185,7 @@ def test_transcribe_episode_raises_dependency_error(monkeypatch, tmp_path):
 
 
 def test_transcribe_episode_writes_txt_srt_and_json(monkeypatch, tmp_path):
-    import podcast_ingest_core.transcriber as transcriber
+    import corpus_ingest_core.transcriber as transcriber
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
     monkeypatch.setattr(transcriber, "download_audio", lambda *_args: _audio_asset(tmp_path))
@@ -212,7 +212,7 @@ def test_transcribe_episode_writes_txt_srt_and_json(monkeypatch, tmp_path):
 
 
 def test_transcribe_episode_reports_progress_callback(monkeypatch, tmp_path):
-    import podcast_ingest_core.transcriber as transcriber
+    import corpus_ingest_core.transcriber as transcriber
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
     monkeypatch.setattr(transcriber, "download_audio", lambda *_args: _audio_asset(tmp_path))
@@ -230,8 +230,8 @@ def test_transcribe_episode_reports_progress_callback(monkeypatch, tmp_path):
 
 
 def test_transcribe_episode_skips_when_all_outputs_exist(monkeypatch, tmp_path):
-    import podcast_ingest_core.transcriber as transcriber
-    from podcast_ingest_core.storage import transcript_asset_paths
+    import corpus_ingest_core.transcriber as transcriber
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
     audio_asset = _audio_asset(tmp_path)
@@ -267,8 +267,8 @@ def test_transcribe_episode_skips_when_all_outputs_exist(monkeypatch, tmp_path):
 
 
 def test_transcribe_episode_force_retranscribes_existing_outputs(monkeypatch, tmp_path):
-    import podcast_ingest_core.transcriber as transcriber
-    from podcast_ingest_core.storage import transcript_asset_paths
+    import corpus_ingest_core.transcriber as transcriber
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
     audio_asset = _audio_asset(tmp_path)
@@ -294,9 +294,9 @@ def test_transcribe_episode_force_retranscribes_existing_outputs(monkeypatch, tm
 def test_transcribe_episode_rejects_bad_existing_outputs_without_force(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.transcriber as transcriber
-    from podcast_ingest_core.errors import TranscriptionFailedError
-    from podcast_ingest_core.storage import transcript_asset_paths
+    import corpus_ingest_core.transcriber as transcriber
+    from corpus_ingest_core.errors import TranscriptionFailedError
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
     audio_asset = _audio_asset(tmp_path)
@@ -315,7 +315,7 @@ def test_transcribe_episode_rejects_bad_existing_outputs_without_force(
 
 
 def test_transcribe_episode_uses_audio_path_without_downloading(monkeypatch, tmp_path):
-    import podcast_ingest_core.transcriber as transcriber
+    import corpus_ingest_core.transcriber as transcriber
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
     sample_audio_path = tmp_path / "sample.mp3"
@@ -346,8 +346,8 @@ def test_transcribe_episode_names_outputs_by_an_explicit_title(monkeypatch, tmp_
     test above pins.
     """
 
-    import podcast_ingest_core.transcriber as transcriber
-    from podcast_ingest_core.storage import transcript_asset_paths
+    import corpus_ingest_core.transcriber as transcriber
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
     sample_audio_path = tmp_path / "sample.wav"
@@ -378,9 +378,9 @@ def test_transcribe_episode_names_outputs_by_an_explicit_title(monkeypatch, tmp_
 def test_transcribe_episode_removes_part_files_and_preserves_no_half_outputs(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.transcriber as transcriber
-    from podcast_ingest_core.errors import TranscriptionFailedError
-    from podcast_ingest_core.storage import transcript_asset_paths
+    import corpus_ingest_core.transcriber as transcriber
+    from corpus_ingest_core.errors import TranscriptionFailedError
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
     audio_asset = _audio_asset(tmp_path)
@@ -406,7 +406,7 @@ def test_transcribe_episode_removes_part_files_and_preserves_no_half_outputs(
 
 
 def test_transcript_paths_remove_illegal_characters_and_emoji():
-    from podcast_ingest_core.storage import transcript_asset_paths
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     paths = transcript_asset_paths("gooaye", "EP672", ' bad <title> 🐣 : / \\ | ? * ok ')
 
@@ -416,7 +416,7 @@ def test_transcript_paths_remove_illegal_characters_and_emoji():
 
 
 def test_format_srt_timestamp():
-    from podcast_ingest_core.transcriber import _format_srt_timestamp
+    from corpus_ingest_core.transcriber import _format_srt_timestamp
 
     assert _format_srt_timestamp(0.0) == "00:00:00,000"
     assert _format_srt_timestamp(65.123) == "00:01:05,123"
@@ -424,7 +424,7 @@ def test_format_srt_timestamp():
 
 
 def test_transcribe_cli_parses_podcast_episode_and_model(monkeypatch, capsys, tmp_path):
-    from podcast_ingest_core.models import TranscriptAsset
+    from corpus_ingest_core.models import TranscriptAsset
     from scripts import transcribe_episode
 
     asset = TranscriptAsset(

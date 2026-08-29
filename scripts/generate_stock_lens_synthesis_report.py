@@ -10,21 +10,21 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import (
+from corpus_ingest_core import (
     PodcastIngestCoreError,
     generate_stock_lens_synthesis_report,
     load_llm_profile,
 )
-from podcast_ingest_core.llm_profiles import DEFAULT_LLM_PROFILES_CONFIG_PATH
-from podcast_ingest_core.local_env import (
+from corpus_ingest_core.llm_profiles import DEFAULT_LLM_PROFILES_CONFIG_PATH
+from corpus_ingest_core.local_env import (
     DEFAULT_LOCAL_ENV_PATH,
     empty_local_env_result,
     load_local_env,
     local_env_metadata,
 )
-from podcast_ingest_core.serialization import to_jsonable
-from podcast_ingest_core.stock_lens_synthesis import DEBUG_OUTPUT_PATH_ENV
-from podcast_ingest_core.storage import title_slug
+from corpus_ingest_core.serialization import to_jsonable
+from corpus_ingest_core.stock_lens_synthesis import DEBUG_OUTPUT_PATH_ENV
+from corpus_ingest_core.storage import title_slug
 
 
 def main() -> None:

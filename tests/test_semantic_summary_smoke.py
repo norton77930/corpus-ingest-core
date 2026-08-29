@@ -15,7 +15,7 @@ ACK = (
 
 
 def _summary_asset(tmp_path: Path):
-    from podcast_ingest_core.models import SummaryAsset
+    from corpus_ingest_core.models import SummaryAsset
 
     return SummaryAsset(
         podcast_id="gooaye",
@@ -38,7 +38,7 @@ def _summary_asset(tmp_path: Path):
 def test_semantic_summary_smoke_dry_run_writes_nothing_and_exposes_no_secret(
     monkeypatch, tmp_path, capsys
 ):
-    from podcast_ingest_core.models import TranscriptValidationResult
+    from corpus_ingest_core.models import TranscriptValidationResult
     from scripts import run_semantic_summary_smoke
 
     monkeypatch.setenv("API_KEY", "secret-value")

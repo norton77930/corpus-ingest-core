@@ -89,7 +89,7 @@ def test_scan_covers_expected_repo_surface():
     # The scan must include the committed template and core source files...
     assert ".env.example" in files
     assert "config/llm_profiles.yaml" in files
-    assert "src/podcast_ingest_core/llm_provider.py" in files
+    assert "src/corpus_ingest_core/llm_provider.py" in files
     # ...and must never include the local-only .env or data artifacts.
     assert ".env" not in files
     assert not any(name.startswith("data/") for name in files)
@@ -101,18 +101,18 @@ def test_scan_covers_expected_repo_surface():
 def test_scan_covers_016_core_cli_mcp_and_portable_skill_surface():
     files = {path.relative_to(ROOT).as_posix() for path in _scannable_files()}
 
-    assert "src/podcast_ingest_core/corpus_episode_completion_workflow_runner.py" in files
+    assert "src/corpus_ingest_core/corpus_episode_completion_workflow_runner.py" in files
     assert "scripts/run_corpus_episode_completion_workflow.py" in files
-    assert "src/podcast_ingest_core/mcp_server.py" in files
+    assert "src/corpus_ingest_core/mcp_server.py" in files
     assert ".agents/skills/corpus-episode-completion/SKILL.md" in files
 
 
 def test_scan_covers_017_core_cli_mcp_and_portable_skill_surface():
     files = {path.relative_to(ROOT).as_posix() for path in _scannable_files()}
 
-    assert "src/podcast_ingest_core/corpus_latest_episode_deterministic_workflow_runner.py" in files
+    assert "src/corpus_ingest_core/corpus_latest_episode_deterministic_workflow_runner.py" in files
     assert "scripts/run_corpus_latest_episode_deterministic_workflow.py" in files
-    assert "src/podcast_ingest_core/mcp_server.py" in files
+    assert "src/corpus_ingest_core/mcp_server.py" in files
     assert ".agents/skills/corpus-latest-episode-processing/SKILL.md" in files
 
 

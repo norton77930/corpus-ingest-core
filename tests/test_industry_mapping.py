@@ -8,7 +8,7 @@ import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
     monkeypatch.setattr(storage, "REPORTS_DIR", tmp_path / "reports")
@@ -26,8 +26,8 @@ def _write_episode_report(
     industry_text="半導體",
     include_company=True,
 ):
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.storage import episode_intelligence_report_asset_paths
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.storage import episode_intelligence_report_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     transcript = storage.transcript_asset_paths(podcast_id, episode_ref, title)
@@ -161,7 +161,7 @@ company_aliases: {}
 def test_generate_industry_chain_mapping_writes_json_and_markdown(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.industry_mapping as industry_mapping
+    import corpus_ingest_core.industry_mapping as industry_mapping
 
     config_path = _write_mapping_config(tmp_path)
     monkeypatch.setattr(industry_mapping, "DEFAULT_MAPPING_CONFIG_PATH", config_path)
@@ -204,7 +204,7 @@ def test_generate_industry_chain_mapping_writes_json_and_markdown(
 def test_generate_industry_chain_mapping_warns_without_fabricating_candidates(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.industry_mapping as industry_mapping
+    import corpus_ingest_core.industry_mapping as industry_mapping
 
     monkeypatch.setattr(
         industry_mapping, "DEFAULT_MAPPING_CONFIG_PATH", tmp_path / "missing.yaml"
@@ -238,8 +238,8 @@ def test_generate_industry_chain_mapping_warns_without_fabricating_candidates(
 def test_generate_industry_chain_mapping_handles_partial_report(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.industry_mapping as industry_mapping
-    from podcast_ingest_core.errors import IndustryMappingInputError
+    import corpus_ingest_core.industry_mapping as industry_mapping
+    from corpus_ingest_core.errors import IndustryMappingInputError
 
     config_path = _write_mapping_config(tmp_path)
     monkeypatch.setattr(industry_mapping, "DEFAULT_MAPPING_CONFIG_PATH", config_path)
@@ -260,8 +260,8 @@ def test_generate_industry_chain_mapping_handles_partial_report(
 def test_generate_industry_chain_mapping_reuses_existing_without_force(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.industry_mapping as industry_mapping
-    from podcast_ingest_core.storage import industry_chain_mapping_asset_paths
+    import corpus_ingest_core.industry_mapping as industry_mapping
+    from corpus_ingest_core.storage import industry_chain_mapping_asset_paths
 
     config_path = _write_mapping_config(tmp_path)
     monkeypatch.setattr(industry_mapping, "DEFAULT_MAPPING_CONFIG_PATH", config_path)
@@ -285,7 +285,7 @@ def test_generate_industry_chain_mapping_reuses_existing_without_force(
 
 
 def test_industry_chain_mapping_path_removes_illegal_characters_and_emoji():
-    from podcast_ingest_core.storage import industry_chain_mapping_asset_paths
+    from corpus_ingest_core.storage import industry_chain_mapping_asset_paths
 
     paths = industry_chain_mapping_asset_paths(
         "gooaye", "EP672", ' bad <title> 🐣 : / \\ | ? * ok '
@@ -300,7 +300,7 @@ def test_industry_chain_mapping_path_removes_illegal_characters_and_emoji():
 def test_industry_chain_mapping_cli_parses_options_and_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from podcast_ingest_core.models import IndustryChainMappingAsset
+    from corpus_ingest_core.models import IndustryChainMappingAsset
     from scripts import generate_industry_chain_mapping
 
     asset = IndustryChainMappingAsset(

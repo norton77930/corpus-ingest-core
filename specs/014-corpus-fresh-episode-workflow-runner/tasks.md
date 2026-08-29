@@ -31,11 +31,11 @@
 
 **CRITICAL**: No user story implementation can begin until this phase is complete.
 
-- [X] T005 Add workflow filter, counts, row, result, and warning models in `src/podcast_ingest_core/models.py`
-- [X] T006 Add workflow runner error type in `src/podcast_ingest_core/errors.py`
-- [X] T007 Add `CorpusEpisodeWorkflowRunAssetPaths` and `corpus_episode_workflow_run_asset_paths(podcast_id)` in `src/podcast_ingest_core/storage.py`
-- [X] T008 Create `src/podcast_ingest_core/corpus_episode_workflow_runner.py` with public function signature, stage constants, run mode constants, and no-op-safe module skeleton
-- [X] T009 Export workflow public function, error, storage helper, and model types from `src/podcast_ingest_core/__init__.py`
+- [X] T005 Add workflow filter, counts, row, result, and warning models in `src/corpus_ingest_core/models.py`
+- [X] T006 Add workflow runner error type in `src/corpus_ingest_core/errors.py`
+- [X] T007 Add `CorpusEpisodeWorkflowRunAssetPaths` and `corpus_episode_workflow_run_asset_paths(podcast_id)` in `src/corpus_ingest_core/storage.py`
+- [X] T008 Create `src/corpus_ingest_core/corpus_episode_workflow_runner.py` with public function signature, stage constants, run mode constants, and no-op-safe module skeleton
+- [X] T009 Export workflow public function, error, storage helper, and model types from `src/corpus_ingest_core/__init__.py`
 - [X] T010 Run foundational targeted tests `python -m pytest tests/test_corpus_episode_workflow_runner.py -k "contract or storage or error" --basetemp=.pytest-tmp/run-014-foundation`
 
 **Checkpoint**: Public contracts and module boundaries exist, but workflow behavior is not complete.
@@ -61,10 +61,10 @@
 
 ### Implementation for User Story 1
 
-- [X] T019 [US1] Implement selector and stage normalization in `src/podcast_ingest_core/corpus_episode_workflow_runner.py`
-- [X] T020 [US1] Implement dry-run stage probes using existing 013, 012, 011, and 010 dry-run/core metadata in `src/podcast_ingest_core/corpus_episode_workflow_runner.py`
-- [X] T021 [US1] Implement next-stage precedence selection and completed/blocked fallback in `src/podcast_ingest_core/corpus_episode_workflow_runner.py`
-- [X] T022 [US1] Implement metadata-only result serialization with null report paths for dry-run in `src/podcast_ingest_core/corpus_episode_workflow_runner.py`
+- [X] T019 [US1] Implement selector and stage normalization in `src/corpus_ingest_core/corpus_episode_workflow_runner.py`
+- [X] T020 [US1] Implement dry-run stage probes using existing 013, 012, 011, and 010 dry-run/core metadata in `src/corpus_ingest_core/corpus_episode_workflow_runner.py`
+- [X] T021 [US1] Implement next-stage precedence selection and completed/blocked fallback in `src/corpus_ingest_core/corpus_episode_workflow_runner.py`
+- [X] T022 [US1] Implement metadata-only result serialization with null report paths for dry-run in `src/corpus_ingest_core/corpus_episode_workflow_runner.py`
 - [X] T023 [US1] Implement thin dry-run CLI `scripts/run_corpus_episode_workflow.py`
 - [X] T024 [US1] Add CLI dry-run stdout contract test in `tests/test_corpus_episode_workflow_runner.py`
 - [X] T025 [US1] Run User Story 1 targeted tests `python -m pytest tests/test_corpus_episode_workflow_runner.py -k "dry_run or next_stage or selector or unsupported_stage or no_write or cli" --basetemp=.pytest-tmp/run-014-us1`
@@ -92,12 +92,12 @@
 
 ### Implementation for User Story 2
 
-- [X] T034 [US2] Implement confirmed intake dispatch to `run_corpus_episode_intake(..., confirm=True)` only in `src/podcast_ingest_core/corpus_episode_workflow_runner.py`
-- [X] T035 [US2] Implement confirmed audio dispatch to `run_corpus_audio_download(..., confirm=True)` only in `src/podcast_ingest_core/corpus_episode_workflow_runner.py`
-- [X] T036 [US2] Implement confirmed transcription dispatch to `run_corpus_local_transcription(..., confirm=True)` with transcription option pass-through in `src/podcast_ingest_core/corpus_episode_workflow_runner.py`
-- [X] T037 [US2] Implement confirmed deterministic dispatch to `run_corpus_remediation(..., confirm=True, episode_ref=..., force=..., allow_partial=..., max_actions=...)` in `src/podcast_ingest_core/corpus_episode_workflow_runner.py`
-- [X] T038 [US2] Implement one-stage-stop outcome mapping for executed, reused, failed, rejected, skipped, blocked, and completed states in `src/podcast_ingest_core/corpus_episode_workflow_runner.py`
-- [X] T039 [US2] Implement deterministic workflow run JSON and Markdown report writers in `src/podcast_ingest_core/corpus_episode_workflow_runner.py`
+- [X] T034 [US2] Implement confirmed intake dispatch to `run_corpus_episode_intake(..., confirm=True)` only in `src/corpus_ingest_core/corpus_episode_workflow_runner.py`
+- [X] T035 [US2] Implement confirmed audio dispatch to `run_corpus_audio_download(..., confirm=True)` only in `src/corpus_ingest_core/corpus_episode_workflow_runner.py`
+- [X] T036 [US2] Implement confirmed transcription dispatch to `run_corpus_local_transcription(..., confirm=True)` with transcription option pass-through in `src/corpus_ingest_core/corpus_episode_workflow_runner.py`
+- [X] T037 [US2] Implement confirmed deterministic dispatch to `run_corpus_remediation(..., confirm=True, episode_ref=..., force=..., allow_partial=..., max_actions=...)` in `src/corpus_ingest_core/corpus_episode_workflow_runner.py`
+- [X] T038 [US2] Implement one-stage-stop outcome mapping for executed, reused, failed, rejected, skipped, blocked, and completed states in `src/corpus_ingest_core/corpus_episode_workflow_runner.py`
+- [X] T039 [US2] Implement deterministic workflow run JSON and Markdown report writers in `src/corpus_ingest_core/corpus_episode_workflow_runner.py`
 - [X] T040 [US2] Extend CLI parsing for `--confirm`, `--stage`, transcription options, and remediation options in `scripts/run_corpus_episode_workflow.py`
 - [X] T041 [US2] Add CLI confirmed stdout, stderr, and explicit `--stage next` required contract tests in `tests/test_corpus_episode_workflow_runner.py`
 - [X] T042 [US2] Run User Story 2 targeted tests `python -m pytest tests/test_corpus_episode_workflow_runner.py -k "confirmed or dispatch or pass_through or report or generated_at" --basetemp=.pytest-tmp/run-014-us2`
@@ -123,9 +123,9 @@
 
 ### Implementation for User Story 3
 
-- [X] T049 [US3] Harden workflow serialization and CLI errors against unsafe source content and traceback leakage in `src/podcast_ingest_core/corpus_episode_workflow_runner.py` and `scripts/run_corpus_episode_workflow.py`
-- [X] T050 [US3] Implement manual-only warning rows for semantic, LLM, stock-lens, MCP, cache rebuild, and batch exclusions in `src/podcast_ingest_core/corpus_episode_workflow_runner.py`
-- [X] T051 [US3] Ensure selected runner failure handling records bounded category metadata and stops in `src/podcast_ingest_core/corpus_episode_workflow_runner.py`
+- [X] T049 [US3] Harden workflow serialization and CLI errors against unsafe source content and traceback leakage in `src/corpus_ingest_core/corpus_episode_workflow_runner.py` and `scripts/run_corpus_episode_workflow.py`
+- [X] T050 [US3] Implement manual-only warning rows for semantic, LLM, stock-lens, MCP, cache rebuild, and batch exclusions in `src/corpus_ingest_core/corpus_episode_workflow_runner.py`
+- [X] T051 [US3] Ensure selected runner failure handling records bounded category metadata and stops in `src/corpus_ingest_core/corpus_episode_workflow_runner.py`
 - [X] T052 [US3] Run User Story 3 targeted tests `python -m pytest tests/test_corpus_episode_workflow_runner.py -k "manual_only or leak or boundary or investment or failure or cache or mcp" --basetemp=.pytest-tmp/run-014-us3`
 
 **Checkpoint**: Workflow coordination preserves all existing safety boundaries and reports unsafe or excluded work as metadata only.
@@ -209,9 +209,9 @@
 ## Phase 9: Convergence
 
 - [X] T069 CRITICAL add real 014 dry-run integration regressions for unseeded, audio-download, local-transcription, deterministic-remediation, completed, and blocked states that assert a full before/after tree manifest is identical, all 008-014 writer call counts are zero, stale index/plan/report sentinels are neither trusted nor overwritten, and no `.part` file appears per FR-004 and SC-001 (contradicts)
-- [X] T070 split 008 and 009 into package-private side-effect-free build snapshots and atomic persist seams while preserving the public signatures, result types, write order, payload schemas, and standalone behavior in `src/podcast_ingest_core/corpus_index.py`, `src/podcast_ingest_core/corpus_remediation_plan.py`, `tests/test_corpus_index.py`, and `tests/test_corpus_remediation_plan.py` (partial)
-- [X] T071 extract package-private plan preview seams for 012, 011, and 010, use `source_persisted=True` in their unchanged public standalone runners, and add compatibility tests proving standalone dry-run still persists fresh 008/009 but executes no side effect and writes no stage report in `src/podcast_ingest_core/corpus_audio_download_runner.py`, `src/podcast_ingest_core/corpus_local_transcription_runner.py`, `src/podcast_ingest_core/corpus_remediation_runner.py`, and their tests (partial)
-- [X] T072 CRITICAL change 014 selection to build one in-memory 008/009 snapshot for a seeded episode, pass that same snapshot through 012/011/010 previews with `source_persisted=False`, allow only the exact non-path planned-read labels `configured podcast RSS feed` and `in-memory corpus snapshot`, and preserve one-stage confirmed dispatch without public API, CLI, model, schema, or MCP changes in `src/podcast_ingest_core/corpus_episode_workflow_runner.py` (contradicts)
+- [X] T070 split 008 and 009 into package-private side-effect-free build snapshots and atomic persist seams while preserving the public signatures, result types, write order, payload schemas, and standalone behavior in `src/corpus_ingest_core/corpus_index.py`, `src/corpus_ingest_core/corpus_remediation_plan.py`, `tests/test_corpus_index.py`, and `tests/test_corpus_remediation_plan.py` (partial)
+- [X] T071 extract package-private plan preview seams for 012, 011, and 010, use `source_persisted=True` in their unchanged public standalone runners, and add compatibility tests proving standalone dry-run still persists fresh 008/009 but executes no side effect and writes no stage report in `src/corpus_ingest_core/corpus_audio_download_runner.py`, `src/corpus_ingest_core/corpus_local_transcription_runner.py`, `src/corpus_ingest_core/corpus_remediation_runner.py`, and their tests (partial)
+- [X] T072 CRITICAL change 014 selection to build one in-memory 008/009 snapshot for a seeded episode, pass that same snapshot through 012/011/010 previews with `source_persisted=False`, allow only the exact non-path planned-read labels `configured podcast RSS feed` and `in-memory corpus snapshot`, and preserve one-stage confirmed dispatch without public API, CLI, model, schema, or MCP changes in `src/corpus_ingest_core/corpus_episode_workflow_runner.py` (contradicts)
 - [X] T073 add deep 008/009 snapshot failure and metadata no-leak regressions plus confirmed one-stage, no cache rebuild, exact 12 MCP tools, secret/LLM/no-advice, and terminal-outcome regression gates in the relevant corpus and safety test files (partial)
 - [X] T074 align the 014 spec, plan, research, data model, contract, quickstart, safety checklist, root README, architecture, Spec registry, and verification matrix on strict zero-file dry-run semantics while preserving the historical T001-T068 task record (partial)
 - [X] T075 make `.specify/feature.json` an ignored untracked local selector, preserve `SPECIFY_FEATURE_DIRECTORY` selection, and update ADR-0006 plus gitignore/governance guard tests without changing the constitution (contradicts)

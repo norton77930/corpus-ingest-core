@@ -30,7 +30,7 @@ def _fail_rebuild(*args, **kwargs):
 
 
 def test_confirmed_research_workflow_never_auto_rebuilds_cache(monkeypatch, tmp_path):
-    from podcast_ingest_core import cache, research_workflow
+    from corpus_ingest_core import cache, research_workflow
 
     _write_transcript(monkeypatch, tmp_path)
     monkeypatch.setattr(cache, "rebuild_cache", _fail_rebuild)
@@ -78,8 +78,8 @@ def test_confirmed_research_workflow_never_auto_rebuilds_cache(monkeypatch, tmp_
 
 
 def test_mcp_confirmed_side_effect_tools_never_auto_rebuild_cache(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.models import MentionExtractionAsset, SummaryAsset
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.models import MentionExtractionAsset, SummaryAsset
 
     monkeypatch.setattr(mcp_server.cache_module, "rebuild_cache", _fail_rebuild)
 
@@ -148,7 +148,7 @@ def test_rebuild_cache_references_stay_in_reviewed_modules():
         "mcp_tools_stock_lens.py",
         "research_workflow.py",
     }
-    src_dir = ROOT / "src" / "podcast_ingest_core"
+    src_dir = ROOT / "src" / "corpus_ingest_core"
     offenders = sorted(
         path.name
         for path in src_dir.glob("*.py")
@@ -164,7 +164,7 @@ def test_completion_workflow_has_no_automatic_cache_rebuild_path():
     completion_source = (
         ROOT
         / "src"
-        / "podcast_ingest_core"
+        / "corpus_ingest_core"
         / "corpus_episode_completion_workflow_runner.py"
     ).read_text(encoding="utf-8")
 

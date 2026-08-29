@@ -48,7 +48,7 @@ def test_phase_5d_eval_prompts_tighten_tool_and_scope_guidance():
     assert "第一個 evidence tool 必須是 `search_transcripts`" in content
     assert "若先呼叫 `search_mentions`，記為 tool-selection issue" in content
     assert "不得聲稱 `transcribe_episode` 不可見或不可用" in content
-    assert "只使用 podcast-ingest-core MCP evidence" in content
+    assert "只使用 corpus-ingest-core MCP evidence" in content
     assert "除非 prompt 明確要求，不加入外部市場、公司或新聞資訊" in content
 
 

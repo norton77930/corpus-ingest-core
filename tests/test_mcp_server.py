@@ -8,7 +8,7 @@ import pytest
 
 
 def test_to_jsonable_handles_dataclass_path_list_and_dict():
-    from podcast_ingest_core.serialization import to_jsonable
+    from corpus_ingest_core.serialization import to_jsonable
 
     @dataclass(frozen=True)
     class Sample:
@@ -28,13 +28,13 @@ def test_to_jsonable_handles_dataclass_path_list_and_dict():
 
 
 def test_to_jsonable_handles_side_effect_asset_dataclasses():
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core.models import (
         AudioAsset,
         MentionExtractionAsset,
         SummaryAsset,
         TranscriptAsset,
     )
-    from podcast_ingest_core.serialization import to_jsonable
+    from corpus_ingest_core.serialization import to_jsonable
 
     payload = [
         AudioAsset(
@@ -90,14 +90,14 @@ def test_to_jsonable_handles_side_effect_asset_dataclasses():
 
 
 def test_mcp_server_imports_and_exposes_server_object():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
-    assert mcp_server.mcp.name == "podcast-ingest-core"
+    assert mcp_server.mcp.name == "corpus-ingest-core"
 
 
 def test_list_episodes_tool_returns_enveloped_json_without_audio_url(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.models import Episode
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.models import Episode
 
     captured = {}
 
@@ -129,8 +129,8 @@ def test_list_episodes_tool_returns_enveloped_json_without_audio_url(monkeypatch
 
 
 def test_get_episode_tool_returns_enveloped_json_without_audio_url(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.models import Episode
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.models import Episode
 
     def fake_get_episode(podcast_id, episode_ref):
         return Episode(
@@ -151,8 +151,8 @@ def test_get_episode_tool_returns_enveloped_json_without_audio_url(monkeypatch):
 
 
 def test_validate_transcript_tool_returns_jsonable_result(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.models import TranscriptValidationResult
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.models import TranscriptValidationResult
 
     def fake_validate_transcript(podcast_id, episode_ref):
         return TranscriptValidationResult(
@@ -178,8 +178,8 @@ def test_validate_transcript_tool_returns_jsonable_result(monkeypatch):
 
 
 def test_search_transcripts_tool_clamps_limits_and_context(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.models import TranscriptSearchResult
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.models import TranscriptSearchResult
 
     captured = {}
 
@@ -214,8 +214,8 @@ def test_search_transcripts_tool_clamps_limits_and_context(monkeypatch):
 
 
 def test_search_mentions_tool_returns_enveloped_results(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.models import MentionSearchResult
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.models import MentionSearchResult
 
     captured = {}
 
@@ -247,8 +247,8 @@ def test_search_mentions_tool_returns_enveloped_results(monkeypatch):
 
 
 def test_rebuild_cache_tool_returns_enveloped_result(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.models import CacheRebuildResult
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.models import CacheRebuildResult
 
     def fake_rebuild_cache(podcast_id=None, force=False):
         return CacheRebuildResult(
@@ -268,8 +268,8 @@ def test_rebuild_cache_tool_returns_enveloped_result(monkeypatch):
 
 
 def test_tool_wrapper_converts_core_errors_to_error_response(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.errors import SearchError
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.errors import SearchError
 
     def fake_search_transcripts(**kwargs):
         raise SearchError("SQLite cache 不存在：請先執行 rebuild_cache。")
@@ -286,7 +286,7 @@ def test_tool_wrapper_converts_core_errors_to_error_response(monkeypatch):
 
 
 def test_search_tools_reject_blank_query_before_core_call(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     called = False
 
@@ -305,7 +305,7 @@ def test_search_tools_reject_blank_query_before_core_call(monkeypatch):
 
 
 def test_download_audio_dry_run_does_not_call_core(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     called = False
 
@@ -330,8 +330,8 @@ def test_download_audio_dry_run_does_not_call_core(monkeypatch):
 
 
 def test_download_audio_confirm_calls_core_and_hides_source_url(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.models import AudioAsset
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.models import AudioAsset
 
     captured = {}
 
@@ -364,7 +364,7 @@ def test_download_audio_confirm_calls_core_and_hides_source_url(monkeypatch):
 
 
 def test_summarize_episode_extractive_dry_run_does_not_call_core(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     called = False
 
@@ -388,8 +388,8 @@ def test_summarize_episode_extractive_dry_run_does_not_call_core(monkeypatch):
 
 
 def test_summarize_episode_extractive_confirm_clamps_and_warns_cache_stale(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.models import SummaryAsset
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.models import SummaryAsset
 
     captured = {}
 
@@ -424,7 +424,7 @@ def test_summarize_episode_extractive_confirm_clamps_and_warns_cache_stale(monke
 
 
 def test_extract_mentions_dry_run_does_not_call_core(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     called = False
 
@@ -448,8 +448,8 @@ def test_extract_mentions_dry_run_does_not_call_core(monkeypatch):
 
 
 def test_extract_mentions_confirm_clamps_and_warns_cache_stale(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.models import MentionExtractionAsset
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.models import MentionExtractionAsset
 
     captured = {}
 
@@ -484,7 +484,7 @@ def test_extract_mentions_confirm_clamps_and_warns_cache_stale(monkeypatch):
 
 
 def test_transcribe_episode_dry_run_does_not_call_core(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     called = False
 
@@ -508,8 +508,8 @@ def test_transcribe_episode_dry_run_does_not_call_core(monkeypatch):
 
 
 def test_transcribe_episode_confirm_calls_core_and_warns_cache_stale(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.models import TranscriptAsset
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.models import TranscriptAsset
 
     captured = {}
 
@@ -546,7 +546,7 @@ def test_transcribe_episode_confirm_calls_core_and_warns_cache_stale(monkeypatch
 
 
 def test_transcribe_episode_rejects_unknown_model_device_and_compute_type():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     assert mcp_server.transcribe_episode(
         episode_ref="EP672",
@@ -566,8 +566,8 @@ def test_transcribe_episode_rejects_unknown_model_device_and_compute_type():
 
 
 def test_side_effect_tool_core_error_returns_error_response(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.errors import DownloadFailedError
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.errors import DownloadFailedError
 
     def fake_download_audio(podcast_id, episode_ref):
         raise DownloadFailedError("download failed")
@@ -588,8 +588,8 @@ def test_side_effect_tool_core_error_returns_error_response(monkeypatch):
 
 
 def test_semantic_summarize_episode_dry_run_does_not_call_core(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.models import TranscriptValidationResult
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.models import TranscriptValidationResult
 
     called = False
 
@@ -642,7 +642,7 @@ def test_semantic_summarize_episode_dry_run_does_not_call_core(monkeypatch):
 
 
 def test_semantic_summarize_episode_requires_exact_ack_before_core_call(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     called = False
 
@@ -677,8 +677,8 @@ def test_semantic_summarize_episode_requires_exact_ack_before_core_call(monkeypa
 
 
 def test_semantic_summarize_episode_confirm_calls_core_with_clamped_values(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.models import SummaryAsset
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.models import SummaryAsset
 
     captured = {}
 
@@ -728,7 +728,7 @@ def test_semantic_summarize_episode_confirm_calls_core_with_clamped_values(monke
 
 
 def test_semantic_summarize_episode_rejects_provider_and_invalid_api_key_env():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     unsupported_provider = mcp_server.semantic_summarize_episode(
         episode_ref="EP672",
@@ -750,8 +750,8 @@ def test_semantic_summarize_episode_rejects_provider_and_invalid_api_key_env():
 
 
 def test_semantic_summarize_episode_core_errors_return_error_response(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.errors import LLMProviderConfigError, LLMProviderRequestError
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.errors import LLMProviderConfigError, LLMProviderRequestError
 
     def fake_config_error(**kwargs):
         raise LLMProviderConfigError("missing model")
@@ -796,7 +796,7 @@ def test_semantic_summarize_episode_core_errors_return_error_response(monkeypatc
 
 
 def test_completion_workflow_mcp_dry_run_forwards_to_core_and_uses_bounded_envelope(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     captured = {}
     result = SimpleNamespace(
@@ -852,7 +852,7 @@ def test_completion_workflow_mcp_dry_run_forwards_to_core_and_uses_bounded_envel
 
 
 def test_completion_workflow_mcp_terminal_dry_run_does_not_require_confirmation(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     result = SimpleNamespace(selected_action="blocked", rows=[])
     monkeypatch.setattr(
@@ -877,7 +877,7 @@ def test_completion_workflow_mcp_terminal_dry_run_does_not_require_confirmation(
 
 
 def test_completion_workflow_mcp_failed_selected_action_does_not_require_confirmation(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     result = SimpleNamespace(
         selected_action="semantic_summary",
@@ -908,7 +908,7 @@ def test_completion_workflow_mcp_failed_selected_action_does_not_require_confirm
 
 
 def test_completion_workflow_mcp_confirmed_result_uses_success_envelope(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     captured = {}
     result = SimpleNamespace(selected_action="audio_download", rows=[])
@@ -944,8 +944,8 @@ def test_completion_workflow_mcp_confirmed_result_uses_success_envelope(monkeypa
 
 
 def test_completion_workflow_mcp_uses_fixed_category_only_error_envelope(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.errors import CorpusEpisodeCompletionWorkflowRunnerFailedError
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.errors import CorpusEpisodeCompletionWorkflowRunnerFailedError
 
     monkeypatch.setattr(
         mcp_server.completion_workflow_runner,
@@ -970,7 +970,7 @@ def test_completion_workflow_mcp_uses_fixed_category_only_error_envelope(monkeyp
 
 
 def test_completion_workflow_mcp_semantic_ack_rejects_before_selection_work(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     called = False
 
@@ -1002,7 +1002,7 @@ def test_completion_workflow_mcp_semantic_ack_rejects_before_selection_work(monk
 
 
 def test_latest_deterministic_workflow_mcp_uses_bounded_envelopes(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     captured = {}
     dry_result = SimpleNamespace(outcome="dry_run", episode_ref="EP672")
@@ -1077,7 +1077,7 @@ def test_latest_deterministic_workflow_mcp_uses_bounded_envelopes(monkeypatch):
 
 
 def test_verified_research_report_workflow_mcp_uses_dry_run_envelope_and_early_guard(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     captured = {}
     monkeypatch.setattr(
@@ -1123,7 +1123,7 @@ def test_verified_research_report_workflow_mcp_uses_dry_run_envelope_and_early_g
 
 
 def test_catalog_mcp_tool_delegates_once_and_returns_success_envelope(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     adapter = mcp_server.mcp_verified_research_report_catalog
     calls = []
@@ -1165,7 +1165,7 @@ def test_catalog_mcp_tool_delegates_once_and_returns_success_envelope(monkeypatc
     ],
 )
 def test_catalog_mcp_action_matrix_rejects_invalid_envelopes_before_core(monkeypatch, kwargs):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     adapter = mcp_server.mcp_verified_research_report_catalog
     for seam in (
@@ -1185,7 +1185,7 @@ def test_catalog_mcp_action_matrix_rejects_invalid_envelopes_before_core(monkeyp
 
 
 def test_catalog_mcp_core_failure_is_generic_without_path_or_traceback(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     adapter = mcp_server.mcp_verified_research_report_catalog
     monkeypatch.setattr(
@@ -1206,7 +1206,7 @@ def test_catalog_mcp_core_failure_is_generic_without_path_or_traceback(monkeypat
 
 
 def _workflow_result(*, dry_run=True, requires_api_cost_ack=False, stock_query="台積電"):
-    from podcast_ingest_core.models import ResearchWorkflowResult, ResearchWorkflowStep
+    from corpus_ingest_core.models import ResearchWorkflowResult, ResearchWorkflowStep
 
     steps = [
         ResearchWorkflowStep(
@@ -1287,7 +1287,7 @@ def _workflow_result(*, dry_run=True, requires_api_cost_ack=False, stock_query="
 
 
 def test_run_research_workflow_mcp_dry_run_returns_plan_without_leaks(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     captured = {}
 
@@ -1322,7 +1322,7 @@ def test_run_research_workflow_mcp_dry_run_returns_plan_without_leaks(monkeypatc
 
 
 def test_run_research_workflow_mcp_confirm_calls_core_with_defaults(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     captured = {}
     rebuild_called = False
@@ -1364,7 +1364,7 @@ def test_run_research_workflow_mcp_confirm_calls_core_with_defaults(monkeypatch)
 
 
 def test_run_research_workflow_mcp_semantic_dry_run_requires_ack(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     def fake_run_research_workflow(**kwargs):
         return _workflow_result(dry_run=True, requires_api_cost_ack=True)
@@ -1392,7 +1392,7 @@ def test_run_research_workflow_mcp_semantic_dry_run_requires_ack(monkeypatch):
 
 
 def test_run_research_workflow_mcp_confirm_requires_ack_before_core(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     called = False
 
@@ -1430,7 +1430,7 @@ def test_run_research_workflow_mcp_confirm_requires_ack_before_core(monkeypatch)
 
 
 def test_run_research_workflow_mcp_requires_stock_for_synthesis():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     response = mcp_server.run_research_workflow(
         podcast_id="gooaye",
@@ -1445,7 +1445,7 @@ def test_run_research_workflow_mcp_requires_stock_for_synthesis():
 
 
 def test_run_research_workflow_mcp_rejects_provider_and_invalid_env():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     unsupported_semantic_provider = mcp_server.run_research_workflow(
         podcast_id="gooaye",
@@ -1476,8 +1476,8 @@ def test_run_research_workflow_mcp_rejects_provider_and_invalid_env():
 
 
 def test_to_jsonable_handles_semantic_summary_asset():
-    from podcast_ingest_core.models import SummaryAsset
-    from podcast_ingest_core.serialization import to_jsonable
+    from corpus_ingest_core.models import SummaryAsset
+    from corpus_ingest_core.serialization import to_jsonable
 
     asset = SummaryAsset(
         podcast_id="gooaye",
@@ -1504,7 +1504,7 @@ def test_to_jsonable_handles_semantic_summary_asset():
 
 
 def test_source_revalidation_mcp_tool_delegates_once_and_returns_safe_envelope(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     adapter = mcp_server.mcp_verified_research_report_source_revalidation
     calls = []
@@ -1544,7 +1544,7 @@ def test_source_revalidation_mcp_tool_delegates_once_and_returns_safe_envelope(m
     ],
 )
 def test_source_revalidation_mcp_rejects_invalid_input_before_core(monkeypatch, args):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     adapter = mcp_server.mcp_verified_research_report_source_revalidation
     monkeypatch.setattr(
@@ -1563,7 +1563,7 @@ def test_source_revalidation_mcp_rejects_invalid_input_before_core(monkeypatch, 
 
 
 def test_source_revalidation_mcp_core_failure_is_fixed_and_private_detail_free(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     adapter = mcp_server.mcp_verified_research_report_source_revalidation
     monkeypatch.setattr(
@@ -1587,7 +1587,7 @@ def test_source_revalidation_mcp_core_failure_is_fixed_and_private_detail_free(m
 
 
 def test_coverage_mcp_tool_delegates_once_and_returns_safe_envelope(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     adapter = mcp_server.mcp_verified_research_report_coverage
     calls = []
@@ -1635,7 +1635,7 @@ def test_coverage_mcp_tool_delegates_once_and_returns_safe_envelope(monkeypatch)
     ],
 )
 def test_coverage_mcp_rejects_invalid_input_before_core(monkeypatch, kwargs):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     adapter = mcp_server.mcp_verified_research_report_coverage
     monkeypatch.setattr(
@@ -1654,7 +1654,7 @@ def test_coverage_mcp_rejects_invalid_input_before_core(monkeypatch, kwargs):
 
 
 def test_coverage_mcp_core_failure_is_fixed_and_private_detail_free(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     adapter = mcp_server.mcp_verified_research_report_coverage
     monkeypatch.setattr(
@@ -1678,7 +1678,7 @@ def test_coverage_mcp_core_failure_is_fixed_and_private_detail_free(monkeypatch)
 
 
 def test_historical_path_mcp_tool_delegates_once_and_returns_safe_envelope(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     adapter = mcp_server.mcp_historical_verified_report_path
     calls = []
@@ -1719,7 +1719,7 @@ def test_historical_path_mcp_tool_delegates_once_and_returns_safe_envelope(monke
     ],
 )
 def test_historical_path_mcp_rejects_invalid_input_before_core(monkeypatch, kwargs):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     adapter = mcp_server.mcp_historical_verified_report_path
     monkeypatch.setattr(
@@ -1738,7 +1738,7 @@ def test_historical_path_mcp_rejects_invalid_input_before_core(monkeypatch, kwar
 
 
 def test_historical_path_mcp_core_failure_is_fixed_and_private_detail_free(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     adapter = mcp_server.mcp_historical_verified_report_path
     monkeypatch.setattr(
@@ -1762,7 +1762,7 @@ def test_historical_path_mcp_core_failure_is_fixed_and_private_detail_free(monke
 
 
 def test_gap_backlog_mcp_tool_delegates_once_and_returns_safe_envelope(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     adapter = mcp_server.mcp_verified_report_gap_backlog
     calls = []
@@ -1793,7 +1793,7 @@ def test_gap_backlog_mcp_tool_delegates_once_and_returns_safe_envelope(monkeypat
     ],
 )
 def test_gap_backlog_mcp_rejects_invalid_input_before_core(monkeypatch, kwargs):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     adapter = mcp_server.mcp_verified_report_gap_backlog
     monkeypatch.setattr(
@@ -1810,7 +1810,7 @@ def test_gap_backlog_mcp_rejects_invalid_input_before_core(monkeypatch, kwargs):
 
 
 def test_generate_stock_lens_report_dry_run_does_not_call_core(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     called = False
 
@@ -1840,7 +1840,7 @@ def test_generate_stock_lens_report_dry_run_does_not_call_core(monkeypatch):
 def test_generate_stock_lens_report_confirm_clamps_and_forwards_validated_inputs(monkeypatch):
     from types import SimpleNamespace
 
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     captured = {}
 
@@ -1884,7 +1884,7 @@ def test_generate_stock_lens_report_confirm_clamps_and_forwards_validated_inputs
 def test_generate_stock_lens_report_clamps_below_minimum(monkeypatch):
     from types import SimpleNamespace
 
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     captured = {}
 

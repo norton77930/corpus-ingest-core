@@ -11,12 +11,12 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import (
+from corpus_ingest_core import (
     LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError,
     latest_episode_verified_research_report_workflow_result_to_dict as result_to_dict,
     run_latest_episode_verified_research_report_workflow,
 )
-from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
 
 def build_parser() -> argparse.ArgumentParser:

@@ -6,8 +6,10 @@ import os
 import unicodedata
 import re
 
+from .local_env_names import DATA_DIR_ENV, read_env
 
-DATA_DIR = Path(os.environ.get("PODCAST_INGEST_DATA_DIR") or "data")
+
+DATA_DIR = Path(read_env(DATA_DIR_ENV) or "data")
 AUDIO_DIR = DATA_DIR / "audio"
 TRANSCRIPTS_DIR = DATA_DIR / "transcripts"
 SUMMARIES_DIR = DATA_DIR / "summaries"
