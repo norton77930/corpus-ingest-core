@@ -1,7 +1,7 @@
 """Environment-variable names, with the pre-rename spellings still honoured.
 
 The package was renamed from ``podcast_ingest_core`` to ``corpus_ingest_core``
-in 0.2.0, and its three ``PODCAST_INGEST_*`` variables were renamed with it.
+in 0.2.0, and its four ``PODCAST_INGEST_*`` variables were renamed with it.
 An operator who set the old name on a machine that predates the rename should
 not have their setup silently stop taking effect -- a data root that quietly
 reverts to ``data/`` is the kind of failure that looks like corruption rather

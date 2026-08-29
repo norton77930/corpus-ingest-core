@@ -10,13 +10,14 @@ registration order and re-exports the public surface.
 from __future__ import annotations
 
 from collections.abc import Callable
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
 from . import semantic_summarizer
 from .errors import PodcastIngestCoreError, SearchError
+from .local_env_names import MCP_PORT_ENV, read_env
 from .serialization import to_jsonable
 
 MAX_LIMIT = 50
@@ -26,17 +27,40 @@ SEMANTIC_API_COST_ACK = semantic_summarizer.SEMANTIC_API_COST_ACK
 mcp = FastMCP("corpus-ingest-core")
 
 
+DEFAULT_STREAMABLE_HTTP_PORT = 8767
+
+
+def _port_from_env() -> int:
+    raw = (read_env(MCP_PORT_ENV) or "").strip()
+    if not raw:
+        return DEFAULT_STREAMABLE_HTTP_PORT
+    try:
+        return int(raw)
+    except ValueError as exc:
+        raise ValueError(f"{MCP_PORT_ENV} must be an integer") from exc
+
+
 @dataclass(frozen=True)
 class StreamableHttpConfig:
     """Loopback-only Streamable HTTP listener configuration.
 
-    Spec 026 fixes the network boundary to the shared host-network namespace
-    used by the local OpenAB/Hermes deployment. Invalid values fail before the
-    shared server settings are changed.
+    Host and path are fixed, not defaults. This transport exposes every
+    side-effect tool in the registry, so binding it anywhere but the loopback
+    interface would put a download/transcribe/spend surface on the network. The
+    constraint originally came from spec 026's sidecar deployment, which has
+    since been archived; it stays because the reason for it never depended on
+    that deployment. Invalid values fail before the shared server settings are
+    touched. Widening it should be an explicit, reviewed opt-in, not a default.
+
+    The port is the one part that legitimately varies, so it reads
+    ``CORPUS_INGEST_MCP_PORT`` when nothing is passed. Without that the
+    installed ``corpus-ingest-mcp-http`` command would ignore a variable that
+    ``scripts/run_mcp_http_server.py`` honours -- the same setting behaving
+    differently depending on how you started the server.
     """
 
     host: str = "127.0.0.1"
-    port: int = 8767
+    port: int = field(default_factory=lambda: _port_from_env())
     path: str = "/mcp"
 
     def __post_init__(self) -> None:

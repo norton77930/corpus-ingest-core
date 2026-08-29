@@ -24,6 +24,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+import pytest
+
 from corpus_ingest_core.local_env_names import (
     CONFIG_ENV,
     DATA_DIR_ENV,
@@ -226,3 +228,52 @@ def test_helper_copies_are_frozen_to_the_allowlist():
         "new test files must use the shared tmp_data_dirs fixture from "
         f"tests/conftest.py instead of copying the helper: {offenders}"
     )
+
+
+def test_every_renamed_variable_has_its_alias_wired():
+    """One table, four variables, one resolution rule.
+
+    The subprocess tests above cover CORPUS_INGEST_DATA_DIR and
+    CORPUS_INGEST_CONFIG because those two are read at import time and need a
+    child process to exercise. The other two -- the MCP port and the stock-lens
+    debug path -- share the same `read_env` helper, so what needs guarding is
+    the table, not four more subprocess round-trips: an alias that is never
+    added is the failure mode, and it is invisible until an operator's setting
+    silently stops taking effect.
+    """
+
+    from corpus_ingest_core import local_env_names
+
+    current = {
+        name: value
+        for name, value in vars(local_env_names).items()
+        if name.endswith("_ENV") and isinstance(value, str)
+    }
+    assert current, "no *_ENV constants found -- the module was restructured"
+
+    missing = sorted(
+        value for value in current.values() if value not in DEPRECATED_ALIASES
+    )
+    assert not missing, (
+        f"these variables have no pre-rename alias: {missing}. Every renamed "
+        "variable needs one until 0.3.0, or a machine configured before the "
+        "rename loses the setting with no error."
+    )
+    for new_name, old_name in DEPRECATED_ALIASES.items():
+        assert new_name.startswith("CORPUS_INGEST_"), new_name
+        assert old_name.startswith("PODCAST_INGEST_"), old_name
+        assert new_name.removeprefix("CORPUS_INGEST_") == old_name.removeprefix(
+            "PODCAST_INGEST_"
+        ), f"{new_name} and {old_name} are not the same variable renamed"
+
+
+@pytest.mark.parametrize("name", sorted(DEPRECATED_ALIASES))
+def test_current_variable_wins_over_its_alias(name, monkeypatch):
+    from corpus_ingest_core.local_env_names import DEPRECATED_ALIASES, read_env
+
+    monkeypatch.setenv(name, "current")
+    monkeypatch.setenv(DEPRECATED_ALIASES[name], "deprecated")
+    assert read_env(name) == "current"
+
+    monkeypatch.delenv(name)
+    assert read_env(name) == "deprecated"

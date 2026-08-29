@@ -55,9 +55,17 @@ Changelog = "https://github.com/norton77930/corpus-ingest-core/blob/main/CHANGEL
 # scripts/ stay `python scripts/<name>.py`: they are a thin argparse layer over
 # the core, they change with the specs, and promoting them would freeze 46
 # command names as public API. An agent needs exactly one of these to connect.
+#
+# Both MUST point at mcp_server, not mcp_runtime. Tool registration is an import
+# side effect of the mcp_tools_* group modules, and mcp_server is the only thing
+# that imports them -- mcp_runtime owns the bare FastMCP instance and knows
+# nothing about tools. Targeting mcp_runtime:run here produced a server that
+# started cleanly and advertised zero tools.
+# tests/test_console_entry_points.py runs each command in a fresh process and
+# fails if the registry is not the full 25.
 [project.scripts]
-corpus-ingest-mcp = "corpus_ingest_core.mcp_runtime:run"
-corpus-ingest-mcp-http = "corpus_ingest_core.mcp_runtime:run_streamable_http"
+corpus-ingest-mcp = "corpus_ingest_core.mcp_server:run"
+corpus-ingest-mcp-http = "corpus_ingest_core.mcp_server:run_streamable_http"
 
 [tool.ruff]
 # 120, not 88: the existing code is written to it, and E501 is excluded below
