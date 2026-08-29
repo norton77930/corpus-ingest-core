@@ -51,12 +51,10 @@ jobs:
       - name: Install
         run: pip install -e .[dev]
 
-      # The default run excludes only the blocked Hermes 030-034 doc chain, so
-      # this is expected to be fully green. test_spec_029_offline,
-      # test_mcp_http_transport, and test_hermes_runtime_capability stay in it
-      # on purpose: they go red when the environment does not match what
-      # pyproject declares, which is the whole point of running this on a clean
-      # machine.
+      # No --ignore list: the whole suite runs and is expected to be fully
+      # green. test_mcp_http_transport spawns a subprocess, so it goes red when
+      # the environment does not match what pyproject declares -- which is the
+      # whole point of running this on a clean machine.
       - name: Test
         run: python -m pytest
 

@@ -1,3 +1,0 @@
-# Fixture contract
-
-The fixture is a blocked definition-only `FROM scratch` image, not an activation-ready fixture. `fixture_build_authorized=false`, `official_loader_verified=false`, and `provider_materialization_status=blocked_unknown`; it is not built, inspected, or run by Spec031 offline work. Its probe reports only the fixed `BLOCKED_CREDENTIAL_SEAM` terminal state. The probe does not invoke `plugin.register()` because direct registration is not proof of the official plugin-loader path. It includes no Core configuration, provider information, live configuration, credential, endpoint, session, or raw output.

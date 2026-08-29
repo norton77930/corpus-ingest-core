@@ -22,6 +22,11 @@ CLAIM_PATTERNS = (
         r"exact(?:ly)?\s+(\d+)\s+(?:reviewed\s+|MCP\s+)*tools", re.IGNORECASE
     ),
     re.compile(r"恰(?:好)?\s*(?:暴露\s*)?(\d+)\s*個"),
+    # "22 個 MCP tools" and "tool registry 完整（22 個）" both survived three
+    # tool additions in docs/install-and-porting.md because neither carries
+    # "恰"/"恰好". A claim does not need that adverb to be a claim.
+    re.compile(r"(\d+)\s*個\s*(?:reviewed\s*)?(?:MCP\s*)?tools?", re.IGNORECASE),
+    re.compile(r"registry\s*完整\s*[（(]\s*(\d+)\s*個"),
 )
 
 # Feature names that merely contain a marker word. Tool 20 is literally called

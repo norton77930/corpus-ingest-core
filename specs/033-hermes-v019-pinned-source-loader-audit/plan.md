@@ -1,8 +1,0 @@
-# Spec033 Plan
-
-- Fetch GitHub immutable commit/tree/blob endpoints only and persist only the 17 approved source files to the spec-owned evidence tree.
-- Revalidate manifest and bytes against literal path-to-Git-blob authority before static analysis.
-- Publish only through same-parent staging, exclusive file creation/fsync, an exclusive publication lock, fresh-target checks, staging validation, an exclusive directory rename followed by the manifest publication marker, cleanup, and post-publication validation. Cleanup failure is an explicit terminal error and leaves the lock as a recovery marker.
-- Audit AST call edges from `discover_plugins` through `register_fn(ctx)`; distinguish `model_tools.py` import-time discovery from call-time CLI candidates, and record dynamic directory and entry-point module execution as unresolved because implementation/dependency bytes are outside the allowlist.
-- Bind the authoritative Spec029–032 evidence chain through Spec032's hash-pinned verifier inventory, predecessor manifest, and reviewed manifest, without modifying predecessors or executing their verifiers. Revalidate all Spec032-owned artifact bytes; require its four shared top-level pointers as inventory members and seal their current successor bytes in Spec033.
-- Include the final verifier in the reviewed-artifact manifest, bind that manifest through a detached root, and verify the seal before and after focused tests. The verifier regenerates the audit receipt, exact-compares the verdict, and emits `review_root_sha256`; the unique `scripts/verify_spec_033_offline.py` remains reserved for Main after reviews.

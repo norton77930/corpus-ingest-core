@@ -1,9 +1,0 @@
-{
-  "spec_id": "032-hermes-g2-offline-attempt-executor",
-  "fixture_definition_only": true,
-  "activation_ready": false,
-  "build_authorized": false,
-  "official_loader_verified": false,
-  "provider_materialization_status": "blocked_unknown",
-  "live_actions_authorized": false
-}

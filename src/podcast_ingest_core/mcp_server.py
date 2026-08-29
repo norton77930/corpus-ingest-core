@@ -6,11 +6,8 @@ that register on import, so the group import order below IS the registration
 order (Tools 1-25). Tests and clients keep reaching every tool function,
 envelope, and dependency-module alias through this module — the re-exports
 below are contract surface. Next-tool playbook (as used for Tool 22, spec 035, Tool 23, spec 040, and
-Tool 25, spec 043):
-add a group module imported LAST so existing slots keep their order, extend the
-re-exports here, move the size guard in
-``hermes_skill_protocol._registry_tool_names_from_source``, regenerate the spec029
-descriptor snapshot with its official script, then deliberately update
+Tool 25, spec 043): add a group module imported LAST so existing slots keep
+their order, extend the re-exports here, then deliberately update
 ``tests/test_mcp_tool_registry_contract.py``.
 """
 

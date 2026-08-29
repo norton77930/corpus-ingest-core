@@ -142,10 +142,6 @@ market data is deliberately bounded to local fixtures — there is no live marke
 API, and adding one would be an explicit, reviewed decision rather than a
 feature.
 
-The Hermes sidecar integration (specs 026–034) is offline-verified only and
-remains blocked on runtime evidence. Details are in
-[`docs/agent-handoff.md`](docs/agent-handoff.md).
-
 ## Documentation
 
 - [`docs/api.md`](docs/api.md) — complete function reference, output paths, CLI
@@ -188,14 +184,7 @@ python -m pytest
 python -m compileall src scripts
 ```
 
-The default pytest run excludes the blocked Hermes 030–034 doc chain, each of
-which ships its own offline entry point (`scripts/verify_spec_0NN*.py`); the
-exclusion list and its reasoning are in `pyproject.toml`. Naming a path
-explicitly still runs one:
-
-```powershell
-python -m pytest tests/test_spec_032_hermes_g2_docs.py
-```
+There is no `--ignore` list: the whole suite runs and is expected to be green.
 
 Scripts stay thin: they parse arguments and call `podcast_ingest_core`. New
 behaviour is developed test-first. `.env` is local-only and must never be
@@ -212,7 +201,6 @@ original audio and a primary source.
 
 ## License
 
-MIT — see [LICENSE](LICENSE). That covers the first-party work only: two spec
-packages vendor a byte-pinned snapshot of the third-party
-`NousResearch/hermes-agent` repository, which carries its own MIT license. See
+MIT — see [LICENSE](LICENSE). No third-party source is vendored on `main`; an
+archived tag still carries one MIT-licensed snapshot, noted in
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

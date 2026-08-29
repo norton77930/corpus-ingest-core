@@ -1,5 +1,0 @@
-{
-  "mode": "definition_only_not_built",
-  "allowed_relative_files": ["fixture-definition.json", "build-context-allowlist.json", "fixture-contract.md", "credentialless_probe.py"],
-  "excluded": [".env", "data", "live-config", "skills", "sessions", "tests", "agent-state", "podcast-core"]
-}

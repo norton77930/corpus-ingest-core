@@ -131,9 +131,6 @@ verified research report bundle,以及兩種 transport 的 MCP server。
 fixture — 沒有 live market API,要加入的話必須是一次明確且經過審查的決定,
 而不是順手加的功能。
 
-Hermes sidecar 整合(specs 026–034)目前只有離線驗證,runtime evidence 仍是 blocked。
-細節見 [`docs/agent-handoff.md`](docs/agent-handoff.md)。
-
 ## 文件
 
 - [`docs/api.md`](docs/api.md) — 完整函式參考、輸出路徑、CLI 參考與 MCP tool registry
@@ -169,13 +166,7 @@ python -m pytest
 python -m compileall src scripts
 ```
 
-預設的 pytest 執行會排除 blocked 的 Hermes 030–034 文件鏈,它們各自有離線入口
-(`scripts/verify_spec_0NN*.py`);排除清單與理由見 `pyproject.toml`。
-明確指定路徑仍然會跑其中任一個:
-
-```powershell
-python -m pytest tests/test_spec_032_hermes_g2_docs.py
-```
+沒有 `--ignore` 清單:整套測試都會執行,而且應該全綠。
 
 Scripts 維持 thin:只負責解析參數並呼叫 `podcast_ingest_core`。新行為採 test-first
 開發。`.env` 只存在本機,絕不可 commit。
@@ -189,6 +180,6 @@ mention 可能不完整或有誤,LLM 產生的內容也可能在錯誤的同時�
 
 ## 授權
 
-MIT — 見 [LICENSE](LICENSE)。授權範圍僅涵蓋第一方工作:有兩個 spec package
-vendored 了第三方 `NousResearch/hermes-agent` repository 的 byte-pinned 快照,
-該部分有自己的 MIT 授權,見 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
+MIT — 見 [LICENSE](LICENSE)。`main` 上沒有 vendored 任何第三方原始碼;有一份
+MIT 授權的快照仍保留在封存 tag 中,說明見
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
