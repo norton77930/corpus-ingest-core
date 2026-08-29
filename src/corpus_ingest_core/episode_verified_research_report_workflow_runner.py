@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
+import re
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
-import re
 from typing import Any, Literal
 
 from .errors import (

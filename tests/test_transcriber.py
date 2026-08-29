@@ -1,8 +1,7 @@
-from pathlib import Path
-from types import SimpleNamespace
-import importlib
 import json
 import sys
+from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
 
@@ -424,8 +423,9 @@ def test_format_srt_timestamp():
 
 
 def test_transcribe_cli_parses_podcast_episode_and_model(monkeypatch, capsys, tmp_path):
-    from corpus_ingest_core.models import TranscriptAsset
     from scripts import transcribe_episode
+
+    from corpus_ingest_core.models import TranscriptAsset
 
     asset = TranscriptAsset(
         podcast_id="gooaye",

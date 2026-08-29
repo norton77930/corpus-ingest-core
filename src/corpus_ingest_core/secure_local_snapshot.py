@@ -2,12 +2,11 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import os
-from pathlib import Path
 import stat
+from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
-
 
 _MAX_DIRECTORY_ENTRIES = 4_096
 
@@ -303,8 +302,8 @@ def _windows_open_directory_descriptor(directory: Path) -> int:
     """Open a directory without delete sharing, then transfer it to a CRT fd."""
 
     import ctypes
-    from ctypes import wintypes
     import msvcrt
+    from ctypes import wintypes
 
     kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
     creator = kernel32.CreateFileW
@@ -402,8 +401,8 @@ def _windows_final_path_from_descriptor(descriptor: int) -> Path | None:
 
     try:
         import ctypes
-        from ctypes import wintypes
         import msvcrt
+        from ctypes import wintypes
 
         kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
         getter = kernel32.GetFinalPathNameByHandleW

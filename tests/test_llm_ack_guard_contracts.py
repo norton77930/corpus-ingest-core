@@ -118,18 +118,19 @@ def test_synthesis_core_signature_keeps_ack_guard():
 
 
 def test_ack_constant_has_single_source_of_truth():
+    from scripts import (
+        run_corpus_episode_completion_workflow,
+        run_research_llm_smoke,
+        run_semantic_summary_smoke,
+        summarize_episode,
+    )
+
     from corpus_ingest_core import (
         llm_provider,
         mcp_server,
         research_workflow,
         semantic_summarizer,
         stock_lens_synthesis,
-    )
-    from scripts import (
-        run_corpus_episode_completion_workflow,
-        run_research_llm_smoke,
-        run_semantic_summary_smoke,
-        summarize_episode,
     )
 
     canonical = semantic_summarizer.SEMANTIC_API_COST_ACK
@@ -219,8 +220,9 @@ def test_mcp_semantic_dry_run_reports_env_name_only_never_value(monkeypatch):
     assert "fake-key-value" not in serialized
 
 def test_corpus_semantic_cli_reuses_canonical_ack_constant():
-    from corpus_ingest_core import llm_provider
     from scripts import run_corpus_semantic_remediation as corpus_semantic_cli
+
+    from corpus_ingest_core import llm_provider
 
     assert corpus_semantic_cli.SEMANTIC_API_COST_ACK is llm_provider.SEMANTIC_API_COST_ACK
 

@@ -1,39 +1,63 @@
-"""Podcast Ingestion Core 的公開入口。"""
+"""Corpus Ingestion Core 的公開入口。"""
 
+from .cache import index_episode, initialize_cache, rebuild_cache
+from .corpus_audio_download_runner import run_corpus_audio_download
+from .corpus_episode_completion_workflow_runner import (
+    result_to_dict as corpus_episode_completion_workflow_result_to_dict,
+)
+from .corpus_episode_completion_workflow_runner import (
+    run_corpus_episode_completion_workflow,
+)
+from .corpus_episode_intake import run_corpus_episode_intake
+from .corpus_episode_workflow_runner import run_corpus_episode_workflow
+from .corpus_index import discover_local_episode_refs, generate_corpus_index
+from .corpus_latest_episode_deterministic_workflow_runner import (
+    result_to_dict as corpus_latest_episode_deterministic_workflow_result_to_dict,
+)
+from .corpus_latest_episode_deterministic_workflow_runner import (
+    run_corpus_latest_episode_deterministic_workflow,
+)
+from .corpus_local_transcription_runner import run_corpus_local_transcription
+from .corpus_remediation_plan import generate_corpus_remediation_plan
+from .corpus_remediation_runner import run_corpus_remediation
+from .corpus_semantic_remediation_runner import run_corpus_semantic_remediation
 from .downloader import download_audio
+from .entity_extractor import extract_mentions
+from .episode_intelligence import generate_episode_intelligence_report
+from .episode_verified_research_report_workflow_runner import (
+    result_to_dict as episode_verified_research_report_workflow_result_to_dict,
+)
+from .episode_verified_research_report_workflow_runner import (
+    run_episode_verified_research_report_workflow,
+)
 from .errors import (
     AudioFileMissingError,
     AudioUrlMissingError,
     CacheInitializationError,
     CorpusAudioDownloadRunnerFailedError,
+    CorpusEpisodeCompletionWorkflowRunnerFailedError,
     CorpusEpisodeIntakeFailedError,
     CorpusEpisodeWorkflowRunnerFailedError,
-    CorpusEpisodeCompletionWorkflowRunnerFailedError,
-    CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError,
-    LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError,
-    EpisodeVerifiedResearchReportWorkflowRunnerFailedError,
-    VerifiedResearchReportInputError,
-    VerifiedResearchReportCatalogInputError,
-    VerifiedResearchReportSourceRevalidationInputError,
-    VerifiedResearchReportCoverageInputError,
-    HistoricalVerifiedReportPathInputError,
-    VerifiedReportGapBacklogInputError,
-    CorpusSemanticRemediationRunnerFailedError,
-    CorpusLocalTranscriptionRunnerFailedError,
     CorpusIndexFailedError,
+    CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError,
+    CorpusLocalTranscriptionRunnerFailedError,
     CorpusRemediationPlanFailedError,
     CorpusRemediationRunnerFailedError,
+    CorpusSemanticRemediationRunnerFailedError,
     DownloadFailedError,
-    EpisodeNotFoundError,
     EpisodeIndexError,
     EpisodeIntelligenceReportFailedError,
+    EpisodeNotFoundError,
+    EpisodeVerifiedResearchReportWorkflowRunnerFailedError,
     ExternalDataBoundaryFailedError,
     ExternalDataBoundaryInputError,
     ExternalDataVerificationFailedError,
     ExternalDataVerificationInputError,
     GooayeLensConfigError,
+    HistoricalVerifiedReportPathInputError,
     IndustryMappingFailedError,
     IndustryMappingInputError,
+    LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError,
     LLMProviderConfigError,
     LLMProviderRequestError,
     MentionExtractionFailedError,
@@ -43,148 +67,78 @@ from .errors import (
     ResearchWorkflowInputError,
     SearchError,
     SemanticSummaryFailedError,
-    StudyGuideBundleError,
-    WorkflowDerivationError,
     StockLensReportFailedError,
     StockLensReportInputError,
     StockLensSynthesisFailedError,
     StockLensSynthesisInputError,
+    StudyGuideBundleError,
     SummaryFailedError,
-    TranscriptMissingError,
-    TranscriptParseError,
     TranscriptionDependencyError,
     TranscriptionFailedError,
+    TranscriptMissingError,
+    TranscriptParseError,
     UnknownSummaryProfileError,
     UnsupportedSourceTypeError,
+    VerifiedReportGapBacklogInputError,
+    VerifiedResearchReportCatalogInputError,
+    VerifiedResearchReportCoverageInputError,
+    VerifiedResearchReportInputError,
+    VerifiedResearchReportSourceRevalidationInputError,
+    WorkflowDerivationError,
     XVideoIngestDependencyError,
     XVideoIngestFailedError,
     YoutubeVideoIngestDependencyError,
     YoutubeVideoIngestFailedError,
 )
-from .cache import initialize_cache, index_episode, rebuild_cache
-from .corpus_index import discover_local_episode_refs, generate_corpus_index
-from .corpus_remediation_plan import generate_corpus_remediation_plan
-from .corpus_remediation_runner import run_corpus_remediation
-from .corpus_local_transcription_runner import run_corpus_local_transcription
-from .corpus_audio_download_runner import run_corpus_audio_download
-from .corpus_episode_intake import run_corpus_episode_intake
-from .corpus_episode_workflow_runner import run_corpus_episode_workflow
-from .corpus_episode_completion_workflow_runner import (
-    result_to_dict as corpus_episode_completion_workflow_result_to_dict,
-    run_corpus_episode_completion_workflow,
-)
-from .corpus_latest_episode_deterministic_workflow_runner import (
-    result_to_dict as corpus_latest_episode_deterministic_workflow_result_to_dict,
-    run_corpus_latest_episode_deterministic_workflow,
-)
-from .corpus_semantic_remediation_runner import run_corpus_semantic_remediation
-from .study_guide_bundle import (
-    result_to_dict as study_guide_bundle_result_to_dict,
-    run_study_guide_bundle,
-)
-from .workflow_derivation import (
-    result_to_dict as workflow_derivation_result_to_dict,
-    run_workflow_derivation,
-)
-from .latest_episode_verified_research_report_workflow_runner import (
-    result_to_dict as latest_episode_verified_research_report_workflow_result_to_dict,
-    run_latest_episode_verified_research_report_workflow,
-)
-from .episode_verified_research_report_workflow_runner import (
-    result_to_dict as episode_verified_research_report_workflow_result_to_dict,
-    run_episode_verified_research_report_workflow,
-)
-from .verified_research_report_catalog import (
-    discover_eligible_report_summaries,
-    inspect_verified_research_report,
-    list_verified_research_reports,
-    require_safe_podcast_id,
-    result_to_dict as verified_research_report_catalog_result_to_dict,
-    search_verified_research_reports,
-)
-from .verified_research_report_source_revalidation import (
-    revalidate_verified_research_report_sources,
-    result_to_dict as verified_research_report_source_revalidation_result_to_dict,
-)
-from .verified_research_report_coverage import (
-    list_verified_research_report_coverage,
-    result_to_dict as verified_research_report_coverage_result_to_dict,
-)
-from .historical_verified_report_path import (
-    suggest_historical_verified_report_next_step,
-    result_to_dict as historical_verified_report_path_result_to_dict,
-)
-from .verified_report_gap_backlog import (
-    list_verified_report_gap_backlog,
-    result_to_dict as verified_report_gap_backlog_result_to_dict,
-)
-from .entity_extractor import extract_mentions
-from .episode_intelligence import generate_episode_intelligence_report
 from .external_data_boundary import generate_external_data_boundary
 from .external_data_verification import verify_external_data_boundary
 from .feed_reader import get_episode, list_episodes
 from .gooaye_lens import load_gooaye_lens_model
-from .industry_mapping import generate_industry_chain_mapping
-from .llm_profiles import load_llm_profile
-from .research_workflow import run_research_workflow
-from .research_llm_smoke_review import review_research_llm_smoke
-from .semantic_summary_smoke_review import review_semantic_summary_smoke
-from .semantic_summarizer import semantic_summarize_episode
-from .search import search_mentions, search_transcripts
-from .stock_lens import generate_stock_lens_report
-from .stock_lens_synthesis import generate_stock_lens_synthesis_report
-from .summarizer import summarize_episode
-from .segment_grouping import group_segments
-from .summary_profiles import (
-    DEFAULT_SUMMARY_PROFILE,
-    SUMMARY_PROFILES,
-    SummaryProfile,
-    resolve_summary_profile,
+from .historical_verified_report_path import (
+    result_to_dict as historical_verified_report_path_result_to_dict,
 )
-from .transcriber import transcribe_episode
-from .validator import validate_transcript
-from .x_video_ingest import XVideoIdentity, XVideoIngestResult, run_x_video_ingest
-from .youtube_video_ingest import run_youtube_video_ingest
+from .historical_verified_report_path import (
+    suggest_historical_verified_report_next_step,
+)
+from .industry_mapping import generate_industry_chain_mapping
+from .latest_episode_verified_research_report_workflow_runner import (
+    result_to_dict as latest_episode_verified_research_report_workflow_result_to_dict,
+)
+from .latest_episode_verified_research_report_workflow_runner import (
+    run_latest_episode_verified_research_report_workflow,
+)
+from .llm_profiles import load_llm_profile
 from .models import (
+    VIDEO_SEED_SOURCES,
     CorpusArtifactFamilyCounts,
     CorpusAudioDownloadOutcomeCounts,
     CorpusAudioDownloadRunFilter,
     CorpusAudioDownloadRunResult,
     CorpusAudioDownloadRunRow,
     CorpusAudioDownloadRunWarning,
-    CorpusEpisodeIntakeFilter,
-    CorpusEpisodeIntakeOutcomeCounts,
-    CorpusEpisodeIntakeRunResult,
-    CorpusEpisodeIntakeRunRow,
-    CorpusEpisodeIntakeRunWarning,
-    CorpusEpisodeWorkflowRunCounts,
-    CorpusEpisodeWorkflowRunFilter,
-    CorpusEpisodeWorkflowRunResult,
-    CorpusEpisodeWorkflowRunRow,
-    CorpusEpisodeWorkflowRunWarning,
     CorpusEpisodeCompletionWorkflowRunCounts,
     CorpusEpisodeCompletionWorkflowRunFilter,
     CorpusEpisodeCompletionWorkflowRunResult,
     CorpusEpisodeCompletionWorkflowRunRow,
     CorpusEpisodeCompletionWorkflowRunWarning,
+    CorpusEpisodeIntakeFilter,
+    CorpusEpisodeIntakeOutcomeCounts,
+    CorpusEpisodeIntakeRunResult,
+    CorpusEpisodeIntakeRunRow,
+    CorpusEpisodeIntakeRunWarning,
+    CorpusEpisodeRow,
+    CorpusEpisodeSeed,
+    CorpusEpisodeWorkflowRunCounts,
+    CorpusEpisodeWorkflowRunFilter,
+    CorpusEpisodeWorkflowRunResult,
+    CorpusEpisodeWorkflowRunRow,
+    CorpusEpisodeWorkflowRunWarning,
+    CorpusIndexResult,
     CorpusLatestEpisodeDeterministicWorkflowRunCounts,
     CorpusLatestEpisodeDeterministicWorkflowRunFilter,
     CorpusLatestEpisodeDeterministicWorkflowRunResult,
     CorpusLatestEpisodeDeterministicWorkflowRunRow,
     CorpusLatestEpisodeDeterministicWorkflowRunWarning,
-    LatestEpisodeVerifiedResearchReportWorkflowRunFilter,
-    LatestEpisodeVerifiedResearchReportWorkflowRunResult,
-    LatestEpisodeVerifiedResearchReportWorkflowStep,
-    LatestEpisodeVerifiedResearchReportWorkflowWarning,
-    EpisodeVerifiedResearchReportWorkflowRunResult,
-    CorpusSemanticRemediationRunCounts,
-    CorpusSemanticRemediationRunFilter,
-    CorpusSemanticRemediationRunResult,
-    CorpusSemanticRemediationRunRow,
-    CorpusSemanticRemediationRunWarning,
-    CorpusEpisodeRow,
-    CorpusEpisodeSeed,
-    CorpusIndexResult,
     CorpusLocalTranscriptionOutcomeCounts,
     CorpusLocalTranscriptionRunFilter,
     CorpusLocalTranscriptionRunResult,
@@ -201,34 +155,102 @@ from .models import (
     CorpusRemediationRunRow,
     CorpusRemediationRunWarning,
     CorpusRemediationWarning,
+    CorpusSemanticRemediationRunCounts,
+    CorpusSemanticRemediationRunFilter,
+    CorpusSemanticRemediationRunResult,
+    CorpusSemanticRemediationRunRow,
+    CorpusSemanticRemediationRunWarning,
+    EpisodeVerifiedResearchReportWorkflowRunResult,
+    HistoricalVerifiedReportNextStep,
+    LatestEpisodeVerifiedResearchReportWorkflowRunFilter,
+    LatestEpisodeVerifiedResearchReportWorkflowRunResult,
+    LatestEpisodeVerifiedResearchReportWorkflowStep,
+    LatestEpisodeVerifiedResearchReportWorkflowWarning,
+    StudyGuideBundleResult,
+    VerifiedReportGapBacklogPage,
+    VerifiedReportGapBacklogRow,
     VerifiedResearchReportCatalogInspection,
     VerifiedResearchReportCatalogItem,
-    VerifiedResearchReportSourceRevalidation,
     VerifiedResearchReportCatalogPage,
-    VerifiedResearchReportCoverageRow,
     VerifiedResearchReportCoveragePage,
-    HistoricalVerifiedReportNextStep,
-    VerifiedReportGapBacklogRow,
-    VerifiedReportGapBacklogPage,
-    StudyGuideBundleResult,
+    VerifiedResearchReportCoverageRow,
+    VerifiedResearchReportSourceRevalidation,
     WorkflowDerivationResult,
-    VIDEO_SEED_SOURCES,
     YoutubeVideoIdentity,
     YoutubeVideoIngestResult,
 )
+from .research_llm_smoke_review import review_research_llm_smoke
+from .research_workflow import run_research_workflow
+from .search import search_mentions, search_transcripts
+from .segment_grouping import group_segments
+from .semantic_summarizer import semantic_summarize_episode
+from .semantic_summary_smoke_review import review_semantic_summary_smoke
+from .stock_lens import generate_stock_lens_report
+from .stock_lens_synthesis import generate_stock_lens_synthesis_report
 from .storage import (
     CorpusEpisodeCompletionWorkflowRunAssetPaths,
     CorpusLatestEpisodeDeterministicWorkflowRunAssetPaths,
-    LatestEpisodeVerifiedResearchReportPaths,
     CorpusSemanticRemediationRunAssetPaths,
+    LatestEpisodeVerifiedResearchReportPaths,
     corpus_episode_completion_workflow_run_asset_paths,
-    corpus_latest_episode_deterministic_workflow_run_asset_paths,
-    latest_episode_verified_research_report_paths,
     corpus_episode_intake_run_asset_paths,
     corpus_episode_seed_asset_path,
     corpus_episode_workflow_run_asset_paths,
+    corpus_latest_episode_deterministic_workflow_run_asset_paths,
     corpus_semantic_remediation_run_asset_paths,
+    latest_episode_verified_research_report_paths,
 )
+from .study_guide_bundle import (
+    result_to_dict as study_guide_bundle_result_to_dict,
+)
+from .study_guide_bundle import (
+    run_study_guide_bundle,
+)
+from .summarizer import summarize_episode
+from .summary_profiles import (
+    DEFAULT_SUMMARY_PROFILE,
+    SUMMARY_PROFILES,
+    SummaryProfile,
+    resolve_summary_profile,
+)
+from .transcriber import transcribe_episode
+from .validator import validate_transcript
+from .verified_report_gap_backlog import (
+    list_verified_report_gap_backlog,
+)
+from .verified_report_gap_backlog import (
+    result_to_dict as verified_report_gap_backlog_result_to_dict,
+)
+from .verified_research_report_catalog import (
+    discover_eligible_report_summaries,
+    inspect_verified_research_report,
+    list_verified_research_reports,
+    require_safe_podcast_id,
+    search_verified_research_reports,
+)
+from .verified_research_report_catalog import (
+    result_to_dict as verified_research_report_catalog_result_to_dict,
+)
+from .verified_research_report_coverage import (
+    list_verified_research_report_coverage,
+)
+from .verified_research_report_coverage import (
+    result_to_dict as verified_research_report_coverage_result_to_dict,
+)
+from .verified_research_report_source_revalidation import (
+    result_to_dict as verified_research_report_source_revalidation_result_to_dict,
+)
+from .verified_research_report_source_revalidation import (
+    revalidate_verified_research_report_sources,
+)
+from .workflow_derivation import (
+    result_to_dict as workflow_derivation_result_to_dict,
+)
+from .workflow_derivation import (
+    run_workflow_derivation,
+)
+from .x_video_ingest import XVideoIdentity, XVideoIngestResult, run_x_video_ingest
+from .youtube_video_ingest import run_youtube_video_ingest
 
 __all__ = [
     "AudioFileMissingError",

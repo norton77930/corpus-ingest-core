@@ -2,12 +2,24 @@
 
 from __future__ import annotations
 
+import multiprocessing
 from multiprocessing.synchronize import Event
 from pathlib import Path
 
-import multiprocessing
-
 import pytest
+
+# Liveness budget for the spawned worker, not a correctness bound. The child
+# has to start a fresh interpreter, import a 39k-line package, and take an OS
+# lock before it can signal. Ten seconds was enough on an idle laptop; under
+# `pytest --cov` on a two-core shared CI runner it is not, and this test went
+# red once for exactly that reason with nothing wrong in the lock.
+#
+# What the test actually proves is untouched by this number: the parent still
+# asserts that a second claim on the same episode raises TimeoutError with
+# timeout_seconds=0.1 while the child holds it. A generous startup budget only
+# removes a false failure -- if the lock genuinely broke, the parent's claim
+# would succeed and the assertion would fail no matter how long we waited.
+WORKER_STARTUP_TIMEOUT_SECONDS = 60.0
 
 
 def _hold_artifact_claim(lock_path: str, acquired: Event, release: Event) -> None:
@@ -17,7 +29,7 @@ def _hold_artifact_claim(lock_path: str, acquired: Event, release: Event) -> Non
 
     with exclusive_artifact_claim(Path(lock_path), timeout_seconds=10.0):
         acquired.set()
-        release.wait(timeout=10.0)
+        release.wait(timeout=WORKER_STARTUP_TIMEOUT_SECONDS)
 
 
 def _hold_episode_writer_claim(
@@ -31,7 +43,7 @@ def _hold_episode_writer_claim(
     storage.CORPUS_DIR = Path(corpus_dir)
     with episode_writer_claim("gooaye", "EP700", timeout_seconds=10.0):
         acquired.set()
-        release.wait(timeout=10.0)
+        release.wait(timeout=WORKER_STARTUP_TIMEOUT_SECONDS)
 
 
 def test_spawned_process_blocks_same_episode_writer_claim(
@@ -52,16 +64,16 @@ def test_spawned_process_blocks_same_episode_writer_claim(
     )
     worker.start()
     try:
-        assert acquired.wait(timeout=10.0)
+        assert acquired.wait(timeout=WORKER_STARTUP_TIMEOUT_SECONDS)
         with pytest.raises(TimeoutError, match="artifact claim timed out"):
             with episode_writer_claim("gooaye", "EP700", timeout_seconds=0.1):
                 pytest.fail("same episode claim must remain exclusive")
     finally:
         release.set()
-        worker.join(timeout=10.0)
+        worker.join(timeout=WORKER_STARTUP_TIMEOUT_SECONDS)
         if worker.is_alive():
             worker.terminate()
-            worker.join(timeout=10.0)
+            worker.join(timeout=WORKER_STARTUP_TIMEOUT_SECONDS)
     assert worker.exitcode == 0
 
 
@@ -80,16 +92,16 @@ def test_spawned_process_blocks_same_artifact_claim(tmp_path: Path) -> None:
     )
     worker.start()
     try:
-        assert acquired.wait(timeout=10.0)
+        assert acquired.wait(timeout=WORKER_STARTUP_TIMEOUT_SECONDS)
         with pytest.raises(TimeoutError, match="artifact claim timed out"):
             with exclusive_artifact_claim(lock_path, timeout_seconds=0.1):
                 pytest.fail("same artifact claim must remain exclusive")
     finally:
         release.set()
-        worker.join(timeout=10.0)
+        worker.join(timeout=WORKER_STARTUP_TIMEOUT_SECONDS)
         if worker.is_alive():
             worker.terminate()
-            worker.join(timeout=10.0)
+            worker.join(timeout=WORKER_STARTUP_TIMEOUT_SECONDS)
     assert worker.exitcode == 0
 
 

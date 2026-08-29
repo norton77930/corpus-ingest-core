@@ -6,7 +6,6 @@ import sys
 
 import pytest
 
-
 ACK = (
     "I understand this may call an external LLM API, send transcript text outside this machine, "
     "and incur costs."
@@ -175,8 +174,8 @@ def _write_semantic_context(
     review_status="passed",
     body_extra="",
 ):
-    from corpus_ingest_core import storage
     import corpus_ingest_core.stock_lens_synthesis as synthesis
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "SUMMARIES_DIR", tmp_path / "summaries", raising=False)
     monkeypatch.setattr(
@@ -791,9 +790,10 @@ def test_stock_lens_synthesis_path_removes_illegal_characters_and_emoji():
 def test_stock_lens_synthesis_cli_parses_options_and_outputs_json(
     monkeypatch, tmp_path, capsys
 ):
+    from scripts import generate_stock_lens_synthesis_report
+
     import corpus_ingest_core.stock_lens_synthesis as synthesis
     from corpus_ingest_core.models import StockLensSynthesisResult
-    from scripts import generate_stock_lens_synthesis_report
 
     config_path = tmp_path / "llm_profiles.yaml"
     config_path.write_text(
@@ -904,8 +904,9 @@ profiles:
 
 
 def test_stock_lens_synthesis_cli_loads_env_file(monkeypatch, tmp_path, capsys):
-    from corpus_ingest_core.models import StockLensSynthesisResult
     from scripts import generate_stock_lens_synthesis_report
+
+    from corpus_ingest_core.models import StockLensSynthesisResult
 
     env_path = tmp_path / ".env"
     env_path.write_text("API_KEY=secret-value\nMODEL=file-model\n", encoding="utf-8")

@@ -13,6 +13,7 @@ published summaries a fixed point.
 from __future__ import annotations
 
 import inspect
+from dataclasses import FrozenInstanceError
 
 import pytest
 
@@ -25,7 +26,6 @@ from corpus_ingest_core.summary_profiles import (
     UNSET,
     resolve_summary_profile,
 )
-
 
 # --- Frozen copies of today's behaviour (pre-Spec-037 source) ----------------
 
@@ -128,7 +128,7 @@ def test_registry_module_performs_no_io():
 
 def test_profiles_are_frozen():
     profile = resolve_summary_profile(FINANCE)
-    with pytest.raises(Exception):
+    with pytest.raises(FrozenInstanceError):
         profile.name = "mutated"  # type: ignore[misc]
 
 
@@ -222,7 +222,7 @@ def test_learning_notes_final_prompt_asks_for_the_study_sections_in_order():
 
     positions = [profile.final_sections.find(section) for section in expected_order]
     assert all(position >= 0 for position in positions), dict(
-        zip(expected_order, positions)
+        zip(expected_order, positions, strict=True)
     )
     assert positions == sorted(positions), "sections must appear in the FR-014 order"
 

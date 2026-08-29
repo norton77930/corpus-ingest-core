@@ -10,18 +10,17 @@ glob result.
 
 from __future__ import annotations
 
-from contextlib import contextmanager
 import fnmatch
-from contextvars import ContextVar
-from dataclasses import dataclass
 import hashlib
 import json
+from collections.abc import Iterator
+from contextlib import contextmanager
+from contextvars import ContextVar
+from dataclasses import dataclass
 from pathlib import Path
-from typing import Iterator
 
 from . import storage
 from .secure_local_snapshot import secure_directory_names, secure_read_bytes
-
 
 _MAX_TRANSCRIPT_BYTES = 64 * 1024 * 1024
 

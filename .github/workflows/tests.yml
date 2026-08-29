@@ -1,11 +1,12 @@
 name: tests
 
-# Windows only, deliberately. The project documents PowerShell as its default
-# shell, pyproject carries Windows-specific pytest settings (a repo-local
-# basetemp, because long temp paths hit the 260-character MAX_PATH limit), and
-# the pipeline has never been run on Linux. CI verifies what the project claims
-# to support; adding a Linux job today would report path-separator noise rather
-# than signal.
+# Two platforms, deliberately. This project was written on Windows and ran only
+# on windows-latest for its whole life, but the code was always written to be
+# portable -- Path.as_posix() wherever a path enters a content digest, explicit
+# os.name == "nt" branches in artifact_lock, secure_local_snapshot and
+# verified_research_report_catalog. None of that was ever exercised. A public
+# project whose CI only proves Windows is, in practice, a Windows-only project,
+# and most people who would use this are not on Windows.
 
 on:
   push:
@@ -20,17 +21,14 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-defaults:
-  run:
-    shell: pwsh
-
 jobs:
   test:
-    runs-on: windows-latest
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 45
     strategy:
       fail-fast: false
       matrix:
+        os: [windows-latest, ubuntu-latest]
         # pyproject declares requires-python = ">=3.11".
         python-version: ['3.11', '3.12']
 
@@ -51,19 +49,39 @@ jobs:
       - name: Install
         run: pip install -e .[dev]
 
+      # Lint and types run before the suite: they take seconds and fail for
+      # reasons a nine-minute test run would only obscure.
+      - name: Lint
+        run: python -m ruff check src tests scripts
+
+      - name: Types
+        run: python -m mypy
+
       # No --ignore list: the whole suite runs and is expected to be fully
       # green. test_mcp_http_transport spawns a subprocess, so it goes red when
       # the environment does not match what pyproject declares -- which is the
       # whole point of running this on a clean machine.
       - name: Test
-        run: python -m pytest
+        run: python -m pytest --cov=corpus_ingest_core --cov-report=term-missing
 
       - name: Compile
         run: python -m compileall src scripts
 
       # The suite must not write into a tracked path. Everything it produces
       # belongs under the gitignored .pytest-tmp/ and data/ trees.
+      #
+      # The original check was a pwsh-only conditional, and this job now also
+      # runs on bash. `git diff --exit-code` would be portable but only sees
+      # tracked files -- an untracked artifact is a .gitignore gap, which is
+      # exactly what this step is meant to catch. GitHub ships bash on the
+      # Windows runners too, so pinning the shell here keeps one check for
+      # both platforms.
       - name: Working tree stays clean
+        shell: bash
         run: |
-          git status --porcelain
-          if (git status --porcelain) { throw "the test run modified tracked files" }
+          changes="$(git status --porcelain)"
+          if [ -n "$changes" ]; then
+            echo "the test run changed the working tree:"
+            echo "$changes"
+            exit 1
+          fi

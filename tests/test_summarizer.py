@@ -1,8 +1,8 @@
 from __future__ import annotations
 
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 import pytest
 
@@ -226,8 +226,9 @@ def test_summarize_episode_cleans_part_file_on_write_failure(monkeypatch, tmp_pa
 
 
 def test_summarize_cli_parses_options_and_outputs_json(monkeypatch, capsys, tmp_path):
-    from corpus_ingest_core.models import SummaryAsset
     from scripts import summarize_episode
+
+    from corpus_ingest_core.models import SummaryAsset
 
     asset = SummaryAsset(
         podcast_id="gooaye",

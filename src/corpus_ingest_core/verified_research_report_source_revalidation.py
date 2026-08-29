@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict
 import re
+from dataclasses import asdict
 from typing import Any
 
 from . import storage
@@ -19,12 +19,11 @@ from .verified_research_report import (
     REPORT_SCHEMA_VERSION,
     _canonical_source_path,
     _current_verified_research_source_snapshot,
-    _safe_path,
     _normalize_stock_query,
+    _safe_path,
     _source_digest,
 )
 from .verified_research_report_catalog import _exact_bundle_evidence
-
 
 _CHECK_NAMES = (
     "bundle_self_consistency",

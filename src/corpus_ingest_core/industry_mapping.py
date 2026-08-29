@@ -7,14 +7,13 @@ from typing import Any
 
 import yaml
 
+from . import storage
+from .canonical_transcript import current_canonical_transcript_identity
 from .config import load_podcast_profile
+from .episode_claim import episode_writer_claimed
 from .errors import IndustryMappingFailedError, IndustryMappingInputError
 from .models import IndustryChainMappingAsset
-from . import storage
 from .storage import industry_chain_mapping_asset_paths
-from .canonical_transcript import current_canonical_transcript_identity
-from .episode_claim import episode_writer_claimed
-
 
 MAPPING_MODE = "deterministic-industry-chain-v1"
 DEFAULT_MAPPING_CONFIG_PATH = Path("config/industry_chain_mappings.yaml")

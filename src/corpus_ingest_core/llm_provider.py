@@ -12,7 +12,6 @@ from .summary_profiles import (
     resolve_summary_profile,
 )
 
-
 DEFAULT_OPENAI_COMPATIBLE_BASE_URL = "https://api.openai.com/v1"
 SEMANTIC_API_COST_ACK = (
     "I understand this may call an external LLM API, send transcript text outside this machine, "

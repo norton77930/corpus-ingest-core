@@ -1,17 +1,16 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 import hashlib
 import json
+from dataclasses import asdict
 from pathlib import Path
 from typing import Any
 
+from . import storage
 from .config import load_podcast_profile
 from .errors import StockLensReportFailedError, StockLensReportInputError
 from .gooaye_lens import load_gooaye_lens_model
 from .models import StockLensReportAsset
-from . import storage
-
 
 REPORT_MODE = "deterministic-stock-lens-v1"
 SUPPORTED_MAPPING_MODE = "deterministic-industry-chain-v1"

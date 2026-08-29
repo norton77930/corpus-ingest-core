@@ -2,8 +2,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
@@ -386,8 +386,9 @@ def test_verify_external_data_boundary_output_contains_no_advice(monkeypatch, tm
 def test_verify_external_data_boundary_cli_parses_options_and_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from corpus_ingest_core.models import ExternalDataVerificationAsset
     from scripts import verify_external_data_boundary
+
+    from corpus_ingest_core.models import ExternalDataVerificationAsset
 
     asset = ExternalDataVerificationAsset(
         podcast_id="gooaye",

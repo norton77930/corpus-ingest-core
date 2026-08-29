@@ -20,17 +20,18 @@ from __future__ import annotations
 import importlib
 import os
 import re
+import subprocess
+import sys
+from pathlib import Path
 
 from corpus_ingest_core.local_env_names import (
     CONFIG_ENV,
     DATA_DIR_ENV,
     DEPRECATED_ALIASES,
+)
+from corpus_ingest_core.local_env_names import (
     names_for as _names,
 )
-import subprocess
-import sys
-from pathlib import Path
-
 from tests import conftest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]

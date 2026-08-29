@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import sys
 from pathlib import Path
-
 
 from tests.conftest import use_tmp_data_dirs as _use_tmp_data_dirs
 
@@ -358,8 +356,8 @@ def test_corpus_index_public_result_contract_exports(tmp_path):
 def test_corpus_index_snapshot_builds_without_writes_until_persisted(
     monkeypatch, tmp_path
 ):
-    from corpus_ingest_core import storage
     import corpus_ingest_core.corpus_index as corpus_index
+    from corpus_ingest_core import storage
 
     _write_episode_seed(monkeypatch, tmp_path)
     paths = storage.corpus_index_asset_paths("gooaye")
@@ -678,8 +676,9 @@ def test_generate_corpus_index_reports_missing_semantic_review(monkeypatch, tmp_
 def test_generate_corpus_index_cli_prints_output_paths_and_counts(
     monkeypatch, capsys, tmp_path
 ):
-    from corpus_ingest_core.models import CorpusArtifactFamilyCounts, CorpusIndexResult
     from scripts import generate_corpus_index as cli
+
+    from corpus_ingest_core.models import CorpusArtifactFamilyCounts, CorpusIndexResult
 
     result = CorpusIndexResult(
         podcast_id="gooaye",

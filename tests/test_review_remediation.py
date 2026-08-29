@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
 import json
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Event
 
@@ -10,9 +9,9 @@ import pytest
 
 
 def _configure_local_artifacts(monkeypatch, tmp_path: Path) -> Path:
-    from corpus_ingest_core import storage
     import corpus_ingest_core.corpus_index as corpus_index
     import corpus_ingest_core.semantic_summary_smoke_review as review
+    from corpus_ingest_core import storage
 
     for name, directory in (
         ("TRANSCRIPTS_DIR", "transcripts"),
@@ -109,10 +108,9 @@ def test_red_bearer_authorization_is_rejected_by_semantic_reviewer(monkeypatch, 
 
 
 def test_red_canonical_summary_uses_transcript_title_not_lexicographic_candidate(monkeypatch, tmp_path):
-    from corpus_ingest_core import storage
-    from corpus_ingest_core import corpus_index
-    from corpus_ingest_core import semantic_summary_smoke_review as writer
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as workflow
+    from corpus_ingest_core import corpus_index, storage
+    from corpus_ingest_core import semantic_summary_smoke_review as writer
 
     zulu = _write_transcript_and_summary(monkeypatch, tmp_path, title="EP700 Zulu")
     alpha = storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha")
@@ -145,11 +143,11 @@ def test_red_neutral_semantic_review_uses_low_level_disclaimer_policy_without_ll
 
     evaluation = review.evaluate_semantic_review_bytes(
         (
-            "Summary mode: semantic-llm\nProvider: fixture\nModel: fixture\n"
-            "Transcript status: valid\n[00:00:00 - 00:00:05] fixture\n"
-            "## Chunk Summaries\n"
-            "This is not investment advice. No buy/sell/hold advice is provided."
-        ).encode("utf-8"),
+            b"Summary mode: semantic-llm\nProvider: fixture\nModel: fixture\n"
+            b"Transcript status: valid\n[00:00:00 - 00:00:05] fixture\n"
+            b"## Chunk Summaries\n"
+            b"This is not investment advice. No buy/sell/hold advice is provided."
+        ),
         semantic_summary_path=Path("summary.semantic.md"),
     )
 
@@ -177,8 +175,8 @@ def test_red_same_second_review_writers_claim_distinct_complete_artifacts(monkey
 
 
 def test_review_writer_holds_the_episode_claim_while_publishing(monkeypatch, tmp_path):
-    from corpus_ingest_core.episode_claim import _episode_writer_claim_is_held
     from corpus_ingest_core import semantic_summary_smoke_review as writer
+    from corpus_ingest_core.episode_claim import _episode_writer_claim_is_held
 
     _write_transcript_and_summary(monkeypatch, tmp_path)
     original_publish = writer._publish_review_artifacts
@@ -197,8 +195,8 @@ def test_review_writer_holds_the_episode_claim_while_publishing(monkeypatch, tmp
 
 
 def test_review_writer_reenters_an_existing_same_episode_claim(monkeypatch, tmp_path):
-    from corpus_ingest_core.episode_claim import episode_writer_claim
     from corpus_ingest_core import semantic_summary_smoke_review as writer
+    from corpus_ingest_core.episode_claim import episode_writer_claim
 
     _write_transcript_and_summary(monkeypatch, tmp_path)
 
@@ -330,8 +328,8 @@ def _same_second_process_review(root_text: str, result_queue) -> None:
     from datetime import datetime as real_datetime
     from pathlib import Path as local_path
 
-    from corpus_ingest_core import storage
     import corpus_ingest_core.semantic_summary_smoke_review as writer
+    from corpus_ingest_core import storage
 
     root = local_path(root_text)
     storage.TRANSCRIPTS_DIR = root / "transcripts"

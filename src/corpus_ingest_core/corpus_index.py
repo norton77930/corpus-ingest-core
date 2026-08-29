@@ -1,25 +1,25 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
 import json
+from collections.abc import Callable
+from dataclasses import asdict, dataclass
 from pathlib import Path
-import re
-from typing import Any, Callable
+from typing import Any
 
 from . import storage
 from .errors import CorpusIndexFailedError
+from .models import (
+    CorpusArtifactFamilyCounts,
+    CorpusEpisodeRow,
+    CorpusIndexResult,
+)
 from .semantic_review_artifact import (
     inspect_semantic_review,
     parse_semantic_review_filename,
     semantic_review_candidates,
 )
 from .semantic_summary_identity import canonical_semantic_summary_path
-from .models import (
-    CorpusArtifactFamilyCounts,
-    CorpusEpisodeRow,
-    CorpusIndexResult,
-)
-
+from .storage import EVALS_RESEARCH_SMOKE_REPORTS_DIR as SEMANTIC_REVIEW_REPORTS_DIR
 
 INDEX_MODE = "deterministic-corpus-artifact-index-v1"
 SOURCE_SCOPE = "local-per-episode-artifacts-only"
@@ -36,7 +36,7 @@ SUPPORTED_ARTIFACT_FAMILIES = (
     "study_guide",
     "workflow_derivation",
 )
-from .storage import EVALS_RESEARCH_SMOKE_REPORTS_DIR as SEMANTIC_REVIEW_REPORTS_DIR
+
 _AUDIO_SUFFIXES = {".mp3", ".m4a", ".wav", ".aac", ".flac"}
 _ARRAY_COUNTS_KEY = "__array_counts__"
 _SEMANTIC_SUMMARY_MAX_READ_BYTES = 2 * 1024 * 1024

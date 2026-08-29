@@ -1,14 +1,13 @@
 from __future__ import annotations
 
-from pathlib import Path
 import re
 import sqlite3
+from pathlib import Path
 
 from . import storage
 from .cache import is_fts5_available
 from .errors import SearchError
 from .models import MentionSearchResult, TranscriptSearchResult
-
 
 _VALID_TRANSCRIPT_SEARCH_MODES = {"auto", "like", "fts"}
 _MAX_CONTEXT_SEGMENTS = 5

@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import asdict
 from typing import Any
 
+from . import storage
 from .corpus_episode_completion_workflow_runner import (
     run_corpus_episode_completion_workflow,
 )
@@ -16,7 +17,6 @@ from .errors import (
     VerifiedResearchReportCatalogInputError,
 )
 from .models import HistoricalVerifiedReportNextStep
-from . import storage
 from .verified_research_report_catalog import (
     discover_eligible_report_summaries,
     require_safe_podcast_id,

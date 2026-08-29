@@ -9,15 +9,15 @@ registration order and re-exports the public surface.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Any, Callable
+from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
 from . import semantic_summarizer
 from .errors import PodcastIngestCoreError, SearchError
 from .serialization import to_jsonable
-
 
 MAX_LIMIT = 50
 MAX_CONTEXT_SEGMENTS = 5

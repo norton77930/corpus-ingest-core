@@ -6,8 +6,6 @@ import importlib.util
 import json
 from pathlib import Path
 
-import pytest
-
 ROOT = Path(__file__).resolve().parents[1]
 SCRIPT = ROOT / "scripts" / "query_verified_research_report_coverage.py"
 

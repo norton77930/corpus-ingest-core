@@ -14,7 +14,6 @@ from corpus_ingest_core.episode_verified_research_report_workflow_runner import 
     run_episode_verified_research_report_workflow,
 )
 
-
 _FAILURE_ENVELOPE = {
     "ok": False,
     "error_type": "episode_verified_research_report_workflow_failed",

@@ -7,16 +7,15 @@ from typing import Any
 
 import yaml
 
+from . import storage
+from .canonical_transcript import current_canonical_transcript_identity
+from .episode_claim import episode_writer_claimed
 from .errors import (
     ExternalDataVerificationFailedError,
     ExternalDataVerificationInputError,
 )
 from .models import ExternalDataVerificationAsset
 from .storage import external_data_boundary_asset_paths
-from . import storage
-from .canonical_transcript import current_canonical_transcript_identity
-from .episode_claim import episode_writer_claimed
-
 
 VERIFICATION_MODE = "fixture-external-data-v1"
 SUPPORTED_BOUNDARY_MODE = "external-data-boundary-v1"

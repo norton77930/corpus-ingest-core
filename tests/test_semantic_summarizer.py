@@ -468,8 +468,9 @@ def test_openai_provider_falls_back_to_legacy_openai_model_and_base_url(monkeypa
 
 
 def test_summarize_cli_parses_semantic_options(monkeypatch, capsys, tmp_path):
-    from corpus_ingest_core.models import SummaryAsset
     from scripts import summarize_episode
+
+    from corpus_ingest_core.models import SummaryAsset
 
     asset = SummaryAsset(
         podcast_id="gooaye",
@@ -582,8 +583,9 @@ def test_summarize_cli_semantic_mode_requires_exact_ack_before_provider(monkeypa
 
 
 def test_summarize_cli_loads_env_file_for_semantic_mode(monkeypatch, capsys, tmp_path):
-    from corpus_ingest_core.models import SummaryAsset
     from scripts import summarize_episode
+
+    from corpus_ingest_core.models import SummaryAsset
 
     env_path = tmp_path / ".env"
     env_path.write_text("API_KEY=secret-value\nMODEL=file-model\n", encoding="utf-8")

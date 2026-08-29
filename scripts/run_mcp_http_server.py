@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import argparse
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from corpus_ingest_core.local_env_names import MCP_PORT_ENV as PORT_ENV, read_env
+from corpus_ingest_core.local_env_names import MCP_PORT_ENV as PORT_ENV
+from corpus_ingest_core.local_env_names import read_env
 from corpus_ingest_core.mcp_server import StreamableHttpConfig, run_streamable_http
-
 
 DEFAULT_PORT = 8767
 

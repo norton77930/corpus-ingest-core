@@ -1,18 +1,18 @@
 from __future__ import annotations
 
-from dataclasses import fields
 import hashlib
 import inspect
 import json
+from dataclasses import fields
 from pathlib import Path
 
 import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> Path:
-    from corpus_ingest_core import storage
     import corpus_ingest_core.corpus_index as corpus_index
     import corpus_ingest_core.semantic_summary_smoke_review as semantic_review
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "AUDIO_DIR", tmp_path / "audio")
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
@@ -1295,8 +1295,6 @@ def test_runner_report_writer_failure_is_safe_nontransactional_and_no_cleanup_re
             evidence_count=1,
         )
 
-    real_write_pair = runner.write_atomic_audit_report_pair
-
     def fail_commit_marker(json_path: Path, markdown_path: Path, payload: dict, markdown: str):
         # The staged Markdown may have committed, but the JSON marker failure
         # must leave no reader-acceptable pair.
@@ -1736,6 +1734,7 @@ def test_semantic_remediation_cli_ack_precedes_profile_env_and_core(
     monkeypatch, capsys, action
 ):
     from scripts import run_corpus_semantic_remediation as cli
+
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     calls = {"profile": 0, "env": 0, "core": 0}
@@ -1782,6 +1781,7 @@ def test_semantic_remediation_cli_normalizes_action_before_configuration_and_dis
     monkeypatch, capsys
 ):
     from scripts import run_corpus_semantic_remediation as cli
+
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     calls = []
@@ -1840,6 +1840,7 @@ def test_semantic_remediation_cli_confirmed_summary_resolves_controlled_options_
     monkeypatch, tmp_path: Path, capsys
 ):
     from scripts import run_corpus_semantic_remediation as cli
+
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
@@ -1919,6 +1920,7 @@ def test_semantic_remediation_cli_confirmed_review_bypasses_all_llm_resolution(
     monkeypatch, tmp_path: Path, capsys
 ):
     from scripts import run_corpus_semantic_remediation as cli
+
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
 
     _write_seed(monkeypatch, tmp_path)
@@ -1982,6 +1984,7 @@ def test_015_stale_review_remains_manual_only_without_a_collision_rereview(
 ):
     """Only 018 owns automatic authenticity rereview; 015 remains terminal."""
     from datetime import datetime as real_datetime
+
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     import corpus_ingest_core.semantic_summary_smoke_review as semantic_review
 
@@ -2030,6 +2033,7 @@ def test_semantic_remediation_cli_exit_and_error_no_leak_contract(
     monkeypatch, capsys
 ):
     from scripts import run_corpus_semantic_remediation as cli
+
     from corpus_ingest_core import CorpusSemanticRemediationRunnerFailedError
 
     cases = [
@@ -2115,7 +2119,7 @@ def test_unsafe_provider_and_model_are_rejected_without_leaking_values(
 
 
 def test_safe_cjk_local_paths_are_preserved_in_preview(monkeypatch, tmp_path: Path):
-    from corpus_ingest_core import run_corpus_semantic_remediation, storage
+    from corpus_ingest_core import run_corpus_semantic_remediation
 
     cjk_root = tmp_path / "測試資料"
     _use_tmp_data_dirs(monkeypatch, cjk_root)
@@ -2187,6 +2191,7 @@ def test_cli_runner_contained_failed_outcome_uses_exit_zero(
     monkeypatch, tmp_path: Path, capsys
 ):
     from scripts import run_corpus_semantic_remediation as cli
+
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 

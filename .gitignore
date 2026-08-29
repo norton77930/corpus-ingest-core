@@ -16,6 +16,13 @@ evals/**/raw/
 __pycache__/
 .pytest_cache/
 .pytest-tmp/
+# Coverage writes .coverage next to pyproject; CI fails the run if anything
+# untracked survives it.
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
 .tmp/
 *.pyc
 *.egg-info/

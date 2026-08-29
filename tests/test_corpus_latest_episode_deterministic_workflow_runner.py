@@ -2,9 +2,9 @@
 
 from __future__ import annotations
 
-from dataclasses import replace
 import inspect
 import json
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -31,10 +31,10 @@ def test_public_runner_is_exported_with_dry_run_first_local_options():
 
 
 def _install_semantic_only_residual_fixture(monkeypatch, tmp_path: Path) -> None:
-    from corpus_ingest_core import storage
-    from corpus_ingest_core.models import Episode
     import corpus_ingest_core.corpus_episode_intake as intake
     import corpus_ingest_core.corpus_index as corpus_index
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.models import Episode
 
     for name, directory in (
         ("AUDIO_DIR", "audio"),
@@ -176,10 +176,10 @@ def _install_semantic_only_residual_fixture(monkeypatch, tmp_path: Path) -> None
 def test_semantic_only_residual_hands_off_without_confirmed_executor_calls(
     monkeypatch, tmp_path
 ):
+    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
-    import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
 
     _install_semantic_only_residual_fixture(monkeypatch, tmp_path)
 
@@ -1050,8 +1050,8 @@ def test_failed_remediation_action_stops_without_second_remediation_probe(monkey
 
 
 def test_repeated_remediation_action_stops_without_automatic_retry(monkeypatch):
-    from corpus_ingest_core.models import CorpusEpisodeWorkflowRunRow
     import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    from corpus_ingest_core.models import CorpusEpisodeWorkflowRunRow
 
     remediation_calls = 0
     selected_public_row = CorpusEpisodeWorkflowRunRow(
@@ -1106,8 +1106,8 @@ def test_repeated_remediation_action_stops_without_automatic_retry(monkeypatch):
 
 
 def test_remediation_execution_cap_blocks_sixth_action_before_executor(monkeypatch):
-    from corpus_ingest_core.models import CorpusEpisodeWorkflowRunRow
     import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
+    from corpus_ingest_core.models import CorpusEpisodeWorkflowRunRow
 
     remediation_calls = 0
     probe_calls = 0

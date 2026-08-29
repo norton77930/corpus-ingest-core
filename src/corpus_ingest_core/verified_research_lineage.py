@@ -10,13 +10,14 @@ meaningful output.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import hashlib
 import json
-from pathlib import Path
 import re
-from typing import Any, Iterable
 import uuid
+from collections.abc import Iterable
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Any
 
 from . import storage
 from .canonical_transcript import (
@@ -25,9 +26,8 @@ from .canonical_transcript import (
 )
 from .errors import VerifiedResearchReportInputError
 from .external_data_verification import VERIFICATION_MODE
-from .semantic_review_artifact import REVIEW_BOUNDARY, REVIEW_MODE, inspect_semantic_review
 from .secure_local_snapshot import secure_read_bytes
-
+from .semantic_review_artifact import REVIEW_BOUNDARY, REVIEW_MODE, inspect_semantic_review
 
 _MAX_LINEAGE_INPUT_BYTES = 64 * 1024 * 1024
 

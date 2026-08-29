@@ -1,12 +1,14 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 import json
-from pathlib import Path
 import re
+from dataclasses import asdict
+from pathlib import Path
 from typing import Any
 
+from .canonical_transcript import resolve_canonical_transcript_asset_paths
 from .config import load_podcast_profile
+from .episode_claim import episode_writer_claimed
 from .errors import (
     MentionExtractionFailedError,
     MentionExtractionInputError,
@@ -15,10 +17,7 @@ from .errors import (
 )
 from .models import Mention, MentionEvidence, MentionExtractionAsset
 from .storage import mention_asset_paths
-from .canonical_transcript import resolve_canonical_transcript_asset_paths
-from .episode_claim import episode_writer_claimed
 from .validator import validate_transcript
-
 
 EXTRACTION_MODE = "deterministic-rules"
 MENTION_RULES: dict[str, list[str]] = {

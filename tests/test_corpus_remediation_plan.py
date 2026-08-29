@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 import hashlib
 import importlib
 import json
-from pathlib import Path
 import socket
 import sys
+from dataclasses import asdict
+from pathlib import Path
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> Path:
-    from corpus_ingest_core import storage
     import corpus_ingest_core.corpus_index as corpus_index
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "AUDIO_DIR", tmp_path / "audio")
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
@@ -414,9 +414,9 @@ def test_corpus_remediation_public_result_contract_exports(tmp_path):
 def test_corpus_remediation_plan_snapshot_builds_without_writes_until_persisted(
     monkeypatch, tmp_path
 ):
-    from corpus_ingest_core import storage
     import corpus_ingest_core.corpus_index as corpus_index
     import corpus_ingest_core.corpus_remediation_plan as remediation_plan
+    from corpus_ingest_core import storage
 
     _write_episode_seed(monkeypatch, tmp_path)
     index_paths = storage.corpus_index_asset_paths("gooaye")
@@ -490,9 +490,9 @@ def test_generate_corpus_remediation_plan_markdown_includes_contract_summary(
 def test_generate_corpus_remediation_plan_refreshes_index_first(
     monkeypatch, tmp_path
 ):
-    from corpus_ingest_core.models import CorpusArtifactFamilyCounts, CorpusIndexResult
-    from corpus_ingest_core import storage
     import corpus_ingest_core.corpus_remediation_plan as remediation
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.models import CorpusArtifactFamilyCounts, CorpusIndexResult
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     calls: list[str] = []
@@ -671,11 +671,12 @@ def test_generate_corpus_remediation_plan_is_deterministic_and_has_no_timestamp(
 def test_generate_corpus_remediation_plan_cli_prints_output_paths_and_counts(
     monkeypatch, capsys, tmp_path
 ):
+    from scripts import generate_corpus_remediation_plan as cli
+
     from corpus_ingest_core.models import (
         CorpusRemediationActionCounts,
         CorpusRemediationPlanResult,
     )
-    from scripts import generate_corpus_remediation_plan as cli
 
     result = CorpusRemediationPlanResult(
         podcast_id="gooaye",

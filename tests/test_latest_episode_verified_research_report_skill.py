@@ -9,7 +9,6 @@ from types import SimpleNamespace
 
 import pytest
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -66,9 +65,10 @@ def test_cli_no_publish_forwards_false_without_changing_loopback_routing(monkeyp
 
 
 def test_confirmed_cli_no_publish_forwards_ack_and_hides_core_failure(monkeypatch, capsys):
+    from scripts import run_latest_episode_verified_research_report_workflow as cli
+
     from corpus_ingest_core import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
-    from scripts import run_latest_episode_verified_research_report_workflow as cli
 
     captured = {}
 
@@ -95,6 +95,7 @@ def test_confirmed_cli_no_publish_forwards_ack_and_hides_core_failure(monkeypatc
 
 def test_red_cli_rejects_remote_base_url_before_core_and_hides_host(monkeypatch, capsys):
     from scripts import run_latest_episode_verified_research_report_workflow as cli
+
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     monkeypatch.setattr(

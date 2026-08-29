@@ -2,14 +2,13 @@
 
 from __future__ import annotations
 
-from contextlib import contextmanager
 import errno
 import os
-from pathlib import Path
 import time
+from collections.abc import Iterator
+from contextlib import contextmanager
+from pathlib import Path
 from threading import Lock
-from typing import Iterator
-
 
 _PROCESS_CLAIMS_GUARD = Lock()
 _PROCESS_CLAIMS: dict[str, Lock] = {}

@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
-from dataclasses import fields, replace
 import hashlib
 import inspect
 import json
+from dataclasses import fields, replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -25,8 +25,8 @@ def _manifest(root: Path) -> dict[str, tuple[str, int, int]]:
 
 
 def _use_tmp_dirs(monkeypatch, tmp_path: Path) -> None:
-    from corpus_ingest_core import storage
     import corpus_ingest_core.semantic_summary_smoke_review as semantic_review
+    from corpus_ingest_core import storage
 
     for name, directory in (
         ("AUDIO_DIR", "audio"),
@@ -314,8 +314,8 @@ def test_public_contract_models_and_safe_parameter_surface():
 
 
 def test_storage_paths_are_pure_and_preview_is_strict_zero_write(monkeypatch, tmp_path):
-    from corpus_ingest_core import storage
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core import storage
 
     _use_tmp_dirs(monkeypatch, tmp_path)
     paths = storage.latest_episode_verified_research_report_paths("gooaye", "EP700", "a" * 64)
@@ -342,7 +342,6 @@ def test_storage_paths_are_pure_and_preview_is_strict_zero_write(monkeypatch, tm
 
 
 def test_no_publish_preview_is_strict_zero_write_and_omits_publication(monkeypatch, tmp_path):
-    from corpus_ingest_core import storage
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _use_tmp_dirs(monkeypatch, tmp_path)
@@ -373,8 +372,8 @@ def test_no_publish_preview_is_strict_zero_write_and_omits_publication(monkeypat
 def test_publish_report_requires_a_strict_bool_before_latest_resolution(
     monkeypatch, publish_report
 ):
-    from corpus_ingest_core import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
 
     monkeypatch.setattr(
         runner,
@@ -389,9 +388,9 @@ def test_publish_report_requires_a_strict_bool_before_latest_resolution(
 
 
 def test_confirmed_no_publish_completes_current_lineage_without_bundle(monkeypatch, tmp_path):
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     _record_current_018_lineage()
@@ -469,8 +468,8 @@ def test_confirmed_no_publish_completes_current_lineage_without_bundle(monkeypat
 def test_no_publish_rereviews_a_current_passed_review_and_blocks_failed_review(
     monkeypatch, tmp_path
 ):
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     _record_current_018_lineage()
@@ -511,9 +510,9 @@ def test_no_publish_rereviews_a_current_passed_review_and_blocks_failed_review(
 
 
 def test_no_publish_rejects_stock_query_before_latest_or_claim(monkeypatch):
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     for name in ("_resolve_latest_episode", "_acquire_episode_workflow_claim"):
         monkeypatch.setattr(
@@ -569,9 +568,9 @@ def test_manual_checkpoint_clears_non_success_bundle_references(tmp_path, termin
 def test_no_publish_failures_never_assemble_publish_or_return_ready(
     monkeypatch, tmp_path, failure_stage
 ):
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     _record_current_018_lineage()
@@ -675,8 +674,8 @@ def test_invalid_ack_blocks_rss_env_provider_writer_and_child_stages(monkeypatch
 
 
 def test_confirmed_drift_is_approval_boundary_rejection_with_strict_zero_writes(monkeypatch, tmp_path):
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _use_tmp_dirs(monkeypatch, tmp_path)
     calls = {"latest": 0, "deterministic": 0}
@@ -706,8 +705,8 @@ def test_confirmed_drift_is_approval_boundary_rejection_with_strict_zero_writes(
 
 
 def test_review_passed_runs_pinned_deterministic_research_once_with_fixed_options_and_publishes(monkeypatch, tmp_path):
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_completed_artifacts(monkeypatch, tmp_path, stock_query="NVDA")
     monkeypatch.setattr(runner, "_adopt_complete_bundle", lambda *args: None)
@@ -756,8 +755,8 @@ def test_review_passed_runs_pinned_deterministic_research_once_with_fixed_option
 
 
 def test_missing_summary_runs_summary_then_review_once_and_requires_exact_pass(monkeypatch, tmp_path):
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     from corpus_ingest_core import storage
@@ -802,10 +801,10 @@ def test_stale_passed_review_is_deterministically_rereviewed_before_research(
     monkeypatch, tmp_path, review_defect
 ):
     """SPEC 018 re-reviews its own stale or forged authenticity deficits once."""
-    from corpus_ingest_core import storage
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     import corpus_ingest_core.corpus_index as corpus_index
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     review_dir = tmp_path / "evals" / "research-llm-smoke" / "reports"
@@ -858,10 +857,10 @@ def test_stale_passed_review_with_failed_rereview_returns_bounded_blocked(
     monkeypatch, tmp_path
 ):
     """A real deterministic rereview failure never becomes a workflow failure."""
-    from corpus_ingest_core import storage
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     import corpus_ingest_core.corpus_index as corpus_index
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     review_dir = tmp_path / "evals" / "research-llm-smoke" / "reports"
@@ -909,10 +908,9 @@ def test_stale_passed_review_with_failed_rereview_returns_bounded_blocked(
 
 @pytest.mark.parametrize("review_status", ["failed", "blocked"])
 def test_nonpassed_review_stops_before_research_and_publish(monkeypatch, tmp_path, review_status):
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
-
     from corpus_ingest_core import storage
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     from corpus_ingest_core.semantic_summary_smoke_review import (
         review_semantic_summary_smoke,
     )
@@ -1094,12 +1092,12 @@ def test_manifest_preserves_safe_windows_local_source_paths(monkeypatch, tmp_pat
 
 
 def test_complete_matching_bundle_is_adopted_without_rerunning_children(monkeypatch, tmp_path):
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     from corpus_ingest_core.verified_research_report import (
         assemble_verified_research_report,
         publish_verified_research_report_bundle,
     )
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     publish_verified_research_report_bundle(
@@ -1135,9 +1133,9 @@ def test_complete_matching_bundle_is_adopted_without_rerunning_children(monkeypa
 
 
 def test_checkpoint_failure_after_publish_returns_bundle_with_bounded_warning(monkeypatch, tmp_path):
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
-    from corpus_ingest_core import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     monkeypatch.setattr(runner, "_adopt_complete_bundle", lambda *args: None)
@@ -1211,8 +1209,8 @@ def test_existing_bundle_rejects_coordinated_report_manifest_tampering_and_extra
 
 
 def test_adoption_requires_valid_transcript_complete_output_contract(monkeypatch, tmp_path):
-    from corpus_ingest_core import storage
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core import storage
     from corpus_ingest_core.verified_research_report import (
         assemble_verified_research_report,
         publish_verified_research_report_bundle,
@@ -1296,9 +1294,9 @@ def test_publish_rechecks_sources_after_staging_before_atomic_rename(monkeypatch
 
 
 def test_summary_stage_exception_returns_bounded_terminal_result(monkeypatch, tmp_path):
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
-    from corpus_ingest_core import storage
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha").unlink()
@@ -1483,6 +1481,7 @@ def test_report_retains_sanitized_evidence_and_readable_stock_appendix(monkeypat
 
 def test_destination_race_reuses_only_a_matching_bundle(monkeypatch, tmp_path):
     from pathlib import Path
+
     import corpus_ingest_core.verified_research_report as report
     from corpus_ingest_core.verified_research_report import (
         assemble_verified_research_report,
@@ -1753,8 +1752,8 @@ def test_red_reserved_generations_prevent_deterministic_stale_success_overwrite(
 
 
 def test_confirmed_blocked_return_finalizes_checkpoint_terminal_outcome(monkeypatch, tmp_path):
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     monkeypatch.setattr(runner, "_adopt_complete_bundle", lambda *args: None)
@@ -2033,9 +2032,9 @@ def test_red_workflow_claim_failure_returns_bounded_terminal_result_before_child
 ):
     from contextlib import contextmanager
 
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _use_tmp_dirs(monkeypatch, tmp_path)
     checkpoint_path = storage.latest_episode_verified_research_report_paths(
@@ -2119,9 +2118,9 @@ def test_red_reservation_failure_skips_finalization_and_preserves_newer_generati
     monkeypatch, tmp_path
 ):
     """An unreserved invocation cannot retry or merge into a newer checkpoint."""
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _use_tmp_dirs(monkeypatch, tmp_path)
     checkpoint_path = storage.latest_episode_verified_research_report_paths(
@@ -2180,10 +2179,10 @@ def test_red_018_rereview_converges_past_future_forged_and_rejected_candidates(
     monkeypatch, tmp_path
 ):
     """A new authentic review must supersede invalid higher-sorting filenames."""
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.semantic_review_artifact import inspect_semantic_review
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     review_dir = tmp_path / "evals" / "research-llm-smoke" / "reports"
@@ -2244,6 +2243,7 @@ def test_red_confirmed_existing_summary_without_lineage_uses_private_regeneratio
 ):
     from types import SimpleNamespace
 
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.episode_claim import (
         _ControlledRegenerationCapability,
@@ -2251,7 +2251,6 @@ def test_red_confirmed_existing_summary_without_lineage_uses_private_regeneratio
     )
     from corpus_ingest_core.generation_proof import notify_child_artifact_committed
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _write_completed_artifacts(monkeypatch, tmp_path, with_lineage=False)
     summary_path = storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha")
@@ -2312,9 +2311,9 @@ def test_red_confirmed_existing_summary_without_lineage_uses_private_regeneratio
 
 
 def test_red_regeneration_provider_failure_reports_substage_category(monkeypatch, tmp_path):
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _write_completed_artifacts(monkeypatch, tmp_path, with_lineage=False)
     summary_path = storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha")
@@ -2429,14 +2428,14 @@ def test_red_regeneration_proof_failures_report_distinct_substages(
 ):
     from types import SimpleNamespace
 
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
-    from corpus_ingest_core.errors import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
-    from corpus_ingest_core.generation_proof import notify_child_artifact_committed
     from corpus_ingest_core.episode_claim import (
         _mint_controlled_regeneration_capability,
         episode_writer_claim,
     )
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core.errors import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
+    from corpus_ingest_core.generation_proof import notify_child_artifact_committed
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     summary_path = storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha")
@@ -2506,14 +2505,14 @@ def test_red_regeneration_transaction_substages_are_allowlisted_constants(
 ):
     from types import SimpleNamespace
 
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
-    from corpus_ingest_core.errors import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
-    from corpus_ingest_core.generation_proof import notify_child_artifact_committed
     from corpus_ingest_core.episode_claim import (
         _mint_controlled_regeneration_capability,
         episode_writer_claim,
     )
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core.errors import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
+    from corpus_ingest_core.generation_proof import notify_child_artifact_committed
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     summary_path = storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha")
@@ -2604,14 +2603,14 @@ def test_controlled_regeneration_rolls_back_summary_and_lineage_on_failure(
 ):
     from types import SimpleNamespace
 
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
-    from corpus_ingest_core.errors import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
-    from corpus_ingest_core.generation_proof import notify_child_artifact_committed
     from corpus_ingest_core.episode_claim import (
         _mint_controlled_regeneration_capability,
         episode_writer_claim,
     )
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core.errors import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
+    from corpus_ingest_core.generation_proof import notify_child_artifact_committed
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     summary_path = storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha")
@@ -2776,8 +2775,8 @@ def test_red_research_is_forced_when_its_lineage_roles_are_not_current(
 ):
     from types import SimpleNamespace
 
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_completed_artifacts(monkeypatch, tmp_path, with_lineage=False)
     _record_current_018_lineage(roles=lineage_roles)
@@ -2814,8 +2813,8 @@ def test_red_research_is_forced_when_its_lineage_roles_are_not_current(
 def _unproven_research_scenario(monkeypatch, tmp_path):
     """EP687-shaped state: artifacts on disk, lineage covering only the semantics."""
 
-    from corpus_ingest_core import storage
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core import storage
 
     _write_completed_artifacts(monkeypatch, tmp_path, with_lineage=False)
     _record_current_018_lineage(roles=("transcript", "semantic_summary", "semantic_review"))
@@ -2846,8 +2845,8 @@ def _unproven_research_scenario(monkeypatch, tmp_path):
 def test_red_unproven_research_artifacts_are_cleared_before_the_child_runs(
     monkeypatch, tmp_path
 ):
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     paths = _unproven_research_scenario(monkeypatch, tmp_path)
     assert all(path.exists() for path in paths.values())
@@ -2873,8 +2872,8 @@ def test_red_unproven_research_artifacts_are_cleared_before_the_child_runs(
 def test_cleared_research_artifacts_are_restored_byte_exactly_when_the_child_fails(
     monkeypatch, tmp_path
 ):
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     paths = _unproven_research_scenario(monkeypatch, tmp_path)
     before = {role: path.read_bytes() for role, path in paths.items()}
@@ -2904,9 +2903,9 @@ def test_regenerated_research_artifacts_survive_a_successful_stage(monkeypatch, 
     import hashlib
     from types import SimpleNamespace
 
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core.generation_proof import notify_child_artifact_committed
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     paths = _unproven_research_scenario(monkeypatch, tmp_path)
     before = {role: path.read_bytes() for role, path in paths.items()}
@@ -2943,8 +2942,8 @@ def test_regenerated_research_artifacts_survive_a_successful_stage(monkeypatch, 
 
 
 def test_interrupted_clearing_restores_every_already_moved_artifact(monkeypatch, tmp_path):
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     paths = _unproven_research_scenario(monkeypatch, tmp_path)
     before = {role: path.read_bytes() for role, path in paths.items()}
@@ -2982,8 +2981,8 @@ def test_interrupted_clearing_restores_every_already_moved_artifact(monkeypatch,
 def test_incomplete_research_child_restores_the_superseded_artifacts(monkeypatch, tmp_path):
     from types import SimpleNamespace
 
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     paths = _unproven_research_scenario(monkeypatch, tmp_path)
     before = {role: path.read_bytes() for role, path in paths.items()}
@@ -3013,8 +3012,8 @@ def test_red_research_completed_without_proof_coverage_restores_the_artifacts(
 ):
     from types import SimpleNamespace
 
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     paths = _unproven_research_scenario(monkeypatch, tmp_path)
     before = {role: path.read_bytes() for role, path in paths.items()}
@@ -3047,8 +3046,8 @@ def test_red_research_completed_without_proof_coverage_restores_the_artifacts(
 
 
 def test_aliased_research_roles_are_cleared_and_restored_exactly_once(monkeypatch, tmp_path):
-    from corpus_ingest_core import storage
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core import storage
 
     _use_tmp_dirs(monkeypatch, tmp_path)
     boundary = storage.EXTERNAL_DIR / "gooaye" / "EP700__EP700.external-boundary.json"
@@ -3079,16 +3078,15 @@ def _record_current_018_lineage(
 ) -> None:
     """Create a test-only trusted 018 lineage snapshot from known fixture writes."""
 
-    from corpus_ingest_core.verified_research_lineage import (
-        record_current_verified_research_lineage,
-    )
-
     from corpus_ingest_core import storage
     from corpus_ingest_core.canonical_transcript import (
         resolve_canonical_transcript_asset_paths,
     )
     from corpus_ingest_core.semantic_review_artifact import inspect_semantic_review
     from corpus_ingest_core.semantic_summary_smoke_review import REPORTS_DIR
+    from corpus_ingest_core.verified_research_lineage import (
+        record_current_verified_research_lineage,
+    )
 
     transcript = resolve_canonical_transcript_asset_paths(podcast_id, episode_ref)
     assert transcript is not None
@@ -3156,8 +3154,8 @@ def _record_current_018_lineage(
 def _mark_boundary_fixture_verified(monkeypatch, tmp_path: Path) -> Path:
     """Install a current fixture marker without contacting an external provider."""
 
-    from corpus_ingest_core import storage
     import corpus_ingest_core.external_data_verification as external_verification
+    from corpus_ingest_core import storage
 
     fixture_path = tmp_path / "fixture.yaml"
     fixture_path.write_text("candidates: []\n", encoding="utf-8")
@@ -3227,13 +3225,12 @@ def test_red_018_transcript_bytes_mutation_invalidates_all_derived_lineage(monke
 def test_red_018_fixture_bytes_mutation_blocks_fixture_bound_assembly_and_adoption(
     monkeypatch, tmp_path
 ):
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core.verified_research_report import (
         VerifiedResearchReportInputError,
         assemble_verified_research_report,
         publish_verified_research_report_bundle,
     )
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     fixture_path = _mark_boundary_fixture_verified(monkeypatch, tmp_path)
@@ -3321,13 +3318,13 @@ def test_red_018_stock_input_set_mutation_invalidates_stock_lens_lineage(monkeyp
 def test_red_018_adopts_valid_bundle_despite_corrupt_checkpoint(monkeypatch, tmp_path):
     """Checkpoint bytes are untrusted metadata, not a veto over a valid bundle."""
 
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     from corpus_ingest_core.verified_research_report import (
         assemble_verified_research_report,
         publish_verified_research_report_bundle,
     )
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     _record_current_018_lineage()
@@ -3357,11 +3354,11 @@ def test_red_018_adopts_valid_bundle_despite_corrupt_checkpoint(monkeypatch, tmp
 def test_red_018_same_episode_threads_hold_one_cost_boundary(monkeypatch, tmp_path):
     """Two confirmed calls for one episode may not create two semantic providers."""
 
-    from threading import Barrier, Lock, Thread
     import time
+    from threading import Barrier, Lock, Thread
 
-    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _use_tmp_dirs(monkeypatch, tmp_path)
     state = {"summary": False, "review": False, "published": False}
@@ -3501,12 +3498,12 @@ def test_red_v2_lineage_without_generation_proofs_cannot_assemble_or_adopt(
 ):
     """Correct v2 hashes/options alone may not bless pre-existing report bytes."""
 
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.verified_research_report import (
         VerifiedResearchReportInputError,
         assemble_verified_research_report,
     )
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     sidecar = storage.CORPUS_DIR / "gooaye" / "verified-research" / "EP700.lineage.json"
@@ -3525,12 +3522,12 @@ def test_red_adoption_rejects_bundle_when_requested_semantic_identity_changes(
 ):
     """A bundle for request A cannot satisfy provider/model/base/chunk request B."""
 
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
     from corpus_ingest_core.verified_research_report import (
         assemble_verified_research_report,
         publish_verified_research_report_bundle,
     )
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     publish_verified_research_report_bundle(
@@ -3558,14 +3555,14 @@ def test_red_fixture_enablement_records_in_place_boundary_and_fixture_proofs(
 ):
     """A trusted unverified boundary may become fixture-verified in place once."""
 
+    import corpus_ingest_core.external_data_verification as verification
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.external_data_verification import verify_external_data_boundary
     from corpus_ingest_core.generation_proof import notify_child_artifact_committed
     from corpus_ingest_core.verified_research_lineage import (
         validate_current_verified_research_lineage,
     )
-    import corpus_ingest_core.external_data_verification as verification
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     fixture_path = tmp_path / "fixture.yaml"
@@ -3622,6 +3619,8 @@ def test_red_fixture_enablement_records_in_place_boundary_and_fixture_proofs(
 def test_red_fresh_fixture_run_records_non_preexisting_fixture_proof(monkeypatch, tmp_path):
     """A fresh boundary plus fixture run records two ordinary post-commit proofs."""
 
+    import corpus_ingest_core.external_data_verification as verification
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.external_data_boundary import generate_external_data_boundary
     from corpus_ingest_core.external_data_verification import verify_external_data_boundary
@@ -3629,8 +3628,6 @@ def test_red_fresh_fixture_run_records_non_preexisting_fixture_proof(monkeypatch
     from corpus_ingest_core.verified_research_lineage import (
         validate_current_verified_research_lineage,
     )
-    import corpus_ingest_core.external_data_verification as verification
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     fixture_path = tmp_path / "fresh-fixture.yaml"

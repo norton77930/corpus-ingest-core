@@ -14,10 +14,8 @@ from __future__ import annotations
 
 from typing import Any
 
-from . import mcp_runtime
-from . import stock_lens
+from . import mcp_runtime, stock_lens
 from .mcp_runtime import mcp, tool_action_plan
-
 
 MIN_EVIDENCE_ITEMS = 1
 MAX_EVIDENCE_ITEMS = 50

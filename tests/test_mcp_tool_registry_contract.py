@@ -18,7 +18,6 @@ import inspect
 import re
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 READ_QUERY_TOOLS = {

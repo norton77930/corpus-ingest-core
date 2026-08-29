@@ -59,6 +59,117 @@ Changelog = "https://github.com/norton77930/corpus-ingest-core/blob/main/CHANGEL
 corpus-ingest-mcp = "corpus_ingest_core.mcp_runtime:run"
 corpus-ingest-mcp-http = "corpus_ingest_core.mcp_runtime:run_streamable_http"
 
+[tool.ruff]
+# 120, not 88: the existing code is written to it, and E501 is excluded below
+# anyway. This value only shapes what ruff format would do when it is adopted.
+line-length = 120
+target-version = "py311"
+src = ["src", "tests", "scripts"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B"]
+# E501 (line-too-long) is off on purpose. It accounts for 2018 of the 2549
+# violations found when this gate was first switched on, and every one of them
+# is a formatting question, not a correctness one. Reflowing them belongs in a
+# single `ruff format` commit that touches nothing else -- mixed into a feature
+# diff it would bury the change under whitespace.
+ignore = ["E501"]
+
+# F401 is reported but never auto-fixed here. This codebase re-exports across
+# module boundaries -- semantic_summarizer imports SEMANTIC_API_COST_ACK purely
+# so stock_lens_synthesis can import it back out -- and `ruff check --fix`
+# cannot see that from inside one file. It deleted exactly that binding on the
+# first run and broke the package import. Every F401 gets read by a human.
+unfixable = ["F401"]
+
+[tool.ruff.lint.per-file-ignores]
+# The facade re-exports tool functions, envelopes, and dependency-module
+# aliases so that clients and tests can reach every one of them through this
+# one module; see its docstring. Ruff sees 85 unused imports. They are the
+# contract, and tests/test_mcp_server_facade_boundary.py fails if they go.
+"src/corpus_ingest_core/mcp_server.py" = ["F401"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["corpus_ingest_core"]
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src"]
+# Third-party packages here ship no stubs (faster_whisper, feedparser, av,
+# yt_dlp, mcp). Without this every import of them is an error and the real
+# findings drown.
+ignore_missing_imports = true
+# Deliberately not strict. Turning on disallow_untyped_defs today would report
+# thousands of errors and the gate would be switched straight back off; the
+# baseline below is the thing that shrinks first.
+warn_unused_configs = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+
+# Baseline, not an exemption. mypy finds 87 errors across these 30 modules; the
+# other 54 under src/ are already clean and are gated from now on, so a new
+# module starts type-checked and cannot join this list without an edit here.
+# Shrink it: delete a line, run mypy, fix what it reports. The list is small on
+# purpose so that is a normal-sized piece of work rather than a project.
+[[tool.mypy.overrides]]
+module = [
+    "corpus_ingest_core.artifact_lock",
+    "corpus_ingest_core.config",
+    "corpus_ingest_core.corpus_episode_completion_workflow_runner",
+    "corpus_ingest_core.corpus_episode_workflow_runner",
+    "corpus_ingest_core.corpus_index",
+    "corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner",
+    "corpus_ingest_core.corpus_remediation_runner",
+    "corpus_ingest_core.downloader",
+    "corpus_ingest_core.episode_verified_research_report_workflow_runner",
+    "corpus_ingest_core.external_data_boundary",
+    "corpus_ingest_core.external_data_verification",
+    "corpus_ingest_core.feed_reader",
+    "corpus_ingest_core.gooaye_lens",
+    "corpus_ingest_core.industry_mapping",
+    "corpus_ingest_core.latest_episode_verified_research_report_workflow_runner",
+    "corpus_ingest_core.llm_profiles",
+    "corpus_ingest_core.llm_provider",
+    "corpus_ingest_core.mcp_tools_side_effect",
+    "corpus_ingest_core.mcp_tools_stock_lens",
+    "corpus_ingest_core.mcp_verified_research_report_catalog",
+    "corpus_ingest_core.secure_local_snapshot",
+    "corpus_ingest_core.stock_lens",
+    "corpus_ingest_core.validator",
+    "corpus_ingest_core.verified_research_lineage",
+    "corpus_ingest_core.verified_research_report_catalog",
+    "corpus_ingest_core.verified_research_report_source_revalidation",
+    "corpus_ingest_core.video_acquire",
+    "corpus_ingest_core.workflow_derivation",
+    "corpus_ingest_core.x_video_ingest",
+    "corpus_ingest_core.youtube_video_ingest",
+]
+ignore_errors = true
+
+[tool.coverage.run]
+source = ["corpus_ingest_core"]
+# branch = true does not work here. Several tests spawn subprocesses from a
+# temporary cwd, so those children never find this file and measure in
+# statement mode; combining them with the parent's branch data fails outright
+# with "Can't combine statement coverage data with branch data". Turning it on
+# would need COVERAGE_RCFILE plumbed through every subprocess launch, which is
+# a bigger change than the extra signal is worth today.
+
+[tool.coverage.report]
+# Measured 89% on windows-latest (13329 statements, 1511 uncovered). The floor
+# sits below that on purpose: artifact_lock, secure_local_snapshot and
+# verified_research_report_catalog branch on os.name == "nt", so each platform
+# leaves the other's branch uncovered and the ubuntu number will not match the
+# windows one. 85 is a real floor -- it fails on a genuine regression -- with
+# just enough slack that a platform split does not turn CI red for nothing.
+# Ratchet it up once both platforms have reported a few times.
+fail_under = 85
+show_missing = true
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]
+
 [tool.setuptools.packages.find]
 where = ["src"]
 

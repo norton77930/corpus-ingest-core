@@ -6,11 +6,11 @@ Never sends transcript text to a provider.
 
 from __future__ import annotations
 
-from dataclasses import asdict
 import json
-from pathlib import Path
 import re
 import shutil
+from dataclasses import asdict
+from pathlib import Path
 from typing import Any
 
 from . import storage
@@ -32,7 +32,6 @@ from .study_guide_profiles import (
     WORKFLOW_MARKERS,
 )
 from .summary_profiles import LEARNING_NOTES
-
 
 CACHE_STALE_WARNING = (
     "SQLite cache may be stale; rebuild cache manually. "

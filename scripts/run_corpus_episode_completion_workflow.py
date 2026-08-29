@@ -2,15 +2,17 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from corpus_ingest_core import (
     CorpusEpisodeCompletionWorkflowRunnerFailedError,
-    corpus_episode_completion_workflow_result_to_dict as result_to_dict,
     run_corpus_episode_completion_workflow,
+)
+from corpus_ingest_core import (
+    corpus_episode_completion_workflow_result_to_dict as result_to_dict,
 )
 from corpus_ingest_core.corpus_episode_completion_workflow_runner import (
     CONFIRMED_ACTION_MUST_BE_EXPLICIT_MESSAGE,

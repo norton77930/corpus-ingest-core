@@ -1,24 +1,22 @@
 from __future__ import annotations
 
+import re
 from collections.abc import Callable
 from dataclasses import asdict, dataclass, replace
 from pathlib import Path
-import json
-import re
 from typing import Any
 
 from . import storage
 from .audit_report_pair import write_atomic_audit_report_pair
+from .corpus_index import _build_corpus_index_snapshot
+from .corpus_remediation_plan import _build_corpus_remediation_plan_snapshot
 from .episode_claim import (
     _consume_controlled_regeneration_capability,
     _ControlledRegenerationCapability,
     episode_writer_claimed,
 )
-from .generation_proof import ChildArtifactCommit, notify_child_artifact_committed
-from .corpus_index import _build_corpus_index_snapshot
-from .corpus_remediation_plan import _build_corpus_remediation_plan_snapshot
 from .errors import CorpusSemanticRemediationRunnerFailedError
-from .path_safety import is_safe_local_path_structure
+from .generation_proof import notify_child_artifact_committed
 from .models import (
     CorpusSemanticRemediationRunCounts,
     CorpusSemanticRemediationRunFilter,
@@ -26,12 +24,12 @@ from .models import (
     CorpusSemanticRemediationRunRow,
     CorpusSemanticRemediationRunWarning,
 )
+from .path_safety import is_safe_local_path_structure
 from .semantic_summarizer import (
     SEMANTIC_API_COST_ACK,
     semantic_summarize_episode,
 )
 from .semantic_summary_smoke_review import review_semantic_summary_smoke
-
 
 RUN_MODE_DRY_RUN = "dry_run"
 RUN_MODE_CONFIRMED = "confirmed"

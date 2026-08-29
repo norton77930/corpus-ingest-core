@@ -1,20 +1,18 @@
 from __future__ import annotations
 
-from dataclasses import asdict, replace
 import hashlib
 import inspect
 import json
+from dataclasses import asdict, replace
 from pathlib import Path
-import subprocess
-import sys
 from types import SimpleNamespace
 
 import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> None:
-    from corpus_ingest_core import storage
     import corpus_ingest_core.corpus_index as corpus_index
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "AUDIO_DIR", tmp_path / "audio")
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
@@ -240,7 +238,7 @@ def _write_stale_corpus_sentinels() -> dict[Path, bytes]:
                     }
                 ).encode("utf-8")
                 if path.suffix == ".json"
-                else f"# stale sentinel {index}\n".encode("utf-8")
+                else f"# stale sentinel {index}\n".encode()
             )
             path.write_bytes(payload)
             sentinels[path] = payload
@@ -700,10 +698,10 @@ def test_corpus_episode_workflow_public_result_contract_exports(tmp_path):
     from corpus_ingest_core import (
         CorpusEpisodeWorkflowRunCounts,
         CorpusEpisodeWorkflowRunFilter,
+        CorpusEpisodeWorkflowRunnerFailedError,
         CorpusEpisodeWorkflowRunResult,
         CorpusEpisodeWorkflowRunRow,
         CorpusEpisodeWorkflowRunWarning,
-        CorpusEpisodeWorkflowRunnerFailedError,
         run_corpus_episode_workflow,
     )
 
@@ -791,7 +789,6 @@ def test_dry_run_uses_fresh_real_corpus_state_without_any_writes(
     corpus_state,
     expected_stage,
 ):
-    from corpus_ingest_core import storage
     import corpus_ingest_core.cache as cache
     import corpus_ingest_core.corpus_audio_download_runner as audio_runner
     import corpus_ingest_core.corpus_episode_intake as intake_runner
@@ -800,6 +797,7 @@ def test_dry_run_uses_fresh_real_corpus_state_without_any_writes(
     import corpus_ingest_core.corpus_local_transcription_runner as transcription_runner
     import corpus_ingest_core.corpus_remediation_plan as remediation_plan
     import corpus_ingest_core.corpus_remediation_runner as remediation_runner
+    from corpus_ingest_core import storage
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     if corpus_state != "unseeded":
@@ -2002,12 +2000,13 @@ def test_cli_does_not_swallow_process_control_exceptions(monkeypatch, error_type
 
 
 def test_cli_dry_run_stdout_contract(monkeypatch, capsys, tmp_path):
+    from scripts import run_corpus_episode_workflow as cli
+
     from corpus_ingest_core.models import (
         CorpusEpisodeWorkflowRunCounts,
         CorpusEpisodeWorkflowRunFilter,
         CorpusEpisodeWorkflowRunResult,
     )
-    from scripts import run_corpus_episode_workflow as cli
 
     result = CorpusEpisodeWorkflowRunResult(
         podcast_id="gooaye",
@@ -2115,14 +2114,14 @@ def test_confirmed_remediation_report_reflects_target_episode_not_first_row(
     different, alphabetically-earlier episode), so the target episode's output paths
     went missing while another episode's paths leaked in.
     """
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
+        run_corpus_episode_workflow,
+    )
     from corpus_ingest_core.models import (
         CorpusRemediationRunCounts,
         CorpusRemediationRunFilter,
         CorpusRemediationRunResult,
         CorpusRemediationRunRow,
-    )
-    from corpus_ingest_core.corpus_episode_workflow_runner import (
-        run_corpus_episode_workflow,
     )
 
     _write_seed(monkeypatch, tmp_path)
@@ -2265,14 +2264,14 @@ def test_confirmed_transcription_executed_despite_rejected_sibling_rows(
     confirmed workflow status must reflect the executed transcript rather than letting
     those benign ``rejected`` siblings win the priority.
     """
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
+        run_corpus_episode_workflow,
+    )
     from corpus_ingest_core.models import (
         CorpusLocalTranscriptionOutcomeCounts,
         CorpusLocalTranscriptionRunFilter,
         CorpusLocalTranscriptionRunResult,
         CorpusLocalTranscriptionRunRow,
-    )
-    from corpus_ingest_core.corpus_episode_workflow_runner import (
-        run_corpus_episode_workflow,
     )
 
     _write_seed(monkeypatch, tmp_path)
@@ -2366,14 +2365,14 @@ def test_confirmed_remediation_executed_despite_blocked_sibling_family(
     executed ready family plus the LLM-gated semantic_review family (still blocked on
     the deterministic ladder); the stage status must reflect the executed work.
     """
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
+        run_corpus_episode_workflow,
+    )
     from corpus_ingest_core.models import (
         CorpusRemediationRunCounts,
         CorpusRemediationRunFilter,
         CorpusRemediationRunResult,
         CorpusRemediationRunRow,
-    )
-    from corpus_ingest_core.corpus_episode_workflow_runner import (
-        run_corpus_episode_workflow,
     )
 
     _write_seed(monkeypatch, tmp_path)
@@ -2706,12 +2705,13 @@ def test_confirmed_report_is_deterministic_and_has_no_generated_at(
 def test_cli_confirmed_requires_explicit_stage_next_and_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
+    from scripts import run_corpus_episode_workflow as cli
+
     from corpus_ingest_core.models import (
         CorpusEpisodeWorkflowRunCounts,
         CorpusEpisodeWorkflowRunFilter,
         CorpusEpisodeWorkflowRunResult,
     )
-    from scripts import run_corpus_episode_workflow as cli
 
     result = CorpusEpisodeWorkflowRunResult(
         podcast_id="gooaye",
@@ -2838,10 +2838,11 @@ def test_selected_stage_failure_is_bounded_without_traceback_url_or_secret(
 def test_dependency_free_text_is_not_propagated_to_workflow_artifacts(
     monkeypatch, tmp_path, capsys
 ):
+    from scripts import run_corpus_episode_workflow as cli
+
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
-    from scripts import run_corpus_episode_workflow as cli
 
     unsafe_values = [
         'the guest disclosed confidential alpha sequence',
@@ -2986,11 +2987,11 @@ def test_dependency_episode_reference_requires_bounded_identifier(
 def test_outputs_do_not_leak_raw_secret_url_prompt_llm_or_investment_text(
     monkeypatch, tmp_path, capsys
 ):
-    import corpus_ingest_core.corpus_episode_workflow_runner as runner
+    from scripts import run_corpus_episode_workflow as cli
+
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
-    from scripts import run_corpus_episode_workflow as cli
 
     _write_seed(monkeypatch, tmp_path)
     calls: list[tuple[str, dict]] = []

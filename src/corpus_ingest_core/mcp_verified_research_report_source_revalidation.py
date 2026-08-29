@@ -3,7 +3,8 @@
 from __future__ import annotations
 
 import re
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from . import verified_research_report_source_revalidation as core
 

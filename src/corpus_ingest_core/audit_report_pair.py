@@ -11,12 +11,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import uuid
 from pathlib import Path
 from typing import Any
-import uuid
 
 from .artifact_lock import exclusive_artifact_claim
-
 
 PAIR_SCHEMA_VERSION = "audit-report-pair-v1"
 _PAIR_KEY = "audit_report_pair"

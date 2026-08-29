@@ -555,7 +555,7 @@ def test_a_failed_seed_write_leaves_no_partial_seed(monkeypatch, tmp_data_dirs):
 
     monkeypatch.setattr(Path, "write_text", fail_on_the_seed)
 
-    with pytest.raises(Exception):
+    with pytest.raises(OSError):
         x_video_ingest.run_x_video_ingest(_SAMPLE_URL, confirm=True)
 
     seed_path = storage.corpus_episode_seed_asset_path(

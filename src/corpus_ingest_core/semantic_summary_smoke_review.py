@@ -1,11 +1,12 @@
 from __future__ import annotations
 
+import json
+import uuid
 from contextlib import contextmanager
 from datetime import datetime
-import json
 from pathlib import Path
-import uuid
 
+from . import storage
 from .artifact_lock import exclusive_artifact_claim
 from .episode_claim import episode_writer_claimed
 from .generation_proof import notify_child_artifact_committed
@@ -15,9 +16,6 @@ from .semantic_review_artifact import (
     semantic_review_payload,
 )
 from .semantic_summary_identity import canonical_semantic_summary_path
-from . import storage
-
-
 from .storage import EVALS_RESEARCH_SMOKE_REPORTS_DIR as REPORTS_DIR
 
 

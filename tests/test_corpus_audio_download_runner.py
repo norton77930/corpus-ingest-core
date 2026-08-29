@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 import json
-from pathlib import Path
 import subprocess
 import sys
+from dataclasses import asdict
+from pathlib import Path
 
 import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> None:
-    from corpus_ingest_core import storage
     import corpus_ingest_core.corpus_index as corpus_index
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "AUDIO_DIR", tmp_path / "audio")
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
@@ -154,12 +154,12 @@ def _fake_plan_refresh(
     payload: dict,
     calls: list[str] | None = None,
 ):
+    import corpus_ingest_core.corpus_audio_download_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.models import (
         CorpusRemediationActionCounts,
         CorpusRemediationPlanResult,
     )
-    import corpus_ingest_core.corpus_audio_download_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
 
@@ -240,12 +240,12 @@ def _rows_by_episode(result) -> dict[str, object]:
 def test_preview_corpus_audio_download_from_in_memory_plan(
     monkeypatch, tmp_path
 ):
+    import corpus_ingest_core.corpus_audio_download_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.models import (
         CorpusRemediationActionCounts,
         CorpusRemediationPlanResult,
     )
-    import corpus_ingest_core.corpus_audio_download_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     payload = _plan_payload([_episode_payload("EP677", title="EP677 Alpha")])
@@ -283,8 +283,8 @@ def test_preview_corpus_audio_download_from_in_memory_plan(
 def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(
     monkeypatch, tmp_path
 ):
-    from corpus_ingest_core import storage
     import corpus_ingest_core.corpus_audio_download_runner as runner
+    from corpus_ingest_core import storage
 
     _write_episode_seed(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -329,10 +329,10 @@ def test_corpus_audio_download_public_result_contract_exports(tmp_path):
     from corpus_ingest_core import (
         CorpusAudioDownloadOutcomeCounts,
         CorpusAudioDownloadRunFilter,
+        CorpusAudioDownloadRunnerFailedError,
         CorpusAudioDownloadRunResult,
         CorpusAudioDownloadRunRow,
         CorpusAudioDownloadRunWarning,
-        CorpusAudioDownloadRunnerFailedError,
         run_corpus_audio_download,
     )
 
@@ -598,12 +598,13 @@ def test_dry_run_is_deterministic_and_has_no_generated_at(monkeypatch, tmp_path)
 def test_run_corpus_audio_download_cli_dry_run_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
+    from scripts import run_corpus_audio_download as cli
+
     from corpus_ingest_core.models import (
         CorpusAudioDownloadOutcomeCounts,
         CorpusAudioDownloadRunFilter,
         CorpusAudioDownloadRunResult,
     )
-    from scripts import run_corpus_audio_download as cli
 
     result = CorpusAudioDownloadRunResult(
         podcast_id="gooaye",
@@ -806,13 +807,14 @@ def test_confirmed_run_report_json_and_markdown_are_written(monkeypatch, tmp_pat
 
 
 def test_cli_confirmed_stdout_and_stderr_contract(monkeypatch, capsys, tmp_path):
+    from scripts import run_corpus_audio_download as cli
+
     from corpus_ingest_core import CorpusAudioDownloadRunnerFailedError
     from corpus_ingest_core.models import (
         CorpusAudioDownloadOutcomeCounts,
         CorpusAudioDownloadRunFilter,
         CorpusAudioDownloadRunResult,
     )
-    from scripts import run_corpus_audio_download as cli
 
     result = CorpusAudioDownloadRunResult(
         podcast_id="gooaye",
@@ -890,11 +892,12 @@ def test_download_failure_records_metadata_without_traceback_or_url(
 def test_outputs_do_not_leak_source_url_secret_prompt_llm_or_traceback(
     monkeypatch, tmp_path, capsys
 ):
+    from scripts import run_corpus_audio_download as cli
+
     import corpus_ingest_core.corpus_audio_download_runner as runner
     from corpus_ingest_core.corpus_audio_download_runner import (
         run_corpus_audio_download,
     )
-    from scripts import run_corpus_audio_download as cli
 
     payload = _plan_payload(
         [

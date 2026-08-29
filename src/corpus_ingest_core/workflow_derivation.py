@@ -6,11 +6,11 @@ transcript text to a provider. Never rewrites the lecture four.
 
 from __future__ import annotations
 
-from dataclasses import asdict
 import json
-from pathlib import Path
 import re
 import shutil
+from dataclasses import asdict
+from pathlib import Path
 from typing import Any
 
 import yaml
@@ -23,8 +23,8 @@ from .models import WorkflowDerivationResult
 from .report_safety import matched_investment_advice_guard
 from .run_report_io import write_part_staged_report_pair
 from .semantic_summary_identity import canonical_semantic_summary_path
-from .summary_profiles import LEARNING_NOTES
 from .study_guide_profiles import WORKFLOW_MARKERS
+from .summary_profiles import LEARNING_NOTES
 from .workflow_derivation_profiles import (
     APPLY_FILENAME,
     APPLY_HEADINGS,
@@ -35,7 +35,6 @@ from .workflow_derivation_profiles import (
     PROMPT_EXAMPLES_KEY,
     WORKFLOW_DERIVATION_PROFILE,
 )
-
 
 CACHE_STALE_WARNING = (
     "SQLite cache may be stale; rebuild cache manually. "

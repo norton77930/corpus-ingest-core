@@ -59,6 +59,7 @@ def test_secure_reader_rejects_opened_handle_identity_race(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     import os
+
     import corpus_ingest_core.secure_local_snapshot as snapshots
 
     root = tmp_path / "root"
@@ -159,6 +160,7 @@ def test_secure_directory_listing_rejects_mocked_reparse_and_identity_race(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     import os
+
     import corpus_ingest_core.secure_local_snapshot as snapshots
 
     root = tmp_path / "root"
@@ -225,8 +227,8 @@ def test_directory_listing_rejects_names_absent_after_enumeration(
 def test_lineage_sidecar_source_and_config_reads_only_use_secure_snapshot_boundary(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from corpus_ingest_core import storage
     import corpus_ingest_core.verified_research_lineage as lineage
+    from corpus_ingest_core import storage
 
     corpus = tmp_path / "corpus"
     source = tmp_path / "transcripts" / "show" / "EP1.json"

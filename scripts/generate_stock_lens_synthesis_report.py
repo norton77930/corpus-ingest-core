@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 import argparse
-from datetime import datetime
 import json
 import os
-from pathlib import Path
 import sys
+from dataclasses import asdict
+from datetime import datetime
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 

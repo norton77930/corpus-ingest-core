@@ -7,7 +7,6 @@ from types import SimpleNamespace
 
 import pytest
 
-
 _DIGEST = "a" * 64
 
 
@@ -31,9 +30,8 @@ def test_missing_bundle_stops_before_any_current_source_or_lineage_read(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """A missing exact bundle is not evidence that permits external reads."""
-    from corpus_ingest_core import storage
     import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
-    from corpus_ingest_core import revalidate_verified_research_report_sources
+    from corpus_ingest_core import revalidate_verified_research_report_sources, storage
 
     monkeypatch.setattr(storage, "RESEARCH_REPORTS_DIR", tmp_path / "research-reports")
     monkeypatch.setattr(
@@ -175,8 +173,8 @@ def test_stock_lens_input_set_requires_core_derived_paths_before_any_read(
     """Stock artifact metadata must not turn a hostile path into read authority."""
     import hashlib
 
-    from corpus_ingest_core import VerifiedResearchReportInputError
     import corpus_ingest_core.verified_research_lineage as lineage
+    from corpus_ingest_core import VerifiedResearchReportInputError
 
     expected_mapping = tmp_path / "canonical-mapping.json"
     expected_boundary = tmp_path / "canonical-boundary.json"
@@ -211,8 +209,8 @@ def test_stock_lens_input_set_requires_core_derived_paths_before_any_read(
 
 
 def test_safe_serializer_omits_tainted_values_and_keeps_only_bounded_contract() -> None:
-    from corpus_ingest_core.models import VerifiedResearchReportSourceRevalidation
     import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
+    from corpus_ingest_core.models import VerifiedResearchReportSourceRevalidation
 
     result = VerifiedResearchReportSourceRevalidation(
         locator={"podcast_id": "show", "episode_ref": "EP1", "source_digest": _DIGEST},
@@ -278,6 +276,7 @@ def test_current_source_snapshot_uses_fresh_evidence_not_persisted_lineage_paths
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     from types import SimpleNamespace
+
     import corpus_ingest_core.verified_research_report as report
 
     roles = (
@@ -325,8 +324,8 @@ def test_current_source_snapshot_uses_fresh_evidence_not_persisted_lineage_paths
 def test_publisher_lineage_manifest_keeps_sidecar_and_generation_proofs(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from tests.test_latest_episode_verified_research_report_workflow_runner import _write_completed_artifacts
     from corpus_ingest_core.verified_research_report import assemble_verified_research_report
+    from tests.test_latest_episode_verified_research_report_workflow_runner import _write_completed_artifacts
 
     _write_completed_artifacts(monkeypatch, tmp_path)
 
@@ -343,15 +342,15 @@ def test_publisher_lineage_manifest_keeps_sidecar_and_generation_proofs(
 def test_external_default_fixture_path_supports_public_assembly_and_revalidation(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from tests.test_latest_episode_verified_research_report_workflow_runner import (
-        _mark_boundary_fixture_verified,
-        _record_current_018_lineage,
-        _write_completed_artifacts,
-    )
     from corpus_ingest_core import revalidate_verified_research_report_sources
     from corpus_ingest_core.verified_research_report import (
         assemble_verified_research_report,
         publish_verified_research_report_bundle,
+    )
+    from tests.test_latest_episode_verified_research_report_workflow_runner import (
+        _mark_boundary_fixture_verified,
+        _record_current_018_lineage,
+        _write_completed_artifacts,
     )
 
     _write_completed_artifacts(monkeypatch, tmp_path)
@@ -373,13 +372,13 @@ def test_external_default_fixture_path_supports_public_assembly_and_revalidation
 def test_external_default_fixture_symlink_is_rejected_by_public_assembly(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
+    from corpus_ingest_core import VerifiedResearchReportInputError
+    from corpus_ingest_core.verified_research_report import assemble_verified_research_report
     from tests.test_latest_episode_verified_research_report_workflow_runner import (
         _mark_boundary_fixture_verified,
         _record_current_018_lineage,
         _write_completed_artifacts,
     )
-    from corpus_ingest_core import VerifiedResearchReportInputError
-    from corpus_ingest_core.verified_research_report import assemble_verified_research_report
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     fixture = _mark_boundary_fixture_verified(monkeypatch, tmp_path)
@@ -401,15 +400,14 @@ def test_external_default_fixture_symlink_is_rejected_by_public_assembly(
 def test_public_revalidation_accepts_an_unchanged_publisher_bundle_without_writes(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from tests.test_latest_episode_verified_research_report_workflow_runner import (
-        _manifest,
-        _write_completed_artifacts,
-    )
-
     from corpus_ingest_core import revalidate_verified_research_report_sources
     from corpus_ingest_core.verified_research_report import (
         assemble_verified_research_report,
         publish_verified_research_report_bundle,
+    )
+    from tests.test_latest_episode_verified_research_report_workflow_runner import (
+        _manifest,
+        _write_completed_artifacts,
     )
 
     _write_completed_artifacts(monkeypatch, tmp_path)
@@ -435,8 +433,7 @@ def test_fixture_marker_paths_are_rejected_before_any_fixture_or_snapshot_read(
 ) -> None:
     """Lineage marker paths remain comparison data, never read selectors."""
     import corpus_ingest_core.verified_research_lineage as lineage
-    from corpus_ingest_core import storage
-    from corpus_ingest_core import VerifiedResearchReportInputError
+    from corpus_ingest_core import VerifiedResearchReportInputError, storage
 
     fixture = tmp_path / "canonical-fixture.yaml"
     corpus = tmp_path / "corpus"
@@ -516,8 +513,8 @@ def test_invalid_bundle_stops_before_any_current_source_or_lineage_read(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """Invalid exact bundle evidence cannot authorize downstream artifact reads."""
-    from corpus_ingest_core import revalidate_verified_research_report_sources, storage
     import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
+    from corpus_ingest_core import revalidate_verified_research_report_sources, storage
 
     bundle = tmp_path / "research-reports" / "show" / "EP1" / f"v1-{_DIGEST}"
     bundle.mkdir(parents=True)
@@ -590,8 +587,8 @@ def test_unsupported_assembly_options_short_circuit_before_current_lineage(
 def test_current_lineage_failure_is_bounded_and_classified(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, message: str, status: str
 ) -> None:
-    from corpus_ingest_core import VerifiedResearchReportInputError
     import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
+    from corpus_ingest_core import VerifiedResearchReportInputError
 
     digest, evidence, _snapshot = _valid_evidence_and_snapshot(tmp_path)
     monkeypatch.setattr(revalidation, "_exact_bundle_evidence", lambda locator: evidence)
@@ -615,8 +612,8 @@ def test_malformed_empty_current_snapshot_cannot_be_reported_current(
 ) -> None:
     from types import SimpleNamespace
 
-    from corpus_ingest_core.verified_research_report import _source_digest
     import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
+    from corpus_ingest_core.verified_research_report import _source_digest
 
     lineage = {"schema_version": "lineage-v2", "artifacts": {}}
     digest = _source_digest(
@@ -711,6 +708,7 @@ def test_second_snapshot_replacement_race_fails_closed_with_source_role(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     from types import SimpleNamespace
+
     import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     digest, evidence, first = _valid_evidence_and_snapshot(tmp_path)
@@ -804,8 +802,8 @@ def test_public_seam_accepts_legacy_safe_and_canonical_published_paths(
 def test_safe_metadata_discloses_stock_presence_without_stock_query_value(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from corpus_ingest_core.models import VerifiedResearchReportCatalogItem
     import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
+    from corpus_ingest_core.models import VerifiedResearchReportCatalogItem
 
     digest, evidence, snapshot = _valid_evidence_and_snapshot(tmp_path, stock_query="SECRET-STOCK")
     evidence.safe_metadata = VerifiedResearchReportCatalogItem(

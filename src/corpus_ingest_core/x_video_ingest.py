@@ -6,16 +6,16 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
 import json
-from pathlib import Path
 import re
 import shutil
 import tempfile
+from dataclasses import asdict, dataclass
+from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
 
-from . import storage
+from . import storage, video_acquire
 from .config import load_podcast_profile
 from .errors import (
     PodcastIngestCoreError,
@@ -25,8 +25,6 @@ from .errors import (
 from .models import CorpusEpisodeSeed
 from .run_report_io import write_part_staged_report_pair
 from .transcriber import transcribe_episode
-from . import video_acquire
-
 
 X_SOURCE_TYPE = "x-video"
 RUN_MODE_PREVIEW = "preview"

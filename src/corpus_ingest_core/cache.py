@@ -1,16 +1,15 @@
 from __future__ import annotations
 
-from datetime import datetime, timezone
 import json
-from pathlib import Path
 import sqlite3
+from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 from . import storage
 from .errors import CacheInitializationError, EpisodeIndexError
 from .models import CacheRebuildResult, EpisodeIndexResult
 from .validator import validate_transcript
-
 
 SCHEMA_SQL = """
 create table if not exists episodes (
@@ -430,7 +429,7 @@ def _upsert_episode(
             validation_status,
             segment_count,
             last_segment_end_seconds,
-            datetime.now(timezone.utc).isoformat(),
+            datetime.now(UTC).isoformat(),
         ),
     )
 

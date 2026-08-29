@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 import json
-from pathlib import Path
 import subprocess
 import sys
+from dataclasses import asdict
+from pathlib import Path
 
 import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> None:
-    from corpus_ingest_core import storage
     import corpus_ingest_core.corpus_index as corpus_index
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "SUMMARIES_DIR", tmp_path / "summaries")
     monkeypatch.setattr(storage, "MENTIONS_DIR", tmp_path / "mentions")
@@ -117,12 +117,12 @@ def _extra_action(episode_ref: str, family: str, status: str = "ready") -> dict:
 
 
 def _fake_plan_refresh(monkeypatch, tmp_path: Path, payload: dict, calls: list[str] | None = None):
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.models import (
         CorpusRemediationActionCounts,
         CorpusRemediationPlanResult,
     )
-    import corpus_ingest_core.corpus_local_transcription_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
 
@@ -198,12 +198,12 @@ def _transcript_asset(
 def test_preview_corpus_local_transcription_from_in_memory_plan(
     monkeypatch, tmp_path
 ):
+    import corpus_ingest_core.corpus_local_transcription_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.models import (
         CorpusRemediationActionCounts,
         CorpusRemediationPlanResult,
     )
-    import corpus_ingest_core.corpus_local_transcription_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     audio_path = storage.AUDIO_DIR / "gooaye" / "EP677__Alpha.mp3"
@@ -247,8 +247,8 @@ def test_preview_corpus_local_transcription_from_in_memory_plan(
 def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(
     monkeypatch, tmp_path
 ):
-    from corpus_ingest_core import storage
     import corpus_ingest_core.corpus_local_transcription_runner as runner
+    from corpus_ingest_core import storage
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_json(
@@ -309,10 +309,10 @@ def test_corpus_local_transcription_public_result_contract_exports(tmp_path):
     from corpus_ingest_core import (
         CorpusLocalTranscriptionOutcomeCounts,
         CorpusLocalTranscriptionRunFilter,
+        CorpusLocalTranscriptionRunnerFailedError,
         CorpusLocalTranscriptionRunResult,
         CorpusLocalTranscriptionRunRow,
         CorpusLocalTranscriptionRunWarning,
-        CorpusLocalTranscriptionRunnerFailedError,
         run_corpus_local_transcription,
     )
 
@@ -566,12 +566,13 @@ def test_dry_run_is_deterministic_and_has_no_generated_at(monkeypatch, tmp_path)
 def test_run_corpus_local_transcription_cli_dry_run_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
+    from scripts import run_corpus_local_transcription as cli
+
     from corpus_ingest_core.models import (
         CorpusLocalTranscriptionOutcomeCounts,
         CorpusLocalTranscriptionRunFilter,
         CorpusLocalTranscriptionRunResult,
     )
-    from scripts import run_corpus_local_transcription as cli
 
     result = CorpusLocalTranscriptionRunResult(
         podcast_id="gooaye",
@@ -909,13 +910,14 @@ def test_confirmed_run_report_json_and_markdown_are_written(monkeypatch, tmp_pat
 
 
 def test_cli_confirmed_stdout_and_stderr_contract(monkeypatch, capsys, tmp_path):
+    from scripts import run_corpus_local_transcription as cli
+
     from corpus_ingest_core import CorpusLocalTranscriptionRunnerFailedError
     from corpus_ingest_core.models import (
         CorpusLocalTranscriptionOutcomeCounts,
         CorpusLocalTranscriptionRunFilter,
         CorpusLocalTranscriptionRunResult,
     )
-    from scripts import run_corpus_local_transcription as cli
 
     result = CorpusLocalTranscriptionRunResult(
         podcast_id="gooaye",
@@ -1017,11 +1019,12 @@ def test_transcription_failure_records_metadata_without_traceback(monkeypatch, t
 def test_outputs_do_not_leak_raw_transcript_prompt_llm_secret_or_traceback(
     monkeypatch, tmp_path, capsys
 ):
+    from scripts import run_corpus_local_transcription as cli
+
     import corpus_ingest_core.corpus_local_transcription_runner as runner
     from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
     )
-    from scripts import run_corpus_local_transcription as cli
 
     audio = tmp_path / "audio" / "EP001.mp3"
     audio.parent.mkdir(parents=True)

@@ -244,8 +244,9 @@ def test_rebuild_cache_does_not_fail_when_fts5_unavailable(monkeypatch, tmp_path
 
 
 def test_rebuild_cache_cli_parses_options(monkeypatch, capsys, tmp_path):
-    from corpus_ingest_core.models import CacheRebuildResult
     from scripts import rebuild_cache
+
+    from corpus_ingest_core.models import CacheRebuildResult
 
     captured = {}
 

@@ -210,8 +210,9 @@ def test_validate_transcript_legacy_metadata_warns_but_stays_valid(
 
 
 def test_validate_transcript_cli_outputs_json(monkeypatch, capsys):
-    from corpus_ingest_core.models import TranscriptValidationResult
     from scripts import validate_transcript
+
+    from corpus_ingest_core.models import TranscriptValidationResult
 
     result = TranscriptValidationResult(
         podcast_id="gooaye",

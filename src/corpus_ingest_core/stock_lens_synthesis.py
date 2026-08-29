@@ -1,11 +1,11 @@
 from __future__ import annotations
 
 import json
-import os
 import re
 from pathlib import Path
 from typing import Any
 
+from . import storage
 from .config import load_podcast_profile
 from .errors import (
     LLMProviderConfigError,
@@ -14,12 +14,17 @@ from .errors import (
     StockLensSynthesisInputError,
 )
 from .llm_provider import SemanticSummaryProvider, create_provider
+from .local_env_names import (
+    STOCK_LENS_SYNTHESIS_DEBUG_OUTPUT_PATH_ENV as DEBUG_OUTPUT_PATH_ENV,
+)
+from .local_env_names import (
+    read_env,
+)
 from .models import StockLensSynthesisResult
 from .report_safety import strip_safety_disclaimers
 from .semantic_summarizer import SEMANTIC_API_COST_ACK
+from .storage import EVALS_RESEARCH_SMOKE_REPORTS_DIR as SEMANTIC_REVIEW_REPORTS_DIR
 from .summary_profiles import FINANCE
-from . import storage
-
 
 SYNTHESIS_MODE = "llm-stock-lens-synthesis-v1"
 SOURCE_REPORT_MODE = "deterministic-stock-lens-v1"
@@ -27,11 +32,7 @@ INPUT_BOUNDARY = "phase-6f-stock-lens-json-only"
 REVIEWED_SEMANTIC_INPUT_BOUNDARY = (
     "phase-6f-stock-lens-json-plus-reviewed-semantic-summary"
 )
-from .local_env_names import (
-    STOCK_LENS_SYNTHESIS_DEBUG_OUTPUT_PATH_ENV as DEBUG_OUTPUT_PATH_ENV,
-    read_env,
-)
-from .storage import EVALS_RESEARCH_SMOKE_REPORTS_DIR as SEMANTIC_REVIEW_REPORTS_DIR
+
 SEMANTIC_CONTEXT_TRUNCATION_MARKER = "\n[semantic context truncated]"
 _SECRET_LIKE_PATTERN = re.compile(r"\bsk-[A-Za-z0-9_-]{8,}\b")
 RISKS = [

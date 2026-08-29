@@ -6,7 +6,9 @@ from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 
+from .canonical_transcript import resolve_canonical_transcript_asset_paths
 from .config import load_podcast_profile
+from .episode_claim import episode_writer_claimed
 from .errors import (
     LLMProviderConfigError,
     LLMProviderRequestError,
@@ -15,7 +17,7 @@ from .errors import (
     TranscriptParseError,
 )
 from .llm_provider import (
-    SEMANTIC_API_COST_ACK,
+    SEMANTIC_API_COST_ACK,  # noqa: F401 - re-exported as the canonical ack for research_workflow/stock_lens_synthesis/mcp_runtime and 5 scripts
     SemanticSummaryProvider,
     create_provider,
     require_exact_api_cost_ack,
@@ -23,10 +25,7 @@ from .llm_provider import (
 from .models import SummaryAsset
 from .storage import semantic_summary_asset_path
 from .summary_profiles import SummaryProfile, resolve_summary_profile
-from .canonical_transcript import resolve_canonical_transcript_asset_paths
-from .episode_claim import episode_writer_claimed
 from .validator import validate_transcript
-
 
 SUMMARY_MODE = "semantic-llm"
 _TIMESTAMP_EVIDENCE_PATTERN = re.compile(r"\[\d{2}:\d{2}:\d{2}\s*-\s*\d{2}:\d{2}:\d{2}\]")

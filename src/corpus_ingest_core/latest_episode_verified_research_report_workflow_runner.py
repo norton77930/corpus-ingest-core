@@ -2,19 +2,34 @@
 
 from __future__ import annotations
 
+import hashlib
+import json
+import re
+import uuid
 from contextlib import contextmanager, nullcontext
 from contextvars import ContextVar
 from dataclasses import asdict, is_dataclass
 from functools import wraps
-import hashlib
-import json
 from pathlib import Path
-import re
 from typing import Any
-import uuid
 
 from . import storage
 from .artifact_lock import exclusive_artifact_claim
+from .canonical_transcript import (
+    CanonicalTranscriptResolutionError,
+    canonical_transcript_scope,
+    resolve_canonical_transcript_asset_paths,
+    resolve_canonical_transcript_identity,
+)
+from .corpus_latest_episode_deterministic_workflow_runner import (
+    DEFAULT_SELECTOR,
+    _resolve_latest_episode,
+    _run_pinned_deterministic_workflow,
+)
+from .corpus_semantic_remediation_runner import (
+    _run_controlled_semantic_summary_regeneration,
+    run_corpus_semantic_remediation,
+)
 from .episode_claim import (
     _ControlledRegenerationCapability,
     _episode_writer_claim_is_held,
@@ -22,13 +37,8 @@ from .episode_claim import (
     _validate_controlled_regeneration_capability,
     episode_writer_claim,
 )
-from .generation_proof import ChildArtifactCommit, controlled_child_commit_scope
-from .corpus_latest_episode_deterministic_workflow_runner import (
-    DEFAULT_SELECTOR,
-    _resolve_latest_episode,
-    _run_pinned_deterministic_workflow,
-)
 from .errors import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
+from .generation_proof import ChildArtifactCommit, controlled_child_commit_scope
 from .models import (
     CorpusLatestEpisodeDeterministicWorkflowRunFilter,
     LatestEpisodeVerifiedResearchReportWorkflowRunFilter,
@@ -36,35 +46,24 @@ from .models import (
     LatestEpisodeVerifiedResearchReportWorkflowStep,
     LatestEpisodeVerifiedResearchReportWorkflowWarning,
 )
-from .corpus_semantic_remediation_runner import (
-    _run_controlled_semantic_summary_regeneration,
-    run_corpus_semantic_remediation,
-)
-from .research_workflow import run_research_workflow
-from .semantic_summarizer import SEMANTIC_API_COST_ACK
-from .secure_local_snapshot import secure_snapshot
 from .report_safety import OMITTED_VALUE, contains_sensitive_text, is_sensitive_key, safe_text
+from .research_workflow import run_research_workflow
+from .secure_local_snapshot import secure_snapshot
 from .semantic_review_artifact import inspect_semantic_review
+from .semantic_summarizer import SEMANTIC_API_COST_ACK
 from .semantic_summary_identity import canonical_semantic_summary_path
-from .canonical_transcript import (
-    CanonicalTranscriptResolutionError,
-    canonical_transcript_scope,
-    resolve_canonical_transcript_asset_paths,
-    resolve_canonical_transcript_identity,
-)
+from .validator import validate_transcript
 from .verified_research_lineage import (
     lineage_path,
     record_current_verified_research_lineage,
     validate_current_verified_research_lineage,
 )
-from .validator import validate_transcript
 from .verified_research_report import (
     REPORT_SCHEMA_VERSION,
     VerifiedResearchReportInputError,
     assemble_verified_research_report,
     publish_verified_research_report_bundle,
 )
-
 
 _RUN_MODE_DRY_RUN = "dry_run"
 _RUN_MODE_CONFIRMED = "confirmed"
@@ -492,7 +491,6 @@ def run_latest_episode_verified_research_report_workflow(
         roles=("semantic_review",),
     )
     fresh_summary = False
-    fresh_review = False
     summary_regeneration_required = False
     try:
         title = _transcript_title(normalized_podcast_id, canonical_episode_ref)
@@ -789,7 +787,6 @@ def run_latest_episode_verified_research_report_workflow(
                     expected_episode_ref=normalized_expected_episode_ref, outcome="blocked", filters=filters,
                     checkpoint_path=checkpoint_path, stage_plan=stages, warnings=warnings,
                 )
-            fresh_review = True
             stages.append(_step("semantic_review", "completed", "semantic review passed"))
             checkpoint_history.append({"stage": "semantic_review", "status": "passed"})
             _record_checkpoint_warning(

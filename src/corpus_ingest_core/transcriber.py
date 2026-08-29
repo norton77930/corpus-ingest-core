@@ -2,12 +2,13 @@ from __future__ import annotations
 
 import json
 from collections.abc import Callable
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 from .config import load_podcast_profile
 from .downloader import download_audio
+from .episode_claim import episode_writer_claimed
 from .errors import (
     AudioFileMissingError,
     TranscriptionDependencyError,
@@ -15,9 +16,7 @@ from .errors import (
 )
 from .models import AudioAsset, TranscriptAsset
 from .storage import transcript_asset_paths
-from .episode_claim import episode_writer_claimed
 from .validator import validate_transcript
-
 
 DEFAULT_TRANSCRIPTION_MODEL = "tiny"
 PROGRESS_WRITE_INTERVAL = 25
@@ -180,9 +179,9 @@ def _existing_segment_count(json_path) -> int:
 def _segment_to_dict(segment: Any, index: int) -> dict[str, Any]:
     return {
         "id": getattr(segment, "id", index + 1),
-        "start": float(getattr(segment, "start")),
-        "end": float(getattr(segment, "end")),
-        "text": str(getattr(segment, "text")).strip(),
+        "start": float(segment.start),
+        "end": float(segment.end),
+        "text": str(segment.text).strip(),
     }
 
 
@@ -275,7 +274,7 @@ def _write_transcript_outputs(
             json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
         )
         for part_path, target_path in zip(
-            part_paths, [paths.text_path, paths.srt_path, paths.json_path]
+            part_paths, [paths.text_path, paths.srt_path, paths.json_path], strict=True
         ):
             part_path.replace(target_path)
     except OSError as exc:
@@ -338,7 +337,7 @@ def _cleanup_paths(paths: list[Path]) -> None:
 
 
 def _utc_now_iso() -> str:
-    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace(
+    return datetime.now(UTC).replace(microsecond=0).isoformat().replace(
         "+00:00", "Z"
     )
 

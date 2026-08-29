@@ -8,7 +8,6 @@ import yaml
 from .errors import LLMProviderConfigError
 from .models import LLMProfile
 
-
 DEFAULT_LLM_PROFILES_CONFIG_PATH = Path("config/llm_profiles.yaml")
 ALLOWED_PROFILE_FIELDS = {"provider", "model", "base_url", "api_key_env", "unavailable"}
 SECRET_FIELD_TOKENS = ("api_key", "token", "secret")

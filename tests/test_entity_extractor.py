@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import sys
-from pathlib import Path
 
 import pytest
 
@@ -242,8 +241,9 @@ def test_mention_path_removes_illegal_characters_and_emoji():
 def test_extract_mentions_cli_parses_options_and_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from corpus_ingest_core.models import MentionExtractionAsset
     from scripts import extract_mentions
+
+    from corpus_ingest_core.models import MentionExtractionAsset
 
     asset = MentionExtractionAsset(
         podcast_id="gooaye",

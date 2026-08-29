@@ -9,15 +9,14 @@ dependency details and tracebacks never leak.
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
 from . import corpus_episode_completion_workflow_runner as completion_workflow_runner
 from . import corpus_latest_episode_deterministic_workflow_runner as latest_deterministic_workflow_runner
 from . import latest_episode_verified_research_report_workflow_runner as verified_research_report_workflow_runner
-from . import mcp_episode_verified_research_report
-from . import storage
+from . import mcp_episode_verified_research_report, storage
 from .mcp_runtime import SEMANTIC_API_COST_ACK, mcp, tool_error, tool_success
-
 
 _COMPLETION_EXECUTABLE_ACTIONS = {
     "intake",

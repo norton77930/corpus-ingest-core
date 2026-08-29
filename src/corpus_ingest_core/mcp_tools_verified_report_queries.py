@@ -12,11 +12,13 @@ from __future__ import annotations
 
 from typing import Any
 
-from . import mcp_historical_verified_report_path
-from . import mcp_verified_report_gap_backlog
-from . import mcp_verified_research_report_catalog
-from . import mcp_verified_research_report_coverage
-from . import mcp_verified_research_report_source_revalidation
+from . import (
+    mcp_historical_verified_report_path,
+    mcp_verified_report_gap_backlog,
+    mcp_verified_research_report_catalog,
+    mcp_verified_research_report_coverage,
+    mcp_verified_research_report_source_revalidation,
+)
 from .mcp_runtime import mcp, tool_success
 
 

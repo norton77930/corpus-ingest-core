@@ -17,8 +17,8 @@ import pytest
 
 
 def _use_tmp_dirs(monkeypatch, tmp_path: Path) -> None:
-    from corpus_ingest_core import storage
     import corpus_ingest_core.semantic_summary_smoke_review as semantic_review
+    from corpus_ingest_core import storage
 
     for name, directory in (
         ("AUDIO_DIR", "audio"),
@@ -312,7 +312,11 @@ def _record_lineage(*, stock_query: str) -> None:
 
 def run_verified_report_public_workflow(monkeypatch, tmp_path: Path) -> None:
     from corpus_ingest_core import storage
-    from corpus_ingest_core.verified_research_report import assemble_verified_research_report, publish_verified_research_report_bundle
+    from corpus_ingest_core.errors import VerifiedResearchReportInputError
+    from corpus_ingest_core.verified_research_report import (
+        assemble_verified_research_report,
+        publish_verified_research_report_bundle,
+    )
 
     # Guards are installed before fixture preparation: no network, provider
     # constructor, external verifier, market lookup, or ambient config reader
@@ -375,5 +379,5 @@ def run_verified_report_public_workflow(monkeypatch, tmp_path: Path) -> None:
             source_artifacts = mutated
         assert _independent_source_digest(MutatedAssembly()) != first.source_digest, source_artifact.role
     stock_path.write_text(stock_path.read_text(encoding="utf-8") + " ", encoding="utf-8")
-    with pytest.raises(Exception):
+    with pytest.raises(VerifiedResearchReportInputError):
         assemble_verified_research_report("gooaye", "EP700", stock_query="NVDA")

@@ -8,18 +8,17 @@ not sufficient evidence.
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import fnmatch
 import hashlib
 import json
-from pathlib import Path
 import re
+from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from . import storage
 from .report_safety import contains_sensitive_text, matched_investment_advice_guard
 from .secure_local_snapshot import secure_directory_names, secure_read_bytes
-
 
 _MAX_REVIEW_BYTES = 64 * 1024 * 1024
 

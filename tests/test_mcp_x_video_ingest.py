@@ -4,7 +4,6 @@ import inspect
 
 from corpus_ingest_core.x_video_ingest import XVideoIngestResult
 
-
 _SAMPLE_URL = "https://x.com/Raytar/status/2071290493581840707"
 
 

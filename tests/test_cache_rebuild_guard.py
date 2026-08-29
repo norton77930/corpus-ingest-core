@@ -21,7 +21,6 @@ import pytest
 
 from tests.test_research_workflow import _write_transcript
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 

@@ -7,7 +7,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-
 PROMPT_EXAMPLES_KEY = "05_prompt_examples"
 APPLY_KEY = "06_apply_to_my_workflow"
 BUNDLE_KEYS = (PROMPT_EXAMPLES_KEY, APPLY_KEY)

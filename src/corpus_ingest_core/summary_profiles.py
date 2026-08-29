@@ -10,11 +10,10 @@ stub、也沒有 api_cost_ack 的情況下被測試。
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass
-from typing import Mapping
 
 from .errors import UnknownSummaryProfileError
-
 
 FINANCE = "finance"
 LEARNING_NOTES = "learning-notes"

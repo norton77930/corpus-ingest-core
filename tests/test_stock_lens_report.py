@@ -321,8 +321,9 @@ def test_stock_lens_report_path_removes_illegal_characters_and_emoji():
 def test_stock_lens_report_cli_parses_options_and_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from corpus_ingest_core.models import StockLensReportAsset
     from scripts import generate_stock_lens_report
+
+    from corpus_ingest_core.models import StockLensReportAsset
 
     asset = StockLensReportAsset(
         podcast_id="gooaye",

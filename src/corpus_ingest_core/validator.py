@@ -4,10 +4,9 @@ import json
 from pathlib import Path
 from typing import Any
 
-from .models import TranscriptValidationResult
-from .canonical_transcript import resolve_canonical_transcript_asset_paths
 from . import storage
-
+from .canonical_transcript import resolve_canonical_transcript_asset_paths
+from .models import TranscriptValidationResult
 
 VALIDATION_STATUSES = {
     "missing",

@@ -11,16 +11,19 @@ from __future__ import annotations
 import math
 import os
 import re
-from typing import Any, Callable
+from collections.abc import Callable
+from typing import Any
 
-from . import downloader
-from . import entity_extractor
-from . import mcp_runtime
-from . import research_workflow
-from . import semantic_summarizer
-from . import summarizer
-from . import transcriber
-from . import validator
+from . import (
+    downloader,
+    entity_extractor,
+    mcp_runtime,
+    research_workflow,
+    semantic_summarizer,
+    summarizer,
+    transcriber,
+    validator,
+)
 from .errors import PodcastIngestCoreError
 from .mcp_runtime import (
     SEMANTIC_API_COST_ACK,
@@ -31,7 +34,6 @@ from .mcp_runtime import (
 )
 from .models import AudioAsset
 from .serialization import to_jsonable
-
 
 MAX_QUOTES = 50
 MIN_WINDOW_SECONDS = 60

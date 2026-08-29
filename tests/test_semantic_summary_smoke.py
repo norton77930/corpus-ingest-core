@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-
 ACK = (
     "I understand this may call an external LLM API, send transcript text outside this machine, "
     "and incur costs."
@@ -38,8 +37,9 @@ def _summary_asset(tmp_path: Path):
 def test_semantic_summary_smoke_dry_run_writes_nothing_and_exposes_no_secret(
     monkeypatch, tmp_path, capsys
 ):
-    from corpus_ingest_core.models import TranscriptValidationResult
     from scripts import run_semantic_summary_smoke
+
+    from corpus_ingest_core.models import TranscriptValidationResult
 
     monkeypatch.setenv("API_KEY", "secret-value")
     monkeypatch.setattr(

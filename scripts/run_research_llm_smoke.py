@@ -1,12 +1,12 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 import argparse
-from datetime import datetime
 import json
 import os
-from pathlib import Path
 import sys
+from dataclasses import asdict
+from datetime import datetime
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -22,7 +22,6 @@ from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 from corpus_ingest_core.serialization import to_jsonable
 from corpus_ingest_core.stock_lens_synthesis import DEBUG_OUTPUT_PATH_ENV
 from corpus_ingest_core.storage import title_slug
-
 
 SMOKE_MODE = "research-llm-smoke-v1"
 LLM_RUNTIME = "openai-compatible /chat/completions"

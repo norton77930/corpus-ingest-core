@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
-from typing import Any, Callable
+from collections.abc import Callable
+from functools import partial
+from typing import Any
 
 from . import verified_research_report_catalog as core
 
@@ -29,14 +31,21 @@ def dispatch(
     if action == "list":
         if query is not None or source_digest is not None:
             return tool_error_payload()
-        operation = lambda: core.list_verified_research_reports(
-            podcast_id=podcast_id, episode_ref=episode_ref, limit=limit
+        operation = partial(
+            core.list_verified_research_reports,
+            podcast_id=podcast_id,
+            episode_ref=episode_ref,
+            limit=limit,
         )
     elif action == "search":
         if source_digest is not None or not isinstance(query, str) or not query.strip():
             return tool_error_payload()
-        operation = lambda: core.search_verified_research_reports(
-            query, podcast_id=podcast_id, episode_ref=episode_ref, limit=limit
+        operation = partial(
+            core.search_verified_research_reports,
+            query,
+            podcast_id=podcast_id,
+            episode_ref=episode_ref,
+            limit=limit,
         )
     elif action == "inspect":
         if (
@@ -45,8 +54,11 @@ def dispatch(
             or not all(isinstance(value, str) and value.strip() for value in (podcast_id, episode_ref, source_digest))
         ):
             return tool_error_payload()
-        operation = lambda: core.inspect_verified_research_report(
-            podcast_id, episode_ref, source_digest
+        operation = partial(
+            core.inspect_verified_research_report,
+            podcast_id,
+            episode_ref,
+            source_digest,
         )
     else:
         return tool_error_payload()

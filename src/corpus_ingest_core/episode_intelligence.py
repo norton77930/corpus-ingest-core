@@ -1,11 +1,13 @@
 from __future__ import annotations
 
-from collections import defaultdict
 import json
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
+from .canonical_transcript import resolve_canonical_transcript_asset_paths
 from .config import load_podcast_profile
+from .episode_claim import episode_writer_claimed
 from .errors import (
     EpisodeIntelligenceReportFailedError,
     TranscriptMissingError,
@@ -16,10 +18,7 @@ from .storage import (
     episode_intelligence_report_asset_paths,
     mention_asset_paths,
 )
-from .canonical_transcript import resolve_canonical_transcript_asset_paths
-from .episode_claim import episode_writer_claimed
 from .validator import validate_transcript
-
 
 REPORT_MODE = "deterministic-episode-intelligence-v1"
 

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import asdict, replace
 import json
+from dataclasses import asdict, replace
 from pathlib import Path
 from typing import Any
 
@@ -9,7 +9,6 @@ from . import storage
 from .corpus_remediation_plan import generate_corpus_remediation_plan
 from .downloader import download_audio
 from .errors import CorpusAudioDownloadRunnerFailedError
-from .run_report_io import write_part_staged_report_pair
 from .models import (
     VIDEO_SEED_SOURCES,
     CorpusAudioDownloadOutcomeCounts,
@@ -19,7 +18,7 @@ from .models import (
     CorpusAudioDownloadRunWarning,
     CorpusRemediationPlanResult,
 )
-
+from .run_report_io import write_part_staged_report_pair
 
 RUN_MODE_DRY_RUN = "dry_run"
 RUN_MODE_CONFIRMED = "confirmed"

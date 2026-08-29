@@ -290,8 +290,9 @@ def test_external_data_boundary_path_removes_illegal_characters_and_emoji():
 def test_external_data_boundary_cli_parses_options_and_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from corpus_ingest_core.models import ExternalDataBoundaryAsset
     from scripts import generate_external_data_boundary
+
+    from corpus_ingest_core.models import ExternalDataBoundaryAsset
 
     asset = ExternalDataBoundaryAsset(
         podcast_id="gooaye",

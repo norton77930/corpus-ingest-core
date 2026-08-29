@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 import json
 from pathlib import Path
 
@@ -175,8 +174,8 @@ def test_review_research_llm_smoke_fails_inconsistent_semantic_boundary(
 
 
 def test_review_research_llm_smoke_blocks_missing_artifacts(monkeypatch, tmp_path):
-    import corpus_ingest_core.storage as storage
     import corpus_ingest_core.research_llm_smoke_review as review
+    import corpus_ingest_core.storage as storage
 
     monkeypatch.setattr(storage, "STOCK_LENS_DIR", tmp_path / "stock-lens")
     monkeypatch.setattr(review, "REPORTS_DIR", tmp_path / "reports")
@@ -253,8 +252,9 @@ def test_review_research_llm_smoke_warns_when_external_status_context_is_missing
 
 
 def test_review_research_llm_smoke_cli_parses_arguments(monkeypatch, tmp_path, capsys):
-    from corpus_ingest_core.models import ResearchLLMSmokeReviewResult
     from scripts import review_research_llm_smoke as cli
+
+    from corpus_ingest_core.models import ResearchLLMSmokeReviewResult
 
     captured = {}
 

@@ -1,13 +1,11 @@
 from __future__ import annotations
 
+import re
+import unicodedata
 from dataclasses import dataclass
 from pathlib import Path
-import os
-import unicodedata
-import re
 
 from .local_env_names import DATA_DIR_ENV, read_env
-
 
 DATA_DIR = Path(read_env(DATA_DIR_ENV) or "data")
 AUDIO_DIR = DATA_DIR / "audio"

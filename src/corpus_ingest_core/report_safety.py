@@ -5,7 +5,6 @@ from __future__ import annotations
 import re
 from typing import Any
 
-
 _API_KEY_LIKE_PATTERN = re.compile(r"\bsk-[A-Za-z0-9_-]{8,}\b", re.IGNORECASE)
 _PRIVATE_KEY_PATTERN = re.compile(r"-----BEGIN(?: [A-Z0-9]+)* PRIVATE KEY-----", re.IGNORECASE)
 _CREDENTIAL_ASSIGNMENT_PATTERN = re.compile(

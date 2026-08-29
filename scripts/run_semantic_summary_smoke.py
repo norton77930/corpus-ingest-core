@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 import argparse
 import json
-from pathlib import Path
 import sys
+from dataclasses import asdict
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
@@ -23,7 +23,6 @@ from corpus_ingest_core.local_env import (
 )
 from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 from corpus_ingest_core.serialization import to_jsonable
-
 
 SMOKE_MODE = "semantic-summary-smoke-v1"
 LLM_RUNTIME = "openai-compatible /chat/completions"

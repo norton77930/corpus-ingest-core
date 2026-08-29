@@ -85,8 +85,8 @@ def test_review_semantic_summary_smoke_generates_passed_report(monkeypatch, tmp_
 
 
 def test_review_semantic_summary_smoke_blocks_missing_artifact(monkeypatch, tmp_path):
-    import corpus_ingest_core.storage as storage
     import corpus_ingest_core.semantic_summary_smoke_review as review
+    import corpus_ingest_core.storage as storage
 
     monkeypatch.setattr(storage, "SUMMARIES_DIR", tmp_path / "summaries")
     monkeypatch.setattr(review, "REPORTS_DIR", tmp_path / "reports")
@@ -185,12 +185,12 @@ def test_review_semantic_summary_smoke_rejects_direct_trade_advice(
     ),
 )
 def test_red_review_and_assembler_share_personalized_advice_guard(monkeypatch, tmp_path, advice):
+    import corpus_ingest_core.semantic_summary_smoke_review as review
     from corpus_ingest_core.verified_research_report import (
         VerifiedResearchReportInputError,
         _assert_safe_source_bytes,
         _source_artifact,
     )
-    import corpus_ingest_core.semantic_summary_smoke_review as review
 
     summary_path = _write_semantic_summary(monkeypatch, tmp_path, extra=advice)
     monkeypatch.setattr(review, "REPORTS_DIR", tmp_path / "reports")
@@ -262,8 +262,9 @@ def test_review_semantic_summary_smoke_warns_for_missing_quality_signals(
 
 
 def test_review_semantic_summary_smoke_cli_parses_arguments(monkeypatch, tmp_path, capsys):
-    from corpus_ingest_core.models import SemanticSummarySmokeReviewResult
     from scripts import review_semantic_summary_smoke as cli
+
+    from corpus_ingest_core.models import SemanticSummarySmokeReviewResult
 
     captured = {}
 

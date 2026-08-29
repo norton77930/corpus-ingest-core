@@ -1,23 +1,23 @@
 from __future__ import annotations
 
-from datetime import datetime
 import json
 import re
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
+from . import storage
 from .models import ResearchLLMSmokeReviewResult
 from .report_safety import strip_safety_disclaimers
-from . import storage
 from .stock_lens_synthesis import (
     INPUT_BOUNDARY,
     REVIEWED_SEMANTIC_INPUT_BOUNDARY,
     _matched_prohibited_guard,
 )
-
+from .storage import EVALS_RESEARCH_SMOKE_REPORTS_DIR as REPORTS_DIR
 
 REVIEW_MODE = "research-llm-smoke-review-v1"
-from .storage import EVALS_RESEARCH_SMOKE_REPORTS_DIR as REPORTS_DIR
+
 _SECRET_PATTERN = re.compile(r"\bsk-[A-Za-z0-9_-]{8,}\b")
 _TRACEBACK_PATTERN = re.compile(r"Traceback\s+\(most recent call last\):")
 _RAW_TRANSCRIPT_LEAK_PATTERN = re.compile(

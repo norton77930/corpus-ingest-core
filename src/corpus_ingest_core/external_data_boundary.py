@@ -7,13 +7,12 @@ from typing import Any
 
 import yaml
 
+from .canonical_transcript import current_canonical_transcript_identity
 from .config import load_podcast_profile
+from .episode_claim import episode_writer_claimed
 from .errors import ExternalDataBoundaryFailedError, ExternalDataBoundaryInputError
 from .models import ExternalDataBoundaryAsset
 from .storage import external_data_boundary_asset_paths, industry_chain_mapping_asset_paths
-from .canonical_transcript import current_canonical_transcript_identity
-from .episode_claim import episode_writer_claimed
-
 
 BOUNDARY_MODE = "external-data-boundary-v1"
 SUPPORTED_MAPPING_MODE = "deterministic-industry-chain-v1"

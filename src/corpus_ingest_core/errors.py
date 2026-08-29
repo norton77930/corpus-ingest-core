@@ -1,5 +1,5 @@
 class PodcastIngestCoreError(Exception):
-    """Podcast Ingestion Core 的基礎錯誤。"""
+    """Corpus Ingestion Core 的基礎錯誤。"""
 
 
 class EpisodeNotFoundError(PodcastIngestCoreError):

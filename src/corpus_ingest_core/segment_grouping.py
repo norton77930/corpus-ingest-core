@@ -10,7 +10,6 @@ from __future__ import annotations
 
 from typing import Any
 
-
 DEFAULT_MIN_DURATION_SECONDS = 30.0
 DEFAULT_MAX_DURATION_SECONDS = 90.0
 # 半形給英文來源，全形給中文——本 repo 的主語料是 zh，只認半形的話中文逐字稿

@@ -125,10 +125,10 @@ def test_red_seeded_corrected_transcript_is_actual_semantic_and_research_input(
 ) -> None:
     """A seed-selected canonical path must defeat every legacy filename glob."""
 
+    import corpus_ingest_core.semantic_summarizer as semantic
     from corpus_ingest_core import storage
     from corpus_ingest_core.entity_extractor import extract_mentions
     from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK
-    import corpus_ingest_core.semantic_summarizer as semantic
 
     variants = _write_transcript_variants(monkeypatch, tmp_path)
     corrected = variants["EP700 Corrected"]
@@ -249,6 +249,7 @@ def test_red_summary_lineage_records_only_a_safe_base_url_identity(
     """The output-affecting endpoint is lineage-bound without persisting its URL."""
 
     import hashlib
+
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     base_url = "https://semantic.example.test/v1"
@@ -278,9 +279,9 @@ def test_red_progressive_lineage_survives_later_audit_or_research_failure(
 ) -> None:
     """A committed child is reusable after a later report/stage writer fails."""
 
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.generation_proof import notify_child_artifact_committed
-    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
 
     _use_tmp_dirs(monkeypatch, tmp_path)
     transcript = storage.transcript_asset_paths("gooaye", "EP700", "EP700 Alpha")
@@ -372,12 +373,12 @@ def test_red_same_episode_direct_semantic_calls_share_one_cost_claim(
 ) -> None:
     """The direct writer must share 018's same-episode cost boundary."""
 
-    from threading import Barrier, Lock, Thread
     import time
+    from threading import Barrier, Lock, Thread
 
+    import corpus_ingest_core.semantic_summarizer as semantic
     from corpus_ingest_core import storage
     from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK
-    import corpus_ingest_core.semantic_summarizer as semantic
 
     _use_tmp_dirs(monkeypatch, tmp_path)
     paths = storage.transcript_asset_paths("gooaye", "EP700", "EP700 Alpha")

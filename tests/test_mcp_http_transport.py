@@ -5,7 +5,6 @@ from pathlib import Path
 
 import pytest
 
-
 ROOT = Path(__file__).resolve().parents[1]
 HTTP_RUNNER = ROOT / "scripts" / "run_mcp_http_server.py"
 

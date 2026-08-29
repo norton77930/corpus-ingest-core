@@ -972,8 +972,9 @@ def test_run_research_workflow_dry_run_does_not_call_external_or_cache(
 
 
 def test_run_research_workflow_cli_outputs_json(monkeypatch, tmp_path, capsys):
-    import corpus_ingest_core.research_workflow as core_research_workflow
     from scripts import run_research_workflow
+
+    import corpus_ingest_core.research_workflow as core_research_workflow
 
     _write_transcript(monkeypatch, tmp_path)
     _patch_configs(monkeypatch, tmp_path)
@@ -1072,8 +1073,9 @@ def test_run_research_workflow_cli_outputs_json(monkeypatch, tmp_path, capsys):
 
 
 def test_run_research_workflow_cli_loads_env_file(monkeypatch, tmp_path, capsys):
-    from corpus_ingest_core.models import ResearchWorkflowResult
     from scripts import run_research_workflow
+
+    from corpus_ingest_core.models import ResearchWorkflowResult
 
     env_path = tmp_path / ".env"
     env_path.write_text("API_KEY=secret-value\nMODEL=file-model\n", encoding="utf-8")

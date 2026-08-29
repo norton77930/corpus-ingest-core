@@ -33,6 +33,17 @@ from .mcp_runtime import (
 # 1-24 keep their slots. Append here, not only to the re-export block below:
 # a re-export happens to register too, but then this list stops being the
 # order it claims to be, and the next group appended here would take the slot.
+#
+# The fence runs to the end of the alias block below, because the
+# re-export block mirrors this order by hand and the alias block is
+# grouped by purpose -- none of it is alphabetical, all of it is
+# deliberate. The fence is load-bearing, not decoration. `ruff check --fix` sorted this
+# block alphabetically the first time the lint gate ran: mcp_tools_corpus_
+# workflows moved to the front, so Tool 1 became run_corpus_episode_completion_
+# workflow instead of list_episodes, and mcp_tools_x_video landed after
+# workflow_derivation. Three registry contract tests caught it. A comment
+# saying "do not reorder" does not stop a formatter -- this does.
+# isort: off
 from . import mcp_tools_read
 from . import mcp_tools_side_effect
 from . import mcp_tools_corpus_workflows
@@ -123,3 +134,4 @@ from . import validator
 from . import stock_lens
 from . import x_video_ingest
 from . import youtube_video_ingest
+# isort: on

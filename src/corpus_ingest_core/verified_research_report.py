@@ -2,18 +2,22 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import errno
 import hashlib
 import json
-from pathlib import Path
 import re
 import shutil
 import uuid
+from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from . import storage
 from .artifact_lock import exclusive_artifact_claim
+from .canonical_transcript import (
+    CanonicalTranscriptResolutionError,
+    resolve_canonical_transcript_asset_paths,
+)
 from .errors import VerifiedResearchReportInputError
 from .report_safety import (
     OMITTED_VALUE,
@@ -22,15 +26,12 @@ from .report_safety import (
     safe_text,
     strip_safety_disclaimers,
 )
+from .secure_local_snapshot import secure_read_bytes
 from .semantic_review_artifact import (
     SemanticReviewInspection,
-    inspect_semantic_review as _inspect_semantic_review_artifact,
 )
-from .semantic_summary_identity import canonical_semantic_summary_path_for_title
-from .secure_local_snapshot import secure_read_bytes
-from .canonical_transcript import (
-    CanonicalTranscriptResolutionError,
-    resolve_canonical_transcript_asset_paths,
+from .semantic_review_artifact import (
+    inspect_semantic_review as _inspect_semantic_review_artifact,
 )
 from .verified_research_lineage import (
     LINEAGE_QUALITY_GATE,
@@ -38,7 +39,6 @@ from .verified_research_lineage import (
     _current_verified_research_lineage_evidence,
     validate_current_verified_research_lineage,
 )
-
 
 REPORT_SCHEMA_VERSION = "latest-episode-verified-research-report-v1"
 REPORT_VERSION_PREFIX = "v1"

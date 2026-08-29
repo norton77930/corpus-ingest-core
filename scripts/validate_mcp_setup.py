@@ -4,9 +4,9 @@ import argparse
 import asyncio
 import inspect
 import json
-from pathlib import Path
 import platform
 import sys
+from pathlib import Path
 from typing import Any
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
@@ -14,7 +14,6 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 from corpus_ingest_core import storage
 from corpus_ingest_core.errors import PodcastIngestCoreError
 from corpus_ingest_core.search import search_mentions, search_transcripts
-
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RUNNER_PATH = PROJECT_ROOT / "scripts" / "run_mcp_server.py"

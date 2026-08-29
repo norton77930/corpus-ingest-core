@@ -1,4 +1,3 @@
-from pathlib import Path
 import json
 import sys
 
@@ -190,8 +189,9 @@ def test_content_type_mp4_sets_m4a_when_url_has_no_extension(monkeypatch, tmp_pa
 
 
 def test_download_cli_parses_podcast_and_episode(monkeypatch, capsys, tmp_path):
-    from corpus_ingest_core.models import AudioAsset
     from scripts import download_episode
+
+    from corpus_ingest_core.models import AudioAsset
 
     asset = AudioAsset(
         podcast_id="gooaye",

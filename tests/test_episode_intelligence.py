@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import sys
-from pathlib import Path
 
 import pytest
 
@@ -299,8 +298,9 @@ def test_episode_intelligence_report_path_removes_illegal_characters_and_emoji()
 def test_episode_intelligence_cli_parses_options_and_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from corpus_ingest_core.models import EpisodeIntelligenceReportAsset
     from scripts import generate_episode_intelligence_report
+
+    from corpus_ingest_core.models import EpisodeIntelligenceReportAsset
 
     asset = EpisodeIntelligenceReportAsset(
         podcast_id="gooaye",

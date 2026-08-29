@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
 import json
+from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
 
@@ -18,7 +18,6 @@ from .models import (
     CorpusRemediationPlanResult,
     CorpusRemediationWarning,
 )
-
 
 PLAN_MODE = "deterministic-corpus-remediation-plan-v1"
 SOURCE_SCOPE = "refreshed-local-corpus-index-only"

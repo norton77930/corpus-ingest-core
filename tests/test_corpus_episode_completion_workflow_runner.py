@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import fields, replace
 import hashlib
 import inspect
 import json
+from dataclasses import fields, replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -11,9 +11,9 @@ import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> None:
-    from corpus_ingest_core import storage
     import corpus_ingest_core.corpus_index as corpus_index
     import corpus_ingest_core.semantic_summary_smoke_review as semantic_review
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "AUDIO_DIR", tmp_path / "audio")
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
@@ -242,7 +242,7 @@ def _write_stale_corpus_sentinels() -> dict[Path, bytes]:
                     }
                 ).encode("utf-8")
                 if path.suffix == ".json"
-                else f"# stale sentinel {index}\n".encode("utf-8")
+                else f"# stale sentinel {index}\n".encode()
             )
             path.write_bytes(payload)
             sentinels[path] = payload
@@ -250,8 +250,8 @@ def _write_stale_corpus_sentinels() -> dict[Path, bytes]:
 
 
 def _install_rss_episode(monkeypatch) -> None:
-    from corpus_ingest_core.models import Episode
     import corpus_ingest_core.corpus_episode_intake as intake
+    from corpus_ingest_core.models import Episode
 
     monkeypatch.setattr(
         intake,
@@ -449,11 +449,11 @@ def test_completion_workflow_storage_paths_do_not_create_directories(
 def test_dry_run_unseeded_latest_selects_intake_without_writes(
     monkeypatch, tmp_path: Path
 ):
-    from corpus_ingest_core.models import Episode
     import corpus_ingest_core.corpus_episode_intake as intake
     from corpus_ingest_core.corpus_episode_completion_workflow_runner import (
         run_corpus_episode_completion_workflow,
     )
+    from corpus_ingest_core.models import Episode
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -815,8 +815,8 @@ def test_invalid_transcript_blocks_before_semantic_preview(
     tmp_path: Path,
     transcript_state: str,
 ):
-    from corpus_ingest_core import storage
     import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
+    from corpus_ingest_core import storage
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _install_rss_episode(monkeypatch)

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
-from collections import defaultdict
 import json
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -14,7 +14,6 @@ from .storage import (
 )
 from .summary_profiles import SummaryProfile, resolve_summary_profile
 from .validator import validate_transcript
-
 
 SUMMARY_MODE = "extractive-template"
 

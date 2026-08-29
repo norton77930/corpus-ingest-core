@@ -8,7 +8,6 @@ import yaml
 from .errors import GooayeLensConfigError
 from .models import GooayeLensDimension, GooayeLensModel
 
-
 DEFAULT_GOOAYE_LENS_CONFIG_PATH = Path("config/gooaye_lens.yaml")
 
 

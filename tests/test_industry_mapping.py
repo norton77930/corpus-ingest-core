@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import json
 import sys
-from pathlib import Path
 
 import pytest
 
@@ -300,8 +299,9 @@ def test_industry_chain_mapping_path_removes_illegal_characters_and_emoji():
 def test_industry_chain_mapping_cli_parses_options_and_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from corpus_ingest_core.models import IndustryChainMappingAsset
     from scripts import generate_industry_chain_mapping
+
+    from corpus_ingest_core.models import IndustryChainMappingAsset
 
     asset = IndustryChainMappingAsset(
         podcast_id="gooaye",

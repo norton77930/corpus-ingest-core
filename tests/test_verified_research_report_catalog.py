@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 
-
 _DIGEST_A = "a" * 64
 _DIGEST_B = "b" * 64
 
@@ -193,7 +192,7 @@ def test_list_never_reads_report_or_source_bodies(
     from corpus_ingest_core import list_verified_research_reports
 
     root = _use_catalog_root(monkeypatch, tmp_path)
-    bundle = _write_manifest_bundle(root, "show", "EP1", _DIGEST_A)
+    _write_manifest_bundle(root, "show", "EP1", _DIGEST_A)
     artifacts = tmp_path / "source-artifacts"
     artifacts.mkdir()
     for name in ("transcript.json", "source.json"):
@@ -896,9 +895,9 @@ def test_windows_final_path_normalizer_accepts_only_safe_dos_or_unc_forms(
 
 def test_windows_handle_final_path_uses_pointer_sized_ctypes_abi(monkeypatch: pytest.MonkeyPatch) -> None:
     import ctypes
-    from ctypes import wintypes
     import sys
     import types
+    from ctypes import wintypes
 
     from corpus_ingest_core import verified_research_report_catalog as catalog
 

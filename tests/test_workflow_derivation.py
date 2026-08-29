@@ -15,7 +15,6 @@ from corpus_ingest_core.workflow_derivation import (
     run_workflow_derivation,
 )
 
-
 PODCAST = "x-raytar"
 EPISODE = "2071290493581840707"
 TITLE = "Alpha Talk"

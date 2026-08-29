@@ -9,13 +9,14 @@ cross-process authority.
 
 from __future__ import annotations
 
+import inspect
+import re
+from collections.abc import Callable, Iterator
 from contextlib import contextmanager
 from contextvars import ContextVar
 from dataclasses import dataclass, field
 from functools import wraps
-import inspect
-import re
-from typing import Any, Callable, Iterator, ParamSpec, TypeVar
+from typing import Any, ParamSpec, TypeVar
 
 from . import storage
 from .artifact_lock import exclusive_artifact_claim

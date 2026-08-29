@@ -109,8 +109,8 @@ def test_search_transcripts_auto_falls_back_to_like_for_chinese_query(tmp_path):
 
 
 def test_search_transcripts_fts_unavailable_raises_search_error(monkeypatch, tmp_path):
-    from corpus_ingest_core.errors import SearchError
     from corpus_ingest_core import search as search_module
+    from corpus_ingest_core.errors import SearchError
     from corpus_ingest_core.search import search_transcripts
 
     db_path = _create_search_db(tmp_path)
@@ -229,8 +229,9 @@ def test_search_missing_db_raises_search_error(tmp_path):
 
 
 def test_search_transcripts_cli_parses_options(monkeypatch, capsys):
-    from corpus_ingest_core.models import TranscriptSearchResult
     from scripts import search_transcripts
+
+    from corpus_ingest_core.models import TranscriptSearchResult
 
     captured = {}
 
@@ -285,8 +286,9 @@ def test_search_transcripts_cli_parses_options(monkeypatch, capsys):
 
 
 def test_search_mentions_cli_parses_options(monkeypatch, capsys):
-    from corpus_ingest_core.models import MentionSearchResult
     from scripts import search_mentions
+
+    from corpus_ingest_core.models import MentionSearchResult
 
     captured = {}
 

@@ -6,7 +6,6 @@ from types import SimpleNamespace
 
 from corpus_ingest_core.models import PodcastProfile
 
-
 _VIDEO_ID = "dQw4w9WgXcQ"
 _WATCH_URL = f"https://www.youtube.com/watch?v={_VIDEO_ID}"
 _SAMPLE_INFO = {

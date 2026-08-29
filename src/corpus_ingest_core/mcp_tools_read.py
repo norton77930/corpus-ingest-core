@@ -10,10 +10,8 @@ from __future__ import annotations
 from typing import Any
 
 from . import cache as cache_module
-from . import feed_reader
-from . import mcp_runtime
+from . import feed_reader, mcp_runtime, validator
 from . import search as search_module
-from . import validator
 from .mcp_runtime import mcp, tool_error
 from .models import Episode
 

@@ -2,15 +2,15 @@
 
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
 import hashlib
 import json
 import os
-from pathlib import Path
 import re
 import stat
-from typing import Any
 import unicodedata
+from dataclasses import asdict, dataclass
+from pathlib import Path
+from typing import Any
 
 from . import storage
 from .errors import VerifiedResearchReportCatalogInputError
@@ -21,7 +21,6 @@ from .models import (
 )
 from .secure_local_snapshot import secure_directory_names
 from .verified_research_report import REPORT_SCHEMA_VERSION
-
 
 _DEFAULT_LIMIT = 50
 _MAX_LIMIT = 100
@@ -532,8 +531,8 @@ def _windows_final_path_from_descriptor(descriptor: int) -> Path | None:
 
     try:
         import ctypes
-        from ctypes import wintypes
         import msvcrt
+        from ctypes import wintypes
 
         kernel32 = ctypes.WinDLL("kernel32", use_last_error=True)
         get_final_path = kernel32.GetFinalPathNameByHandleW

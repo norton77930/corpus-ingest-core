@@ -10,11 +10,10 @@ import pytest
 from corpus_ingest_core.errors import LLMProviderConfigError, StudyGuideBundleError
 from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK
 from corpus_ingest_core.study_guide_bundle import (
-    run_study_guide_bundle,
     result_to_dict,
+    run_study_guide_bundle,
 )
 from corpus_ingest_core.study_guide_profiles import COVER_FILENAME
-
 
 PODCAST = "x-raytar"
 EPISODE = "2071290493581840707"
@@ -245,7 +244,8 @@ def test_dry_run_writes_nothing_and_does_not_construct_provider(
 
 
 def test_dry_run_reuse_says_reuse(tmp_data_dirs, monkeypatch):
-    from corpus_ingest_core import storage, study_guide_bundle as bundle
+    from corpus_ingest_core import storage
+    from corpus_ingest_core import study_guide_bundle as bundle
 
     _ready_episode(tmp_data_dirs)
     captured: list = []
@@ -308,7 +308,8 @@ def test_wrong_ack_does_not_construct_provider(tmp_data_dirs, monkeypatch):
 
 
 def test_confirm_writes_four_files_and_keeps_uncertainty(tmp_data_dirs, monkeypatch):
-    from corpus_ingest_core import storage, study_guide_bundle as bundle
+    from corpus_ingest_core import storage
+    from corpus_ingest_core import study_guide_bundle as bundle
 
     _ready_episode(tmp_data_dirs)
     captured: list = []
@@ -370,7 +371,8 @@ def test_advice_shaped_body_is_rejected(tmp_data_dirs, monkeypatch):
 
 
 def test_partial_bundle_is_refused_unless_force(tmp_data_dirs, monkeypatch):
-    from corpus_ingest_core import storage, study_guide_bundle as bundle
+    from corpus_ingest_core import storage
+    from corpus_ingest_core import study_guide_bundle as bundle
 
     _ready_episode(tmp_data_dirs)
     captured: list = []
@@ -396,7 +398,8 @@ def test_partial_bundle_is_refused_unless_force(tmp_data_dirs, monkeypatch):
 
 
 def test_missing_cover_only_does_not_call_llm(tmp_data_dirs, monkeypatch):
-    from corpus_ingest_core import storage, study_guide_bundle as bundle
+    from corpus_ingest_core import storage
+    from corpus_ingest_core import study_guide_bundle as bundle
 
     _ready_episode(tmp_data_dirs)
     captured: list = []
@@ -425,7 +428,8 @@ def test_missing_cover_only_does_not_call_llm(tmp_data_dirs, monkeypatch):
 def test_required_phrases_may_appear_in_body_not_only_headings(
     tmp_data_dirs, monkeypatch
 ):
-    from corpus_ingest_core import storage, study_guide_bundle as bundle
+    from corpus_ingest_core import storage
+    from corpus_ingest_core import study_guide_bundle as bundle
 
     _ready_episode(tmp_data_dirs)
     payload = _valid_payload()
@@ -493,7 +497,8 @@ def test_invented_timestamp_is_rejected(tmp_data_dirs, monkeypatch):
 
 
 def test_force_rewrites_existing_bundle(tmp_data_dirs, monkeypatch):
-    from corpus_ingest_core import storage, study_guide_bundle as bundle
+    from corpus_ingest_core import storage
+    from corpus_ingest_core import study_guide_bundle as bundle
 
     _ready_episode(tmp_data_dirs)
     captured: list = []
@@ -550,8 +555,8 @@ def test_artifact_ladder_does_not_include_study_guide():
 
 def test_index_reports_available_and_partial(tmp_data_dirs, monkeypatch):
     from corpus_ingest_core import storage
-    from corpus_ingest_core.corpus_index import generate_corpus_index
     from corpus_ingest_core import study_guide_bundle as bundle
+    from corpus_ingest_core.corpus_index import generate_corpus_index
 
     _ready_episode(tmp_data_dirs)
     captured: list = []

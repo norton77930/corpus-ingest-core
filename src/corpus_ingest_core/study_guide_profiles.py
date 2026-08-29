@@ -8,7 +8,6 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 
-
 BUNDLE_KEYS = ("03_full_summary", "04_learning_notes", "07_final_study_guide")
 
 COVER_FILENAME = "00_video_info.md"

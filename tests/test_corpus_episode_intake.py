@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 import inspect
 import json
-from pathlib import Path
 import sys
+from dataclasses import asdict
+from pathlib import Path
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> None:
-    from corpus_ingest_core import storage
     import corpus_ingest_core.corpus_index as corpus_index
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "AUDIO_DIR", tmp_path / "audio")
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
@@ -341,12 +341,13 @@ def test_dry_run_is_deterministic_and_has_no_generated_at(monkeypatch, tmp_path)
 def test_run_corpus_episode_intake_cli_dry_run_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
+    from scripts import run_corpus_episode_intake as cli
+
     from corpus_ingest_core.models import (
         CorpusEpisodeIntakeFilter,
         CorpusEpisodeIntakeOutcomeCounts,
         CorpusEpisodeIntakeRunResult,
     )
-    from scripts import run_corpus_episode_intake as cli
 
     result = CorpusEpisodeIntakeRunResult(
         podcast_id="gooaye",
@@ -538,12 +539,13 @@ def test_confirmed_intake_does_not_call_downstream_side_effects(monkeypatch, tmp
 def test_run_corpus_episode_intake_cli_confirmed_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
+    from scripts import run_corpus_episode_intake as cli
+
     from corpus_ingest_core.models import (
         CorpusEpisodeIntakeFilter,
         CorpusEpisodeIntakeOutcomeCounts,
         CorpusEpisodeIntakeRunResult,
     )
-    from scripts import run_corpus_episode_intake as cli
 
     result = CorpusEpisodeIntakeRunResult(
         podcast_id="gooaye",
@@ -600,10 +602,11 @@ def test_run_corpus_episode_intake_cli_confirmed_outputs_json(
 def test_no_unsafe_feed_content_leaks(
     monkeypatch, capsys, tmp_path
 ):
+    from scripts import run_corpus_episode_intake as cli
+
     import corpus_ingest_core.corpus_episode_intake as runner
     from corpus_ingest_core import CorpusEpisodeIntakeFailedError
     from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
-    from scripts import run_corpus_episode_intake as cli
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     malicious_episode = _episode(
