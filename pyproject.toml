@@ -41,8 +41,13 @@ dependencies = [
 dev = [
     "pytest>=8.0",
     "pytest-cov>=5.0",
-    "ruff>=0.6",
-    "mypy>=1.11",
+    # Upper bounds on the two linters, matching the mcp pin's house style. Both
+    # add checks in ordinary releases, so an unbounded floor lets CI go red on a
+    # commit that changed nothing -- which is how mypy 2.x found a real bug here
+    # while the authoring machine still had 1.7 and reported a clean run.
+    # Dependabot proposes the bump; the bump is where new findings get read.
+    "ruff>=0.6,<1",
+    "mypy>=1.11,<3",
 ]
 
 [project.urls]
