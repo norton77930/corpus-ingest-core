@@ -1,0 +1,20 @@
+{
+  "_comment": [
+    "Claude Code: save as .mcp.json in your project root, or run",
+    "  claude mcp add corpus-ingest-core -- corpus-ingest-mcp",
+    "",
+    "The uvx form needs no install at all and pins a release:",
+    "  claude mcp add corpus-ingest-core -- uvx --from",
+    "  git+https://github.com/norton77930/corpus-ingest-core.git@v0.2.0 corpus-ingest-mcp"
+  ],
+  "mcpServers": {
+    "corpus-ingest-core": {
+      "command": "corpus-ingest-mcp",
+      "args": [],
+      "env": {
+        "CORPUS_INGEST_DATA_DIR": "./data",
+        "CORPUS_INGEST_CONFIG": "./config/podcasts.yaml"
+      }
+    }
+  }
+}

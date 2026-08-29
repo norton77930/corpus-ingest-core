@@ -2,7 +2,7 @@
 
 > The Hermes sidecar audit chain (specs 026-034) terminated at BLOCKED and was removed from `main` on 2026-08-29. Its modules, specs, deployment files, scripts, and evidence are preserved in full under the git tag `archive/hermes-audit-chain`.
 
-This document reflects the Phase 7C system shape. Podcast Ingestion Core is still a thin-CLI / thick-core Python package, but the repo now includes a research layer, optional LLM paths, MCP exposure, deterministic eval / review gates, official Spec Kit bootstrap files, and a project-specific Spec Kit constitution.
+This document reflects the Phase 7C system shape. Corpus Ingestion Core is still a thin-CLI / thick-core Python package, but the repo now includes a research layer, optional LLM paths, MCP exposure, deterministic eval / review gates, official Spec Kit bootstrap files, and a project-specific Spec Kit constitution.
 
 ## Core Principles
 

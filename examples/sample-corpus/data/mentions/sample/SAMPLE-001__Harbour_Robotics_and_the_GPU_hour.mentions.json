@@ -1,0 +1,82 @@
+{
+  "podcast_id": "sample",
+  "episode_ref": "SAMPLE-001",
+  "title": "Harbour Robotics and the GPU hour",
+  "extraction_mode": "deterministic-rules",
+  "generation_options": {
+    "max_evidence_per_mention": 5
+  },
+  "segment_count": 22,
+  "mention_count": 3,
+  "mentions": [
+    {
+      "type": "industry",
+      "text": "AI",
+      "normalized_text": "ai",
+      "evidence": [
+        {
+          "segment_id": 9,
+          "start": 150.0,
+          "end": 178.5,
+          "timestamp": "[00:02:30 - 00:02:58]",
+          "text": "The interesting part is not the bill. It is that they moved the AI workload off rented capacity and onto hardware they own."
+        },
+        {
+          "segment_id": 11,
+          "start": 209.0,
+          "end": 241.5,
+          "timestamp": "[00:03:29 - 00:04:01]",
+          "text": "Northwind Logistics runs roughly six hundred fictional trucks and leases all of its AI capacity by the hour."
+        }
+      ],
+      "count": 2,
+      "confidence": "rule"
+    },
+    {
+      "type": "industry",
+      "text": "GPU",
+      "normalized_text": "gpu",
+      "evidence": [
+        {
+          "segment_id": 5,
+          "start": 56.0,
+          "end": 76.5,
+          "timestamp": "[00:00:56 - 00:01:16]",
+          "text": "On-device means no round trip to a rented server, and that changes what a GPU hour is worth to a company like Harbour Robotics."
+        },
+        {
+          "segment_id": 6,
+          "start": 76.5,
+          "end": 99.0,
+          "timestamp": "[00:01:16 - 00:01:39]",
+          "text": "Let us put an imaginary number on it. In this made-up market a rented GPU hour costs forty-one dollars."
+        },
+        {
+          "segment_id": 7,
+          "start": 99.0,
+          "end": 123.5,
+          "timestamp": "[00:01:39 - 00:02:03]",
+          "text": "Harbour Robotics says it burned eleven thousand GPU hours last quarter training its grasp model."
+        }
+      ],
+      "count": 3,
+      "confidence": "rule"
+    },
+    {
+      "type": "macro_topic",
+      "text": "CPI",
+      "normalized_text": "cpi",
+      "evidence": [
+        {
+          "segment_id": 22,
+          "start": 676.0,
+          "end": 722.5,
+          "timestamp": "[00:11:16 - 00:12:02]",
+          "text": "Next episode we will invent a CPI print and pretend to care about it. Thanks for listening to nobody."
+        }
+      ],
+      "count": 1,
+      "confidence": "rule"
+    }
+  ]
+}

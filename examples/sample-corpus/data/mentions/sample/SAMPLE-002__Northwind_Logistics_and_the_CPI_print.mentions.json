@@ -1,0 +1,91 @@
+{
+  "podcast_id": "sample",
+  "episode_ref": "SAMPLE-002",
+  "title": "Northwind Logistics and the CPI print",
+  "extraction_mode": "deterministic-rules",
+  "generation_options": {
+    "max_evidence_per_mention": 5
+  },
+  "segment_count": 16,
+  "mention_count": 4,
+  "mentions": [
+    {
+      "type": "industry",
+      "text": "AI",
+      "normalized_text": "ai",
+      "evidence": [
+        {
+          "segment_id": 14,
+          "start": 352.5,
+          "end": 395.0,
+          "timestamp": "[00:05:52 - 00:06:35]",
+          "text": "The AI scheduling system they lease is supposed to solve exactly that, in this fiction."
+        }
+      ],
+      "count": 1,
+      "confidence": "rule"
+    },
+    {
+      "type": "industry",
+      "text": "GPU",
+      "normalized_text": "gpu",
+      "evidence": [
+        {
+          "segment_id": 15,
+          "start": 395.0,
+          "end": 440.5,
+          "timestamp": "[00:06:35 - 00:07:20]",
+          "text": "It costs them a fictional nineteen dollars per GPU hour, billed monthly, and it is not clear it earns that back."
+        }
+      ],
+      "count": 1,
+      "confidence": "rule"
+    },
+    {
+      "type": "macro_topic",
+      "text": "CPI",
+      "normalized_text": "cpi",
+      "evidence": [
+        {
+          "segment_id": 5,
+          "start": 64.0,
+          "end": 88.5,
+          "timestamp": "[00:01:04 - 00:01:28]",
+          "text": "The invented CPI print for the quarter came in at two point four percent."
+        },
+        {
+          "segment_id": 6,
+          "start": 88.5,
+          "end": 114.0,
+          "timestamp": "[00:01:28 - 00:01:54]",
+          "text": "Milo, does a fictional CPI print tell you anything at all about fictional freight?"
+        },
+        {
+          "segment_id": 7,
+          "start": 114.0,
+          "end": 142.5,
+          "timestamp": "[00:01:54 - 00:02:22]",
+          "text": "Not directly. Fuel is a much bigger input than the CPI basket we invented would suggest."
+        }
+      ],
+      "count": 3,
+      "confidence": "rule"
+    },
+    {
+      "type": "macro_topic",
+      "text": "GDP",
+      "normalized_text": "gdp",
+      "evidence": [
+        {
+          "segment_id": 8,
+          "start": 142.5,
+          "end": 173.0,
+          "timestamp": "[00:02:22 - 00:02:53]",
+          "text": "Our made-up GDP figure grew one point one percent, which in this fantasy counts as a soft landing."
+        }
+      ],
+      "count": 1,
+      "confidence": "rule"
+    }
+  ]
+}

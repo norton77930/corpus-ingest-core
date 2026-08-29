@@ -1,0 +1,118 @@
+{
+  "podcast_id": "sample",
+  "episode_ref": "SAMPLE-002",
+  "title": "Northwind Logistics and the CPI print",
+  "model": "synthetic",
+  "language": "en",
+  "device": "none",
+  "compute_type": "none",
+  "vad_filter": false,
+  "generated_at": "2026-08-29T06:10:20Z",
+  "source_audio_path": "examples\\sample-corpus\\data\\audio\\sample\\SAMPLE-002__Northwind_Logistics_and_the_CPI_print.mp3",
+  "source_audio_size_bytes": null,
+  "last_segment_end_seconds": 488.0,
+  "completed": true,
+  "audio_path": "examples\\sample-corpus\\data\\audio\\sample\\SAMPLE-002__Northwind_Logistics_and_the_CPI_print.mp3",
+  "text_path": "examples\\sample-corpus\\data\\transcripts\\sample\\SAMPLE-002__Northwind_Logistics_and_the_CPI_print.txt",
+  "srt_path": "examples\\sample-corpus\\data\\transcripts\\sample\\SAMPLE-002__Northwind_Logistics_and_the_CPI_print.srt",
+  "json_path": "examples\\sample-corpus\\data\\transcripts\\sample\\SAMPLE-002__Northwind_Logistics_and_the_CPI_print.json",
+  "segment_count": 16,
+  "segments": [
+    {
+      "id": 1,
+      "start": 0.0,
+      "end": 10.5,
+      "text": "This is episode two of The Synthetic Signal, and like episode one it is completely fabricated."
+    },
+    {
+      "id": 2,
+      "start": 10.5,
+      "end": 24.0,
+      "text": "Ada Kestrel here with Milo Vance. Every company, price and statistic in this episode was invented for a software demo."
+    },
+    {
+      "id": 3,
+      "start": 24.0,
+      "end": 42.5,
+      "text": "Northwind Logistics reported an invented eleven percent drop in spot freight rates this quarter."
+    },
+    {
+      "id": 4,
+      "start": 42.5,
+      "end": 64.0,
+      "text": "Spot rates are what you pay when you did not book ahead, which in this made-up market is most of the time."
+    },
+    {
+      "id": 5,
+      "start": 64.0,
+      "end": 88.5,
+      "text": "The invented CPI print for the quarter came in at two point four percent."
+    },
+    {
+      "id": 6,
+      "start": 88.5,
+      "end": 114.0,
+      "text": "Milo, does a fictional CPI print tell you anything at all about fictional freight?"
+    },
+    {
+      "id": 7,
+      "start": 114.0,
+      "end": 142.5,
+      "text": "Not directly. Fuel is a much bigger input than the CPI basket we invented would suggest."
+    },
+    {
+      "id": 8,
+      "start": 142.5,
+      "end": 173.0,
+      "text": "Our made-up GDP figure grew one point one percent, which in this fantasy counts as a soft landing."
+    },
+    {
+      "id": 9,
+      "start": 173.0,
+      "end": 205.5,
+      "text": "Harbour Robotics turns up here too, because Northwind Logistics is a fictional customer of theirs."
+    },
+    {
+      "id": 10,
+      "start": 205.5,
+      "end": 239.0,
+      "text": "They bought two hundred imaginary picking arms and claim a thirty percent throughput gain."
+    },
+    {
+      "id": 11,
+      "start": 239.0,
+      "end": 274.5,
+      "text": "A claim like that is exactly the kind of thing you want a timestamp attached to."
+    },
+    {
+      "id": 12,
+      "start": 274.5,
+      "end": 312.0,
+      "text": "Meridian Grid, our invented utility, raised overnight power prices again in this storyline."
+    },
+    {
+      "id": 13,
+      "start": 312.0,
+      "end": 352.5,
+      "text": "That pushes Northwind Logistics towards daytime charging, which collides with their invented delivery windows."
+    },
+    {
+      "id": 14,
+      "start": 352.5,
+      "end": 395.0,
+      "text": "The AI scheduling system they lease is supposed to solve exactly that, in this fiction."
+    },
+    {
+      "id": 15,
+      "start": 395.0,
+      "end": 440.5,
+      "text": "It costs them a fictional nineteen dollars per GPU hour, billed monthly, and it is not clear it earns that back."
+    },
+    {
+      "id": 16,
+      "start": 440.5,
+      "end": 488.0,
+      "text": "That is the show. None of it is real, none of it is advice, and all of it carries a timestamp you can check."
+    }
+  ]
+}

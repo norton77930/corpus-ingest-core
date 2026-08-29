@@ -1,4 +1,4 @@
-# Podcast Ingestion Core
+# Corpus Ingestion Core
 
 Turns podcast audio into verifiable, searchable knowledge. It takes an RSS
 feed (or an X / YouTube video), transcribes it locally with faster-whisper, and
@@ -6,6 +6,8 @@ produces timestamped transcripts, summaries, entity mentions, and research
 artifacts on disk — exposed to AI agents through an MCP server and Skills.
 
 [![tests](https://github.com/norton77930/corpus-ingest-core/actions/workflows/tests.yml/badge.svg)](https://github.com/norton77930/corpus-ingest-core/actions/workflows/tests.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 
 [繁體中文說明](README.zh-TW.md)
 
@@ -34,7 +36,7 @@ Two properties follow from that goal and shape the whole design:
 Requires Python 3.11+. Examples use PowerShell; any shell works.
 
 ```powershell
-git clone https://github.com/<your-account>/corpus-ingest-core.git
+git clone https://github.com/norton77930/corpus-ingest-core.git
 cd corpus-ingest-core
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -57,6 +59,19 @@ python scripts/search_transcripts.py --podcast gooaye --query TSMC --limit 10
 
 Add your own podcast by appending a profile to `config/podcasts.yaml`. The core
 never hard-codes a specific show.
+
+### Connecting an agent, without cloning
+
+The MCP server installs as a command, so an agent can reach it in one line:
+
+```powershell
+claude mcp add corpus-ingest-core -- uvx --from git+https://github.com/norton77930/corpus-ingest-core.git@v0.2.0 corpus-ingest-mcp
+```
+
+[`examples/`](examples/) carries ready-to-copy configs for Claude Desktop,
+Claude Code and Codex, a set of prompts to try, and a small **synthetic** sample
+corpus so the search and evidence tools return real results before you have
+transcribed anything of your own.
 
 ## Architecture
 
@@ -144,6 +159,8 @@ feature.
 
 ## Documentation
 
+- [`examples/`](examples/) — agent configs, prompts to try, and a synthetic
+  sample corpus that needs no transcription
 - [`docs/api.md`](docs/api.md) — complete function reference, output paths, CLI
   reference, and the MCP tool registry
 - [`docs/architecture.md`](docs/architecture.md) — architecture in depth

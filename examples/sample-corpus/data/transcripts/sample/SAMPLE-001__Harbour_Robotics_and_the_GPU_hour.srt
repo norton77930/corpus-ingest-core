@@ -1,0 +1,87 @@
+1
+00:00:00,000 --> 00:00:09,000
+Welcome to The Synthetic Signal. Everything in this feed is invented: the companies, the numbers, the hosts, and this warning.
+
+2
+00:00:09,000 --> 00:00:21,000
+I am Ada Kestrel, and across the desk is Milo Vance. Neither of us exists, and none of this is investment advice.
+
+3
+00:00:21,000 --> 00:00:37,500
+Today we are talking about Harbour Robotics, a fictional company that builds picking arms for fictional warehouses.
+
+4
+00:00:37,500 --> 00:00:56,000
+Harbour Robotics published an invented quarterly note last week, claiming its arms now run their models entirely on-device.
+
+5
+00:00:56,000 --> 00:01:16,500
+On-device means no round trip to a rented server, and that changes what a GPU hour is worth to a company like Harbour Robotics.
+
+6
+00:01:16,500 --> 00:01:39,000
+Let us put an imaginary number on it. In this made-up market a rented GPU hour costs forty-one dollars.
+
+7
+00:01:39,000 --> 00:02:03,500
+Harbour Robotics says it burned eleven thousand GPU hours last quarter training its grasp model.
+
+8
+00:02:03,500 --> 00:02:30,000
+That is an invented four hundred and fifty-one thousand dollars, which is an invented rounding error for an invented company.
+
+9
+00:02:30,000 --> 00:02:58,500
+The interesting part is not the bill. It is that they moved the AI workload off rented capacity and onto hardware they own.
+
+10
+00:02:58,500 --> 00:03:29,000
+Northwind Logistics, another company we made up, went the other way and rents every hour it uses.
+
+11
+00:03:29,000 --> 00:04:01,500
+Northwind Logistics runs roughly six hundred fictional trucks and leases all of its AI capacity by the hour.
+
+12
+00:04:01,500 --> 00:04:36,000
+Which approach is better? We do not know. This show does not exist, so we are not going to pretend to know.
+
+13
+00:04:36,000 --> 00:05:12,500
+What we can do is leave a timestamp on every sentence, so you can check what was actually said instead of what you remember.
+
+14
+00:05:12,500 --> 00:05:51,000
+After the break: Meridian Grid, a fictional utility that nobody should model anything on.
+
+15
+00:05:51,000 --> 00:06:31,500
+Meridian Grid announced an invented tariff change that lifts the price of overnight power by nine percent.
+
+16
+00:06:31,500 --> 00:07:14,000
+For Harbour Robotics that matters, because in this story their charging fleet runs overnight.
+
+17
+00:07:14,000 --> 00:07:58,500
+It is a second-order effect, and it only shows up if you can search a transcript instead of trusting your memory of it.
+
+18
+00:07:58,500 --> 00:08:45,000
+Milo, if you had to summarise the fictional quarter in one line, what would it be?
+
+19
+00:08:45,000 --> 00:09:33,500
+Harbour Robotics bought certainty, Northwind Logistics bought flexibility, and Meridian Grid quietly repriced both of them.
+
+20
+00:09:33,500 --> 00:10:24,000
+None of which happened. We are a test fixture with a microphone.
+
+21
+00:10:24,000 --> 00:11:16,000
+That is the whole point of this sample corpus: search it, cite it, and remember that every word was written for a demo.
+
+22
+00:11:16,000 --> 00:12:02,500
+Next episode we will invent a CPI print and pretend to care about it. Thanks for listening to nobody.

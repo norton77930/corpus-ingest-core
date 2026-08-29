@@ -1,0 +1,154 @@
+{
+  "podcast_id": "sample",
+  "episode_ref": "SAMPLE-001",
+  "title": "Harbour Robotics and the GPU hour",
+  "model": "synthetic",
+  "language": "en",
+  "device": "none",
+  "compute_type": "none",
+  "vad_filter": false,
+  "generated_at": "2026-08-29T06:10:19Z",
+  "source_audio_path": "examples\\sample-corpus\\data\\audio\\sample\\SAMPLE-001__Harbour_Robotics_and_the_GPU_hour.mp3",
+  "source_audio_size_bytes": null,
+  "last_segment_end_seconds": 722.5,
+  "completed": true,
+  "audio_path": "examples\\sample-corpus\\data\\audio\\sample\\SAMPLE-001__Harbour_Robotics_and_the_GPU_hour.mp3",
+  "text_path": "examples\\sample-corpus\\data\\transcripts\\sample\\SAMPLE-001__Harbour_Robotics_and_the_GPU_hour.txt",
+  "srt_path": "examples\\sample-corpus\\data\\transcripts\\sample\\SAMPLE-001__Harbour_Robotics_and_the_GPU_hour.srt",
+  "json_path": "examples\\sample-corpus\\data\\transcripts\\sample\\SAMPLE-001__Harbour_Robotics_and_the_GPU_hour.json",
+  "segment_count": 22,
+  "segments": [
+    {
+      "id": 1,
+      "start": 0.0,
+      "end": 9.0,
+      "text": "Welcome to The Synthetic Signal. Everything in this feed is invented: the companies, the numbers, the hosts, and this warning."
+    },
+    {
+      "id": 2,
+      "start": 9.0,
+      "end": 21.0,
+      "text": "I am Ada Kestrel, and across the desk is Milo Vance. Neither of us exists, and none of this is investment advice."
+    },
+    {
+      "id": 3,
+      "start": 21.0,
+      "end": 37.5,
+      "text": "Today we are talking about Harbour Robotics, a fictional company that builds picking arms for fictional warehouses."
+    },
+    {
+      "id": 4,
+      "start": 37.5,
+      "end": 56.0,
+      "text": "Harbour Robotics published an invented quarterly note last week, claiming its arms now run their models entirely on-device."
+    },
+    {
+      "id": 5,
+      "start": 56.0,
+      "end": 76.5,
+      "text": "On-device means no round trip to a rented server, and that changes what a GPU hour is worth to a company like Harbour Robotics."
+    },
+    {
+      "id": 6,
+      "start": 76.5,
+      "end": 99.0,
+      "text": "Let us put an imaginary number on it. In this made-up market a rented GPU hour costs forty-one dollars."
+    },
+    {
+      "id": 7,
+      "start": 99.0,
+      "end": 123.5,
+      "text": "Harbour Robotics says it burned eleven thousand GPU hours last quarter training its grasp model."
+    },
+    {
+      "id": 8,
+      "start": 123.5,
+      "end": 150.0,
+      "text": "That is an invented four hundred and fifty-one thousand dollars, which is an invented rounding error for an invented company."
+    },
+    {
+      "id": 9,
+      "start": 150.0,
+      "end": 178.5,
+      "text": "The interesting part is not the bill. It is that they moved the AI workload off rented capacity and onto hardware they own."
+    },
+    {
+      "id": 10,
+      "start": 178.5,
+      "end": 209.0,
+      "text": "Northwind Logistics, another company we made up, went the other way and rents every hour it uses."
+    },
+    {
+      "id": 11,
+      "start": 209.0,
+      "end": 241.5,
+      "text": "Northwind Logistics runs roughly six hundred fictional trucks and leases all of its AI capacity by the hour."
+    },
+    {
+      "id": 12,
+      "start": 241.5,
+      "end": 276.0,
+      "text": "Which approach is better? We do not know. This show does not exist, so we are not going to pretend to know."
+    },
+    {
+      "id": 13,
+      "start": 276.0,
+      "end": 312.5,
+      "text": "What we can do is leave a timestamp on every sentence, so you can check what was actually said instead of what you remember."
+    },
+    {
+      "id": 14,
+      "start": 312.5,
+      "end": 351.0,
+      "text": "After the break: Meridian Grid, a fictional utility that nobody should model anything on."
+    },
+    {
+      "id": 15,
+      "start": 351.0,
+      "end": 391.5,
+      "text": "Meridian Grid announced an invented tariff change that lifts the price of overnight power by nine percent."
+    },
+    {
+      "id": 16,
+      "start": 391.5,
+      "end": 434.0,
+      "text": "For Harbour Robotics that matters, because in this story their charging fleet runs overnight."
+    },
+    {
+      "id": 17,
+      "start": 434.0,
+      "end": 478.5,
+      "text": "It is a second-order effect, and it only shows up if you can search a transcript instead of trusting your memory of it."
+    },
+    {
+      "id": 18,
+      "start": 478.5,
+      "end": 525.0,
+      "text": "Milo, if you had to summarise the fictional quarter in one line, what would it be?"
+    },
+    {
+      "id": 19,
+      "start": 525.0,
+      "end": 573.5,
+      "text": "Harbour Robotics bought certainty, Northwind Logistics bought flexibility, and Meridian Grid quietly repriced both of them."
+    },
+    {
+      "id": 20,
+      "start": 573.5,
+      "end": 624.0,
+      "text": "None of which happened. We are a test fixture with a microphone."
+    },
+    {
+      "id": 21,
+      "start": 624.0,
+      "end": 676.0,
+      "text": "That is the whole point of this sample corpus: search it, cite it, and remember that every word was written for a demo."
+    },
+    {
+      "id": 22,
+      "start": 676.0,
+      "end": 722.5,
+      "text": "Next episode we will invent a CPI print and pretend to care about it. Thanks for listening to nobody."
+    }
+  ]
+}

@@ -1,10 +1,12 @@
-# Podcast Ingestion Core
+# Corpus Ingestion Core
 
 把 podcast 音訊變成可驗證、可搜尋的知識。輸入一個 RSS feed(或 X / YouTube 影片),
 在本機用 faster-whisper 轉錄,產出帶時間戳的逐字稿、摘要、實體 mention 與研究
 artifacts,並透過 MCP server 與 Skills 提供給 AI agent 使用。
 
 [![tests](https://github.com/norton77930/corpus-ingest-core/actions/workflows/tests.yml/badge.svg)](https://github.com/norton77930/corpus-ingest-core/actions/workflows/tests.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 
 [English](README.md)
 
@@ -32,7 +34,7 @@ Podcast 內容很難引用。三個月前某一集裡你只記得一半的說法
 需要 Python 3.11 以上。範例使用 PowerShell,其他 shell 同樣適用。
 
 ```powershell
-git clone https://github.com/<your-account>/corpus-ingest-core.git
+git clone https://github.com/norton77930/corpus-ingest-core.git
 cd corpus-ingest-core
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
@@ -53,6 +55,18 @@ python scripts/search_transcripts.py --podcast gooaye --query 台積電 --limit 
 ```
 
 要加入自己的 podcast,在 `config/podcasts.yaml` 追加一個 profile 即可。核心程式
+
+### 不用 clone 就接上 agent
+
+MCP server 會安裝成一個指令,agent 一行就能接上:
+
+```powershell
+claude mcp add corpus-ingest-core -- uvx --from git+https://github.com/norton77930/corpus-ingest-core.git@v0.2.0 corpus-ingest-mcp
+```
+
+[`examples/`](examples/) 放了 Claude Desktop、Claude Code 與 Codex 可直接複製的
+設定、一組可以試的 prompt,以及一份**合成的** sample corpus——不必先轉錄任何東西,
+搜尋與證據類工具就會回傳真實結果。
 不會寫死任何特定節目。
 
 ## 架構
@@ -133,6 +147,7 @@ fixture — 沒有 live market API,要加入的話必須是一次明確且經過
 
 ## 文件
 
+- [`examples/`](examples/) — agent 設定、可試的 prompt,以及不需轉錄的合成 sample corpus
 - [`docs/api.md`](docs/api.md) — 完整函式參考、輸出路徑、CLI 參考與 MCP tool registry
 - [`docs/architecture.md`](docs/architecture.md) — 架構細節
 - [`docs/install-and-porting.md`](docs/install-and-porting.md) — 乾淨安裝與移機
