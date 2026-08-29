@@ -1,0 +1,70 @@
+name: Bug report
+description: Something behaves differently from what the docs say it should.
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before filing: `data/` holds third-party audio, transcripts and derived
+        reports. Do not paste transcript text, episode content, or anything
+        from a `.env` into this issue.
+
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: What happened
+      description: What you ran, and what it did instead of what you expected.
+      placeholder: |
+        python scripts/transcribe_episode.py --podcast gooaye --episode latest
+        ... then it did X, but the docs say Y.
+    validations:
+      required: true
+
+  - type: textarea
+    id: error
+    attributes:
+      label: Error output
+      description: >
+        The full traceback or error message, if there was one. Redact any API
+        key or absolute path that identifies you.
+      render: text
+
+  - type: dropdown
+    id: surface
+    attributes:
+      label: Which surface
+      options:
+        - A script under scripts/
+        - The MCP server (stdio)
+        - The MCP server (loopback HTTP)
+        - The Python API
+        - Documentation
+        - Not sure
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: A release tag, or the output of `git rev-parse --short HEAD`.
+    validations:
+      required: true
+
+  - type: input
+    id: environment
+    attributes:
+      label: OS and Python
+      placeholder: Windows 11 / Python 3.12.4
+    validations:
+      required: true
+
+  - type: checkboxes
+    id: checks
+    attributes:
+      label: Before you file
+      options:
+        - label: I installed with `pip install -e .[dev]`, not a PYTHONPATH shim.
+          required: true
+        - label: I ran `python -m pytest` and noted whether it was green.
+          required: false

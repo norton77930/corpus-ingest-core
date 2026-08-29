@@ -1,0 +1,19 @@
+version: 2
+updates:
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    groups:
+      # One PR for the tools, which move often and matter least.
+      dev-tools:
+        patterns: ["ruff", "mypy", "pytest", "pytest-cov"]
+    # yt-dlp is deliberately excluded from grouping: YouTube breaks older
+    # releases and the failure is confusing (metadata resolves, then the media
+    # URL returns HTTP 403), so its bumps deserve their own PR.
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly

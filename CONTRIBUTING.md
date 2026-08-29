@@ -7,6 +7,9 @@ the tripwires are before you hit one.
 Read [`AGENTS.md`](AGENTS.md) too. Its Engineering Rules are authoritative and
 apply to humans and agents alike; everything here is compatible with it.
 
+Participation is governed by the
+[Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## Setting up
 
 ```powershell

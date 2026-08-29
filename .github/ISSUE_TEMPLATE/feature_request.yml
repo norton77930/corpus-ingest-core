@@ -1,0 +1,38 @@
+name: Feature request
+description: Propose a capability the project does not have.
+labels: [enhancement]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Some things are out of scope by design, not by omission. Please read
+        [CONTRIBUTING.md](../blob/main/CONTRIBUTING.md) first -- there is no
+        investment advice, no live market data API, and the deterministic and
+        LLM paths are never merged. A proposal that crosses one of those is a
+        discussion about the product boundary, which is fine, but say so.
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem
+      description: What are you trying to do that you cannot do today?
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: What you would like it to do
+    validations:
+      required: true
+
+  - type: dropdown
+    id: boundary
+    attributes:
+      label: Does this cross a documented product boundary?
+      options:
+        - 'No'
+        - 'Yes, and I explain why above'
+        - 'Not sure'
+    validations:
+      required: true
