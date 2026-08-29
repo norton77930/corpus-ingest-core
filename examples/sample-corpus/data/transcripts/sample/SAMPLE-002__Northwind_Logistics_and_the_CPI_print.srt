@@ -1,0 +1,63 @@
+1
+00:00:00,000 --> 00:00:10,500
+This is episode two of The Synthetic Signal, and like episode one it is completely fabricated.
+
+2
+00:00:10,500 --> 00:00:24,000
+Ada Kestrel here with Milo Vance. Every company, price and statistic in this episode was invented for a software demo.
+
+3
+00:00:24,000 --> 00:00:42,500
+Northwind Logistics reported an invented eleven percent drop in spot freight rates this quarter.
+
+4
+00:00:42,500 --> 00:01:04,000
+Spot rates are what you pay when you did not book ahead, which in this made-up market is most of the time.
+
+5
+00:01:04,000 --> 00:01:28,500
+The invented CPI print for the quarter came in at two point four percent.
+
+6
+00:01:28,500 --> 00:01:54,000
+Milo, does a fictional CPI print tell you anything at all about fictional freight?
+
+7
+00:01:54,000 --> 00:02:22,500
+Not directly. Fuel is a much bigger input than the CPI basket we invented would suggest.
+
+8
+00:02:22,500 --> 00:02:53,000
+Our made-up GDP figure grew one point one percent, which in this fantasy counts as a soft landing.
+
+9
+00:02:53,000 --> 00:03:25,500
+Harbour Robotics turns up here too, because Northwind Logistics is a fictional customer of theirs.
+
+10
+00:03:25,500 --> 00:03:59,000
+They bought two hundred imaginary picking arms and claim a thirty percent throughput gain.
+
+11
+00:03:59,000 --> 00:04:34,500
+A claim like that is exactly the kind of thing you want a timestamp attached to.
+
+12
+00:04:34,500 --> 00:05:12,000
+Meridian Grid, our invented utility, raised overnight power prices again in this storyline.
+
+13
+00:05:12,000 --> 00:05:52,500
+That pushes Northwind Logistics towards daytime charging, which collides with their invented delivery windows.
+
+14
+00:05:52,500 --> 00:06:35,000
+The AI scheduling system they lease is supposed to solve exactly that, in this fiction.
+
+15
+00:06:35,000 --> 00:07:20,500
+It costs them a fictional nineteen dollars per GPU hour, billed monthly, and it is not clear it earns that back.
+
+16
+00:07:20,500 --> 00:08:08,000
+That is the show. None of it is real, none of it is advice, and all of it carries a timestamp you can check.

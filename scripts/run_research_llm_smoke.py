@@ -1,28 +1,27 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 import argparse
-from datetime import datetime
 import json
 import os
-from pathlib import Path
 import sys
+from dataclasses import asdict
+from datetime import datetime
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import PodcastIngestCoreError, load_llm_profile, run_research_workflow
-from podcast_ingest_core.llm_profiles import DEFAULT_LLM_PROFILES_CONFIG_PATH
-from podcast_ingest_core.local_env import (
+from corpus_ingest_core import PodcastIngestCoreError, load_llm_profile, run_research_workflow
+from corpus_ingest_core.llm_profiles import DEFAULT_LLM_PROFILES_CONFIG_PATH
+from corpus_ingest_core.local_env import (
     DEFAULT_LOCAL_ENV_PATH,
     empty_local_env_result,
     load_local_env,
     local_env_metadata,
 )
-from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
-from podcast_ingest_core.serialization import to_jsonable
-from podcast_ingest_core.stock_lens_synthesis import DEBUG_OUTPUT_PATH_ENV
-from podcast_ingest_core.storage import title_slug
-
+from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+from corpus_ingest_core.serialization import to_jsonable
+from corpus_ingest_core.stock_lens_synthesis import DEBUG_OUTPUT_PATH_ENV
+from corpus_ingest_core.storage import title_slug
 
 SMOKE_MODE = "research-llm-smoke-v1"
 LLM_RUNTIME = "openai-compatible /chat/completions"

@@ -18,7 +18,6 @@ import inspect
 import re
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 READ_QUERY_TOOLS = {
@@ -95,7 +94,7 @@ EXPECTED_TOOLS = LEGACY_EXPECTED_TOOLS | {
 
 
 def _registered_tool_names() -> set[str]:
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     tools = asyncio.run(mcp_server.mcp.list_tools())
     return {tool.name for tool in tools}
@@ -109,7 +108,7 @@ def test_mcp_registry_exposes_exactly_the_reviewed_tool_set():
 
 
 def test_workflow_tools_are_appended_after_the_preserved_twelve_tool_order():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     tools = asyncio.run(mcp_server.mcp.list_tools())
 
@@ -132,7 +131,7 @@ def test_workflow_tools_are_appended_after_the_preserved_twelve_tool_order():
 
 
 def test_tools_one_through_twenty_one_preserve_exact_signature_order_and_defaults():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     required = "<required>"
     expected = {
@@ -170,7 +169,7 @@ def test_tools_one_through_twenty_one_preserve_exact_signature_order_and_default
 
 
 def test_side_effect_tools_default_to_dry_run_confirm_false():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     for name in sorted(SIDE_EFFECT_TOOLS):
         signature = inspect.signature(getattr(mcp_server, name))
@@ -181,7 +180,7 @@ def test_side_effect_tools_default_to_dry_run_confirm_false():
 
 
 def test_success_envelope_shape():
-    from podcast_ingest_core.mcp_server import tool_success
+    from corpus_ingest_core.mcp_server import tool_success
 
     response = tool_success({"value": 1})
     assert response == {"ok": True, "data": {"value": 1}}
@@ -192,14 +191,14 @@ def test_success_envelope_shape():
 
 
 def test_error_envelope_shape():
-    from podcast_ingest_core.mcp_server import tool_error
+    from corpus_ingest_core.mcp_server import tool_error
 
     response = tool_error("boom", "ValueError")
     assert response == {"ok": False, "error_type": "ValueError", "message": "boom"}
 
 
 def test_action_plan_envelope_shape():
-    from podcast_ingest_core.mcp_server import tool_action_plan
+    from corpus_ingest_core.mcp_server import tool_action_plan
 
     response = tool_action_plan(
         tool_name="example_tool",
@@ -272,7 +271,7 @@ def test_mcp_workflow_tool_exposes_deliberate_core_parameter_subset():
     # NOT expose the fixture external-data verification and reviewed semantic
     # context opt-ins of the core run_research_workflow. Exposing them through
     # MCP is a safety-boundary change that needs its own review (Batch 3).
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     signature = inspect.signature(mcp_server.run_research_workflow)
     for hidden_parameter in (
@@ -289,7 +288,7 @@ def test_mcp_workflow_tool_exposes_deliberate_core_parameter_subset():
 
 
 def test_completion_workflow_tool_mirrors_the_bounded_core_schema():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     signature = inspect.signature(mcp_server.run_corpus_episode_completion_workflow)
     assert list(signature.parameters) == [
@@ -325,7 +324,7 @@ def test_completion_workflow_tool_mirrors_the_bounded_core_schema():
 
 
 def test_latest_deterministic_workflow_tool_exposes_only_local_inputs():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     signature = inspect.signature(
         mcp_server.run_corpus_latest_episode_deterministic_workflow
@@ -359,7 +358,7 @@ def test_latest_deterministic_workflow_tool_exposes_only_local_inputs():
 
 
 def test_catalog_tool_is_read_only_and_exposes_only_bounded_query_inputs():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     signature = inspect.signature(mcp_server.query_verified_research_report_catalog)
     assert list(signature.parameters) == [
@@ -390,7 +389,7 @@ def test_catalog_tool_is_read_only_and_exposes_only_bounded_query_inputs():
 
 
 def test_source_revalidation_tool_is_read_only_and_exposes_only_exact_locator_inputs():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     signature = inspect.signature(mcp_server.revalidate_verified_research_report_sources)
     assert list(signature.parameters) == ["podcast_id", "episode_ref", "source_digest"]

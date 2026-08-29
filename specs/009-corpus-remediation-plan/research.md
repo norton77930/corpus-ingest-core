@@ -42,7 +42,7 @@
 
 ## Decision: Core plus CLI only
 
-**Rationale**: Existing project rules keep runtime behavior in `podcast_ingest_core` and keep CLI wrappers thin. v1 has no MCP surface change, and the reviewed MCP tool count must remain unchanged.
+**Rationale**: Existing project rules keep runtime behavior in `corpus_ingest_core` and keep CLI wrappers thin. v1 has no MCP surface change, and the reviewed MCP tool count must remain unchanged.
 
 **Alternatives considered**:
 

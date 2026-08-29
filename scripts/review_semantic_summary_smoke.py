@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 import argparse
 import json
-from pathlib import Path
 import sys
+from dataclasses import asdict
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import review_semantic_summary_smoke
-from podcast_ingest_core.serialization import to_jsonable
+from corpus_ingest_core import review_semantic_summary_smoke
+from corpus_ingest_core.serialization import to_jsonable
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -2,23 +2,23 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import (
+from corpus_ingest_core import (
     PodcastIngestCoreError,
     semantic_summarize_episode,
     summarize_episode,
 )
-from podcast_ingest_core.local_env import (
+from corpus_ingest_core.local_env import (
     DEFAULT_LOCAL_ENV_PATH,
     empty_local_env_result,
     load_local_env,
     local_env_metadata,
 )
-from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
 
 def main() -> None:

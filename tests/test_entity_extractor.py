@@ -2,13 +2,12 @@ from __future__ import annotations
 
 import json
 import sys
-from pathlib import Path
 
 import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
     monkeypatch.setattr(storage, "MENTIONS_DIR", tmp_path / "mentions")
@@ -29,7 +28,7 @@ def _write_transcript(
     write_json=True,
     json_text=None,
 ):
-    from podcast_ingest_core.storage import transcript_asset_paths
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     if segments is None:
@@ -86,7 +85,7 @@ def _write_transcript(
 
 
 def test_extract_mentions_generates_json_and_markdown(monkeypatch, tmp_path):
-    import podcast_ingest_core.entity_extractor as extractor
+    import corpus_ingest_core.entity_extractor as extractor
 
     _write_transcript(monkeypatch, tmp_path)
 
@@ -105,7 +104,7 @@ def test_extract_mentions_generates_json_and_markdown(monkeypatch, tmp_path):
 
 
 def test_extract_mentions_empty_transcript_generates_zero_mentions(monkeypatch, tmp_path):
-    import podcast_ingest_core.entity_extractor as extractor
+    import corpus_ingest_core.entity_extractor as extractor
 
     _write_transcript(
         monkeypatch,
@@ -124,8 +123,8 @@ def test_extract_mentions_empty_transcript_generates_zero_mentions(monkeypatch, 
 
 
 def test_extract_mentions_rejects_missing_transcript(monkeypatch, tmp_path):
-    import podcast_ingest_core.entity_extractor as extractor
-    from podcast_ingest_core.errors import TranscriptMissingError
+    import corpus_ingest_core.entity_extractor as extractor
+    from corpus_ingest_core.errors import TranscriptMissingError
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
 
@@ -134,8 +133,8 @@ def test_extract_mentions_rejects_missing_transcript(monkeypatch, tmp_path):
 
 
 def test_extract_mentions_rejects_corrupt_transcript(monkeypatch, tmp_path):
-    import podcast_ingest_core.entity_extractor as extractor
-    from podcast_ingest_core.errors import TranscriptParseError
+    import corpus_ingest_core.entity_extractor as extractor
+    from corpus_ingest_core.errors import TranscriptParseError
 
     _write_transcript(monkeypatch, tmp_path, json_text="{not-json")
 
@@ -144,8 +143,8 @@ def test_extract_mentions_rejects_corrupt_transcript(monkeypatch, tmp_path):
 
 
 def test_extract_mentions_rejects_incomplete_outputs(monkeypatch, tmp_path):
-    import podcast_ingest_core.entity_extractor as extractor
-    from podcast_ingest_core.errors import TranscriptMissingError
+    import corpus_ingest_core.entity_extractor as extractor
+    from corpus_ingest_core.errors import TranscriptMissingError
 
     _write_transcript(monkeypatch, tmp_path, write_srt=False)
 
@@ -154,8 +153,8 @@ def test_extract_mentions_rejects_incomplete_outputs(monkeypatch, tmp_path):
 
 
 def test_extract_mentions_rejects_partial_by_default(monkeypatch, tmp_path):
-    import podcast_ingest_core.entity_extractor as extractor
-    from podcast_ingest_core.errors import TranscriptParseError
+    import corpus_ingest_core.entity_extractor as extractor
+    from corpus_ingest_core.errors import TranscriptParseError
 
     _write_transcript(monkeypatch, tmp_path, completed=False)
 
@@ -164,7 +163,7 @@ def test_extract_mentions_rejects_partial_by_default(monkeypatch, tmp_path):
 
 
 def test_extract_mentions_allows_partial_when_requested(monkeypatch, tmp_path):
-    import podcast_ingest_core.entity_extractor as extractor
+    import corpus_ingest_core.entity_extractor as extractor
 
     _write_transcript(monkeypatch, tmp_path, completed=False)
 
@@ -177,7 +176,7 @@ def test_extract_mentions_allows_partial_when_requested(monkeypatch, tmp_path):
 def test_extract_mentions_counts_repeated_mentions_and_limits_evidence(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.entity_extractor as extractor
+    import corpus_ingest_core.entity_extractor as extractor
 
     _write_transcript(monkeypatch, tmp_path)
 
@@ -195,8 +194,8 @@ def test_extract_mentions_counts_repeated_mentions_and_limits_evidence(
 
 
 def test_extract_mentions_skips_existing_artifacts_without_force(monkeypatch, tmp_path):
-    import podcast_ingest_core.entity_extractor as extractor
-    from podcast_ingest_core.storage import mention_asset_paths
+    import corpus_ingest_core.entity_extractor as extractor
+    from corpus_ingest_core.storage import mention_asset_paths
 
     _write_transcript(monkeypatch, tmp_path)
     paths = mention_asset_paths("gooaye", "EP672", "EP672 title")
@@ -212,8 +211,8 @@ def test_extract_mentions_skips_existing_artifacts_without_force(monkeypatch, tm
 
 
 def test_extract_mentions_force_rewrites_existing_artifacts(monkeypatch, tmp_path):
-    import podcast_ingest_core.entity_extractor as extractor
-    from podcast_ingest_core.storage import mention_asset_paths
+    import corpus_ingest_core.entity_extractor as extractor
+    from corpus_ingest_core.storage import mention_asset_paths
 
     _write_transcript(monkeypatch, tmp_path)
     paths = mention_asset_paths("gooaye", "EP672", "EP672 title")
@@ -229,7 +228,7 @@ def test_extract_mentions_force_rewrites_existing_artifacts(monkeypatch, tmp_pat
 
 
 def test_mention_path_removes_illegal_characters_and_emoji():
-    from podcast_ingest_core.storage import mention_asset_paths
+    from corpus_ingest_core.storage import mention_asset_paths
 
     paths = mention_asset_paths("gooaye", "EP672", ' bad <title> 🐣 : / \\ | ? * ok ')
 
@@ -242,8 +241,9 @@ def test_mention_path_removes_illegal_characters_and_emoji():
 def test_extract_mentions_cli_parses_options_and_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from podcast_ingest_core.models import MentionExtractionAsset
     from scripts import extract_mentions
+
+    from corpus_ingest_core.models import MentionExtractionAsset
 
     asset = MentionExtractionAsset(
         podcast_id="gooaye",

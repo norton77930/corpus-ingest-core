@@ -29,7 +29,7 @@ Add a dry-run-first Core runner that turns one existing `learning-notes` semanti
 ## Constitution Check
 
 - **I Local artifacts**: bundle is derived from the on-disk semantic summary and local seed/audio metadata. Speaker-attributed claims keep timestamps that already exist in that summary.
-- **II Thin interfaces**: all behaviour in `src/podcast_ingest_core`; `scripts/run_study_guide_bundle.py` parses, calls, prints metadata-only JSON.
+- **II Thin interfaces**: all behaviour in `src/corpus_ingest_core`; `scripts/run_study_guide_bundle.py` parses, calls, prints metadata-only JSON.
 - **III Dry-run first**: `confirm=false` default; plan lists real reads/writes/reuses; no `.part` residue.
 - **IV LLM opt-in / secrets**: confirmed `03`/`04`/`07` generation requires exact ack before `create_provider`. Input is the semantic summary's final half (text before `## Chunk Summaries`), never the transcript. `.env` values never appear in stdout or artifacts. **No constitution amendment.**
 - **V Evidence separation**: reconstruction and missing support go to 不確定事項. `05`/`06` workflow advice is forbidden unless already present and labelled in the source.
@@ -60,13 +60,13 @@ Post-design re-check: adding `STUDY_GUIDES_DIR` is picked up by the 025 data-dir
 
 ```text
 specs/038-multi-document-study-guide/
-src/podcast_ingest_core/storage.py                 (STUDY_GUIDES_DIR + path helper)
-src/podcast_ingest_core/errors.py                  (StudyGuideBundleError)
-src/podcast_ingest_core/models.py                  (result dataclasses)
-src/podcast_ingest_core/study_guide_profiles.py    (new: prompts + heading lists, pure data)
-src/podcast_ingest_core/study_guide_bundle.py      (new: core runner)
-src/podcast_ingest_core/corpus_index.py            (append study_guide family)
-src/podcast_ingest_core/__init__.py                (export runner + error)
+src/corpus_ingest_core/storage.py                 (STUDY_GUIDES_DIR + path helper)
+src/corpus_ingest_core/errors.py                  (StudyGuideBundleError)
+src/corpus_ingest_core/models.py                  (result dataclasses)
+src/corpus_ingest_core/study_guide_profiles.py    (new: prompts + heading lists, pure data)
+src/corpus_ingest_core/study_guide_bundle.py      (new: core runner)
+src/corpus_ingest_core/corpus_index.py            (append study_guide family)
+src/corpus_ingest_core/__init__.py                (export runner + error)
 scripts/run_study_guide_bundle.py                  (thin CLI)
 tests/test_study_guide_bundle.py                   (new)
 tests/test_study_guide_profiles.py                 (new)

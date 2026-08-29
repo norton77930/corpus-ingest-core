@@ -7,6 +7,9 @@ the tripwires are before you hit one.
 Read [`AGENTS.md`](AGENTS.md) too. Its Engineering Rules are authoritative and
 apply to humans and agents alike; everything here is compatible with it.
 
+Participation is governed by the
+[Code of Conduct](CODE_OF_CONDUCT.md).
+
 ## Setting up
 
 ```powershell
@@ -20,7 +23,7 @@ pip install -e .[dev]
 Python 3.11 or newer. **Do not skip `pip install -e .`** — several tests spawn
 subprocesses, and `pythonpath = ["src"]` in `pyproject.toml` covers pytest
 itself but nothing it spawns. Without the install those tests fail with
-`ModuleNotFoundError: No module named 'podcast_ingest_core'`, and the cause is
+`ModuleNotFoundError: No module named 'corpus_ingest_core'`, and the cause is
 not obvious from the message.
 
 Video ingestion has one extra setup detail that is easy to miss:
@@ -44,19 +47,15 @@ python -m compileall src scripts
 git diff --check
 ```
 
-`python -m pytest` should be **fully green**. If it is not, look at your
-environment before you look at your change: `test_spec_029_offline`,
-`test_mcp_http_transport`, and `test_hermes_runtime_capability` are deliberately
-kept in the default run precisely because they go red when the environment does
-not match what `pyproject.toml` declares.
+`python -m pytest` should be **fully green** — there is no `--ignore` list and
+no expected-failure set. If it is not green, look at your environment before you
+look at your change: `test_mcp_http_transport` spawns a subprocess, so it goes
+red whenever the environment does not match what `pyproject.toml` declares
+(most often because `pip install -e .` was skipped).
 
 Run the targeted tests for your change type first —
 [`docs/verification-matrix.md`](docs/verification-matrix.md) maps change types to
 the guard tests that cover them.
-
-The blocked Hermes 030–034 doc chain is excluded from the default run. Those
-tests are expected to fail, for reasons recorded next to the exclusion list in
-`pyproject.toml`. Naming a path explicitly still runs one.
 
 ## Rules that are not up for discussion
 
@@ -73,26 +72,11 @@ will not be merged regardless of how good the code is.
 - **Never auto-rebuild the SQLite cache** after a side-effect tool. Warn that
   the cache may be stale and let the operator rebuild.
 - **Thin CLI, thick core.** Scripts parse arguments and call
-  `podcast_ingest_core`. Logic does not live in `scripts/`.
+  `corpus_ingest_core`. Logic does not live in `scripts/`.
 - **TDD for new behavior**, and keep the change surgical.
 
 ## Traps specific to this repository
 
-This repo carries audit records that bind file contents by hash. Editing the
-wrong file does not just break a test — it falsifies a record.
-
-- **`specs/033-*/upstream/` and `specs/034-*/upstream/`** are byte-pinned
-  snapshots of third-party source, tied to digests in each spec's
-  `contracts/source-bundle-manifest.json`. Do not edit, add to, or reformat
-  anything under those directories. See
-  [`THIRD-PARTY-NOTICES.md`](THIRD-PARTY-NOTICES.md).
-- **The `contracts/reviewed-artifact-manifest.json` files** in specs 032, 033,
-  and 034 pin roughly thirty files under `tests/` and `scripts/` by hash.
-  If a test in the blocked chain is wrong, you cannot simply mark it `xfail`.
-- **Several blocked-chain tests pin the byte length** of `README.md`,
-  `docs/roadmap.md`, `specs/README.md`, and `pyproject.toml` to the snapshot
-  taken when that spec was reviewed. This is why those tests are excluded by
-  default rather than repaired.
 - **`README.md` is a contract surface.** More than a dozen test files assert on
   its content. Check before you reword a heading. `README.zh-TW.md` is a
   translation and must not drift from it.

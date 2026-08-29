@@ -15,14 +15,14 @@
 - [x] T004 [P] Add RED tests for strict zero-write preview and reserved selector rejection (`latest`/`next` casefold) in `tests/test_episode_verified_research_report_workflow_runner.py`
 - [x] T005 [P] Add RED tests for blocked inventory (missing/stale roles) and no provider/RSS/015–017 dispatch on confirm in `tests/test_episode_verified_research_report_workflow_runner.py`
 - [x] T006 [P] Add RED tests for ready-path assemble publish + reuse + fail-closed conflict in `tests/test_episode_verified_research_report_workflow_runner.py`
-- [x] T007 Add models/errors/exports stubs as needed in `src/podcast_ingest_core/models.py`, `errors.py`, `__init__.py` so RED imports resolve without full behavior
+- [x] T007 Add models/errors/exports stubs as needed in `src/corpus_ingest_core/models.py`, `errors.py`, `__init__.py` so RED imports resolve without full behavior
 
 ## Phase 3: User Story 1 — Preview (P1) [US1]
 
 **Goal**: Explicit-episode readiness preview, zero writes.  
 **Independent test**: Preview ready and missing fixtures; assert inventories and zero files.
 
-- [x] T008 [US1] Implement readiness inspection helper in `src/podcast_ingest_core/episode_verified_research_report_workflow_runner.py` reusing lineage/transcript/review validators
+- [x] T008 [US1] Implement readiness inspection helper in `src/corpus_ingest_core/episode_verified_research_report_workflow_runner.py` reusing lineage/transcript/review validators
 - [x] T009 [US1] Implement `confirm=False` path returning metadata-only readiness plan in `episode_verified_research_report_workflow_runner.py`
 - [x] T010 [US1] Implement early reserved-selector and empty-ref rejection shared by preview/confirm in `episode_verified_research_report_workflow_runner.py`
 - [x] T011 [US1] GREEN: pass T003–T004 preview/selector tests
@@ -49,7 +49,7 @@
 ## Phase 6: Interfaces & governance
 
 - [x] T019 [P] Thin CLI `scripts/run_episode_verified_research_report_workflow.py`
-- [x] T020 [P] Append MCP tool 16 `run_episode_verified_research_report_workflow` in `src/podcast_ingest_core/mcp_server.py` with early selector rejection
+- [x] T020 [P] Append MCP tool 16 `run_episode_verified_research_report_workflow` in `src/corpus_ingest_core/mcp_server.py` with early selector rejection
 - [x] T021 [P] Portable Skill `.agents/skills/episode-verified-research-report/SKILL.md`
 - [x] T022 Update `scripts/validate_mcp_setup.py` and `tests/test_mcp_setup_validation.py` for exact 16 tools + Skill metadata
 - [x] T023 Update `tests/test_mcp_tool_registry_contract.py` and `tests/test_mcp_server.py` for tool 16 order/contract

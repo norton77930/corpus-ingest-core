@@ -1,6 +1,6 @@
 # API reference
 
-Complete reference for the `podcast_ingest_core` public surface: core
+Complete reference for the `corpus_ingest_core` public surface: core
 functions, the artifact paths they write, the CLI scripts that wrap them, and
 the MCP tool registry.
 
@@ -36,7 +36,7 @@ investment advice.
 
 ## Core function reference
 
-All names below are importable from `podcast_ingest_core`.
+All names below are importable from `corpus_ingest_core`.
 
 ```python
 list_episodes(podcast_id, limit)

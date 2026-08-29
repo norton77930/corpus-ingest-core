@@ -5,7 +5,7 @@ Static-scan guard in the style of tests/test_llm_provider_factory_boundary.py
 
 1. The structural regex constants (URI scheme / safe filename / safe path
    component) may be defined via ``re.compile`` assignment only in
-   ``src/podcast_ingest_core/path_safety.py``.
+   ``src/corpus_ingest_core/path_safety.py``.
 2. Every ``_is_safe_local_path`` definition in ``src`` must be a thin wrapper:
    it references ``is_safe_local_path_structure`` and contains no ``re.split``
    reimplementation of the skeleton.
@@ -19,7 +19,7 @@ import ast
 import re
 from pathlib import Path
 
-SRC_DIR = Path(__file__).resolve().parents[1] / "src" / "podcast_ingest_core"
+SRC_DIR = Path(__file__).resolve().parents[1] / "src" / "corpus_ingest_core"
 
 STRUCTURAL_PATTERN_DEFINITION = re.compile(
     r"_?(?:URI_SCHEME|SAFE_FILENAME|SAFE_PATH_COMPONENT)_PATTERN\s*=\s*re\.compile"

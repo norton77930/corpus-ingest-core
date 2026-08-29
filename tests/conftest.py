@@ -1,4 +1,4 @@
-"""Shared test fixtures for podcast-ingest-core.
+"""Shared test fixtures for corpus-ingest-core.
 
 Consolidation contract (specs/025-core-consolidation FR-008): tests that need
 isolated artifact roots use the opt-in ``tmp_data_dirs`` fixture (or the plain
@@ -12,16 +12,15 @@ explicitly so a rename fails loudly here, in one place.
 from __future__ import annotations
 
 import importlib
-import os
 from pathlib import Path
 
 import pytest
 
 EVALS_REPORTS_DIR_BINDINGS = (
-    ("podcast_ingest_core.corpus_index", "SEMANTIC_REVIEW_REPORTS_DIR"),
-    ("podcast_ingest_core.research_llm_smoke_review", "REPORTS_DIR"),
-    ("podcast_ingest_core.semantic_summary_smoke_review", "REPORTS_DIR"),
-    ("podcast_ingest_core.stock_lens_synthesis", "SEMANTIC_REVIEW_REPORTS_DIR"),
+    ("corpus_ingest_core.corpus_index", "SEMANTIC_REVIEW_REPORTS_DIR"),
+    ("corpus_ingest_core.research_llm_smoke_review", "REPORTS_DIR"),
+    ("corpus_ingest_core.semantic_summary_smoke_review", "REPORTS_DIR"),
+    ("corpus_ingest_core.stock_lens_synthesis", "SEMANTIC_REVIEW_REPORTS_DIR"),
 )
 
 
@@ -41,9 +40,15 @@ def pytest_configure(config: pytest.Config) -> None:
     if basetemp:
         Path(basetemp).parent.mkdir(parents=True, exist_ok=True)
 
-    if os.environ.get("PODCAST_INGEST_DATA_DIR"):
+    import sys
+
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from corpus_ingest_core.local_env_names import DATA_DIR_ENV, env_is_set, names_for
+
+    if env_is_set(DATA_DIR_ENV):
+        named = " or ".join(names_for(DATA_DIR_ENV))
         raise pytest.UsageError(
-            "PODCAST_INGEST_DATA_DIR is set, and the suite cannot run with "
+            f"{named} is set, and the suite cannot run with "
             "it. Nine path-contract assertions compare against a literal "
             "hardcoded data/ path -- specs/025 FR-008 protects that "
             "default, and tests/test_data_dir_fixture_contract.py strips this "
@@ -57,7 +62,7 @@ def pytest_configure(config: pytest.Config) -> None:
 
 
 def storage_dir_constant_names() -> list[str]:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     return sorted(
         name
@@ -68,7 +73,7 @@ def storage_dir_constant_names() -> list[str]:
 
 def use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> Path:
     """Redirect every artifact root to ``tmp_path``; returns the review dir."""
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     review_dir = tmp_path / "evals" / "research-llm-smoke" / "reports"
     for name in storage_dir_constant_names():

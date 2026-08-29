@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 import hashlib
 import importlib
 import json
-from pathlib import Path
 import socket
 import sys
+from dataclasses import asdict
+from pathlib import Path
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> Path:
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_index as corpus_index
+    import corpus_ingest_core.corpus_index as corpus_index
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "AUDIO_DIR", tmp_path / "audio")
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
@@ -43,7 +43,7 @@ def _write_episode_seed(
     title: str = "EP677 Alpha",
     has_audio_url: bool = True,
 ) -> Path:
-    from podcast_ingest_core.storage import corpus_episode_seed_asset_path
+    from corpus_ingest_core.storage import corpus_episode_seed_asset_path
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     return _write_json(
@@ -73,7 +73,7 @@ def _write_audio(
     episode_ref: str = "EP672",
     title: str = "Alpha",
 ) -> Path:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     path = storage.AUDIO_DIR / podcast_id / f"{episode_ref}__{title}.mp3"
@@ -92,7 +92,7 @@ def _write_transcript(
     segments: list[dict] | None = None,
     json_text: str | None = None,
 ) -> Path:
-    from podcast_ingest_core.storage import transcript_asset_paths
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     if segments is None:
@@ -133,7 +133,7 @@ def _write_summary(
     semantic: bool = False,
     body: str = "summary body must not leak",
 ) -> Path:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     suffix = ".semantic.md" if semantic else ".md"
@@ -152,7 +152,7 @@ def _write_mentions(
     title: str = "Alpha",
     json_text: str | None = None,
 ) -> Path:
-    from podcast_ingest_core.storage import mention_asset_paths
+    from corpus_ingest_core.storage import mention_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = mention_asset_paths(podcast_id, episode_ref, title)
@@ -182,7 +182,7 @@ def _write_episode_intelligence(
     episode_ref: str = "EP672",
     title: str = "Alpha",
 ) -> Path:
-    from podcast_ingest_core.storage import episode_intelligence_report_asset_paths
+    from corpus_ingest_core.storage import episode_intelligence_report_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = episode_intelligence_report_asset_paths(podcast_id, episode_ref, title)
@@ -208,7 +208,7 @@ def _write_industry_mapping(
     episode_ref: str = "EP672",
     title: str = "Alpha",
 ) -> Path:
-    from podcast_ingest_core.storage import industry_chain_mapping_asset_paths
+    from corpus_ingest_core.storage import industry_chain_mapping_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = industry_chain_mapping_asset_paths(podcast_id, episode_ref, title)
@@ -237,7 +237,7 @@ def _write_external_boundary(
     episode_ref: str = "EP672",
     title: str = "Alpha",
 ) -> Path:
-    from podcast_ingest_core.storage import external_data_boundary_asset_paths
+    from corpus_ingest_core.storage import external_data_boundary_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = external_data_boundary_asset_paths(podcast_id, episode_ref, title)
@@ -270,7 +270,7 @@ def _write_semantic_review(
 ) -> Path:
     json_path = review_dir / f"{timestamp}__{podcast_id}__{episode_ref}.semantic-review.json"
     if review_status == "passed":
-        import podcast_ingest_core.semantic_summary_smoke_review as review
+        import corpus_ingest_core.semantic_summary_smoke_review as review
 
         review.REPORTS_DIR = review_dir
         created = review.review_semantic_summary_smoke(podcast_id, episode_ref)
@@ -278,7 +278,7 @@ def _write_semantic_review(
             created.review_markdown_path.replace(json_path.with_suffix(".md"))
             created.review_json_path.replace(json_path)
         return json_path
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     checks = [
         {"name": name, "status": "pass", "message": "fixture"}
@@ -332,7 +332,7 @@ def _action(row: dict, artifact_family: str) -> dict:
 
 
 def test_corpus_remediation_plan_asset_paths_contract():
-    from podcast_ingest_core.storage import corpus_remediation_plan_asset_paths
+    from corpus_ingest_core.storage import corpus_remediation_plan_asset_paths
 
     paths = corpus_remediation_plan_asset_paths("gooaye")
 
@@ -341,7 +341,7 @@ def test_corpus_remediation_plan_asset_paths_contract():
 
 
 def test_corpus_remediation_public_result_contract_exports(tmp_path):
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         CorpusRemediationAction,
         CorpusRemediationActionCounts,
         CorpusRemediationBlocker,
@@ -414,9 +414,9 @@ def test_corpus_remediation_public_result_contract_exports(tmp_path):
 def test_corpus_remediation_plan_snapshot_builds_without_writes_until_persisted(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_index as corpus_index
-    import podcast_ingest_core.corpus_remediation_plan as remediation_plan
+    import corpus_ingest_core.corpus_index as corpus_index
+    import corpus_ingest_core.corpus_remediation_plan as remediation_plan
+    from corpus_ingest_core import storage
 
     _write_episode_seed(monkeypatch, tmp_path)
     index_paths = storage.corpus_index_asset_paths("gooaye")
@@ -451,7 +451,7 @@ def test_corpus_remediation_plan_snapshot_builds_without_writes_until_persisted(
 
 
 def test_generate_corpus_remediation_plan_writes_empty_plan(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
 
@@ -470,7 +470,7 @@ def test_generate_corpus_remediation_plan_writes_empty_plan(monkeypatch, tmp_pat
 def test_generate_corpus_remediation_plan_markdown_includes_contract_summary(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
 
@@ -490,9 +490,9 @@ def test_generate_corpus_remediation_plan_markdown_includes_contract_summary(
 def test_generate_corpus_remediation_plan_refreshes_index_first(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.models import CorpusArtifactFamilyCounts, CorpusIndexResult
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_remediation_plan as remediation
+    import corpus_ingest_core.corpus_remediation_plan as remediation
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.models import CorpusArtifactFamilyCounts, CorpusIndexResult
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     calls: list[str] = []
@@ -563,7 +563,7 @@ def test_generate_corpus_remediation_plan_refreshes_index_first(
 def test_generate_corpus_remediation_plan_orders_actions_and_counts(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path, episode_ref="EP001", title="Alpha")
@@ -600,7 +600,7 @@ def test_generate_corpus_remediation_plan_orders_actions_and_counts(
 def test_generate_corpus_remediation_plan_uses_seed_audio_availability(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _write_episode_seed(
         monkeypatch,
@@ -632,7 +632,7 @@ def test_generate_corpus_remediation_plan_uses_seed_audio_availability(
 def test_generate_corpus_remediation_plan_uses_contract_action_types(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
@@ -651,7 +651,7 @@ def test_generate_corpus_remediation_plan_uses_contract_action_types(
 def test_generate_corpus_remediation_plan_is_deterministic_and_has_no_timestamp(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
@@ -671,11 +671,12 @@ def test_generate_corpus_remediation_plan_is_deterministic_and_has_no_timestamp(
 def test_generate_corpus_remediation_plan_cli_prints_output_paths_and_counts(
     monkeypatch, capsys, tmp_path
 ):
-    from podcast_ingest_core.models import (
+    from scripts import generate_corpus_remediation_plan as cli
+
+    from corpus_ingest_core.models import (
         CorpusRemediationActionCounts,
         CorpusRemediationPlanResult,
     )
-    from scripts import generate_corpus_remediation_plan as cli
 
     result = CorpusRemediationPlanResult(
         podcast_id="gooaye",
@@ -720,7 +721,7 @@ def test_generate_corpus_remediation_plan_cli_prints_output_paths_and_counts(
 def test_generate_corpus_remediation_plan_marks_transcript_blockers(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_audio(monkeypatch, tmp_path)
@@ -741,7 +742,7 @@ def test_generate_corpus_remediation_plan_marks_transcript_blockers(
 def test_generate_corpus_remediation_plan_contains_unreadable_warning(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
@@ -762,7 +763,7 @@ def test_generate_corpus_remediation_plan_contains_unreadable_warning(
 def test_generate_corpus_remediation_plan_blocks_downstream_missing_upstream(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_external_boundary(monkeypatch, tmp_path)
@@ -782,7 +783,7 @@ def test_generate_corpus_remediation_plan_blocks_downstream_missing_upstream(
 def test_generate_corpus_remediation_plan_blocks_external_boundary_when_transcript_missing(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_industry_mapping(monkeypatch, tmp_path)
@@ -800,7 +801,7 @@ def test_generate_corpus_remediation_plan_blocks_external_boundary_when_transcri
 def test_generate_corpus_remediation_plan_blocks_industry_mapping_when_transcript_missing(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_episode_intelligence(monkeypatch, tmp_path)
@@ -818,7 +819,7 @@ def test_generate_corpus_remediation_plan_blocks_industry_mapping_when_transcrip
 def test_generate_corpus_remediation_plan_blocks_semantic_review_when_transcript_missing(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_summary(monkeypatch, tmp_path, semantic=True)
@@ -836,7 +837,7 @@ def test_generate_corpus_remediation_plan_blocks_semantic_review_when_transcript
 def test_generate_corpus_remediation_plan_marks_semantic_summary_gated(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
@@ -855,7 +856,7 @@ def test_generate_corpus_remediation_plan_marks_semantic_summary_gated(
 def test_generate_corpus_remediation_plan_reports_semantic_review_metadata(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     review_dir = _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
@@ -883,7 +884,7 @@ def test_generate_corpus_remediation_plan_reports_semantic_review_metadata(
 def test_generate_corpus_remediation_plan_has_semantic_review_action_after_summary(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
@@ -901,7 +902,7 @@ def test_generate_corpus_remediation_plan_has_semantic_review_action_after_summa
 
 
 def test_corpus_remediation_plan_import_surface_stays_plan_only():
-    source = Path("src/podcast_ingest_core/corpus_remediation_plan.py").read_text(
+    source = Path("src/corpus_ingest_core/corpus_remediation_plan.py").read_text(
         encoding="utf-8"
     )
     forbidden_fragments = [
@@ -933,7 +934,7 @@ def test_corpus_remediation_plan_import_surface_stays_plan_only():
 def test_generate_corpus_remediation_plan_excludes_raw_body_and_secret_text(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     review_dir = _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_transcript(
@@ -986,7 +987,7 @@ def test_generate_corpus_remediation_plan_excludes_raw_body_and_secret_text(
 def test_generate_corpus_remediation_plan_does_not_execute_remediation_boundaries(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
+    from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_audio(monkeypatch, tmp_path)
@@ -995,29 +996,29 @@ def test_generate_corpus_remediation_plan_does_not_execute_remediation_boundarie
         raise AssertionError("remediation plan must not execute side effects")
 
     forbidden_functions = (
-        ("podcast_ingest_core.cache", "initialize_cache"),
-        ("podcast_ingest_core.cache", "rebuild_cache"),
-        ("podcast_ingest_core.downloader", "download_audio"),
-        ("podcast_ingest_core.entity_extractor", "extract_mentions"),
-        ("podcast_ingest_core.external_data_verification", "verify_external_data_boundary"),
-        ("podcast_ingest_core.feed_reader", "get_episode"),
-        ("podcast_ingest_core.feed_reader", "list_episodes"),
-        ("podcast_ingest_core.llm_profiles", "load_llm_profile"),
-        ("podcast_ingest_core.local_env", "load_local_env"),
-        ("podcast_ingest_core.mcp_server", "download_audio"),
-        ("podcast_ingest_core.mcp_server", "rebuild_cache"),
-        ("podcast_ingest_core.mcp_server", "run_research_workflow"),
-        ("podcast_ingest_core.research_workflow", "run_research_workflow"),
-        ("podcast_ingest_core.search", "search_mentions"),
-        ("podcast_ingest_core.search", "search_transcripts"),
-        ("podcast_ingest_core.semantic_summarizer", "semantic_summarize_episode"),
-        ("podcast_ingest_core.stock_lens", "generate_stock_lens_report"),
+        ("corpus_ingest_core.cache", "initialize_cache"),
+        ("corpus_ingest_core.cache", "rebuild_cache"),
+        ("corpus_ingest_core.downloader", "download_audio"),
+        ("corpus_ingest_core.entity_extractor", "extract_mentions"),
+        ("corpus_ingest_core.external_data_verification", "verify_external_data_boundary"),
+        ("corpus_ingest_core.feed_reader", "get_episode"),
+        ("corpus_ingest_core.feed_reader", "list_episodes"),
+        ("corpus_ingest_core.llm_profiles", "load_llm_profile"),
+        ("corpus_ingest_core.local_env", "load_local_env"),
+        ("corpus_ingest_core.mcp_server", "download_audio"),
+        ("corpus_ingest_core.mcp_server", "rebuild_cache"),
+        ("corpus_ingest_core.mcp_server", "run_research_workflow"),
+        ("corpus_ingest_core.research_workflow", "run_research_workflow"),
+        ("corpus_ingest_core.search", "search_mentions"),
+        ("corpus_ingest_core.search", "search_transcripts"),
+        ("corpus_ingest_core.semantic_summarizer", "semantic_summarize_episode"),
+        ("corpus_ingest_core.stock_lens", "generate_stock_lens_report"),
         (
-            "podcast_ingest_core.stock_lens_synthesis",
+            "corpus_ingest_core.stock_lens_synthesis",
             "generate_stock_lens_synthesis_report",
         ),
-        ("podcast_ingest_core.summarizer", "summarize_episode"),
-        ("podcast_ingest_core.transcriber", "transcribe_episode"),
+        ("corpus_ingest_core.summarizer", "summarize_episode"),
+        ("corpus_ingest_core.transcriber", "transcribe_episode"),
     )
     for module_name, function_name in forbidden_functions:
         module = importlib.import_module(module_name)

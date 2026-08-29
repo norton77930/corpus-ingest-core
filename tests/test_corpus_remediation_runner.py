@@ -1,17 +1,17 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 import json
-from pathlib import Path
 import subprocess
 import sys
+from dataclasses import asdict
+from pathlib import Path
 
 import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> None:
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_index as corpus_index
+    import corpus_ingest_core.corpus_index as corpus_index
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "AUDIO_DIR", tmp_path / "audio")
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
@@ -43,7 +43,7 @@ def _write_transcript_fixture(
     episode_ref: str = "EP672",
     title: str = "Alpha",
 ) -> Path:
-    from podcast_ingest_core.storage import transcript_asset_paths
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = transcript_asset_paths(podcast_id, episode_ref, title)
@@ -123,7 +123,7 @@ def _plan_payload(actions: list[dict], *, podcast_id: str = "gooaye") -> dict:
 
 
 def _artifact_status_for_episode(episode_ref: str) -> dict:
-    base = f"data"
+    base = "data"
     return {
         "audio": {"status": "available", "paths": {"audio": f"{base}/audio/gooaye/{episode_ref}.mp3"}},
         "transcript": {
@@ -160,12 +160,12 @@ def _family_order(family: str) -> int:
 
 
 def _fake_plan_refresh(monkeypatch, tmp_path: Path, payload: dict, calls: list[str] | None = None):
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.models import (
+    import corpus_ingest_core.corpus_remediation_runner as runner
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.models import (
         CorpusRemediationActionCounts,
         CorpusRemediationPlanResult,
     )
-    import podcast_ingest_core.corpus_remediation_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
 
@@ -249,7 +249,7 @@ def _asset(
 
 
 def _install_successful_generators(monkeypatch, tmp_path: Path, calls: list[tuple[str, str, dict]]):
-    import podcast_ingest_core.corpus_remediation_runner as runner
+    import corpus_ingest_core.corpus_remediation_runner as runner
 
     def fake_generator(family: str):
         def generate(podcast_id: str, episode_ref: str, **kwargs):
@@ -285,12 +285,12 @@ def _install_successful_generators(monkeypatch, tmp_path: Path, calls: list[tupl
 
 
 def test_preview_corpus_remediation_from_in_memory_plan(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.models import (
+    import corpus_ingest_core.corpus_remediation_runner as runner
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.models import (
         CorpusRemediationActionCounts,
         CorpusRemediationPlanResult,
     )
-    import podcast_ingest_core.corpus_remediation_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     payload = _plan_payload(
@@ -338,8 +338,8 @@ def test_preview_corpus_remediation_from_in_memory_plan(monkeypatch, tmp_path):
 def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_remediation_runner as runner
+    import corpus_ingest_core.corpus_remediation_runner as runner
+    from corpus_ingest_core import storage
 
     _write_transcript_fixture(
         monkeypatch,
@@ -385,7 +385,7 @@ def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(
 
 
 def test_corpus_remediation_run_asset_paths_contract():
-    from podcast_ingest_core.storage import corpus_remediation_run_asset_paths
+    from corpus_ingest_core.storage import corpus_remediation_run_asset_paths
 
     paths = corpus_remediation_run_asset_paths("gooaye")
 
@@ -394,13 +394,13 @@ def test_corpus_remediation_run_asset_paths_contract():
 
 
 def test_corpus_remediation_runner_public_result_contract_exports(tmp_path):
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         CorpusRemediationRunCounts,
         CorpusRemediationRunFilter,
+        CorpusRemediationRunnerFailedError,
         CorpusRemediationRunResult,
         CorpusRemediationRunRow,
         CorpusRemediationRunWarning,
-        CorpusRemediationRunnerFailedError,
         run_corpus_remediation,
     )
 
@@ -462,7 +462,7 @@ def test_corpus_remediation_runner_public_result_contract_exports(tmp_path):
 
 
 def test_corpus_remediation_runner_error_contract():
-    from podcast_ingest_core import CorpusRemediationRunnerFailedError, PodcastIngestCoreError
+    from corpus_ingest_core import CorpusRemediationRunnerFailedError, PodcastIngestCoreError
 
     assert issubclass(CorpusRemediationRunnerFailedError, PodcastIngestCoreError)
 
@@ -470,8 +470,8 @@ def test_corpus_remediation_runner_error_contract():
 def test_run_corpus_remediation_empty_corpus_dry_run_writes_no_report(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
-    from podcast_ingest_core.storage import corpus_remediation_run_asset_paths
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    from corpus_ingest_core.storage import corpus_remediation_run_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
 
@@ -489,7 +489,7 @@ def test_run_corpus_remediation_empty_corpus_dry_run_writes_no_report(
 
 
 def test_run_corpus_remediation_refreshes_plan_before_selection(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     calls: list[str] = []
     _fake_plan_refresh(
@@ -517,7 +517,7 @@ def test_run_corpus_remediation_refreshes_plan_before_selection(monkeypatch, tmp
 def test_dry_run_selects_deterministic_and_excludes_non_deterministic(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     _fake_plan_refresh(
         monkeypatch,
@@ -563,7 +563,7 @@ def test_dry_run_selects_deterministic_and_excludes_non_deterministic(
 
 
 def test_dry_run_keeps_blocked_and_skipped_rows_visible(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     _fake_plan_refresh(
         monkeypatch,
@@ -601,7 +601,7 @@ def test_episode_filter_skips_other_episode_blocked_action(monkeypatch, tmp_path
     ``blocked`` instead of ``skipped`` (the ``blocked`` short-circuit ran before the
     episode filter).
     """
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     _fake_plan_refresh(
         monkeypatch,
@@ -631,7 +631,7 @@ def test_episode_filter_skips_other_episode_blocked_action(monkeypatch, tmp_path
 
 
 def test_dry_run_is_deterministic_and_has_no_generated_at(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     payload = _plan_payload(
         [
@@ -650,12 +650,13 @@ def test_dry_run_is_deterministic_and_has_no_generated_at(monkeypatch, tmp_path)
 
 
 def test_run_corpus_remediation_cli_dry_run_outputs_json(monkeypatch, capsys, tmp_path):
-    from podcast_ingest_core.models import (
+    from scripts import run_corpus_remediation as cli
+
+    from corpus_ingest_core.models import (
         CorpusRemediationRunCounts,
         CorpusRemediationRunFilter,
         CorpusRemediationRunResult,
     )
-    from scripts import run_corpus_remediation as cli
 
     result = CorpusRemediationRunResult(
         podcast_id="gooaye",
@@ -704,8 +705,8 @@ def test_run_corpus_remediation_cli_dry_run_outputs_json(monkeypatch, capsys, tm
 
 
 def test_confirmed_execution_rejects_missing_filter(monkeypatch, tmp_path):
-    from podcast_ingest_core import CorpusRemediationRunnerFailedError
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    from corpus_ingest_core import CorpusRemediationRunnerFailedError
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     calls: list[tuple[str, str, dict]] = []
     _fake_plan_refresh(
@@ -724,7 +725,7 @@ def test_confirmed_execution_rejects_missing_filter(monkeypatch, tmp_path):
 def test_confirmed_action_family_filter_and_max_actions_ordering(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     calls: list[tuple[str, str, dict]] = []
     _fake_plan_refresh(
@@ -760,7 +761,7 @@ def test_confirmed_action_family_filter_and_max_actions_ordering(
 def test_confirmed_episode_filter_executes_only_matching_ready_actions(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     calls: list[tuple[str, str, dict]] = []
     _fake_plan_refresh(
@@ -786,7 +787,7 @@ def test_confirmed_episode_filter_executes_only_matching_ready_actions(
 
 
 def test_confirmed_run_report_json_and_markdown_are_written(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     calls: list[tuple[str, str, dict]] = []
     _fake_plan_refresh(
@@ -813,7 +814,7 @@ def test_confirmed_run_report_json_and_markdown_are_written(monkeypatch, tmp_pat
 def test_confirmed_execution_calls_core_functions_directly_without_shelling_out(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     calls: list[tuple[str, str, dict]] = []
     _fake_plan_refresh(
@@ -835,7 +836,7 @@ def test_confirmed_execution_calls_core_functions_directly_without_shelling_out(
         action_family="extractive_summary",
     )
 
-    source = Path("src/podcast_ingest_core/corpus_remediation_runner.py").read_text(
+    source = Path("src/corpus_ingest_core/corpus_remediation_runner.py").read_text(
         encoding="utf-8"
     )
     assert "subprocess" not in source
@@ -846,7 +847,7 @@ def test_confirmed_execution_calls_core_functions_directly_without_shelling_out(
 def test_confirmed_execution_propagates_force_and_allow_partial(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     calls: list[tuple[str, str, dict]] = []
     _fake_plan_refresh(
@@ -887,13 +888,14 @@ def test_confirmed_execution_propagates_force_and_allow_partial(
 def test_run_corpus_remediation_cli_confirmed_stdout_and_error_contract(
     monkeypatch, capsys, tmp_path
 ):
-    from podcast_ingest_core import CorpusRemediationRunnerFailedError
-    from podcast_ingest_core.models import (
+    from scripts import run_corpus_remediation as cli
+
+    from corpus_ingest_core import CorpusRemediationRunnerFailedError
+    from corpus_ingest_core.models import (
         CorpusRemediationRunCounts,
         CorpusRemediationRunFilter,
         CorpusRemediationRunResult,
     )
-    from scripts import run_corpus_remediation as cli
 
     result = CorpusRemediationRunResult(
         podcast_id="gooaye",
@@ -962,8 +964,8 @@ def test_run_corpus_remediation_cli_confirmed_stdout_and_error_contract(
 def test_single_action_failure_records_failure_and_continues_unrelated(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_remediation_runner as runner
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    import corpus_ingest_core.corpus_remediation_runner as runner
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     _fake_plan_refresh(
         monkeypatch,
@@ -1001,8 +1003,8 @@ def test_single_action_failure_records_failure_and_continues_unrelated(
 
 
 def test_failed_dependency_skips_same_run_downstream_actions(monkeypatch, tmp_path):
-    import podcast_ingest_core.corpus_remediation_runner as runner
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    import corpus_ingest_core.corpus_remediation_runner as runner
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     _fake_plan_refresh(
         monkeypatch,
@@ -1033,7 +1035,7 @@ def test_failed_dependency_skips_same_run_downstream_actions(monkeypatch, tmp_pa
 
 
 def test_outputs_do_not_leak_raw_or_secret_text(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     payload = _plan_payload([{"episode_ref": "EP001", "artifact_family": "mentions"}])
     payload["episodes"][0]["artifact_status"]["transcript"]["body"] = (
@@ -1082,7 +1084,7 @@ def test_outputs_do_not_leak_raw_or_secret_text(monkeypatch, tmp_path):
 def test_boundary_guard_excludes_forbidden_families_without_execution(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     _fake_plan_refresh(
         monkeypatch,
@@ -1109,7 +1111,7 @@ def test_boundary_guard_excludes_forbidden_families_without_execution(
     assert result.counts.selected_count == 0
     assert result.counts.executed_count == 0
     assert result.counts.excluded_count == 5
-    source = Path("src/podcast_ingest_core/corpus_remediation_runner.py").read_text(
+    source = Path("src/corpus_ingest_core/corpus_remediation_runner.py").read_text(
         encoding="utf-8"
     )
     forbidden_fragments = [
@@ -1132,7 +1134,7 @@ def test_boundary_guard_excludes_forbidden_families_without_execution(
 
 
 def test_outputs_keep_no_investment_advice_boundary(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_remediation_runner import run_corpus_remediation
+    from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     _fake_plan_refresh(
         monkeypatch,

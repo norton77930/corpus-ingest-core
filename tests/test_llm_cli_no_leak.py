@@ -21,7 +21,6 @@ import pytest
 
 from tests.test_research_workflow import _use_tmp_data_dirs
 
-
 ACK = (
     "I understand this may call an external LLM API, send transcript text outside this machine, "
     "and incur costs."
@@ -31,7 +30,7 @@ FAKE_KEY_VALUE = "fake-key-value-71249"
 
 
 def _write_marker_transcript(monkeypatch, tmp_path, *, podcast_id="gooaye", episode_ref="EP672"):
-    from podcast_ingest_core.storage import transcript_asset_paths
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     title = f"{episode_ref} title"
@@ -68,6 +67,7 @@ def _write_marker_transcript(monkeypatch, tmp_path, *, podcast_id="gooaye", epis
 
 def test_summarize_cli_semantic_stdout_is_metadata_only(monkeypatch, tmp_path, capsys):
     from scripts import summarize_episode as cli
+
     from tests.test_semantic_summary_smoke import _summary_asset
 
     monkeypatch.setenv("API_KEY", FAKE_KEY_VALUE)

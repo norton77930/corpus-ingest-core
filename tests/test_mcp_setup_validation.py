@@ -2,9 +2,8 @@ from __future__ import annotations
 
 import json
 import sys
-from pathlib import Path
 
-from podcast_ingest_core.models import MentionSearchResult, TranscriptSearchResult
+from corpus_ingest_core.models import MentionSearchResult, TranscriptSearchResult
 
 
 def test_validate_mcp_setup_parse_args_reads_podcast_and_query():

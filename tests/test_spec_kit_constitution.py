@@ -3,7 +3,6 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 SPECIFY = ROOT / ".specify"
 
@@ -15,10 +14,11 @@ def _read(path: Path) -> str:
 def test_constitution_is_project_specific_and_versioned():
     text = _read(SPECIFY / "memory" / "constitution.md")
 
-    assert "Podcast Ingestion Core / Gooaye Research System Constitution" in text
+    assert "Corpus Ingestion Core / Gooaye Research System Constitution" in text
     assert "Sync Impact Report" in text
     assert "Version change: template -> 1.0.0" in text
-    assert "**Version**: 1.0.0 | **Ratified**: 2026-06-30 | **Last Amended**: 2026-06-30" in text
+    assert "Version change: 1.0.0 -> 1.0.1 (PATCH, 2026-08-29)" in text
+    assert "**Version**: 1.0.1 | **Ratified**: 2026-06-30 | **Last Amended**: 2026-08-29" in text
     assert not re.search(r"\[[A-Z0-9_]+\]", text)
 
 

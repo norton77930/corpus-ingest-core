@@ -21,7 +21,7 @@ python scripts/validate_mcp_setup.py --podcast gooaye --query 台積電
 ```text
 1. 啟動 Codex
 2. 輸入 /mcp
-3. 確認 podcast-ingest-core active
+3. 確認 corpus-ingest-core active
 4. 確認 tools 可見
 ```
 

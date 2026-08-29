@@ -18,7 +18,7 @@
 | `python -m pytest` | | |
 | `python -m compileall src scripts` | | |
 | `python scripts/validate_mcp_setup.py --podcast gooaye --query 台積電` | | |
-| `/mcp` shows `podcast-ingest-core` active | | |
+| `/mcp` shows `corpus-ingest-core` active | | |
 
 ## Eval Cases
 

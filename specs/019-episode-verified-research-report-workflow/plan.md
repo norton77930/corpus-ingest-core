@@ -43,7 +43,7 @@ specs/019-episode-verified-research-report-workflow/
 ├── contracts/episode-verified-research-report-workflow.md
 └── checklists/{requirements,safety}.md
 
-src/podcast_ingest_core/
+src/corpus_ingest_core/
 ├── episode_verified_research_report_workflow_runner.py  # NEW
 ├── verified_research_report.py                          # REUSE (no semantic change required if already episode-scoped)
 ├── verified_research_lineage.py                         # REUSE

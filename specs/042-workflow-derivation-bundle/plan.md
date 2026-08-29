@@ -31,7 +31,7 @@ Add a dry-run-first Core runner that turns one available Spec 038 lecture plus a
 ## Constitution Check
 
 - **I Local artifacts**: derivations come from on-disk lecture Markdown and a local operator-context file.
-- **II Thin interfaces**: behaviour in `src/podcast_ingest_core`; CLI parses, calls, prints metadata-only JSON.
+- **II Thin interfaces**: behaviour in `src/corpus_ingest_core`; CLI parses, calls, prints metadata-only JSON.
 - **III Dry-run first**: `confirm=false` default; plan lists real reads/writes/reuses; no `.part` residue.
 - **IV LLM opt-in / secrets**: confirmed generation requires exact ack before `create_provider`. Input is lecture + context, never transcript. `.env` values never appear. **No constitution amendment.**
 - **V Evidence separation**: reconstructed catalogues and operator-application mappings are labelled. Tools not in context are forbidden as advice.
@@ -60,13 +60,13 @@ Post-design: `workflow_derivation` MUST NOT join `ARTIFACT_LADDER`. 038 `study_g
 ```text
 specs/042-workflow-derivation-bundle/
 config/operator_workflow.yaml
-src/podcast_ingest_core/storage.py
-src/podcast_ingest_core/errors.py
-src/podcast_ingest_core/models.py
-src/podcast_ingest_core/workflow_derivation_profiles.py
-src/podcast_ingest_core/workflow_derivation.py
-src/podcast_ingest_core/corpus_index.py
-src/podcast_ingest_core/__init__.py
+src/corpus_ingest_core/storage.py
+src/corpus_ingest_core/errors.py
+src/corpus_ingest_core/models.py
+src/corpus_ingest_core/workflow_derivation_profiles.py
+src/corpus_ingest_core/workflow_derivation.py
+src/corpus_ingest_core/corpus_index.py
+src/corpus_ingest_core/__init__.py
 scripts/run_workflow_derivation.py
 tests/test_workflow_derivation.py
 tests/test_workflow_derivation_profiles.py

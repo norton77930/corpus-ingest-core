@@ -20,7 +20,6 @@ from pathlib import Path
 
 import pytest
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 
@@ -117,7 +116,7 @@ IGNORED_LOCAL_ONLY_PATHS = [
     "data/study-guides/x-raytar/ep/00_video_info.md",
     "data/research-reports/gooaye/EP1/manifest.json",
     # locally generated package metadata
-    "src/podcast_ingest_core.egg-info/PKG-INFO",
+    "src/corpus_ingest_core.egg-info/PKG-INFO",
 ]
 
 COMMITTED_TEMPLATE_PATHS = [

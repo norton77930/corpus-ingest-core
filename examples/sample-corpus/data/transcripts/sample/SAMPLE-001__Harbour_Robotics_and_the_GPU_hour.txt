@@ -1,0 +1,22 @@
+Welcome to The Synthetic Signal. Everything in this feed is invented: the companies, the numbers, the hosts, and this warning.
+I am Ada Kestrel, and across the desk is Milo Vance. Neither of us exists, and none of this is investment advice.
+Today we are talking about Harbour Robotics, a fictional company that builds picking arms for fictional warehouses.
+Harbour Robotics published an invented quarterly note last week, claiming its arms now run their models entirely on-device.
+On-device means no round trip to a rented server, and that changes what a GPU hour is worth to a company like Harbour Robotics.
+Let us put an imaginary number on it. In this made-up market a rented GPU hour costs forty-one dollars.
+Harbour Robotics says it burned eleven thousand GPU hours last quarter training its grasp model.
+That is an invented four hundred and fifty-one thousand dollars, which is an invented rounding error for an invented company.
+The interesting part is not the bill. It is that they moved the AI workload off rented capacity and onto hardware they own.
+Northwind Logistics, another company we made up, went the other way and rents every hour it uses.
+Northwind Logistics runs roughly six hundred fictional trucks and leases all of its AI capacity by the hour.
+Which approach is better? We do not know. This show does not exist, so we are not going to pretend to know.
+What we can do is leave a timestamp on every sentence, so you can check what was actually said instead of what you remember.
+After the break: Meridian Grid, a fictional utility that nobody should model anything on.
+Meridian Grid announced an invented tariff change that lifts the price of overnight power by nine percent.
+For Harbour Robotics that matters, because in this story their charging fleet runs overnight.
+It is a second-order effect, and it only shows up if you can search a transcript instead of trusting your memory of it.
+Milo, if you had to summarise the fictional quarter in one line, what would it be?
+Harbour Robotics bought certainty, Northwind Logistics bought flexibility, and Meridian Grid quietly repriced both of them.
+None of which happened. We are a test fixture with a microphone.
+That is the whole point of this sample corpus: search it, cite it, and remember that every word was written for a demo.
+Next episode we will invent a CPI print and pretend to care about it. Thanks for listening to nobody.

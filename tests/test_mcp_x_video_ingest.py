@@ -2,8 +2,7 @@ from __future__ import annotations
 
 import inspect
 
-from podcast_ingest_core.x_video_ingest import XVideoIngestResult
-
+from corpus_ingest_core.x_video_ingest import XVideoIngestResult
 
 _SAMPLE_URL = "https://x.com/Raytar/status/2071290493581840707"
 
@@ -28,7 +27,7 @@ def _preview_result() -> XVideoIngestResult:
 
 
 def test_preview_returns_network_read_plan_and_does_not_confirm(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     captured = {}
 
@@ -54,7 +53,7 @@ def test_preview_returns_network_read_plan_and_does_not_confirm(monkeypatch):
 
 
 def test_confirm_delegates_to_core_once(monkeypatch):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     captured = {}
 
@@ -98,7 +97,7 @@ def test_confirm_delegates_to_core_once(monkeypatch):
 
 
 def test_invalid_url_preview_returns_error_envelope():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     response = mcp_server.ingest_x_video(url="https://example.com/not-x", confirm=False)
 
@@ -108,7 +107,7 @@ def test_invalid_url_preview_returns_error_envelope():
 
 
 def test_mcp_signature_hides_work_dir_and_device():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     parameters = inspect.signature(mcp_server.ingest_x_video).parameters
     assert list(parameters) == ["url", "confirm", "title", "force"]

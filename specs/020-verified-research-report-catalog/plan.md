@@ -43,7 +43,7 @@ specs/020-verified-research-report-catalog/
 ├── contracts/verified-research-report-catalog.md
 └── checklists/{requirements,safety}.md
 
-src/podcast_ingest_core/
+src/corpus_ingest_core/
 ├── verified_research_report_catalog.py       # NEW Core ownership
 ├── models.py / errors.py / __init__.py        # exports/result models as needed
 └── mcp_server.py                              # append Tool 17 only

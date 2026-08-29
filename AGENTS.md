@@ -37,7 +37,7 @@ path as a repository-wide active-feature pin.
 ## Engineering Rules
 
 - Use Windows PowerShell by default.
-- Keep the thin CLI / thick core boundary: scripts parse arguments and call `podcast_ingest_core` functions.
+- Keep the thin CLI / thick core boundary: scripts parse arguments and call `corpus_ingest_core` functions.
 - Use TDD for new behavior and keep changes surgical.
 - Side-effect workflows stay dry-run first where practical.
 - `.env` is local-only and must not be read, printed, shared, or committed unless the user explicitly asks for a local manual test setup and no secret values are exposed.

@@ -1,4 +1,4 @@
-# Podcast Ingestion Core
+# Corpus Ingestion Core
 
 Turns podcast audio into verifiable, searchable knowledge. It takes an RSS
 feed (or an X / YouTube video), transcribes it locally with faster-whisper, and
@@ -6,6 +6,8 @@ produces timestamped transcripts, summaries, entity mentions, and research
 artifacts on disk — exposed to AI agents through an MCP server and Skills.
 
 [![tests](https://github.com/norton77930/corpus-ingest-core/actions/workflows/tests.yml/badge.svg)](https://github.com/norton77930/corpus-ingest-core/actions/workflows/tests.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 
 [繁體中文說明](README.zh-TW.md)
 
@@ -34,8 +36,8 @@ Two properties follow from that goal and shape the whole design:
 Requires Python 3.11+. Examples use PowerShell; any shell works.
 
 ```powershell
-git clone https://github.com/<your-account>/podcast-ingest-core.git
-cd podcast-ingest-core
+git clone https://github.com/norton77930/corpus-ingest-core.git
+cd corpus-ingest-core
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e .[dev]
@@ -57,6 +59,19 @@ python scripts/search_transcripts.py --podcast gooaye --query TSMC --limit 10
 
 Add your own podcast by appending a profile to `config/podcasts.yaml`. The core
 never hard-codes a specific show.
+
+### Connecting an agent, without cloning
+
+The MCP server installs as a command, so an agent can reach it in one line:
+
+```powershell
+claude mcp add corpus-ingest-core -- uvx --from git+https://github.com/norton77930/corpus-ingest-core.git@v0.2.0 corpus-ingest-mcp
+```
+
+[`examples/`](examples/) carries ready-to-copy configs for Claude Desktop,
+Claude Code and Codex, a set of prompts to try, and a small **synthetic** sample
+corpus so the search and evidence tools return real results before you have
+transcribed anything of your own.
 
 ## Architecture
 
@@ -142,12 +157,10 @@ market data is deliberately bounded to local fixtures — there is no live marke
 API, and adding one would be an explicit, reviewed decision rather than a
 feature.
 
-The Hermes sidecar integration (specs 026–034) is offline-verified only and
-remains blocked on runtime evidence. Details are in
-[`docs/agent-handoff.md`](docs/agent-handoff.md).
-
 ## Documentation
 
+- [`examples/`](examples/) — agent configs, prompts to try, and a synthetic
+  sample corpus that needs no transcription
 - [`docs/api.md`](docs/api.md) — complete function reference, output paths, CLI
   reference, and the MCP tool registry
 - [`docs/architecture.md`](docs/architecture.md) — architecture in depth
@@ -161,7 +174,7 @@ remains blocked on runtime evidence. Details are in
 - [`docs/agent-handoff.md`](docs/agent-handoff.md) — project status, spec
   history, blockers, and the entry point for anyone (human or agent) picking up
   development, including the
-  [2026-08-19 session handoff](docs/agent-handoff.md#handoff--podcast-ingest-core-2026-08-19) relocated from the repo root
+  [2026-08-19 session handoff](docs/agent-handoff.md#handoff--corpus-ingest-core-2026-08-19) relocated from the repo root
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — setup, how to verify a change, the
   product boundaries a change must not cross, and the hash-pinned files that
   must not be edited
@@ -188,16 +201,9 @@ python -m pytest
 python -m compileall src scripts
 ```
 
-The default pytest run excludes the blocked Hermes 030–034 doc chain, each of
-which ships its own offline entry point (`scripts/verify_spec_0NN*.py`); the
-exclusion list and its reasoning are in `pyproject.toml`. Naming a path
-explicitly still runs one:
+There is no `--ignore` list: the whole suite runs and is expected to be green.
 
-```powershell
-python -m pytest tests/test_spec_032_hermes_g2_docs.py
-```
-
-Scripts stay thin: they parse arguments and call `podcast_ingest_core`. New
+Scripts stay thin: they parse arguments and call `corpus_ingest_core`. New
 behaviour is developed test-first. `.env` is local-only and must never be
 committed.
 
@@ -212,7 +218,6 @@ original audio and a primary source.
 
 ## License
 
-MIT — see [LICENSE](LICENSE). That covers the first-party work only: two spec
-packages vendor a byte-pinned snapshot of the third-party
-`NousResearch/hermes-agent` repository, which carries its own MIT license. See
+MIT — see [LICENSE](LICENSE). No third-party source is vendored on `main`; an
+archived tag still carries one MIT-licensed snapshot, noted in
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

@@ -1,15 +1,15 @@
 from __future__ import annotations
 
-from dataclasses import asdict
 import argparse
 import json
-from pathlib import Path
 import sys
+from dataclasses import asdict
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import PodcastIngestCoreError, run_research_workflow
-from podcast_ingest_core.local_env import (
+from corpus_ingest_core import PodcastIngestCoreError, run_research_workflow
+from corpus_ingest_core.local_env import (
     DEFAULT_LOCAL_ENV_PATH,
     empty_local_env_result,
     load_local_env,

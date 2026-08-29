@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from podcast_ingest_core.config import load_podcast_profiles
+from corpus_ingest_core.config import load_podcast_profiles
 
 
 def _write_config(tmp_path: Path, body: str) -> Path:
@@ -164,7 +164,7 @@ def test_unknown_summary_profile_is_refused_at_load(tmp_path):
     """A typo must fail before it can cost an LLM call, and must name both the
     bad value and the known ones."""
 
-    from podcast_ingest_core.errors import UnknownSummaryProfileError
+    from corpus_ingest_core.errors import UnknownSummaryProfileError
 
     config_path = _write_config(
         tmp_path,
@@ -191,7 +191,7 @@ def test_non_string_summary_profile_is_refused_not_silently_defaulted(tmp_path):
     """``_optional_text`` turns a non-string into None. Routing summary_profile
     through it would make ``summary_profile: 123`` silently mean finance."""
 
-    from podcast_ingest_core.errors import UnknownSummaryProfileError
+    from corpus_ingest_core.errors import UnknownSummaryProfileError
 
     config_path = _write_config(
         tmp_path,
@@ -213,7 +213,7 @@ def test_explicit_null_summary_profile_is_refused(tmp_path):
     """An operator who writes the key and leaves it empty wrote something
     deliberate. Treating that as "unconfigured" was the last silent path."""
 
-    from podcast_ingest_core.errors import UnknownSummaryProfileError
+    from corpus_ingest_core.errors import UnknownSummaryProfileError
 
     config_path = _write_config(
         tmp_path,

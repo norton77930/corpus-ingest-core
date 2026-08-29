@@ -38,4 +38,4 @@ tasks, analyze, implement, and converge as an as-built documentation pass.
 ## Structure Decision
 
 No runtime structure change. Existing core modules remain in
-`src/podcast_ingest_core`, and scripts remain thin wrappers.
+`src/corpus_ingest_core`, and scripts remain thin wrappers.

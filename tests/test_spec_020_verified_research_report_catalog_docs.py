@@ -4,7 +4,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-
 ROOT = Path(__file__).resolve().parents[1]
 FEATURE = ROOT / "specs" / "020-verified-research-report-catalog"
 
@@ -113,7 +112,11 @@ def test_spec_020_implemented_docs_and_handoff_keep_current_contracts() -> None:
     # 025 doc-count consolidation: the stale "恰好 18 個" claims were synced to
     # the live registry; the registry-derived checker
     # (tests/test_docs_registry_count_consistency.py) now owns count drift.
-    assert "共用單一 FastMCP 的 stdio 與 loopback Streamable HTTP sidecar（目前恰好 25 個 reviewed tools）" in handoff
+    # The "sidecar" wording came from the Hermes chain (specs 026-034), which was
+    # archived at the `archive/hermes-audit-chain` tag and removed from main on
+    # 2026-08-29. What survives is the loopback Streamable HTTP transport itself;
+    # the pinned count claim is unchanged.
+    assert "共用單一 FastMCP 的 stdio 與 loopback Streamable HTTP transport（目前恰好 25 個 reviewed tools）" in handoff
     assert "The local stdio registry has exact 25 reviewed tools." in handoff
     assert "`generate_stock_lens_report`" in handoff
     assert "stdio-only MCP server" not in handoff

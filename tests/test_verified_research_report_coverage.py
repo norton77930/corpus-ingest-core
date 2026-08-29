@@ -12,7 +12,7 @@ _DIGEST_B = "b" * 64
 
 
 def _use_tmp_data(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> tuple[Path, Path]:
-    from podcast_ingest_core import corpus_index, storage
+    from corpus_ingest_core import corpus_index, storage
 
     reports = tmp_path / "research-reports"
     corpus = tmp_path / "corpus"
@@ -72,10 +72,10 @@ def _write_bundle(root: Path, podcast_id: str, episode_ref: str, digest: str) ->
 def test_coverage_joins_inventory_and_bundles_with_filters_and_zero_writes(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import list_verified_research_report_coverage
+    from corpus_ingest_core import list_verified_research_report_coverage
 
     reports, corpus = _use_tmp_data(monkeypatch, tmp_path)
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     _write_seed(corpus, "gooaye", "EP1")
     _write_seed(corpus, "gooaye", "EP2")
@@ -128,7 +128,7 @@ def test_coverage_joins_inventory_and_bundles_with_filters_and_zero_writes(
 def test_coverage_missing_sides_and_input_validation(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         VerifiedResearchReportCoverageInputError,
         list_verified_research_report_coverage,
         verified_research_report_coverage_result_to_dict,

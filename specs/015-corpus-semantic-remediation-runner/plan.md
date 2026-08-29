@@ -12,7 +12,7 @@ Add a standalone Core+CLI runner that evaluates one explicit episode from one fr
 
 **Language/Version**: Python 3.12
 
-**Primary Dependencies**: Python standard library and existing `podcast_ingest_core` modules only. No new dependency.
+**Primary Dependencies**: Python standard library and existing `corpus_ingest_core` modules only. No new dependency.
 
 **Storage**: Existing local transcript and semantic artifacts plus additive latest runner reports under `data/corpus/{podcast_id}/corpus-semantic-remediation-run.json` and `.md`. Existing semantic review reports remain timestamped under their established reports directory.
 
@@ -33,7 +33,7 @@ Add a standalone Core+CLI runner that evaluates one explicit episode from one fr
 *GATE: Must pass before Phase 0 research. Re-check after Phase 1 design.*
 
 - **I. Local Artifacts and Evidence Traceability — PASS**: decisions and reports retain safe source paths, status, warnings, reuse/execution outcome, and review metadata without copying content bodies.
-- **II. Thin Interfaces over Thick Core — PASS**: all selection, execution, safety filtering, serialization, and report rendering live in `src/podcast_ingest_core`; CLI only parses, resolves confirmed-only configuration, calls core, and prints JSON.
+- **II. Thin Interfaces over Thick Core — PASS**: all selection, execution, safety filtering, serialization, and report rendering live in `src/corpus_ingest_core`; CLI only parses, resolves confirmed-only configuration, calls core, and prints JSON.
 - **III. Dry-Run First Side Effects — PASS**: dry-run builds one in-memory 008/009 snapshot, lists planned metadata and risks, writes zero files, and calls zero executors/providers/loaders.
 - **IV. LLM Opt-In and Secret Boundary — PASS**: only confirmed `semantic_summary` may send transcript content; exact acknowledgement is validated before profile/env/provider resolution, with a second core-level guard.
 - **V. Evidence, Inference, and External Status Separation — PASS**: feature reports artifact state only and does not produce market facts or merge evidence classes.
@@ -66,7 +66,7 @@ specs/015-corpus-semantic-remediation-runner/
 ### Source Code (repository root)
 
 ```text
-src/podcast_ingest_core/
+src/corpus_ingest_core/
 ├── corpus_semantic_remediation_runner.py   # new state reducer, executor boundary, reports
 ├── corpus_index.py                         # additive semantic-summary readability metadata
 ├── models.py                               # additive 015 request/result row/count/warning models

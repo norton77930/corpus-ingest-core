@@ -1,20 +1,18 @@
 from __future__ import annotations
 
-from dataclasses import asdict, replace
 import hashlib
 import inspect
 import json
+from dataclasses import asdict, replace
 from pathlib import Path
-import subprocess
-import sys
 from types import SimpleNamespace
 
 import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> None:
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_index as corpus_index
+    import corpus_ingest_core.corpus_index as corpus_index
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "AUDIO_DIR", tmp_path / "audio")
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
@@ -39,7 +37,7 @@ def _write_seed(
     *,
     has_audio_url: bool = True,
 ) -> Path:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     path = storage.corpus_episode_seed_asset_path("gooaye", episode_ref)
@@ -67,7 +65,7 @@ def _write_seed(
 
 
 def _write_real_audio(episode_ref: str = "EP677") -> Path:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     path = storage.AUDIO_DIR / "gooaye" / f"{episode_ref}__{episode_ref} Alpha.mp3"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -76,7 +74,7 @@ def _write_real_audio(episode_ref: str = "EP677") -> Path:
 
 
 def _write_real_transcript(episode_ref: str = "EP677") -> Path:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     paths = storage.transcript_asset_paths(
         "gooaye", episode_ref, f"{episode_ref} Alpha"
@@ -118,7 +116,7 @@ def _write_real_deterministic_artifacts(
     *,
     include_external: bool = True,
 ) -> None:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     title = f"{episode_ref} Alpha"
     summary_path = storage.summary_asset_path("gooaye", episode_ref, title)
@@ -216,7 +214,7 @@ def _tree_manifest(root: Path) -> dict[str, tuple[str, int, int]]:
 
 
 def _write_stale_corpus_sentinels() -> dict[Path, bytes]:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     asset_pairs = (
         storage.corpus_index_asset_paths("gooaye"),
@@ -240,7 +238,7 @@ def _write_stale_corpus_sentinels() -> dict[Path, bytes]:
                     }
                 ).encode("utf-8")
                 if path.suffix == ".json"
-                else f"# stale sentinel {index}\n".encode("utf-8")
+                else f"# stale sentinel {index}\n".encode()
             )
             path.write_bytes(payload)
             sentinels[path] = payload
@@ -258,7 +256,7 @@ def _stringify(value):
 
 
 def _result_payload(result) -> dict:
-    from podcast_ingest_core.corpus_episode_workflow_runner import result_to_dict
+    from corpus_ingest_core.corpus_episode_workflow_runner import result_to_dict
 
     return result_to_dict(result)
 
@@ -271,7 +269,7 @@ def _intake_result(
     status: str = "selected",
     confirm: bool = False,
 ):
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core.models import (
         CorpusEpisodeIntakeFilter,
         CorpusEpisodeIntakeOutcomeCounts,
         CorpusEpisodeIntakeRunResult,
@@ -334,7 +332,7 @@ def _audio_result(
     status: str = "skipped",
     confirm: bool = False,
 ):
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core.models import (
         CorpusAudioDownloadOutcomeCounts,
         CorpusAudioDownloadRunFilter,
         CorpusAudioDownloadRunResult,
@@ -392,7 +390,7 @@ def _transcription_result(
     status: str = "skipped",
     confirm: bool = False,
 ):
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core.models import (
         CorpusLocalTranscriptionOutcomeCounts,
         CorpusLocalTranscriptionRunFilter,
         CorpusLocalTranscriptionRunResult,
@@ -450,7 +448,7 @@ def _remediation_result(
     family: str = "mentions",
     confirm: bool = False,
 ):
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core.models import (
         CorpusRemediationRunCounts,
         CorpusRemediationRunFilter,
         CorpusRemediationRunResult,
@@ -509,7 +507,7 @@ def _remediation_result_families(
     selected: tuple[str, ...] = (),
     blocked: tuple[str, ...] = (),
 ):
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core.models import (
         CorpusRemediationRunCounts,
         CorpusRemediationRunFilter,
         CorpusRemediationRunResult,
@@ -587,7 +585,7 @@ def _install_stage_doubles(
     transcription=None,
     remediation=None,
 ):
-    import podcast_ingest_core.corpus_episode_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_workflow_runner as runner
 
     def fake_intake(podcast_id: str, **kwargs):
         calls.append(("intake", kwargs))
@@ -688,7 +686,7 @@ def _with_selected_and_terminal_rows(terminal_result, selected_result):
 
 
 def test_corpus_episode_workflow_run_asset_paths_contract():
-    from podcast_ingest_core.storage import corpus_episode_workflow_run_asset_paths
+    from corpus_ingest_core.storage import corpus_episode_workflow_run_asset_paths
 
     paths = corpus_episode_workflow_run_asset_paths("gooaye")
 
@@ -697,13 +695,13 @@ def test_corpus_episode_workflow_run_asset_paths_contract():
 
 
 def test_corpus_episode_workflow_public_result_contract_exports(tmp_path):
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         CorpusEpisodeWorkflowRunCounts,
         CorpusEpisodeWorkflowRunFilter,
+        CorpusEpisodeWorkflowRunnerFailedError,
         CorpusEpisodeWorkflowRunResult,
         CorpusEpisodeWorkflowRunRow,
         CorpusEpisodeWorkflowRunWarning,
-        CorpusEpisodeWorkflowRunnerFailedError,
         run_corpus_episode_workflow,
     )
 
@@ -766,7 +764,7 @@ def test_corpus_episode_workflow_public_result_contract_exports(tmp_path):
 
 
 def test_corpus_episode_workflow_runner_error_contract():
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         CorpusEpisodeWorkflowRunnerFailedError,
         PodcastIngestCoreError,
     )
@@ -791,15 +789,15 @@ def test_dry_run_uses_fresh_real_corpus_state_without_any_writes(
     corpus_state,
     expected_stage,
 ):
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.cache as cache
-    import podcast_ingest_core.corpus_audio_download_runner as audio_runner
-    import podcast_ingest_core.corpus_episode_intake as intake_runner
-    import podcast_ingest_core.corpus_episode_workflow_runner as workflow
-    import podcast_ingest_core.corpus_index as corpus_index
-    import podcast_ingest_core.corpus_local_transcription_runner as transcription_runner
-    import podcast_ingest_core.corpus_remediation_plan as remediation_plan
-    import podcast_ingest_core.corpus_remediation_runner as remediation_runner
+    import corpus_ingest_core.cache as cache
+    import corpus_ingest_core.corpus_audio_download_runner as audio_runner
+    import corpus_ingest_core.corpus_episode_intake as intake_runner
+    import corpus_ingest_core.corpus_episode_workflow_runner as workflow
+    import corpus_ingest_core.corpus_index as corpus_index
+    import corpus_ingest_core.corpus_local_transcription_runner as transcription_runner
+    import corpus_ingest_core.corpus_remediation_plan as remediation_plan
+    import corpus_ingest_core.corpus_remediation_runner as remediation_runner
+    from corpus_ingest_core import storage
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     if corpus_state != "unseeded":
@@ -940,7 +938,7 @@ def test_seeded_probe_builds_one_snapshot_and_reuses_it_across_previews(
 ):
     from types import SimpleNamespace
 
-    import podcast_ingest_core.corpus_episode_workflow_runner as workflow
+    import corpus_ingest_core.corpus_episode_workflow_runner as workflow
 
     _write_seed(monkeypatch, tmp_path)
     index_result = object()
@@ -1066,7 +1064,7 @@ def test_seeded_probe_builds_one_snapshot_and_reuses_it_across_previews(
 def test_snapshot_preview_seam_bounds_deterministic_actions_to_one(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_episode_workflow_runner as workflow
+    import corpus_ingest_core.corpus_episode_workflow_runner as workflow
 
     calls: list[tuple[str, int | None]] = []
     monkeypatch.setattr(
@@ -1115,7 +1113,7 @@ def test_snapshot_remediation_selection_exposes_internal_action_identity(
     tmp_path,
 ):
     """017 receives identity from the private mapping, not the public 014 row."""
-    import podcast_ingest_core.corpus_episode_workflow_runner as workflow
+    import corpus_ingest_core.corpus_episode_workflow_runner as workflow
 
     monkeypatch.setattr(
         workflow,
@@ -1162,7 +1160,7 @@ def test_snapshot_semantic_handoff_ignores_non_target_semantic_skips(
     monkeypatch,
     tmp_path,
 ):
-    import podcast_ingest_core.corpus_episode_workflow_runner as workflow
+    import corpus_ingest_core.corpus_episode_workflow_runner as workflow
 
     monkeypatch.setattr(
         workflow,
@@ -1255,7 +1253,7 @@ def test_semantic_handoff_validator_requires_well_formed_canonical_target_eviden
     status,
     expected_invalid,
 ):
-    import podcast_ingest_core.corpus_episode_workflow_runner as workflow
+    import corpus_ingest_core.corpus_episode_workflow_runner as workflow
 
     rows = []
     if status is not None:
@@ -1279,7 +1277,7 @@ def test_snapshot_semantic_handoff_accepts_explicit_empty_target_actions_with_un
     monkeypatch,
     tmp_path,
 ):
-    import podcast_ingest_core.corpus_episode_workflow_runner as workflow
+    import corpus_ingest_core.corpus_episode_workflow_runner as workflow
 
     monkeypatch.setattr(
         workflow,
@@ -1344,7 +1342,7 @@ def test_snapshot_semantic_handoff_fails_closed_on_invalid_semantic_result(
     tmp_path,
     semantic_status,
 ):
-    import podcast_ingest_core.corpus_episode_workflow_runner as workflow
+    import corpus_ingest_core.corpus_episode_workflow_runner as workflow
 
     monkeypatch.setattr(
         workflow,
@@ -1426,13 +1424,13 @@ def test_dry_run_real_snapshot_failure_fails_closed_without_writes_or_leak(
     tmp_path,
     failure_point,
 ):
-    import podcast_ingest_core.corpus_audio_download_runner as audio_runner
-    import podcast_ingest_core.corpus_episode_intake as intake_runner
-    import podcast_ingest_core.corpus_episode_workflow_runner as workflow
-    import podcast_ingest_core.corpus_index as corpus_index
-    import podcast_ingest_core.corpus_local_transcription_runner as transcription_runner
-    import podcast_ingest_core.corpus_remediation_plan as remediation_plan
-    import podcast_ingest_core.corpus_remediation_runner as remediation_runner
+    import corpus_ingest_core.corpus_audio_download_runner as audio_runner
+    import corpus_ingest_core.corpus_episode_intake as intake_runner
+    import corpus_ingest_core.corpus_episode_workflow_runner as workflow
+    import corpus_ingest_core.corpus_index as corpus_index
+    import corpus_ingest_core.corpus_local_transcription_runner as transcription_runner
+    import corpus_ingest_core.corpus_remediation_plan as remediation_plan
+    import corpus_ingest_core.corpus_remediation_runner as remediation_runner
 
     _write_seed(monkeypatch, tmp_path)
     sentinel_bytes = _write_stale_corpus_sentinels()
@@ -1537,10 +1535,10 @@ def test_dry_run_real_snapshot_failure_fails_closed_without_writes_or_leak(
 def test_dry_run_unseeded_latest_selects_intake_and_writes_no_report(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
-    from podcast_ingest_core.storage import corpus_episode_workflow_run_asset_paths
+    from corpus_ingest_core.storage import corpus_episode_workflow_run_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     calls: list[tuple[str, dict]] = []
@@ -1560,7 +1558,7 @@ def test_dry_run_unseeded_latest_selects_intake_and_writes_no_report(
 
 
 def test_dry_run_seeded_missing_audio_selects_audio_download(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -1584,7 +1582,7 @@ def test_dry_run_seeded_missing_audio_selects_audio_download(monkeypatch, tmp_pa
 def test_dry_run_local_audio_transcript_missing_selects_local_transcription(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -1608,7 +1606,7 @@ def test_dry_run_local_audio_transcript_missing_selects_local_transcription(
 def test_dry_run_transcript_ready_selects_deterministic_remediation(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -1646,7 +1644,7 @@ def test_remediation_selects_when_ready_actions_coexist_with_dependency_blocked(
     families blocked while others are ready. The workflow must select remediation to
     run the ready actions rather than fail-closed 'blocked' on the downstream families.
     """
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -1676,7 +1674,7 @@ def test_remediation_blocks_when_only_dependency_blocked_remains(
     monkeypatch, tmp_path
 ):
     """With no ready actions left (only an LLM-blocked family), fail closed 'blocked'."""
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -1702,7 +1700,7 @@ def test_remediation_blocks_when_only_dependency_blocked_remains(
 
 
 def test_dry_run_completed_state_has_no_executable_stage(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -1727,8 +1725,8 @@ def test_dry_run_completed_state_has_no_executable_stage(monkeypatch, tmp_path):
 def test_blank_selector_defaults_to_latest_and_unsupported_stage_rejected(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import CorpusEpisodeWorkflowRunnerFailedError
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core import CorpusEpisodeWorkflowRunnerFailedError
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -1747,8 +1745,8 @@ def test_blank_selector_defaults_to_latest_and_unsupported_stage_rejected(
 def test_dry_run_does_not_execute_confirmed_stage_runners_or_forbidden_surfaces(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_episode_workflow_runner as runner
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    import corpus_ingest_core.corpus_episode_workflow_runner as runner
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -1794,7 +1792,7 @@ def test_dry_run_does_not_execute_confirmed_stage_runners_or_forbidden_surfaces(
 def test_probe_exception_blocks_confirmed_dispatch(
     monkeypatch, tmp_path, attribute, stage, confirm
 ):
-    import podcast_ingest_core.corpus_episode_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_workflow_runner as runner
     _write_seed(monkeypatch, tmp_path)
     _install_stage_doubles(monkeypatch, tmp_path, [])
     paths = runner.storage.corpus_episode_workflow_run_asset_paths('gooaye')
@@ -1825,7 +1823,7 @@ def test_probe_exception_blocks_confirmed_dispatch(
 
 @pytest.mark.parametrize('confirm', [False, True])
 def test_intake_probe_exception_is_bounded(monkeypatch, tmp_path, confirm):
-    import podcast_ingest_core.corpus_episode_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_workflow_runner as runner
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _install_stage_doubles(monkeypatch, tmp_path, [])
     paths = runner.storage.corpus_episode_workflow_run_asset_paths('gooaye')
@@ -1877,10 +1875,10 @@ def test_returned_terminal_probe_outcome_fails_closed(
     probe_stage,
     expected_calls,
 ):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
-    from podcast_ingest_core.storage import corpus_episode_workflow_run_asset_paths
+    from corpus_ingest_core.storage import corpus_episode_workflow_run_asset_paths
 
     _write_seed(monkeypatch, tmp_path)
     calls: list[tuple[str, dict]] = []
@@ -2002,12 +2000,13 @@ def test_cli_does_not_swallow_process_control_exceptions(monkeypatch, error_type
 
 
 def test_cli_dry_run_stdout_contract(monkeypatch, capsys, tmp_path):
-    from podcast_ingest_core.models import (
+    from scripts import run_corpus_episode_workflow as cli
+
+    from corpus_ingest_core.models import (
         CorpusEpisodeWorkflowRunCounts,
         CorpusEpisodeWorkflowRunFilter,
         CorpusEpisodeWorkflowRunResult,
     )
-    from scripts import run_corpus_episode_workflow as cli
 
     result = CorpusEpisodeWorkflowRunResult(
         podcast_id="gooaye",
@@ -2045,7 +2044,7 @@ def test_cli_dry_run_stdout_contract(monkeypatch, capsys, tmp_path):
 def test_confirmed_unseeded_episode_calls_intake_only_and_writes_report(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -2075,7 +2074,7 @@ def test_confirmed_unseeded_episode_calls_intake_only_and_writes_report(
 
 
 def test_confirmed_intake_target_disappearance_is_rejected(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -2115,14 +2114,14 @@ def test_confirmed_remediation_report_reflects_target_episode_not_first_row(
     different, alphabetically-earlier episode), so the target episode's output paths
     went missing while another episode's paths leaked in.
     """
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
+        run_corpus_episode_workflow,
+    )
+    from corpus_ingest_core.models import (
         CorpusRemediationRunCounts,
         CorpusRemediationRunFilter,
         CorpusRemediationRunResult,
         CorpusRemediationRunRow,
-    )
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
-        run_corpus_episode_workflow,
     )
 
     _write_seed(monkeypatch, tmp_path)
@@ -2214,7 +2213,7 @@ def test_confirmed_remediation_report_reflects_target_episode_not_first_row(
 def test_confirmed_remediation_target_disappearance_is_rejected(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -2265,14 +2264,14 @@ def test_confirmed_transcription_executed_despite_rejected_sibling_rows(
     confirmed workflow status must reflect the executed transcript rather than letting
     those benign ``rejected`` siblings win the priority.
     """
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
+        run_corpus_episode_workflow,
+    )
+    from corpus_ingest_core.models import (
         CorpusLocalTranscriptionOutcomeCounts,
         CorpusLocalTranscriptionRunFilter,
         CorpusLocalTranscriptionRunResult,
         CorpusLocalTranscriptionRunRow,
-    )
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
-        run_corpus_episode_workflow,
     )
 
     _write_seed(monkeypatch, tmp_path)
@@ -2366,14 +2365,14 @@ def test_confirmed_remediation_executed_despite_blocked_sibling_family(
     executed ready family plus the LLM-gated semantic_review family (still blocked on
     the deterministic ladder); the stage status must reflect the executed work.
     """
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
+        run_corpus_episode_workflow,
+    )
+    from corpus_ingest_core.models import (
         CorpusRemediationRunCounts,
         CorpusRemediationRunFilter,
         CorpusRemediationRunResult,
         CorpusRemediationRunRow,
-    )
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
-        run_corpus_episode_workflow,
     )
 
     _write_seed(monkeypatch, tmp_path)
@@ -2472,7 +2471,7 @@ def test_safe_local_path_preserves_cjk_artifact_paths():
     (it preserves the CJK Unified Ideographs block), so CJK-titled episodes lost
     their output paths from the workflow report.
     """
-    from podcast_ingest_core import corpus_episode_workflow_runner as workflow
+    from corpus_ingest_core import corpus_episode_workflow_runner as workflow
 
     cjk_path = "data/summaries/gooaye/EP700__台積電財報.summary.md"
     assert workflow._is_safe_local_path(cjk_path) is True
@@ -2489,7 +2488,7 @@ def test_safe_local_path_preserves_cjk_artifact_paths():
 
 
 def test_confirmed_seeded_missing_audio_calls_audio_only(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -2516,7 +2515,7 @@ def test_confirmed_seeded_missing_audio_calls_audio_only(monkeypatch, tmp_path):
 
 
 def test_confirmed_local_transcription_passes_runtime_options(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -2562,7 +2561,7 @@ def test_confirmed_local_transcription_passes_runtime_options(monkeypatch, tmp_p
 def test_confirmed_deterministic_remediation_passes_filters_and_options(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -2607,7 +2606,7 @@ def test_confirmed_deterministic_remediation_passes_filters_and_options(
 def test_confirmed_blocked_state_writes_report_without_stage_execution(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -2639,7 +2638,7 @@ def test_confirmed_blocked_state_writes_report_without_stage_execution(
 def test_confirmed_completed_state_is_reported_as_blocked_without_stage_execution(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -2674,7 +2673,7 @@ def test_confirmed_completed_state_is_reported_as_blocked_without_stage_executio
 def test_confirmed_report_is_deterministic_and_has_no_generated_at(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -2706,12 +2705,13 @@ def test_confirmed_report_is_deterministic_and_has_no_generated_at(
 def test_cli_confirmed_requires_explicit_stage_next_and_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from podcast_ingest_core.models import (
+    from scripts import run_corpus_episode_workflow as cli
+
+    from corpus_ingest_core.models import (
         CorpusEpisodeWorkflowRunCounts,
         CorpusEpisodeWorkflowRunFilter,
         CorpusEpisodeWorkflowRunResult,
     )
-    from scripts import run_corpus_episode_workflow as cli
 
     result = CorpusEpisodeWorkflowRunResult(
         podcast_id="gooaye",
@@ -2773,7 +2773,7 @@ def test_cli_confirmed_requires_explicit_stage_next_and_outputs_json(
 def test_manual_only_and_failure_boundaries_do_not_execute_excluded_work(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -2806,8 +2806,8 @@ def test_manual_only_and_failure_boundaries_do_not_execute_excluded_work(
 def test_selected_stage_failure_is_bounded_without_traceback_url_or_secret(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.corpus_episode_workflow_runner as runner
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    import corpus_ingest_core.corpus_episode_workflow_runner as runner
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -2838,10 +2838,11 @@ def test_selected_stage_failure_is_bounded_without_traceback_url_or_secret(
 def test_dependency_free_text_is_not_propagated_to_workflow_artifacts(
     monkeypatch, tmp_path, capsys
 ):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from scripts import run_corpus_episode_workflow as cli
+
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
-    from scripts import run_corpus_episode_workflow as cli
 
     unsafe_values = [
         'the guest disclosed confidential alpha sequence',
@@ -2925,7 +2926,7 @@ def test_dependency_free_text_is_not_propagated_to_workflow_artifacts(
 
 
 def test_dependency_reason_is_never_reused_after_boundary_read(tmp_path):
-    from podcast_ingest_core.corpus_episode_workflow_runner import _stage_row
+    from corpus_ingest_core.corpus_episode_workflow_runner import _stage_row
 
     unsafe_reason = 'dependency reason changed between reads'
 
@@ -2956,7 +2957,7 @@ def test_dependency_reason_is_never_reused_after_boundary_read(tmp_path):
 def test_dependency_episode_reference_requires_bounded_identifier(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
@@ -2986,11 +2987,11 @@ def test_dependency_episode_reference_requires_bounded_identifier(
 def test_outputs_do_not_leak_raw_secret_url_prompt_llm_or_investment_text(
     monkeypatch, tmp_path, capsys
 ):
-    import podcast_ingest_core.corpus_episode_workflow_runner as runner
-    from podcast_ingest_core.corpus_episode_workflow_runner import (
+    from scripts import run_corpus_episode_workflow as cli
+
+    from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
-    from scripts import run_corpus_episode_workflow as cli
 
     _write_seed(monkeypatch, tmp_path)
     calls: list[tuple[str, dict]] = []
@@ -3042,9 +3043,9 @@ def test_outputs_do_not_leak_raw_secret_url_prompt_llm_or_investment_text(
 
 
 def test_no_mcp_registry_change_guard_coverage():
-    source = Path("src/podcast_ingest_core/__init__.py").read_text(encoding="utf-8")
+    source = Path("src/corpus_ingest_core/__init__.py").read_text(encoding="utf-8")
     workflow_source = Path(
-        "src/podcast_ingest_core/corpus_episode_workflow_runner.py"
+        "src/corpus_ingest_core/corpus_episode_workflow_runner.py"
     ).read_text(encoding="utf-8")
 
     assert "mcp" not in workflow_source.lower()

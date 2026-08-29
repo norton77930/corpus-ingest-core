@@ -8,7 +8,7 @@ import pytest
 
 
 def _create_search_db(tmp_path):
-    from podcast_ingest_core.cache import initialize_cache, is_fts5_available
+    from corpus_ingest_core.cache import initialize_cache, is_fts5_available
 
     db_path = initialize_cache(tmp_path / "cache.sqlite3")
     with sqlite3.connect(db_path) as connection:
@@ -76,7 +76,7 @@ def _create_search_db(tmp_path):
 
 
 def test_search_transcripts_finds_segment(tmp_path):
-    from podcast_ingest_core.search import search_transcripts
+    from corpus_ingest_core.search import search_transcripts
 
     db_path = _create_search_db(tmp_path)
 
@@ -98,7 +98,7 @@ def test_search_transcripts_finds_segment(tmp_path):
 
 
 def test_search_transcripts_auto_falls_back_to_like_for_chinese_query(tmp_path):
-    from podcast_ingest_core.search import search_transcripts
+    from corpus_ingest_core.search import search_transcripts
 
     db_path = _create_search_db(tmp_path)
 
@@ -109,9 +109,9 @@ def test_search_transcripts_auto_falls_back_to_like_for_chinese_query(tmp_path):
 
 
 def test_search_transcripts_fts_unavailable_raises_search_error(monkeypatch, tmp_path):
-    from podcast_ingest_core.errors import SearchError
-    from podcast_ingest_core import search as search_module
-    from podcast_ingest_core.search import search_transcripts
+    from corpus_ingest_core import search as search_module
+    from corpus_ingest_core.errors import SearchError
+    from corpus_ingest_core.search import search_transcripts
 
     db_path = _create_search_db(tmp_path)
     monkeypatch.setattr(search_module, "is_fts5_available", lambda db_path=None: False)
@@ -121,8 +121,8 @@ def test_search_transcripts_fts_unavailable_raises_search_error(monkeypatch, tmp
 
 
 def test_search_transcripts_fts_finds_english_query_when_available(tmp_path):
-    from podcast_ingest_core.cache import is_fts5_available
-    from podcast_ingest_core.search import search_transcripts
+    from corpus_ingest_core.cache import is_fts5_available
+    from corpus_ingest_core.search import search_transcripts
 
     db_path = _create_search_db(tmp_path)
     if not is_fts5_available(db_path):
@@ -136,8 +136,8 @@ def test_search_transcripts_fts_finds_english_query_when_available(tmp_path):
 
 
 def test_search_transcripts_unknown_search_mode_raises_search_error(tmp_path):
-    from podcast_ingest_core.errors import SearchError
-    from podcast_ingest_core.search import search_transcripts
+    from corpus_ingest_core.errors import SearchError
+    from corpus_ingest_core.search import search_transcripts
 
     db_path = _create_search_db(tmp_path)
 
@@ -146,7 +146,7 @@ def test_search_transcripts_unknown_search_mode_raises_search_error(tmp_path):
 
 
 def test_search_transcripts_case_sensitivity_for_english_query(tmp_path):
-    from podcast_ingest_core.search import search_transcripts
+    from corpus_ingest_core.search import search_transcripts
 
     db_path = _create_search_db(tmp_path)
 
@@ -169,7 +169,7 @@ def test_search_transcripts_case_sensitivity_for_english_query(tmp_path):
 
 
 def test_search_transcripts_context_segments(tmp_path):
-    from podcast_ingest_core.search import search_transcripts
+    from corpus_ingest_core.search import search_transcripts
 
     db_path = _create_search_db(tmp_path)
 
@@ -185,7 +185,7 @@ def test_search_transcripts_context_segments(tmp_path):
 
 
 def test_search_mentions_finds_mention_and_evidence(tmp_path):
-    from podcast_ingest_core.search import search_mentions
+    from corpus_ingest_core.search import search_mentions
 
     db_path = _create_search_db(tmp_path)
 
@@ -199,7 +199,7 @@ def test_search_mentions_finds_mention_and_evidence(tmp_path):
 
 
 def test_search_mentions_filters_by_type(tmp_path):
-    from podcast_ingest_core.search import search_mentions
+    from corpus_ingest_core.search import search_mentions
 
     db_path = _create_search_db(tmp_path)
 
@@ -208,7 +208,7 @@ def test_search_mentions_filters_by_type(tmp_path):
 
 
 def test_search_mentions_case_insensitive_query(tmp_path):
-    from podcast_ingest_core.search import search_mentions
+    from corpus_ingest_core.search import search_mentions
 
     db_path = _create_search_db(tmp_path)
 
@@ -221,16 +221,17 @@ def test_search_mentions_case_insensitive_query(tmp_path):
 
 
 def test_search_missing_db_raises_search_error(tmp_path):
-    from podcast_ingest_core.errors import SearchError
-    from podcast_ingest_core.search import search_transcripts
+    from corpus_ingest_core.errors import SearchError
+    from corpus_ingest_core.search import search_transcripts
 
     with pytest.raises(SearchError):
         search_transcripts("台積電", db_path=tmp_path / "missing.sqlite3")
 
 
 def test_search_transcripts_cli_parses_options(monkeypatch, capsys):
-    from podcast_ingest_core.models import TranscriptSearchResult
     from scripts import search_transcripts
+
+    from corpus_ingest_core.models import TranscriptSearchResult
 
     captured = {}
 
@@ -285,8 +286,9 @@ def test_search_transcripts_cli_parses_options(monkeypatch, capsys):
 
 
 def test_search_mentions_cli_parses_options(monkeypatch, capsys):
-    from podcast_ingest_core.models import MentionSearchResult
     from scripts import search_mentions
+
+    from corpus_ingest_core.models import MentionSearchResult
 
     captured = {}
 

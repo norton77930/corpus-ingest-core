@@ -1,12 +1,12 @@
 # AI Agent Handoff Entrypoint
 
-> Spec 029 is **Offline Implemented** only: live preflight not run; G2-G3 not authorized; source contract remains `BLOCKED_RUNTIME_SEAM`. A future PASS is only an expected high-level MCP tool-call attempt policy-blocked before dispatch, not internal Skill selection, fallback, 019 outcome, or Core execution.
+> The Hermes sidecar audit chain (specs 026-034) terminated at BLOCKED and was removed from `main` on 2026-08-29. Its modules, specs, scripts, deployment files, and guard tests are preserved in full under the git tag `archive/hermes-audit-chain`; nothing in this document asks you to run it.
 
 這是新 AI agent（Opus 4.8、GPT-5.5 或其他）接手本 repo 的第一份文件。目標：10 分鐘內理解專案、知道哪些檔案是 source of truth、哪些邊界不可逾越、如何開始與驗證工作。
 
 ## Project Summary
 
-Podcast Ingestion Core 是一個本機優先的通用 Podcast 擷取與研究核心：RSS episode listing、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive 摘要、opt-in 的 OpenAI-compatible LLM semantic summary、deterministic mention extraction、SQLite metadata cache / search、共用單一 FastMCP 的 stdio 與 loopback Streamable HTTP sidecar（目前恰好 25 個 reviewed tools），以及 deterministic research workflow（stock lens synthesis、external data boundary）。第一個 podcast profile 是 Gooaye 股癌，但核心程式不得寫死股癌；所有 podcast-specific 設定在 `config/podcasts.yaml`。本專案支援 evidence-based 研究整理，明確**不**提供投資建議。
+Corpus Ingestion Core 是一個本機優先的通用 Podcast 擷取與研究核心：RSS episode listing、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive 摘要、opt-in 的 OpenAI-compatible LLM semantic summary、deterministic mention extraction、SQLite metadata cache / search、共用單一 FastMCP 的 stdio 與 loopback Streamable HTTP transport（目前恰好 25 個 reviewed tools），以及 deterministic research workflow（stock lens synthesis、external data boundary）。第一個 podcast profile 是 Gooaye 股癌，但核心程式不得寫死股癌；所有 podcast-specific 設定在 `config/podcasts.yaml`。本專案支援 evidence-based 研究整理，明確**不**提供投資建議。
 Corpus packages 008–018 add local artifact indexing/planning, bounded intake/download/transcription/deterministic remediation, a one-stage fresh workflow, standalone `015-corpus-semantic-remediation-runner`, the human-controlled `016-corpus-episode-completion-workflow-runner`, `017-corpus-latest-episode-deterministic-workflow`, and `018-latest-episode-verified-research-report-workflow`. 016 previews in memory with strict zero-file behavior, 017 locks latest once and stops at `ready_for_semantic_summary`, and 018 validates a previewed exact episode reference plus exact acknowledgement before it pins, gates, researches, and atomically publishes a digest-versioned verified report bundle.
 The local stdio registry has exact 25 reviewed tools. Tool 25, `derive_workflow_bundle`, is append-only after unchanged Tools 1–24; its preview is zero-write and zero-network, and confirm calls an LLM and needs the exact `api_cost_ack`. Tool 24, `ingest_youtube_video`, is the YouTube ingest tool. Tool 23, `ingest_x_video`, remains the X ingest preview/confirm tool. Preview is zero-write but resolves public metadata over the network. Tool 22, `generate_stock_lens_report`, remains a dry-run-first side-effect stock lens (no LLM, no `api_cost_ack`, no network, no live market API, no investment advice). Tool 21, `list_verified_report_gap_backlog`, remains a read-query inventory gap backlog (no confirm/ack). Tool 20 remains historical next-step suggestion. Tool 19 remains coverage join. Tool 18 remains exact-locator source revalidation. Tool 17 retains its catalog contract.
 For historical context, 016 introduced 13 reviewed tools before 017 added the fourteenth tool; the registry therefore had exact 14 reviewed tools before 018 added the fifteenth; 019 added the sixteenth; 020 appends the seventeenth.
@@ -31,16 +31,15 @@ For historical context, 016 introduced 13 reviewed tools before 017 added the fo
 | 驗證指令 | `docs/verification-matrix.md` |
 | 功能規格 | `specs/`（`specs/README.md` 是 registry） |
 | 架構決策 | `docs/architecture-decision-records/README.md` |
-| Runtime 行為 | `src/podcast_ingest_core/`（CLI/MCP 只是 thin wrappers） |
+| Runtime 行為 | `src/corpus_ingest_core/`（CLI/MCP 只是 thin wrappers） |
 | Podcast/LLM/boundary 設定 | `config/*.yaml` |
 
 README.md 是 quick orientation 與 CLI 範例，不是 governance source。
 
 ## Implemented / Not Implemented
 
-- **已實作**：RSS episode listing、episode lookup、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive Markdown 摘要、opt-in LLM semantic summary pipeline、deterministic mention extraction、SQLite metadata cache / search、stdio MCP、loopback-only Streamable HTTP sidecar transport、research workflow orchestration、stock lens synthesis、external data boundary（local fixture only）。
+- **已實作**：RSS episode listing、episode lookup、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive Markdown 摘要、opt-in LLM semantic summary pipeline、deterministic mention extraction、SQLite metadata cache / search、stdio MCP、loopback-only Streamable HTTP transport、research workflow orchestration、stock lens synthesis、external data boundary（local fixture only）。
 - **Corpus 已實作**：008–024，包括 014–023 既有 corpus/verified-report 路徑，以及 gap backlog（024 / Tool 21）；confirmed summary requires exact acknowledgement before profile/`.env`, deterministic review uses no LLM configuration, 018 atomically publishes an identity-validated digest bundle only after review passes, and 019 publishes the same bundle class for a named episode without LLM/ack when lineage already passes.
-- **Spec 026 Blocked**：sidecar image/health、OpenAB config/四 Skills、direct exact-21 readiness、`hermes mcp test`、portable runbook 與 boolean-only endpoint-equality validator 已存在。C6已由required reviewers＋唯一live v2 run驗證為PASS-current；C7仍缺safe runtime evidence，Hermes v0.20.0 tag `v2026.8.3` hooks只是未安裝候選。不可標Implemented，也不可重跑validator/inference、讀live config values/session dump、保存raw response、升級或啟用hooks補證。
 - **未實作**：Web UI、排程、embedding、vector search、live market API（明確不批准，見邊界）。
 
 ## Non-Negotiable Boundaries
@@ -60,17 +59,14 @@ README.md 是 quick orientation 與 CLI 範例，不是 governance source。
 | 018 verified research report / Skill | Preview is strict zero-write. Confirmed work must supply the previewed `expected_episode_ref` and exact `api_cost_ack` before RSS, environment/provider, writer, or child-stage access. The Core pins latest once, requires semantic review exact `passed`, fixes research options, validates source/provenance, and atomically publishes/reuses/fails closed a digest-versioned bundle. The portable Skill uses preview → explicit approval → one confirmed MCP call → report and stop; it has no CLI/terminal fallback, retry, scheduler, live market API, automatic cache rebuild, or investment advice | `tests/test_latest_episode_verified_research_report_workflow_runner.py`、`tests/test_latest_episode_verified_research_report_skill.py`、`tests/test_mcp_tool_registry_contract.py`、`tests/test_mcp_setup_validation.py` |
 | No investment advice | 不得產生 buy/sell/hold、target price、guaranteed returns 或個人化投資建議；review gate 會拒絕 prohibited advice 輸出 | `tests/test_research_llm_smoke_review.py`、`tests/test_gooaye_lens.py` |
 | No automatic cache rebuild | Side-effect tools 完成後不得自動 `rebuild_cache`，只回 cache stale warning；rebuild 是手動操作 | `tests/test_cache_rebuild_guard.py` |
-| Thin CLI / thick core | Runtime 行為住在 `src/podcast_ingest_core`；`scripts/` 與 MCP tools 只解析輸入、呼叫 core、格式化輸出 | `tests/test_contracts.py` |
+| Thin CLI / thick core | Runtime 行為住在 `src/corpus_ingest_core`；`scripts/` 與 MCP tools 只解析輸入、呼叫 core、格式化輸出 | `tests/test_contracts.py` |
 | MCP JSON envelope | MCP responses 維持既有 envelope：`{"ok": true, "data": ...}`、`{"ok": false, ...}`、dry-run 含 `"dry_run": true`；目前恰好 25 個 reviewed tools | `tests/test_mcp_tool_registry_contract.py`、`tests/test_mcp_server.py` |
 | 019 explicit-episode verified report / Skill | Preview is strict zero-write for a named `episode_ref` (reject latest/next). Confirm assembles/publishes only when local artifacts and lineage already pass; no `api_cost_ack`, no LLM/RSS/download, no 015–017 chaining. Blocked lists missing/stale roles. historically MCP Tool 16 + portable Skill | `tests/test_episode_verified_research_report_workflow_runner.py`、`tests/test_episode_verified_research_report_skill.py`、`tests/test_mcp_tool_registry_contract.py` |
 | 025 path-safety 結構單一來源 | 路徑安全結構 regex 只得定義於 `path_safety.py`；四個 runner 的 `_is_safe_local_path` 是薄包裝、真值表凍結（含刻意保留的變體差異） | `tests/test_path_safety_boundary.py`、`tests/test_path_safety_characterization.py` |
 | 025 run-report 寫入協定單一來源 | `_write_run_report` 一律委派 `run_report_io` 弱協定或 `audit_report_pair` 強協定，禁止內嵌 `.part` staging；弱→強升級為後續獨立 spec | `tests/test_run_report_io_boundary.py` |
 | 025 MCP facade 邊界 | `src` 僅一處 `FastMCP(`；`@mcp.tool()` 只存在 `mcp_tools_*` 群組模組；群組不得 import `mcp_server`；facade re-export 別名契約完整；completion 拒絕訊息單一來源於 Core | `tests/test_mcp_server_facade_boundary.py` |
 | 025 docs 計數一致性 | 受治理文件的 tool 計數宣稱必須等於 live registry 數或帶 historical 標記；`*closeout*` 檔豁免 | `tests/test_docs_registry_count_consistency.py` |
-| 025 測試資料目錄 fixture | conftest fixture 反射覆蓋全部 storage `*_DIR` 與 evals 旁路常數；`PODCAST_INGEST_DATA_DIR` 未設時預設不變；新測試檔不得再複製 `_use_tmp_data_dirs` | `tests/test_data_dir_fixture_contract.py` |
-| 026 Hermes sidecar boundary | stdio/HTTP共用單一 FastMCP；HTTP僅loopback Streamable HTTP、non-root/no ports/no SSE；config/四 Skills採pre-mutation manifest-bound recovery。v2 direct validator不跑 inference，只輸出metadata/content equality booleans，拒絕`.env`/reparse/special entries；C6須reviewer＋唯一live run，C7須另案safe runtime evidence，否則維持Blocked。禁止protected digest/path/value、private endpoint、session/raw response輸出與目前計畫外的Hermes upgrade/hooks | `tests/test_mcp_http_transport.py`、`tests/test_hermes_deployment_contract.py`、`tests/test_hermes_integration.py`、`tests/test_hermes_live_smoke.py` |
-| 027 Hermes Skill contract layer | Spec 027 contract layer is complete (offline assurance only); actual Hermes runtime routing is BLOCKED/not_evaluated and is not a runtime PASS. It validates closed routing/protocol projections only, never production MCP, runtime inference, hooks, config, prompts, sessions, or C6. | `tests/test_hermes_skill_protocol.py`、`tests/test_spec_027_hermes_skill_protocol_docs.py` |
-| 028 Hermes runtime capability gate | Spec 028 capability gate is complete and correctly terminates at BLOCKED_CAPABILITY for Hermes v0.20.0 tag v2026.8.3; no upgrade, Skill sync, hooks, collector, inference, or runtime observation was performed. C6 remains PASS-current and was not rerun; actual Hermes Skill routing remains BLOCKED/not_run. | `tests/test_hermes_runtime_capability.py`、`tests/test_spec_028_hermes_runtime_capability_docs.py` |
+| 025 測試資料目錄 fixture | conftest fixture 反射覆蓋全部 storage `*_DIR` 與 evals 旁路常數；`CORPUS_INGEST_DATA_DIR`（含舊名別名）未設時預設不變；新測試檔不得再複製 `_use_tmp_data_dirs` | `tests/test_data_dir_fixture_contract.py` |
 
 ## How to Start a New Feature
 
@@ -114,7 +110,7 @@ git diff --check
   完整 core function 清單、輸出路徑、CLI 與 MCP registry 移到 [`docs/api.md`](api.md)；agent handoff 狀態、Spec 編號、
   blocked 標記與 Phase 6H–7D.1 階段史移到本文件下方的 Relocated from README 區段。原本 pin README 的 exact-substring
   docs tests 已改為斷言新的 canonical 位置，邊界內容一字未鬆綁。
-- **`PODCAST_INGEST_DATA_DIR` 與路徑契約測試相衝**（open, 2026-08-22）：9 個測試把 `data/` 寫成字面值
+- **`CORPUS_INGEST_DATA_DIR` 與路徑契約測試相衝**（open, 2026-08-22；變數於 0.2.0 由 `PODCAST_INGEST_DATA_DIR` 更名，舊名仍為別名，兩者都會觸發本條）：9 個測試把 `data/` 寫成字面值
   （`tests/test_contracts.py::test_storage_paths_are_deterministic_and_under_data` 與 7 個
   `*_asset_paths_contract`），而 `docs/install-and-porting.md` 的 B2 方案正是叫操作者設這個變數把 `data/`
   搬到別處。照做後跑 pytest 得到 9 failed / 1639 passed，且失敗訊息完全看不出與環境變數有關。已在 B2
@@ -125,21 +121,13 @@ git diff --check
   不是設環境變數。換句話說整套測試本來就設計成在變數未設定下執行，那 9 個斷言與設計一致。剩下的只是
   失敗訊息不會自我解釋；若要改善，做法是在 `conftest.py` 於 session 啟動時偵測到該變數就以清楚訊息 fail fast，
   而不是動那 9 個測試。
-- **`deploy/hermes/README.md:3` 說「exact 21-tool registry」**（open, 2026-08-22）：已過期四個工具
-  （22/23/24/25 落地時都沒同步）。沒有任何測試盯它，所以它不會自己變紅。刻意留著沒在 spec 043 一併修：
-  那是 Hermes deploy 面、被稽核鏈雜湊、而該鏈處於 BLOCKED 凍結狀態，為一個既有的敘述過期去動它，
-  會讓 Tool 25 那次改動同時帶一份無關的稽核風險。修時要一併重算 `docs/install-and-porting.md`
-  digest 表裡它那一列。
-- **31 個被 spec manifest 雜湊的檔案沒有換行符釘選**（open, 2026-08-22）：`.gitattributes` 的政策是
-  「稽核鏈會雜湊的檔案一律 `-text`」，因為 GitHub Windows runner 以 `core.autocrlf=true` checkout、
-  而作者機器是 `input`，同一份檔案在兩邊位元組不同、digest 就不同。CI 第二次執行就是被這個打紅的
-  （`config/*.yaml` 三個檔，已修）。事後掃過 `specs/*/contracts/*.json` 列出的 224 個路徑，發現還有
-  32 個 `text: unspecified`；spec 043 只補了 `src/podcast_ingest_core/mcp_server.py`（因為那次改動要把
-  它的 digest 寫進 `docs/install-and-porting.md` 的表格，發布一個機器相依的 digest 本身就是缺陷）。
-  其餘 31 個包含 `storage.py`、`models.py`、`llm_provider.py`、`errors.py`、`config.py` 等核心模組，
-  以及 `docs/roadmap.md`、`specs/README.md`。它們今天不會壞，因為 Hermes 鏈預設不執行；一旦那條鏈
-  回到預設執行或有人在 Linux/CI 上跑稽核，就會整批失敗。修法是把它們加進 `.gitattributes`，
-  一次 commit、獨立驗證，不要混進功能改動。
+- **`deploy/hermes/README.md:3` 說「exact 21-tool registry」**（resolved, 2026-08-29）：該檔案隨 Hermes
+  稽核鏈一併從 main 移除，過期敘述與 `docs/install-and-porting.md` 裡對應的 digest 那一列都不再存在，
+  因此不必再重算。歷史內容見 tag `archive/hermes-audit-chain`。
+- **31 個被 spec manifest 雜湊的檔案沒有換行符釘選**（resolved, 2026-08-29）：原本的風險是 Windows 與
+  Linux checkout 給同一份檔案不同位元組、digest 就分歧。雜湊它們的 spec manifest 已隨 Hermes 稽核鏈
+  移除，`.gitattributes` 也改成單一的 `* text=auto`，倉庫內已無任何東西會雜湊自己的原始檔，因此
+  逐檔釘選 `-text` 不再是必要的。
 - **Spec 039 live confirm 留下的兩個 follow-up**（第二項已解決 2026-08-22）：完整證據見
   [`specs/039-youtube-video-corpus-ingestion/spec.md`](../specs/039-youtube-video-corpus-ingestion/spec.md)
   的 Live Confirm Record。一是 `video_acquire` 沒設 `format`，導致 YouTube 要先下載整支影片再合併才能抽音訊
@@ -149,7 +137,7 @@ git diff --check
   只是 yt-dlp 預設偏好漸進式那個——所以 X 從不需要 ffmpeg,卻在下載 2.42 GiB 只為了 30.58 MiB 的音訊,
   而且沒有任何錯誤訊息會指出這件事。
   二是 live confirm 一定要改動已 commit 的 `config/podcasts.yaml`（`test_contracts.py` 對它有精確集合斷言）——
-  **已解決**：`config.py` 的 `DEFAULT_CONFIG_PATH` 現在讀 `PODCAST_INGEST_CONFIG`，與 `storage.DATA_DIR` 同形。
+  **已解決**：`config.py` 的 `DEFAULT_CONFIG_PATH` 現在讀 `CORPUS_INGEST_CONFIG`（當時叫 `PODCAST_INGEST_CONFIG`，0.2.0 更名並保留舊名別名），與 `storage.DATA_DIR` 同形。
   沒有走「給每個 runner 加 `--config` 參數」那條路：讀 profile 的呼叫點散在 14 個模組且都不傳 path，
   穿透它們會改到已被 MCP 工具與契約測試綁住的簽章。環境變數只改一行，而且 `config/*.local.yaml`
   早就在 `.gitignore` 內，慣例現成。
@@ -165,11 +153,7 @@ section, not the README, is the place to record agent handoff state.
 
 ### Current status snapshot
 
-Podcast Ingestion Core 是一個通用的 Podcast 擷取核心。目前已完成 RSS episode listing、episode lookup、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive Markdown 摘要、OpenAI-compatible LLM semantic summary pipeline、deterministic mention extraction、SQLite metadata cache / search，以及共用同一個 `FastMCP` instance 的本機 stdio 與 loopback Streamable HTTP sidecar。Hermes direct MCP/config/Skills 接入已可運作；Spec 026 的 C6 before/after metadata/content endpoint equality 已經 required reviewers 與唯一 live v2 run 驗證為 PASS-current，且不宣稱 snapshots 間沒有 transient mutation。C7 仍缺安全 runtime evidence；v0.20.0 tag `v2026.8.3` hooks只是候選，整體狀態維持 Blocked。Web UI、排程、embedding 與 vector search 仍未實作。
-
-### Hermes / Spec 026-028 integration status
-
-部署、config/Skill plan→apply→rollback、direct-safe validator 與移植方式見 [`deploy/hermes/README.md`](deploy/hermes/README.md) 與 [`specs/026-hermes-mcp-integration/quickstart.md`](specs/026-hermes-mcp-integration/quickstart.md)。Direct transport 已驗證可用；C6 的 boolean-only endpoint-equality validator 已通過 targeted tests、POSIX synthetic checks、兩位 reviewers 與唯一 live v2 run，狀態為 PASS-current且不得重跑。C7 仍 Blocked；Hermes v0.20.0 tag `v2026.8.3` hooks 只是未安裝、未實機驗證的候選能力。禁止讀取 live config values/session dump、保存 raw response、升級或啟用 hooks來補證。Spec 027 contract layer is complete (offline assurance only); actual Hermes runtime routing is BLOCKED/not_evaluated and is not a runtime PASS. Spec 028 capability gate is complete and correctly terminates at BLOCKED_CAPABILITY for Hermes v0.20.0 tag v2026.8.3; no upgrade, Skill sync, hooks, collector, inference, or runtime observation was performed. C6 remains PASS-current and was not rerun; actual Hermes Skill routing remains BLOCKED/not_run.
+Corpus Ingestion Core 是一個通用的 Podcast 擷取核心。目前已完成 RSS episode listing、episode lookup、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive Markdown 摘要、OpenAI-compatible LLM semantic summary pipeline、deterministic mention extraction、SQLite metadata cache / search，以及共用同一個 `FastMCP` instance 的本機 stdio 與 loopback Streamable HTTP transport。Web UI、排程、embedding 與 vector search 仍未實作。
 
 ### Semantic summary smoke and reviewed semantic context (Phase 6U-6V.1)
 
@@ -203,16 +187,9 @@ Phase 7D 是 Spec Kit Backfill via Full Workflow。此階段用 full Spec Kit fl
 
 Phase 7D.1 是 Spec Kit Active Feature Guidance。此階段補清楚 official Spec Kit command usability：feature packages 的正確位置是 `specs/<feature>`，`.specify/` 是 scaffold/memory/templates/scripts metadata；多個 backfilled packages 不預設 pin 單一 active feature。要對某個 package 跑 official scripts / skills，先設定 `SPECIFY_FEATURE_DIRECTORY`，例如 `$env:SPECIFY_FEATURE_DIRECTORY="specs/003-metadata-search-mcp-core"`；官方 script 可能保存到 `.specify/feature.json`，切換 package 時重新設定即可。Phase 7D.1 不改 runtime、不改 MCP、不呼叫 LLM、不讀 `.env`、不查 live market API，也不提供 investment advice。Phase 6U semantic summary smoke 仍是後續可能的功能階段。
 
-
-### Spec034 Task #82 v8 review repair — current
-
-**startup/plugin closed; credential_provider BLOCKED; overall BLOCKED**. Spec034 remains offline/static-only with H2 exactly 20 upstream paths at H1 SHA-256 `90ba45ccf11bbcbf446f7d16904964073e84837a04aaaa0c6f4887d3ea75109d`; no 21st path is authorized. The isolated child accepts only a regular no-link/reparse-free project snapshot as its payload cwd, changes there before sentinel/Pytest/product import, and retains capability snapshot then project snapshot then stdlib only. Consequently C6's three relative config reads use snapshot-approved bytes even if original workspace configs change after snapshotting. Public receipt projection has no injected verifier; private issuance recomputes current canonical facts. AST proof follows one owner-local package spec/module/loader/return/register/context flow. Bundle rename parent fsync precedes the `bundle_renamed` journal with an explicit platform best-effort fallback, and exact nonce-bound both-missing recovery alone is retry-safe. Runner/journal/trust tests remain non-final. Every prior root is not approval evidence. Fresh code and architecture re-reviews remain required; Main alone may run the documented one-shot command after both PASS, and it is not run here.
-
-> Spec034 Task #77 current terminal is **startup/plugin closed; credential_provider BLOCKED; overall BLOCKED**. Its H2-frozen exact 20-file official `NousResearch/hermes-agent` bundle is static/offline only: startup order and the fixed `security-guidance` plugin identity chain are closed, while credential/provider construction data flow, whole-program closure, dynamic/user/project/entry-point plugin paths, runtime/secret edges, and actual activation remain blocked or unobserved. `runtime_status=not_run`; `live_actions_authorized=false`. The fresh review-only bootstrap/final trust chain is reserved for Main after both reviews PASS and remains unrun.
-
 ---
 
-## Handoff — podcast-ingest-core, 2026-08-19
+## Handoff — corpus-ingest-core, 2026-08-19
 
 > Relocated from `HANDOFF-2026-08-19.md` in the repo root on 2026-08-22, so the
 > root holds only what a first-time reader needs. The text is unchanged; only the
@@ -225,16 +202,14 @@ the docs describe in aggregate.
 ### 1. Where the repo is right now
 
 Specs 036–042 (X/YouTube ingest, summary profiles, study-guide lecture,
-MCP tools 23–24, workflow derivation `05`/`06`) are on `main`. Task F /
-Hermes 026–034 remains blocked: those tests fail or hang on digest pins
-and nested sentinels. That is not a product regression. Do not start F
-to “fix” the suite.
+MCP tools 23–24, workflow derivation `05`/`06`) are on `main`. The Hermes
+026–034 audit chain terminated at BLOCKED and was removed from `main` on
+2026-08-29; it is archived at the tag `archive/hermes-audit-chain`.
 
 Copy `.env.example` to a local `.env` (gitignored). Never commit it.
 
-**Suite baseline:** the documented non-Hermes ignore set in
-`docs/install-and-porting.md` should pass. Unrestricted `python -m pytest`
-still enters the blocked Hermes chain.
+**Suite baseline:** a bare `python -m pytest` is green — there is no ignore
+list left to remember.
 
 ### 2. Environment traps that cost real time
 
@@ -351,9 +326,8 @@ fixture YAMLs were left as `gb10`/`GB10`. Not spec-gated.
 
 Spec 036 deliberately shipped Core plus a thin CLI and no MCP tool, on this
 repo's own precedent: Spec 004 built the stock lens Core and CLI, and exposure
-waited for Spec 035 as Tool 22. The registry count is a pinned chain running
-through the Hermes AST projection, the Spec 029 descriptor snapshot, the deny
-adapter, and the docs-count consistency check — they all move together.
+waited for Spec 035 as Tool 22. The registry count is pinned by the registry
+contract test and the docs-count consistency check — they move together.
 
 Spec 040 decided the envelope: preview keeps `"dry_run": true`, names
 `run_mode=preview`, and sets `network_read=true` /
@@ -377,18 +351,6 @@ Append-only Tool 24 `ingest_youtube_video` copies the Spec 040 preview
 envelope (`dry_run` + `run_mode=preview` + `network_read`). Confirm wraps
 existing Spec 039 Core ingest and writes a metadata-only run report.
 Registry pin chain is 23→24. No Skill, no new dependency.
-
-#### Task F — the blocked Hermes chain *(do not start casually)*
-
-Package `026` is **Blocked**, and Spec 027's contract layer is complete while
-actual Hermes runtime routing is `BLOCKED` / `not_evaluated`. This is the source
-of the remaining Hermes 030–034 digest failures (12 failed + 034 g4 hang on
-this machine). `specs/README.md` records the state in detail, including which
-evidence grades are forbidden (live config values, session dumps, and raw
-responses are all disallowed as evidence). This is governance-grade work with a
-long paper trail; read `specs/026-hermes-mcp-integration/` and
-`specs/033-hermes-v019-pinned-source-loader-audit/` fully before touching it.
-Do not start this task to “fix” the suite.
 
 ### 5. Smaller recorded follow-ups
 
@@ -452,7 +414,6 @@ defended by argument is not evidence. Do that.
 
 A–E, 040, 041, and 042 are on `main`. Spec 042 is the separate
 `workflow_derivation` family (`05`/`06`); it is not mixed into 038.
-Task F / Hermes 026–034 is untouched. Both of the options this line used to
-name are now done: Tool 24's live YouTube confirm is recorded in spec 039's
-Live Confirm Record, and spec 043 exposed 042 as Tool 25. What is left is in
-Known Risks above. Do not casually start Hermes.
+Both of the options this line used to name are now done: Tool 24's live
+YouTube confirm is recorded in spec 039's Live Confirm Record, and spec 043
+exposed 042 as Tool 25. What is left is in Known Risks above.

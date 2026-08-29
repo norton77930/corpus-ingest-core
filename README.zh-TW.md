@@ -1,10 +1,12 @@
-# Podcast Ingestion Core
+# Corpus Ingestion Core
 
 把 podcast 音訊變成可驗證、可搜尋的知識。輸入一個 RSS feed(或 X / YouTube 影片),
 在本機用 faster-whisper 轉錄,產出帶時間戳的逐字稿、摘要、實體 mention 與研究
 artifacts,並透過 MCP server 與 Skills 提供給 AI agent 使用。
 
 [![tests](https://github.com/norton77930/corpus-ingest-core/actions/workflows/tests.yml/badge.svg)](https://github.com/norton77930/corpus-ingest-core/actions/workflows/tests.yml)
+[![license: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+![python: 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)
 
 [English](README.md)
 
@@ -32,8 +34,8 @@ Podcast 內容很難引用。三個月前某一集裡你只記得一半的說法
 需要 Python 3.11 以上。範例使用 PowerShell,其他 shell 同樣適用。
 
 ```powershell
-git clone https://github.com/<your-account>/podcast-ingest-core.git
-cd podcast-ingest-core
+git clone https://github.com/norton77930/corpus-ingest-core.git
+cd corpus-ingest-core
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e .[dev]
@@ -53,6 +55,18 @@ python scripts/search_transcripts.py --podcast gooaye --query 台積電 --limit 
 ```
 
 要加入自己的 podcast,在 `config/podcasts.yaml` 追加一個 profile 即可。核心程式
+
+### 不用 clone 就接上 agent
+
+MCP server 會安裝成一個指令,agent 一行就能接上:
+
+```powershell
+claude mcp add corpus-ingest-core -- uvx --from git+https://github.com/norton77930/corpus-ingest-core.git@v0.2.0 corpus-ingest-mcp
+```
+
+[`examples/`](examples/) 放了 Claude Desktop、Claude Code 與 Codex 可直接複製的
+設定、一組可以試的 prompt,以及一份**合成的** sample corpus——不必先轉錄任何東西,
+搜尋與證據類工具就會回傳真實結果。
 不會寫死任何特定節目。
 
 ## 架構
@@ -131,11 +145,9 @@ verified research report bundle,以及兩種 transport 的 MCP server。
 fixture — 沒有 live market API,要加入的話必須是一次明確且經過審查的決定,
 而不是順手加的功能。
 
-Hermes sidecar 整合(specs 026–034)目前只有離線驗證,runtime evidence 仍是 blocked。
-細節見 [`docs/agent-handoff.md`](docs/agent-handoff.md)。
-
 ## 文件
 
+- [`examples/`](examples/) — agent 設定、可試的 prompt,以及不需轉錄的合成 sample corpus
 - [`docs/api.md`](docs/api.md) — 完整函式參考、輸出路徑、CLI 參考與 MCP tool registry
 - [`docs/architecture.md`](docs/architecture.md) — 架構細節
 - [`docs/install-and-porting.md`](docs/install-and-porting.md) — 乾淨安裝與移機
@@ -145,7 +157,7 @@ Hermes sidecar 整合(specs 026–034)目前只有離線驗證,runtime evidence 
   [`docs/mcp-troubleshooting.md`](docs/mcp-troubleshooting.md) — 接上 agent
 - [`docs/agent-handoff.md`](docs/agent-handoff.md) — 專案狀態、spec 歷史、blockers,
   以及接手開發(不論是人或 agent)的入口,包含從根目錄移入的
-  [2026-08-19 session handoff](docs/agent-handoff.md#handoff--podcast-ingest-core-2026-08-19)
+  [2026-08-19 session handoff](docs/agent-handoff.md#handoff--corpus-ingest-core-2026-08-19)
 - [`CONTRIBUTING.md`](CONTRIBUTING.md) — 環境設定、如何驗證一個變更、
   不可跨越的產品邊界,以及被雜湊釘選、不可編輯的檔案
 - [`SECURITY.md`](SECURITY.md) — 私下通報漏洞
@@ -169,15 +181,9 @@ python -m pytest
 python -m compileall src scripts
 ```
 
-預設的 pytest 執行會排除 blocked 的 Hermes 030–034 文件鏈,它們各自有離線入口
-(`scripts/verify_spec_0NN*.py`);排除清單與理由見 `pyproject.toml`。
-明確指定路徑仍然會跑其中任一個:
+沒有 `--ignore` 清單:整套測試都會執行,而且應該全綠。
 
-```powershell
-python -m pytest tests/test_spec_032_hermes_g2_docs.py
-```
-
-Scripts 維持 thin:只負責解析參數並呼叫 `podcast_ingest_core`。新行為採 test-first
+Scripts 維持 thin:只負責解析參數並呼叫 `corpus_ingest_core`。新行為採 test-first
 開發。`.env` 只存在本機,絕不可 commit。
 
 ## 免責聲明
@@ -189,6 +195,6 @@ mention 可能不完整或有誤,LLM 產生的內容也可能在錯誤的同時�
 
 ## 授權
 
-MIT — 見 [LICENSE](LICENSE)。授權範圍僅涵蓋第一方工作:有兩個 spec package
-vendored 了第三方 `NousResearch/hermes-agent` repository 的 byte-pinned 快照,
-該部分有自己的 MIT 授權,見 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
+MIT — 見 [LICENSE](LICENSE)。`main` 上沒有 vendored 任何第三方原始碼;有一份
+MIT 授權的快照仍保留在封存 tag 中,說明見
+[THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。

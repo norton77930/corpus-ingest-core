@@ -9,7 +9,7 @@ import pytest
 
 
 def test_secure_reader_rejects_out_of_root_symlink_before_body_read(tmp_path: Path) -> None:
-    from podcast_ingest_core.secure_local_snapshot import secure_read_bytes
+    from corpus_ingest_core.secure_local_snapshot import secure_read_bytes
 
     root = tmp_path / "root"
     root.mkdir()
@@ -25,7 +25,7 @@ def test_secure_reader_rejects_out_of_root_symlink_before_body_read(tmp_path: Pa
 
 
 def test_secure_reader_returns_core_derived_regular_file_bytes(tmp_path: Path) -> None:
-    from podcast_ingest_core.secure_local_snapshot import secure_read_bytes
+    from corpus_ingest_core.secure_local_snapshot import secure_read_bytes
 
     root = tmp_path / "root"
     root.mkdir()
@@ -38,7 +38,7 @@ def test_secure_reader_returns_core_derived_regular_file_bytes(tmp_path: Path) -
 def test_secure_reader_rejects_mocked_windows_reparse_before_open(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    import podcast_ingest_core.secure_local_snapshot as snapshots
+    import corpus_ingest_core.secure_local_snapshot as snapshots
 
     root = tmp_path / "root"
     root.mkdir()
@@ -59,7 +59,8 @@ def test_secure_reader_rejects_opened_handle_identity_race(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     import os
-    import podcast_ingest_core.secure_local_snapshot as snapshots
+
+    import corpus_ingest_core.secure_local_snapshot as snapshots
 
     root = tmp_path / "root"
     root.mkdir()
@@ -89,7 +90,7 @@ def test_secure_reader_rejects_opened_handle_identity_race(
 def test_secure_directory_listing_rejects_out_of_root_directory_symlink(
     tmp_path: Path,
 ) -> None:
-    from podcast_ingest_core.secure_local_snapshot import secure_directory_names
+    from corpus_ingest_core.secure_local_snapshot import secure_directory_names
 
     root = tmp_path / "root"
     root.mkdir()
@@ -108,7 +109,7 @@ def test_secure_directory_listing_rejects_out_of_root_directory_symlink(
 def test_secure_reader_rejects_mocked_reparse_in_root_ancestor_chain(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    import podcast_ingest_core.secure_local_snapshot as snapshots
+    import corpus_ingest_core.secure_local_snapshot as snapshots
 
     root = tmp_path / "root"
     root.mkdir()
@@ -128,9 +129,9 @@ def test_secure_reader_rejects_mocked_reparse_in_root_ancestor_chain(
 def test_canonical_and_review_discovery_reject_directory_symlinks(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.canonical_transcript import resolve_canonical_transcript_asset_paths
-    from podcast_ingest_core.semantic_review_artifact import semantic_review_candidates
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.canonical_transcript import resolve_canonical_transcript_asset_paths
+    from corpus_ingest_core.semantic_review_artifact import semantic_review_candidates
 
     transcript_root = tmp_path / "transcripts"
     transcript_root.mkdir()
@@ -159,7 +160,8 @@ def test_secure_directory_listing_rejects_mocked_reparse_and_identity_race(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     import os
-    import podcast_ingest_core.secure_local_snapshot as snapshots
+
+    import corpus_ingest_core.secure_local_snapshot as snapshots
 
     root = tmp_path / "root"
     directory = root / "podcast"
@@ -199,20 +201,32 @@ def test_directory_listing_rejects_names_absent_after_enumeration(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """Post-validation rejects an enumerator result absent from the checked directory."""
-    import podcast_ingest_core.secure_local_snapshot as snapshots
+    import corpus_ingest_core.secure_local_snapshot as snapshots
 
     root = tmp_path / "root"
     directory = root / "podcast"
     directory.mkdir(parents=True)
     (directory / "safe.json").write_text("safe", encoding="utf-8")
-    original_listdir = snapshots.os.listdir
-
+    # The stub answers unconditionally rather than matching on the argument,
+    # which lets this test drop a `monkeypatch.setattr(snapshots.os, "name",
+    # "nt")` it used to need.
+    #
+    # That patch existed so `_list_directory_while_open` would take the Windows
+    # branch and call os.listdir(directory) instead of os.listdir(descriptor),
+    # because the old stub only recognised a path argument. But `snapshots.os`
+    # *is* the os module, so the patch was global: on Python 3.11 pathlib then
+    # believed it was on Windows and every subsequent Path() raised
+    # NotImplementedError: cannot instantiate 'WindowsPath'. It aborted the
+    # whole session inside pytest's failure reporting, so no test name was ever
+    # printed. Python 3.12's rewritten pathlib does not consult os.name the
+    # same way, which is why only the 3.11 job went red.
+    #
+    # Neither branch is what this test is about -- the assertion is that
+    # post-validation rejects a name the enumerator reported but the directory
+    # does not contain. That holds on either platform.
     def swapped_names(path: object) -> list[str]:
-        if path == directory:
-            return ["HOSTILE-SWAP-RESTORE-SENTINEL.json"]
-        return original_listdir(path)
+        return ["HOSTILE-SWAP-RESTORE-SENTINEL.json"]
 
-    monkeypatch.setattr(snapshots.os, "name", "nt")
     monkeypatch.setattr(snapshots, "_open_directory_descriptor", lambda path: 0)
     monkeypatch.setattr(snapshots.os, "fstat", lambda descriptor: directory.lstat())
     monkeypatch.setattr(snapshots, "_opened_handle_is_contained", lambda root, descriptor: True)
@@ -225,8 +239,8 @@ def test_directory_listing_rejects_names_absent_after_enumeration(
 def test_lineage_sidecar_source_and_config_reads_only_use_secure_snapshot_boundary(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.verified_research_lineage as lineage
+    import corpus_ingest_core.verified_research_lineage as lineage
+    from corpus_ingest_core import storage
 
     corpus = tmp_path / "corpus"
     source = tmp_path / "transcripts" / "show" / "EP1.json"

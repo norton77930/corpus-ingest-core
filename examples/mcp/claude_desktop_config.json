@@ -1,0 +1,24 @@
+{
+  "_comment": [
+    "Claude Desktop: merge the mcpServers entry below into",
+    "%APPDATA%/Claude/claude_desktop_config.json (Windows) or",
+    "~/Library/Application Support/Claude/claude_desktop_config.json (macOS),",
+    "then restart Claude Desktop.",
+    "",
+    "cwd matters. Artifacts are written under a relative data/ directory and",
+    "podcast profiles are read from a relative config/podcasts.yaml, so the",
+    "server must start in the directory that holds them. Set CORPUS_INGEST_DATA_DIR",
+    "and CORPUS_INGEST_CONFIG instead if you want them somewhere else."
+  ],
+  "mcpServers": {
+    "corpus-ingest-core": {
+      "command": "corpus-ingest-mcp",
+      "args": [],
+      "cwd": "/absolute/path/to/your/corpus-workspace",
+      "env": {
+        "CORPUS_INGEST_DATA_DIR": "/absolute/path/to/your/corpus-workspace/data",
+        "CORPUS_INGEST_CONFIG": "/absolute/path/to/your/corpus-workspace/config/podcasts.yaml"
+      }
+    }
+  }
+}

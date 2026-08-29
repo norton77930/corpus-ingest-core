@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from podcast_ingest_core import video_acquire
-from podcast_ingest_core.errors import VideoAcquireFailedError
+from corpus_ingest_core import video_acquire
+from corpus_ingest_core.errors import VideoAcquireFailedError
 
 
 def test_guest_metadata_options_have_no_credentials() -> None:

@@ -6,7 +6,7 @@ import pytest
 
 
 def test_load_local_env_loads_simple_values(monkeypatch, tmp_path):
-    from podcast_ingest_core.local_env import load_local_env
+    from corpus_ingest_core.local_env import load_local_env
 
     env_path = tmp_path / ".env"
     env_path.write_text(
@@ -28,7 +28,7 @@ def test_load_local_env_loads_simple_values(monkeypatch, tmp_path):
 
 
 def test_load_local_env_supports_comments_quotes_and_export(monkeypatch, tmp_path):
-    from podcast_ingest_core.local_env import load_local_env
+    from corpus_ingest_core.local_env import load_local_env
 
     env_path = tmp_path / ".env"
     env_path.write_text(
@@ -54,7 +54,7 @@ BASE_URL=https://api.example.com/v1
 
 
 def test_load_local_env_missing_file_is_not_failure(tmp_path):
-    from podcast_ingest_core.local_env import load_local_env
+    from corpus_ingest_core.local_env import load_local_env
 
     result = load_local_env(tmp_path / ".env")
 
@@ -63,7 +63,7 @@ def test_load_local_env_missing_file_is_not_failure(tmp_path):
 
 
 def test_load_local_env_does_not_overwrite_existing_env(monkeypatch, tmp_path):
-    from podcast_ingest_core.local_env import load_local_env
+    from corpus_ingest_core.local_env import load_local_env
 
     env_path = tmp_path / ".env"
     env_path.write_text("API_KEY=file-secret\nMODEL=GB10\n", encoding="utf-8")
@@ -79,8 +79,8 @@ def test_load_local_env_does_not_overwrite_existing_env(monkeypatch, tmp_path):
 
 
 def test_load_local_env_rejects_malformed_line_without_secret_value(tmp_path):
-    from podcast_ingest_core.errors import LLMProviderConfigError
-    from podcast_ingest_core.local_env import load_local_env
+    from corpus_ingest_core.errors import LLMProviderConfigError
+    from corpus_ingest_core.local_env import load_local_env
 
     env_path = tmp_path / ".env"
     env_path.write_text("API_KEY=secret-value\nnot a valid line\n", encoding="utf-8")
@@ -94,7 +94,7 @@ def test_load_local_env_rejects_malformed_line_without_secret_value(tmp_path):
 
 
 def test_local_env_result_metadata_does_not_include_secret_values(monkeypatch, tmp_path):
-    from podcast_ingest_core.local_env import load_local_env, local_env_metadata
+    from corpus_ingest_core.local_env import load_local_env, local_env_metadata
 
     env_path = tmp_path / ".env"
     env_path.write_text("API_KEY=secret-value\nMODEL=GB10\n", encoding="utf-8")

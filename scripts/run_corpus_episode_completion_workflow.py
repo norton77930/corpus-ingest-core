@@ -2,25 +2,27 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import (
+from corpus_ingest_core import (
     CorpusEpisodeCompletionWorkflowRunnerFailedError,
-    corpus_episode_completion_workflow_result_to_dict as result_to_dict,
     run_corpus_episode_completion_workflow,
 )
-from podcast_ingest_core.corpus_episode_completion_workflow_runner import (
+from corpus_ingest_core import (
+    corpus_episode_completion_workflow_result_to_dict as result_to_dict,
+)
+from corpus_ingest_core.corpus_episode_completion_workflow_runner import (
     CONFIRMED_ACTION_MUST_BE_EXPLICIT_MESSAGE,
     CONFIRMED_EPISODE_REF_MUST_BE_CANONICAL_MESSAGE,
     SEMANTIC_SUMMARY_REQUIRES_EXACT_ACK_MESSAGE,
 )
-from podcast_ingest_core.corpus_semantic_remediation_runner import (
+from corpus_ingest_core.corpus_semantic_remediation_runner import (
     SEMANTIC_API_COST_ACK,
 )
-from podcast_ingest_core.local_env import DEFAULT_LOCAL_ENV_PATH, load_local_env
+from corpus_ingest_core.local_env import DEFAULT_LOCAL_ENV_PATH, load_local_env
 
 
 def build_parser() -> argparse.ArgumentParser:

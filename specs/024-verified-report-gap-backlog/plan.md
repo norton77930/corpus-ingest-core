@@ -20,8 +20,8 @@ Local artifacts only; thin CLI/MCP; read-only (no dry-run side effects needed); 
 
 ```text
 specs/024-verified-report-gap-backlog/
-src/podcast_ingest_core/verified_report_gap_backlog.py
-src/podcast_ingest_core/mcp_verified_report_gap_backlog.py
+src/corpus_ingest_core/verified_report_gap_backlog.py
+src/corpus_ingest_core/mcp_verified_report_gap_backlog.py
 scripts/list_verified_report_gap_backlog.py
 tests/test_verified_report_gap_backlog.py
 tests/test_verified_report_gap_backlog_cli.py

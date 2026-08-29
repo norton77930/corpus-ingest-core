@@ -1,10 +1,8 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import sys
 from pathlib import Path
-
 
 from tests.conftest import use_tmp_data_dirs as _use_tmp_data_dirs
 
@@ -24,7 +22,7 @@ def _write_episode_seed(
     title: str = "EP677 Alpha",
     has_audio_url: bool = True,
 ) -> Path:
-    from podcast_ingest_core.storage import corpus_episode_seed_asset_path
+    from corpus_ingest_core.storage import corpus_episode_seed_asset_path
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     return _write_json(
@@ -54,7 +52,7 @@ def _write_audio(
     episode_ref: str = "EP672",
     title: str = "Alpha",
 ) -> Path:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     path = storage.AUDIO_DIR / podcast_id / f"{episode_ref}__{title}.mp3"
@@ -73,7 +71,7 @@ def _write_transcript(
     segments: list[dict] | None = None,
     json_text: str | None = None,
 ) -> Path:
-    from podcast_ingest_core.storage import transcript_asset_paths
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     if segments is None:
@@ -114,7 +112,7 @@ def _write_summary(
     semantic: bool = False,
     body: str = "summary body must not leak",
 ) -> Path:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     suffix = ".semantic.md" if semantic else ".md"
@@ -144,7 +142,7 @@ def _write_mentions(
     title: str = "Alpha",
     json_text: str | None = None,
 ) -> Path:
-    from podcast_ingest_core.storage import mention_asset_paths
+    from corpus_ingest_core.storage import mention_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = mention_asset_paths(podcast_id, episode_ref, title)
@@ -177,7 +175,7 @@ def _write_episode_intelligence(
     episode_ref: str = "EP672",
     title: str = "Alpha",
 ) -> Path:
-    from podcast_ingest_core.storage import episode_intelligence_report_asset_paths
+    from corpus_ingest_core.storage import episode_intelligence_report_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = episode_intelligence_report_asset_paths(podcast_id, episode_ref, title)
@@ -211,7 +209,7 @@ def _write_industry_mapping(
     episode_ref: str = "EP672",
     title: str = "Alpha",
 ) -> Path:
-    from podcast_ingest_core.storage import industry_chain_mapping_asset_paths
+    from corpus_ingest_core.storage import industry_chain_mapping_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = industry_chain_mapping_asset_paths(podcast_id, episode_ref, title)
@@ -249,7 +247,7 @@ def _write_external_boundary(
     episode_ref: str = "EP672",
     title: str = "Alpha",
 ) -> Path:
-    from podcast_ingest_core.storage import external_data_boundary_asset_paths
+    from corpus_ingest_core.storage import external_data_boundary_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = external_data_boundary_asset_paths(podcast_id, episode_ref, title)
@@ -286,7 +284,7 @@ def _write_semantic_review(
     blocked_check_count: int = 0,
 ) -> Path:
     """Create passing fixtures through the production deterministic writer."""
-    import podcast_ingest_core.semantic_summary_smoke_review as review
+    import corpus_ingest_core.semantic_summary_smoke_review as review
 
     review.REPORTS_DIR = review_dir
     created = review.review_semantic_summary_smoke(podcast_id, episode_ref)
@@ -314,7 +312,7 @@ def _payload(result) -> dict:
 
 
 def test_corpus_index_asset_paths_contract():
-    from podcast_ingest_core.storage import corpus_index_asset_paths
+    from corpus_ingest_core.storage import corpus_index_asset_paths
 
     paths = corpus_index_asset_paths("gooaye")
 
@@ -323,7 +321,7 @@ def test_corpus_index_asset_paths_contract():
 
 
 def test_corpus_index_public_result_contract_exports(tmp_path):
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         CorpusArtifactFamilyCounts,
         CorpusEpisodeRow,
         CorpusIndexFailedError,
@@ -358,8 +356,8 @@ def test_corpus_index_public_result_contract_exports(tmp_path):
 def test_corpus_index_snapshot_builds_without_writes_until_persisted(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_index as corpus_index
+    import corpus_ingest_core.corpus_index as corpus_index
+    from corpus_ingest_core import storage
 
     _write_episode_seed(monkeypatch, tmp_path)
     paths = storage.corpus_index_asset_paths("gooaye")
@@ -384,7 +382,7 @@ def test_corpus_index_snapshot_builds_without_writes_until_persisted(
 
 
 def test_generate_corpus_index_writes_empty_index(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_index import generate_corpus_index
+    from corpus_ingest_core.corpus_index import generate_corpus_index
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
 
@@ -402,7 +400,7 @@ def test_generate_corpus_index_writes_empty_index(monkeypatch, tmp_path):
 
 
 def test_generate_corpus_index_discovers_seeded_episode_metadata(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_index import generate_corpus_index
+    from corpus_ingest_core.corpus_index import generate_corpus_index
 
     _write_episode_seed(monkeypatch, tmp_path, episode_ref="EP677", title="EP677 Alpha")
 
@@ -420,7 +418,7 @@ def test_generate_corpus_index_discovers_seeded_episode_metadata(monkeypatch, tm
 def test_generate_corpus_index_discovers_supported_episode_artifacts(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_index import generate_corpus_index
+    from corpus_ingest_core.corpus_index import generate_corpus_index
 
     review_dir = _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_audio(monkeypatch, tmp_path)
@@ -476,7 +474,7 @@ def test_generate_corpus_index_discovers_supported_episode_artifacts(
 def test_generate_corpus_index_is_deterministic_and_has_no_timestamp(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_index import generate_corpus_index
+    from corpus_ingest_core.corpus_index import generate_corpus_index
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
@@ -494,7 +492,7 @@ def test_generate_corpus_index_is_deterministic_and_has_no_timestamp(
 
 
 def test_generate_corpus_index_reports_missing_artifact_families(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_index import generate_corpus_index
+    from corpus_ingest_core.corpus_index import generate_corpus_index
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
@@ -520,7 +518,7 @@ def test_generate_corpus_index_reports_missing_artifact_families(monkeypatch, tm
 def test_generate_corpus_index_contains_unreadable_json_to_affected_family(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_index import generate_corpus_index
+    from corpus_ingest_core.corpus_index import generate_corpus_index
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
@@ -538,7 +536,7 @@ def test_generate_corpus_index_contains_unreadable_json_to_affected_family(
 def test_generate_corpus_index_selects_duplicate_candidates_deterministically(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_index import generate_corpus_index
+    from corpus_ingest_core.corpus_index import generate_corpus_index
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path, title="Zulu")
@@ -553,7 +551,7 @@ def test_generate_corpus_index_selects_duplicate_candidates_deterministically(
 
 
 def test_generate_corpus_index_selects_latest_semantic_review(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_index import generate_corpus_index
+    from corpus_ingest_core.corpus_index import generate_corpus_index
 
     review_dir = _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_summary(monkeypatch, tmp_path, semantic=True)
@@ -598,7 +596,7 @@ def test_generate_corpus_index_selects_latest_semantic_review(monkeypatch, tmp_p
 
 
 def test_generate_corpus_index_excludes_semantic_summary_body(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_index import generate_corpus_index
+    from corpus_ingest_core.corpus_index import generate_corpus_index
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_summary(
@@ -621,7 +619,7 @@ def test_generate_corpus_index_excludes_semantic_summary_body(monkeypatch, tmp_p
 def test_generate_corpus_index_excludes_body_text_from_json_metadata_artifacts(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.corpus_index import generate_corpus_index
+    from corpus_ingest_core.corpus_index import generate_corpus_index
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_transcript(
@@ -660,7 +658,7 @@ def test_generate_corpus_index_excludes_body_text_from_json_metadata_artifacts(
 
 
 def test_generate_corpus_index_reports_missing_semantic_review(monkeypatch, tmp_path):
-    from podcast_ingest_core.corpus_index import generate_corpus_index
+    from corpus_ingest_core.corpus_index import generate_corpus_index
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
@@ -678,8 +676,9 @@ def test_generate_corpus_index_reports_missing_semantic_review(monkeypatch, tmp_
 def test_generate_corpus_index_cli_prints_output_paths_and_counts(
     monkeypatch, capsys, tmp_path
 ):
-    from podcast_ingest_core.models import CorpusArtifactFamilyCounts, CorpusIndexResult
     from scripts import generate_corpus_index as cli
+
+    from corpus_ingest_core.models import CorpusArtifactFamilyCounts, CorpusIndexResult
 
     result = CorpusIndexResult(
         podcast_id="gooaye",
@@ -736,7 +735,7 @@ def test_generate_corpus_index_cli_reports_invalid_podcast(capsys, monkeypatch):
 def test_semantic_summary_readability_metadata_is_additive_and_legacy_status_stays_available(
     monkeypatch, tmp_path: Path
 ):
-    import podcast_ingest_core.corpus_index as corpus_index
+    import corpus_ingest_core.corpus_index as corpus_index
 
     _write_episode_seed(monkeypatch, tmp_path, episode_ref="EP700", title="Alpha")
     _write_transcript(monkeypatch, tmp_path, episode_ref="EP700", title="Alpha")
@@ -766,7 +765,7 @@ def test_semantic_summary_readability_metadata_is_additive_and_legacy_status_sta
 def test_semantic_summary_invalid_utf8_is_metadata_unreadable_without_changing_legacy_status(
     monkeypatch, tmp_path: Path
 ):
-    import podcast_ingest_core.corpus_index as corpus_index
+    import corpus_ingest_core.corpus_index as corpus_index
 
     _write_episode_seed(monkeypatch, tmp_path, episode_ref="EP701", title="Alpha")
     _write_transcript(monkeypatch, tmp_path, episode_ref="EP701", title="Alpha")
@@ -795,7 +794,7 @@ def test_semantic_summary_invalid_utf8_is_metadata_unreadable_without_changing_l
 def test_semantic_summary_oversize_is_fail_closed_with_bounded_read(
     monkeypatch, tmp_path: Path
 ):
-    import podcast_ingest_core.corpus_index as corpus_index
+    import corpus_ingest_core.corpus_index as corpus_index
 
     _write_episode_seed(monkeypatch, tmp_path, episode_ref="EP702", title="Alpha")
     _write_transcript(monkeypatch, tmp_path, episode_ref="EP702", title="Alpha")

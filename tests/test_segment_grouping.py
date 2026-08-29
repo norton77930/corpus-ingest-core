@@ -1,4 +1,4 @@
-from podcast_ingest_core.segment_grouping import group_segments
+from corpus_ingest_core.segment_grouping import group_segments
 
 
 def _segment(segment_id: int, start: float, end: float, text: str) -> dict:

@@ -1,12 +1,11 @@
 from __future__ import annotations
 
 from pathlib import Path
-import re
 
-from podcast_ingest_core import storage
+from corpus_ingest_core import storage
 
 ROOT = Path(__file__).resolve().parents[1]
-SRC = ROOT / "src" / "podcast_ingest_core"
+SRC = ROOT / "src" / "corpus_ingest_core"
 
 _OLD_ALPHABETS = (
     r"^[A-Za-z0-9][A-Za-z0-9-]*$",
@@ -53,7 +52,7 @@ def test_no_second_old_episode_ref_alphabet_in_src() -> None:
 
 
 def test_verified_report_identifier_accepts_underscore() -> None:
-    from podcast_ingest_core.verified_research_report import _validate_identifier
+    from corpus_ingest_core.verified_research_report import _validate_identifier
 
     _validate_identifier("abc_def-hij", "episode_ref")
     try:

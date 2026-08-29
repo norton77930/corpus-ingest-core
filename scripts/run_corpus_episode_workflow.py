@@ -2,13 +2,13 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import run_corpus_episode_workflow
-from podcast_ingest_core.corpus_episode_workflow_runner import result_to_dict
+from corpus_ingest_core import run_corpus_episode_workflow
+from corpus_ingest_core.corpus_episode_workflow_runner import result_to_dict
 
 
 def main(argv: list[str] | None = None) -> int:

@@ -5,18 +5,20 @@ from __future__ import annotations
 import argparse
 import ipaddress
 import json
+import sys
 from pathlib import Path
 from urllib.parse import urlsplit
-import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import (
+from corpus_ingest_core import (
     LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError,
-    latest_episode_verified_research_report_workflow_result_to_dict as result_to_dict,
     run_latest_episode_verified_research_report_workflow,
 )
-from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+from corpus_ingest_core import (
+    latest_episode_verified_research_report_workflow_result_to_dict as result_to_dict,
+)
+from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -54,8 +56,9 @@ def _loopback_semantic_routing(value: str | None) -> tuple[str | None, str]:
     try:
         parsed = urlsplit(value)
         host = parsed.hostname
-        # Accessing ``port`` performs bounded validation of a numeric port.
-        parsed.port
+        # Binding ``port`` performs bounded validation of a numeric port; the
+        # value itself is unused, only the ValueError it may raise matters.
+        _validated_port = parsed.port
     except ValueError as exc:
         raise ValueError("semantic base URL") from exc
     if (

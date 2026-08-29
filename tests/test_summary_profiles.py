@@ -13,11 +13,12 @@ published summaries a fixed point.
 from __future__ import annotations
 
 import inspect
+from dataclasses import FrozenInstanceError
 
 import pytest
 
-from podcast_ingest_core.errors import LLMProviderConfigError, UnknownSummaryProfileError
-from podcast_ingest_core.summary_profiles import (
+from corpus_ingest_core.errors import LLMProviderConfigError, UnknownSummaryProfileError
+from corpus_ingest_core.summary_profiles import (
     DEFAULT_SUMMARY_PROFILE,
     FINANCE,
     LEARNING_NOTES,
@@ -25,7 +26,6 @@ from podcast_ingest_core.summary_profiles import (
     UNSET,
     resolve_summary_profile,
 )
-
 
 # --- Frozen copies of today's behaviour (pre-Spec-037 source) ----------------
 
@@ -119,7 +119,7 @@ def test_non_string_profile_is_refused_rather_than_defaulted(value):
 def test_registry_module_performs_no_io():
     """Pure data is the reason this module is testable without a provider."""
 
-    import podcast_ingest_core.summary_profiles as module
+    import corpus_ingest_core.summary_profiles as module
 
     source = inspect.getsource(module)
     for forbidden in ("import os", "import requests", "open(", "Path(", "getenv"):
@@ -128,7 +128,7 @@ def test_registry_module_performs_no_io():
 
 def test_profiles_are_frozen():
     profile = resolve_summary_profile(FINANCE)
-    with pytest.raises(Exception):
+    with pytest.raises(FrozenInstanceError):
         profile.name = "mutated"  # type: ignore[misc]
 
 
@@ -149,7 +149,7 @@ def test_finance_profile_matches_the_pre_spec_037_literals():
 
 
 def test_finance_chunk_prompt_renders_exactly_as_before():
-    from podcast_ingest_core.llm_provider import _chunk_prompt
+    from corpus_ingest_core.llm_provider import _chunk_prompt
 
     chunk = {
         "index": 1,
@@ -171,7 +171,7 @@ def test_finance_chunk_prompt_renders_exactly_as_before():
 
 
 def test_finance_final_prompt_renders_exactly_as_before():
-    from podcast_ingest_core.llm_provider import _final_prompt
+    from corpus_ingest_core.llm_provider import _final_prompt
 
     rendered = _final_prompt(
         resolve_summary_profile(FINANCE),
@@ -222,7 +222,7 @@ def test_learning_notes_final_prompt_asks_for_the_study_sections_in_order():
 
     positions = [profile.final_sections.find(section) for section in expected_order]
     assert all(position >= 0 for position in positions), dict(
-        zip(expected_order, positions)
+        zip(expected_order, positions, strict=True)
     )
     assert positions == sorted(positions), "sections must appear in the FR-014 order"
 
@@ -263,7 +263,7 @@ def test_every_profile_requires_uncertainty_and_timestamp_traceability(name):
 
 
 def test_create_provider_takes_summary_profile_keyword_only_with_finance_default():
-    from podcast_ingest_core.llm_provider import create_provider
+    from corpus_ingest_core.llm_provider import create_provider
 
     parameters = inspect.signature(create_provider).parameters
 
@@ -282,7 +282,7 @@ def test_wrong_ack_raises_before_the_profile_is_resolved(monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     monkeypatch.setenv("OPENAI_MODEL", "test-model")
 
-    from podcast_ingest_core.llm_provider import create_provider
+    from corpus_ingest_core.llm_provider import create_provider
 
     with pytest.raises(LLMProviderConfigError, match="api_cost_ack"):
         create_provider(
@@ -294,7 +294,7 @@ def test_wrong_ack_raises_before_the_profile_is_resolved(monkeypatch):
 
 
 def _provider_with_captured_messages(monkeypatch, summary_profile):
-    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
+    from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
 
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     monkeypatch.setenv("OPENAI_MODEL", "test-model")
@@ -380,7 +380,7 @@ def test_unknown_profile_at_the_factory_raises_the_profile_error(monkeypatch):
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     monkeypatch.setenv("OPENAI_MODEL", "test-model")
 
-    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
+    from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
 
     with pytest.raises(UnknownSummaryProfileError):
         create_provider(

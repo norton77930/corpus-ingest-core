@@ -8,7 +8,7 @@ import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
     monkeypatch.setattr(storage, "MENTIONS_DIR", tmp_path / "mentions")
@@ -31,7 +31,7 @@ def _write_transcript(
     write_json=True,
     json_text=None,
 ):
-    from podcast_ingest_core.storage import transcript_asset_paths
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     segments = [
@@ -125,8 +125,8 @@ required_external_checks:
 
 
 def _patch_configs(monkeypatch, tmp_path):
-    import podcast_ingest_core.external_data_boundary as external_data_boundary
-    import podcast_ingest_core.industry_mapping as industry_mapping
+    import corpus_ingest_core.external_data_boundary as external_data_boundary
+    import corpus_ingest_core.industry_mapping as industry_mapping
 
     monkeypatch.setattr(
         industry_mapping,
@@ -145,7 +145,7 @@ def _read_json(path):
 
 
 def _semantic_asset(tmp_path):
-    from podcast_ingest_core.models import SummaryAsset
+    from corpus_ingest_core.models import SummaryAsset
 
     summary_path = tmp_path / "summaries" / "gooaye" / "EP672__EP672 title.semantic.md"
     summary_path.parent.mkdir(parents=True, exist_ok=True)
@@ -169,7 +169,7 @@ def _semantic_asset(tmp_path):
 
 
 def _synthesis_asset(tmp_path, *, generated=True, already_exists=False):
-    from podcast_ingest_core.models import StockLensSynthesisResult
+    from corpus_ingest_core.models import StockLensSynthesisResult
 
     synthesis_dir = tmp_path / "stock-lens" / "gooaye"
     synthesis_dir.mkdir(parents=True, exist_ok=True)
@@ -204,8 +204,8 @@ def _synthesis_asset(tmp_path, *, generated=True, already_exists=False):
 
 
 def _verification_asset(tmp_path, *, generated=True, already_exists=False):
-    from podcast_ingest_core.models import ExternalDataVerificationAsset
-    from podcast_ingest_core.storage import find_external_data_boundary_asset_paths
+    from corpus_ingest_core.models import ExternalDataVerificationAsset
+    from corpus_ingest_core.storage import find_external_data_boundary_asset_paths
 
     existing_paths = find_external_data_boundary_asset_paths("gooaye", "EP672")
     if existing_paths is not None:
@@ -242,7 +242,7 @@ def _verification_asset(tmp_path, *, generated=True, already_exists=False):
 
 
 def _stock_lens_asset(tmp_path, *, generated=True, already_exists=False):
-    from podcast_ingest_core.models import StockLensReportAsset
+    from corpus_ingest_core.models import StockLensReportAsset
 
     stock_dir = tmp_path / "stock-lens" / "gooaye"
     stock_dir.mkdir(parents=True, exist_ok=True)
@@ -265,7 +265,7 @@ def _stock_lens_asset(tmp_path, *, generated=True, already_exists=False):
 
 
 def test_run_research_workflow_dry_run_does_not_write_artifacts(monkeypatch, tmp_path):
-    from podcast_ingest_core.research_workflow import run_research_workflow
+    from corpus_ingest_core.research_workflow import run_research_workflow
 
     transcript_paths = _write_transcript(monkeypatch, tmp_path)
     result = run_research_workflow("gooaye", "EP672", stock_query="台積電")
@@ -297,7 +297,7 @@ def test_run_research_workflow_dry_run_does_not_write_artifacts(monkeypatch, tmp
 def test_run_research_workflow_external_verification_dry_run_includes_local_step(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import research_workflow
+    from corpus_ingest_core import research_workflow
 
     fixture_path = tmp_path / "external_market_data_fixtures.yaml"
     _write_transcript(monkeypatch, tmp_path)
@@ -335,8 +335,8 @@ def test_run_research_workflow_external_verification_dry_run_includes_local_step
 
 
 def test_run_research_workflow_refuses_stock_lens_synthesis_for_non_finance_profile():
-    from podcast_ingest_core.errors import ResearchWorkflowInputError
-    from podcast_ingest_core.research_workflow import run_research_workflow
+    from corpus_ingest_core.errors import ResearchWorkflowInputError
+    from corpus_ingest_core.research_workflow import run_research_workflow
 
     with pytest.raises(ResearchWorkflowInputError, match="learning-notes"):
         run_research_workflow(
@@ -350,8 +350,8 @@ def test_run_research_workflow_refuses_stock_lens_synthesis_for_non_finance_prof
 def test_run_research_workflow_synthesis_dry_run_requires_ack_and_writes_nothing(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import research_workflow
-    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    from corpus_ingest_core import research_workflow
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_transcript(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -383,8 +383,8 @@ def test_run_research_workflow_synthesis_dry_run_requires_ack_and_writes_nothing
 
 
 def test_run_research_workflow_synthesis_requires_stock_query(monkeypatch, tmp_path):
-    from podcast_ingest_core.errors import ResearchWorkflowInputError
-    from podcast_ingest_core.research_workflow import run_research_workflow
+    from corpus_ingest_core.errors import ResearchWorkflowInputError
+    from corpus_ingest_core.research_workflow import run_research_workflow
 
     _write_transcript(monkeypatch, tmp_path)
 
@@ -399,8 +399,8 @@ def test_run_research_workflow_synthesis_requires_stock_query(monkeypatch, tmp_p
 def test_run_research_workflow_semantic_dry_run_requires_ack_and_writes_nothing(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import research_workflow
-    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    from corpus_ingest_core import research_workflow
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_transcript(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -430,7 +430,7 @@ def test_run_research_workflow_semantic_dry_run_requires_ack_and_writes_nothing(
 def test_run_research_workflow_confirm_generates_local_research_artifacts(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.research_workflow import run_research_workflow
+    from corpus_ingest_core.research_workflow import run_research_workflow
 
     _write_transcript(monkeypatch, tmp_path)
     _patch_configs(monkeypatch, tmp_path)
@@ -453,8 +453,8 @@ def test_run_research_workflow_confirm_generates_local_research_artifacts(
 def test_run_research_workflow_synthesis_confirm_requires_ack_before_writes(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import research_workflow
-    from podcast_ingest_core.errors import ResearchWorkflowInputError
+    from corpus_ingest_core import research_workflow
+    from corpus_ingest_core.errors import ResearchWorkflowInputError
 
     _write_transcript(monkeypatch, tmp_path)
     _patch_configs(monkeypatch, tmp_path)
@@ -483,8 +483,8 @@ def test_run_research_workflow_synthesis_confirm_requires_ack_before_writes(
 def test_run_research_workflow_semantic_confirm_requires_exact_ack_before_writes(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import research_workflow
-    from podcast_ingest_core.errors import ResearchWorkflowInputError
+    from corpus_ingest_core import research_workflow
+    from corpus_ingest_core.errors import ResearchWorkflowInputError
 
     _write_transcript(monkeypatch, tmp_path)
     _patch_configs(monkeypatch, tmp_path)
@@ -511,7 +511,7 @@ def test_run_research_workflow_semantic_confirm_requires_exact_ack_before_writes
 def test_run_research_workflow_confirm_external_verification_runs_before_stock_lens(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import research_workflow
+    from corpus_ingest_core import research_workflow
 
     fixture_path = tmp_path / "external_market_data_fixtures.yaml"
     _write_transcript(monkeypatch, tmp_path)
@@ -568,8 +568,8 @@ def test_run_research_workflow_confirm_external_verification_runs_before_stock_l
 def test_run_research_workflow_rejects_unsupported_external_provider(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.errors import ResearchWorkflowInputError
-    from podcast_ingest_core.research_workflow import run_research_workflow
+    from corpus_ingest_core.errors import ResearchWorkflowInputError
+    from corpus_ingest_core.research_workflow import run_research_workflow
 
     _write_transcript(monkeypatch, tmp_path)
 
@@ -585,8 +585,8 @@ def test_run_research_workflow_rejects_unsupported_external_provider(
 def test_run_research_workflow_external_verification_failure_stops_before_stock(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import research_workflow
-    from podcast_ingest_core.errors import ExternalDataVerificationInputError
+    from corpus_ingest_core import research_workflow
+    from corpus_ingest_core.errors import ExternalDataVerificationInputError
 
     _write_transcript(monkeypatch, tmp_path)
     _patch_configs(monkeypatch, tmp_path)
@@ -622,8 +622,8 @@ def test_run_research_workflow_external_verification_failure_stops_before_stock(
 def test_run_research_workflow_semantic_confirm_runs_semantic_first(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import research_workflow
-    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    from corpus_ingest_core import research_workflow
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_transcript(monkeypatch, tmp_path)
     _patch_configs(monkeypatch, tmp_path)
@@ -676,9 +676,9 @@ def test_run_research_workflow_semantic_confirm_runs_semantic_first(
 def test_run_research_workflow_semantic_failure_fails_fast(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import research_workflow
-    from podcast_ingest_core.errors import LLMProviderConfigError
-    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    from corpus_ingest_core import research_workflow
+    from corpus_ingest_core.errors import LLMProviderConfigError
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_transcript(monkeypatch, tmp_path)
     _patch_configs(monkeypatch, tmp_path)
@@ -709,7 +709,7 @@ def test_run_research_workflow_semantic_failure_fails_fast(
 def test_run_research_workflow_confirm_with_stock_generates_stock_lens(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.research_workflow import run_research_workflow
+    from corpus_ingest_core.research_workflow import run_research_workflow
 
     _write_transcript(monkeypatch, tmp_path)
     _patch_configs(monkeypatch, tmp_path)
@@ -734,8 +734,8 @@ def test_run_research_workflow_confirm_with_stock_generates_stock_lens(
 def test_run_research_workflow_confirm_with_stock_synthesis_runs_last(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import research_workflow
-    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    from corpus_ingest_core import research_workflow
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_transcript(monkeypatch, tmp_path)
     _patch_configs(monkeypatch, tmp_path)
@@ -794,9 +794,9 @@ def test_run_research_workflow_confirm_with_stock_synthesis_runs_last(
 def test_run_research_workflow_synthesis_failure_propagates_after_local_steps(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import research_workflow
-    from podcast_ingest_core.errors import LLMProviderConfigError
-    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    from corpus_ingest_core import research_workflow
+    from corpus_ingest_core.errors import LLMProviderConfigError
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_transcript(monkeypatch, tmp_path)
     _patch_configs(monkeypatch, tmp_path)
@@ -827,8 +827,8 @@ def test_run_research_workflow_synthesis_failure_propagates_after_local_steps(
 
 
 def test_run_research_workflow_rejects_invalid_transcripts(monkeypatch, tmp_path):
-    from podcast_ingest_core.errors import ResearchWorkflowInputError
-    from podcast_ingest_core.research_workflow import run_research_workflow
+    from corpus_ingest_core.errors import ResearchWorkflowInputError
+    from corpus_ingest_core.research_workflow import run_research_workflow
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     with pytest.raises(ResearchWorkflowInputError, match="missing"):
@@ -844,8 +844,8 @@ def test_run_research_workflow_rejects_invalid_transcripts(monkeypatch, tmp_path
 
 
 def test_run_research_workflow_handles_partial_transcript(monkeypatch, tmp_path):
-    from podcast_ingest_core.errors import ResearchWorkflowInputError
-    from podcast_ingest_core.research_workflow import run_research_workflow
+    from corpus_ingest_core.errors import ResearchWorkflowInputError
+    from corpus_ingest_core.research_workflow import run_research_workflow
 
     _write_transcript(monkeypatch, tmp_path, completed=False)
     _patch_configs(monkeypatch, tmp_path)
@@ -869,8 +869,8 @@ def test_run_research_workflow_handles_partial_transcript(monkeypatch, tmp_path)
 def test_run_research_workflow_synthesis_allow_partial_passes_through(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import research_workflow
-    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    from corpus_ingest_core import research_workflow
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_transcript(monkeypatch, tmp_path, completed=False)
     _patch_configs(monkeypatch, tmp_path)
@@ -901,7 +901,7 @@ def test_run_research_workflow_synthesis_allow_partial_passes_through(
 
 
 def test_run_research_workflow_reuses_existing_unless_force(monkeypatch, tmp_path):
-    from podcast_ingest_core.research_workflow import run_research_workflow
+    from corpus_ingest_core.research_workflow import run_research_workflow
 
     _write_transcript(monkeypatch, tmp_path)
     _patch_configs(monkeypatch, tmp_path)
@@ -918,8 +918,8 @@ def test_run_research_workflow_reuses_existing_unless_force(monkeypatch, tmp_pat
 
 
 def test_run_research_workflow_tracks_reused_synthesis_artifacts(monkeypatch, tmp_path):
-    from podcast_ingest_core import research_workflow
-    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    from corpus_ingest_core import research_workflow
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_transcript(monkeypatch, tmp_path)
     _patch_configs(monkeypatch, tmp_path)
@@ -948,7 +948,7 @@ def test_run_research_workflow_tracks_reused_synthesis_artifacts(monkeypatch, tm
 def test_run_research_workflow_dry_run_does_not_call_external_or_cache(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core import cache, research_workflow
+    from corpus_ingest_core import cache, research_workflow
 
     _write_transcript(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -972,8 +972,9 @@ def test_run_research_workflow_dry_run_does_not_call_external_or_cache(
 
 
 def test_run_research_workflow_cli_outputs_json(monkeypatch, tmp_path, capsys):
-    import podcast_ingest_core.research_workflow as core_research_workflow
     from scripts import run_research_workflow
+
+    import corpus_ingest_core.research_workflow as core_research_workflow
 
     _write_transcript(monkeypatch, tmp_path)
     _patch_configs(monkeypatch, tmp_path)
@@ -1072,8 +1073,9 @@ def test_run_research_workflow_cli_outputs_json(monkeypatch, tmp_path, capsys):
 
 
 def test_run_research_workflow_cli_loads_env_file(monkeypatch, tmp_path, capsys):
-    from podcast_ingest_core.models import ResearchWorkflowResult
     from scripts import run_research_workflow
+
+    from corpus_ingest_core.models import ResearchWorkflowResult
 
     env_path = tmp_path / ".env"
     env_path.write_text("API_KEY=secret-value\nMODEL=file-model\n", encoding="utf-8")

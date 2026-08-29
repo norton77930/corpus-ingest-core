@@ -11,7 +11,7 @@ def test_suggest_is_zero_write_on_tmp_tree(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """FR-006: suggest must not create/modify/delete files under the data root."""
-    from podcast_ingest_core import storage, suggest_historical_verified_report_next_step
+    from corpus_ingest_core import storage, suggest_historical_verified_report_next_step
 
     reports = tmp_path / "research-reports"
     corpus = tmp_path / "corpus"
@@ -25,7 +25,7 @@ def test_suggest_is_zero_write_on_tmp_tree(
     monkeypatch.setattr(storage, "MAPPINGS_DIR", tmp_path / "mappings")
     monkeypatch.setattr(storage, "EXTERNAL_DIR", tmp_path / "external")
     monkeypatch.setattr(
-        "podcast_ingest_core.corpus_index.SEMANTIC_REVIEW_REPORTS_DIR",
+        "corpus_ingest_core.corpus_index.SEMANTIC_REVIEW_REPORTS_DIR",
         tmp_path / "evals" / "research-llm-smoke" / "reports",
     )
 
@@ -48,7 +48,7 @@ def test_suggest_is_zero_write_on_tmp_tree(
 
 
 def test_suggest_rejects_reserved_selectors() -> None:
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         HistoricalVerifiedReportPathInputError,
         suggest_historical_verified_report_next_step,
     )
@@ -62,10 +62,10 @@ def test_suggest_rejects_reserved_selectors() -> None:
 def test_suggest_report_present_when_eligible_bundle_exists(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         suggest_historical_verified_report_next_step,
     )
-    from podcast_ingest_core.models import VerifiedResearchReportCatalogItem
+    from corpus_ingest_core.models import VerifiedResearchReportCatalogItem
 
     digests = ["a" * 64]
     item = VerifiedResearchReportCatalogItem(
@@ -80,11 +80,11 @@ def test_suggest_report_present_when_eligible_bundle_exists(
         not_investment_advice=True,
     )
     monkeypatch.setattr(
-        "podcast_ingest_core.historical_verified_report_path.discover_eligible_report_summaries",
+        "corpus_ingest_core.historical_verified_report_path.discover_eligible_report_summaries",
         lambda **kwargs: ([item], "available", "complete"),
     )
     monkeypatch.setattr(
-        "podcast_ingest_core.historical_verified_report_path.run_episode_verified_research_report_workflow",
+        "corpus_ingest_core.historical_verified_report_path.run_episode_verified_research_report_workflow",
         lambda *a, **k: pytest.fail("must not preview publish when bundle present"),
     )
 
@@ -96,11 +96,11 @@ def test_suggest_report_present_when_eligible_bundle_exists(
 
 
 def test_suggest_publish_when_019_ready(monkeypatch: pytest.MonkeyPatch) -> None:
-    from podcast_ingest_core import suggest_historical_verified_report_next_step
-    from podcast_ingest_core.models import EpisodeVerifiedResearchReportWorkflowRunResult
+    from corpus_ingest_core import suggest_historical_verified_report_next_step
+    from corpus_ingest_core.models import EpisodeVerifiedResearchReportWorkflowRunResult
 
     monkeypatch.setattr(
-        "podcast_ingest_core.historical_verified_report_path.discover_eligible_report_summaries",
+        "corpus_ingest_core.historical_verified_report_path.discover_eligible_report_summaries",
         lambda **kwargs: ([], "missing", "complete"),
     )
 
@@ -128,11 +128,11 @@ def test_suggest_publish_when_019_ready(monkeypatch: pytest.MonkeyPatch) -> None
         )
 
     monkeypatch.setattr(
-        "podcast_ingest_core.historical_verified_report_path.run_episode_verified_research_report_workflow",
+        "corpus_ingest_core.historical_verified_report_path.run_episode_verified_research_report_workflow",
         fake_019,
     )
     monkeypatch.setattr(
-        "podcast_ingest_core.historical_verified_report_path.run_corpus_episode_completion_workflow",
+        "corpus_ingest_core.historical_verified_report_path.run_corpus_episode_completion_workflow",
         lambda *a, **k: pytest.fail("must not call 016 when publish-ready"),
     )
 
@@ -146,8 +146,8 @@ def test_suggest_publish_when_019_ready(monkeypatch: pytest.MonkeyPatch) -> None
 def test_suggest_completion_action_when_not_publish_ready(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    from podcast_ingest_core import suggest_historical_verified_report_next_step
-    from podcast_ingest_core.models import (
+    from corpus_ingest_core import suggest_historical_verified_report_next_step
+    from corpus_ingest_core.models import (
         CorpusEpisodeCompletionWorkflowRunCounts,
         CorpusEpisodeCompletionWorkflowRunFilter,
         CorpusEpisodeCompletionWorkflowRunResult,
@@ -155,11 +155,11 @@ def test_suggest_completion_action_when_not_publish_ready(
     )
 
     monkeypatch.setattr(
-        "podcast_ingest_core.historical_verified_report_path.discover_eligible_report_summaries",
+        "corpus_ingest_core.historical_verified_report_path.discover_eligible_report_summaries",
         lambda **kwargs: ([], "missing", "complete"),
     )
     monkeypatch.setattr(
-        "podcast_ingest_core.historical_verified_report_path.run_episode_verified_research_report_workflow",
+        "corpus_ingest_core.historical_verified_report_path.run_episode_verified_research_report_workflow",
         lambda podcast_id, episode_ref, *, confirm=False, **kwargs: EpisodeVerifiedResearchReportWorkflowRunResult(
             podcast_id=podcast_id,
             episode_ref=episode_ref,
@@ -226,7 +226,7 @@ def test_suggest_completion_action_when_not_publish_ready(
         )
 
     monkeypatch.setattr(
-        "podcast_ingest_core.historical_verified_report_path.run_corpus_episode_completion_workflow",
+        "corpus_ingest_core.historical_verified_report_path.run_corpus_episode_completion_workflow",
         fake_016,
     )
 

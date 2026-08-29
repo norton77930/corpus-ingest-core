@@ -32,7 +32,7 @@ Add a deterministic, offline corpus status index for one podcast. The feature sc
 
 *GATE: Passed before Phase 0 research. Re-checked after Phase 1 design.*
 
-- Core logic stays in `src/podcast_ingest_core`; the CLI will parse options, call core, and print a compact JSON result.
+- Core logic stays in `src/corpus_ingest_core`; the CLI will parse options, call core, and print a compact JSON result.
 - Dry-run is not required because the only write is a deterministic derived status artifact with no provider call, download, transcription, workflow execution, or cache rebuild. The feature still reports planned output paths through CLI result metadata.
 - No LLM step is possible; `api_cost_ack`, `.env`, provider settings, API keys, and tokens are not involved.
 - Research status remains separated: podcast artifact presence, transcript validation status, external boundary status, and semantic review status are represented as metadata only.
@@ -63,7 +63,7 @@ specs/008-corpus-artifact-index/
 ### Source Code (repository root)
 
 ```text
-src/podcast_ingest_core/
+src/corpus_ingest_core/
 ├── __init__.py
 ├── corpus_index.py
 ├── errors.py

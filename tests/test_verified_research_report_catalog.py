@@ -3,17 +3,17 @@
 from __future__ import annotations
 
 import json
+import os
 from pathlib import Path
 
 import pytest
-
 
 _DIGEST_A = "a" * 64
 _DIGEST_B = "b" * 64
 
 
 def _use_catalog_root(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     root = tmp_path / "research-reports"
     monkeypatch.setattr(storage, "RESEARCH_REPORTS_DIR", root)
@@ -88,7 +88,7 @@ def test_list_discovers_only_safe_canonical_manifest_summaries_without_body_read
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """List is bounded, deterministic, safe-projection-only, and read-only."""
-    from podcast_ingest_core import list_verified_research_reports
+    from corpus_ingest_core import list_verified_research_reports
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     first = _write_manifest_bundle(root, "beta", "EP2", _DIGEST_B)
@@ -127,7 +127,7 @@ def test_list_discovers_only_safe_canonical_manifest_summaries_without_body_read
 def test_list_missing_root_is_empty_and_input_is_bounded(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         VerifiedResearchReportCatalogInputError,
         list_verified_research_reports,
     )
@@ -159,7 +159,7 @@ def test_list_missing_root_is_empty_and_input_is_bounded(
 def test_list_skips_unsafe_locator_directory_names(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import list_verified_research_reports
+    from corpus_ingest_core import list_verified_research_reports
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     _write_manifest_bundle(root, "safe-show", "EP1", _DIGEST_A)
@@ -173,7 +173,7 @@ def test_list_skips_unsafe_locator_directory_names(
 def test_list_fails_closed_at_the_per_level_entry_cap(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import list_verified_research_reports
+    from corpus_ingest_core import list_verified_research_reports
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     root.mkdir()
@@ -190,10 +190,10 @@ def test_list_fails_closed_at_the_per_level_entry_cap(
 def test_list_never_reads_report_or_source_bodies(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import list_verified_research_reports
+    from corpus_ingest_core import list_verified_research_reports
 
     root = _use_catalog_root(monkeypatch, tmp_path)
-    bundle = _write_manifest_bundle(root, "show", "EP1", _DIGEST_A)
+    _write_manifest_bundle(root, "show", "EP1", _DIGEST_A)
     artifacts = tmp_path / "source-artifacts"
     artifacts.mkdir()
     for name in ("transcript.json", "source.json"):
@@ -215,7 +215,7 @@ def test_list_never_reads_report_or_source_bodies(
 def test_list_skips_symlinked_or_junctioned_podcast_directories(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import list_verified_research_reports
+    from corpus_ingest_core import list_verified_research_reports
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     _write_manifest_bundle(root, "safe-show", "EP1", _DIGEST_A)
@@ -238,7 +238,7 @@ def test_list_skips_windows_junctioned_podcast_directory(
     import os
     import subprocess
 
-    from podcast_ingest_core import list_verified_research_reports
+    from corpus_ingest_core import list_verified_research_reports
 
     if os.name != "nt":
         pytest.skip("Windows junction creation is unavailable on this platform")
@@ -264,7 +264,7 @@ def test_list_skips_windows_junctioned_podcast_directory(
 def test_search_matches_only_normalized_safe_locator_fields_without_body_reads(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import search_verified_research_reports
+    from corpus_ingest_core import search_verified_research_reports
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     bundle = _write_manifest_bundle(
@@ -299,7 +299,7 @@ def test_search_matches_only_normalized_safe_locator_fields_without_body_reads(
 def test_search_rejects_blank_control_and_oversize_queries(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         VerifiedResearchReportCatalogInputError,
         search_verified_research_reports,
     )
@@ -314,7 +314,7 @@ def test_search_rejects_blank_control_and_oversize_queries(
 def test_inspect_verifies_exact_bundle_self_consistency_only(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         inspect_verified_research_report,
         verified_research_report_catalog_result_to_dict,
     )
@@ -360,7 +360,7 @@ def test_inspect_fail_closes_on_structural_and_integrity_tampering(
 ) -> None:
     import hashlib
 
-    from podcast_ingest_core import inspect_verified_research_report
+    from corpus_ingest_core import inspect_verified_research_report
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     bundle = _write_inspectable_bundle(root, "show", "EP1", _DIGEST_A)
@@ -403,7 +403,7 @@ def test_inspect_fail_closes_on_structural_and_integrity_tampering(
 def test_inspect_never_opens_source_or_lineage_artifacts(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import inspect_verified_research_report
+    from corpus_ingest_core import inspect_verified_research_report
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     bundle = _write_inspectable_bundle(root, "show", "EP1", _DIGEST_A)
@@ -432,7 +432,7 @@ def test_inspect_never_opens_source_or_lineage_artifacts(
 def test_inspect_missing_bundle_and_invalid_locator_are_bounded(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         VerifiedResearchReportCatalogInputError,
         inspect_verified_research_report,
     )
@@ -452,7 +452,7 @@ def test_inspect_rejects_noncanonical_actual_version_name_on_windows(
 ) -> None:
     import os
 
-    from podcast_ingest_core import inspect_verified_research_report
+    from corpus_ingest_core import inspect_verified_research_report
 
     if os.name != "nt":
         pytest.skip("case-insensitive Windows directory lookup is unavailable")
@@ -469,7 +469,7 @@ def test_inspect_rejects_noncanonical_actual_version_name_on_windows(
 def test_inspect_rejects_out_of_root_symlinked_version_before_manifest_read(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import inspect_verified_research_report
+    from corpus_ingest_core import inspect_verified_research_report
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     outside = tmp_path / "outside"
@@ -492,7 +492,7 @@ def test_inspect_rejects_out_of_root_symlinked_version_before_manifest_read(
 def test_inspect_keeps_self_consistency_separate_from_list_eligibility(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import inspect_verified_research_report
+    from corpus_ingest_core import inspect_verified_research_report
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     bundle = _write_inspectable_bundle(root, "show", "EP1", _DIGEST_A)
@@ -511,7 +511,7 @@ def test_inspect_keeps_self_consistency_separate_from_list_eligibility(
 def test_list_and_search_skip_bundles_without_exact_three_regular_files(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         list_verified_research_reports,
         search_verified_research_reports,
     )
@@ -539,7 +539,7 @@ def test_list_and_search_skip_bundles_without_exact_three_regular_files(
 def test_catalog_rejects_reserved_episode_selectors_case_insensitively(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path, episode_ref: str
 ) -> None:
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         VerifiedResearchReportCatalogInputError,
         inspect_verified_research_report,
         list_verified_research_reports,
@@ -559,7 +559,7 @@ def test_catalog_rejects_reserved_episode_selectors_case_insensitively(
 def test_catalog_requires_storage_canonical_lowercase_podcast_slug(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         VerifiedResearchReportCatalogInputError,
         inspect_verified_research_report,
         list_verified_research_reports,
@@ -579,7 +579,7 @@ def test_catalog_requires_storage_canonical_lowercase_podcast_slug(
 def test_list_and_search_fail_closed_for_unsafe_catalog_root(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         list_verified_research_reports,
         search_verified_research_reports,
     )
@@ -600,7 +600,7 @@ def test_list_and_search_fail_closed_for_unsafe_catalog_root(
 def test_list_rejects_symlinked_catalog_root(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import list_verified_research_reports
+    from corpus_ingest_core import list_verified_research_reports
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     target = tmp_path / "outside-root"
@@ -621,8 +621,8 @@ def test_catalog_root_rejects_mocked_reparse_ancestor_before_root_resolve(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """A hostile lexical ancestor is rejected without resolving the root candidate."""
-    from podcast_ingest_core import list_verified_research_reports
-    from podcast_ingest_core import verified_research_report_catalog as catalog
+    from corpus_ingest_core import list_verified_research_reports
+    from corpus_ingest_core import verified_research_report_catalog as catalog
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     root.mkdir()
@@ -652,8 +652,8 @@ def test_inspect_fails_closed_when_verified_bundle_directory_is_replaced(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """Exact inspection cannot use an identically shaped replacement directory."""
-    from podcast_ingest_core import inspect_verified_research_report
-    from podcast_ingest_core import verified_research_report_catalog as catalog
+    from corpus_ingest_core import inspect_verified_research_report
+    from corpus_ingest_core import verified_research_report_catalog as catalog
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     bundle = _write_inspectable_bundle(root, "show", "EP1", _DIGEST_A)
@@ -683,7 +683,7 @@ def test_inspect_fails_closed_when_verified_bundle_directory_is_replaced(
 def test_list_fails_closed_when_catalog_root_cannot_be_lstatd(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import list_verified_research_reports
+    from corpus_ingest_core import list_verified_research_reports
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     root.mkdir()
@@ -706,7 +706,7 @@ def test_list_fails_closed_when_catalog_root_cannot_be_lstatd(
 def test_untrusted_false_investment_disclaimer_is_not_catalog_safe_metadata(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         inspect_verified_research_report,
         list_verified_research_reports,
         search_verified_research_reports,
@@ -737,7 +737,7 @@ def test_list_and_search_never_open_report_bodies_through_common_file_apis(
     import builtins
     import os
 
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         list_verified_research_reports,
         search_verified_research_reports,
     )
@@ -790,7 +790,7 @@ def test_inspect_rejects_manifest_size_mismatch_even_when_hash_matches(
 ) -> None:
     import hashlib
 
-    from podcast_ingest_core import inspect_verified_research_report
+    from corpus_ingest_core import inspect_verified_research_report
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     bundle = _write_inspectable_bundle(root, "show", "EP1", _DIGEST_A)
@@ -815,7 +815,7 @@ def test_inspect_opens_one_report_json_snapshot_for_hash_and_identity(
     """The public inspect seam opens report.json once for its valid hash and identity."""
     import os
 
-    from podcast_ingest_core import inspect_verified_research_report
+    from corpus_ingest_core import inspect_verified_research_report
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     bundle = _write_inspectable_bundle(root, "show", "EP1", _DIGEST_A)
@@ -844,8 +844,8 @@ def test_inspect_rejects_sparse_report_larger_than_the_documented_bound_before_b
     """The public inspect seam bounds report bytes without allocating a large body."""
     import os
 
-    from podcast_ingest_core import inspect_verified_research_report
-    from podcast_ingest_core import verified_research_report_catalog as catalog
+    from corpus_ingest_core import inspect_verified_research_report
+    from corpus_ingest_core import verified_research_report_catalog as catalog
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     bundle = _write_inspectable_bundle(root, "show", "EP1", _DIGEST_A)
@@ -889,18 +889,27 @@ def test_inspect_rejects_sparse_report_larger_than_the_documented_bound_before_b
 def test_windows_final_path_normalizer_accepts_only_safe_dos_or_unc_forms(
     raw_path: str, normalized: str | None
 ) -> None:
-    from podcast_ingest_core import verified_research_report_catalog as catalog
+    from corpus_ingest_core import verified_research_report_catalog as catalog
 
     assert catalog._normalize_windows_final_path(raw_path) == normalized
 
 
+@pytest.mark.skipif(
+    os.name != "nt",
+    reason=(
+        "exercises the Windows GetFinalPathNameByHandleW ctypes ABI; "
+        "ctypes.wintypes does not exist on other platforms. The path "
+        "normalizer this feeds is plain string parsing and is covered "
+        "everywhere by test_windows_final_path_normalizer_*."
+    ),
+)
 def test_windows_handle_final_path_uses_pointer_sized_ctypes_abi(monkeypatch: pytest.MonkeyPatch) -> None:
     import ctypes
-    from ctypes import wintypes
     import sys
     import types
+    from ctypes import wintypes
 
-    from podcast_ingest_core import verified_research_report_catalog as catalog
+    from corpus_ingest_core import verified_research_report_catalog as catalog
 
     observed: dict[str, object] = {}
 
@@ -938,12 +947,21 @@ def test_windows_handle_final_path_uses_pointer_sized_ctypes_abi(monkeypatch: py
     assert observed["handle"].value == 0x1_0000_0001
 
 
+@pytest.mark.skipif(
+    os.name != "nt",
+    reason=(
+        "exercises the Windows GetFinalPathNameByHandleW ctypes ABI; "
+        "ctypes.wintypes does not exist on other platforms. The path "
+        "normalizer this feeds is plain string parsing and is covered "
+        "everywhere by test_windows_final_path_normalizer_*."
+    ),
+)
 def test_windows_handle_final_path_api_failure_fails_closed(monkeypatch: pytest.MonkeyPatch) -> None:
     import ctypes
     import sys
     import types
 
-    from podcast_ingest_core import verified_research_report_catalog as catalog
+    from corpus_ingest_core import verified_research_report_catalog as catalog
 
     api = types.SimpleNamespace()
     api.GetFinalPathNameByHandleW = lambda *args: 0
@@ -960,7 +978,7 @@ def test_catalog_fails_closed_when_a_snapshot_target_is_replaced_before_open(
     """The public seams reject a checked pathname replaced with a different file."""
     import os
 
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         inspect_verified_research_report,
         list_verified_research_reports,
     )
@@ -994,8 +1012,8 @@ def test_catalog_rejects_mocked_reparse_attribute_without_symlink_privileges(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     """The Windows reparse bit itself is fail-closed even without a real junction."""
-    from podcast_ingest_core import inspect_verified_research_report
-    from podcast_ingest_core import verified_research_report_catalog as catalog
+    from corpus_ingest_core import inspect_verified_research_report
+    from corpus_ingest_core import verified_research_report_catalog as catalog
 
     root = _use_catalog_root(monkeypatch, tmp_path)
     bundle = _write_inspectable_bundle(root, "show", "EP1", _DIGEST_A)

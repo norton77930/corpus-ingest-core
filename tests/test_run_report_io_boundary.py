@@ -14,7 +14,7 @@ from __future__ import annotations
 import ast
 from pathlib import Path
 
-SRC_DIR = Path(__file__).resolve().parents[1] / "src" / "podcast_ingest_core"
+SRC_DIR = Path(__file__).resolve().parents[1] / "src" / "corpus_ingest_core"
 
 SANCTIONED_WRITER_CALLS = (
     "write_part_staged_report_pair(",

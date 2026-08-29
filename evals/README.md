@@ -1,6 +1,6 @@
 # Evals
 
-`evals/` 用來存放 MCP tool-use eval 的報告與流程文件。這些報告協助記錄 Codex / Claude 類 MCP client 是否正確使用 `podcast-ingest-core` tools。
+`evals/` 用來存放 MCP tool-use eval 的報告與流程文件。這些報告協助記錄 Codex / Claude 類 MCP client 是否正確使用 `corpus-ingest-core` tools。
 
 報告可以包含：
 

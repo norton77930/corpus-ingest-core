@@ -21,7 +21,7 @@ def run_corpus_semantic_remediation(
     ...
 ```
 
-The function is exported from `podcast_ingest_core`. Existing public signatures and result schemas remain unchanged.
+The function is exported from `corpus_ingest_core`. Existing public signatures and result schemas remain unchanged.
 
 ## Validation Contract
 

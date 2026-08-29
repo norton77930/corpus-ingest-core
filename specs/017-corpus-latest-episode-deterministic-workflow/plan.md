@@ -45,7 +45,7 @@ at most the existing five deterministic remediation families are advanced
 
 *GATE: Passed before Phase 0 research and re-checked after Phase 1 design.*
 
-- Core logic stays in `src/podcast_ingest_core`; CLI and MCP remain thin.
+- Core logic stays in `src/corpus_ingest_core`; CLI and MCP remain thin.
 - Every side effect is behind `confirm=True`; dry-run returns safe planned
   metadata and writes zero files.
 - No LLM, provider, `.env`, acknowledgement, or secret handling path is added.
@@ -76,7 +76,7 @@ specs/017-corpus-latest-episode-deterministic-workflow/
 ### Source Code (repository root)
 
 ```text
-src/podcast_ingest_core/
+src/corpus_ingest_core/
 ├── corpus_latest_episode_deterministic_workflow_runner.py
 ├── models.py
 ├── storage.py

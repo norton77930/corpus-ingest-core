@@ -5,7 +5,7 @@ import sys
 
 
 def _use_tmp_transcripts_dir(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     transcript_dir = tmp_path / "transcripts"
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", transcript_dir)
@@ -24,7 +24,7 @@ def _write_transcript(
     completed=True,
     include_legacy_metadata=False,
 ):
-    from podcast_ingest_core.storage import transcript_asset_paths
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
     if segments is None:
@@ -74,7 +74,7 @@ def _write_transcript(
 
 
 def test_validate_transcript_returns_valid_for_complete_outputs(monkeypatch, tmp_path):
-    from podcast_ingest_core.validator import validate_transcript
+    from corpus_ingest_core.validator import validate_transcript
 
     paths = _write_transcript(monkeypatch, tmp_path)
 
@@ -90,7 +90,7 @@ def test_validate_transcript_returns_valid_for_complete_outputs(monkeypatch, tmp
 
 
 def test_validate_transcript_missing_when_json_absent(monkeypatch, tmp_path):
-    from podcast_ingest_core.validator import validate_transcript
+    from corpus_ingest_core.validator import validate_transcript
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
 
@@ -103,7 +103,7 @@ def test_validate_transcript_missing_when_json_absent(monkeypatch, tmp_path):
 
 
 def test_validate_transcript_incomplete_when_txt_missing(monkeypatch, tmp_path):
-    from podcast_ingest_core.validator import validate_transcript
+    from corpus_ingest_core.validator import validate_transcript
 
     paths = _write_transcript(monkeypatch, tmp_path)
     paths.text_path.unlink()
@@ -116,7 +116,7 @@ def test_validate_transcript_incomplete_when_txt_missing(monkeypatch, tmp_path):
 
 
 def test_validate_transcript_incomplete_when_srt_missing(monkeypatch, tmp_path):
-    from podcast_ingest_core.validator import validate_transcript
+    from corpus_ingest_core.validator import validate_transcript
 
     paths = _write_transcript(monkeypatch, tmp_path)
     paths.srt_path.unlink()
@@ -129,8 +129,8 @@ def test_validate_transcript_incomplete_when_srt_missing(monkeypatch, tmp_path):
 
 
 def test_validate_transcript_corrupt_when_json_invalid(monkeypatch, tmp_path):
-    from podcast_ingest_core.storage import transcript_asset_paths
-    from podcast_ingest_core.validator import validate_transcript
+    from corpus_ingest_core.storage import transcript_asset_paths
+    from corpus_ingest_core.validator import validate_transcript
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
     paths = transcript_asset_paths("gooaye", "EP672", "EP672 title")
@@ -147,7 +147,7 @@ def test_validate_transcript_corrupt_when_json_invalid(monkeypatch, tmp_path):
 
 
 def test_validate_transcript_empty_when_segments_empty(monkeypatch, tmp_path):
-    from podcast_ingest_core.validator import validate_transcript
+    from corpus_ingest_core.validator import validate_transcript
 
     _write_transcript(
         monkeypatch,
@@ -167,7 +167,7 @@ def test_validate_transcript_empty_when_segments_empty(monkeypatch, tmp_path):
 
 
 def test_validate_transcript_warns_when_part_file_exists(monkeypatch, tmp_path):
-    from podcast_ingest_core.validator import validate_transcript
+    from corpus_ingest_core.validator import validate_transcript
 
     paths = _write_transcript(monkeypatch, tmp_path)
     paths.json_path.with_name(f"{paths.json_path.name}.part").write_text(
@@ -184,7 +184,7 @@ def test_validate_transcript_warns_when_part_file_exists(monkeypatch, tmp_path):
 def test_validate_transcript_partial_when_segment_count_mismatch(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.validator import validate_transcript
+    from corpus_ingest_core.validator import validate_transcript
 
     _write_transcript(monkeypatch, tmp_path, segment_count=99)
 
@@ -198,7 +198,7 @@ def test_validate_transcript_partial_when_segment_count_mismatch(
 def test_validate_transcript_legacy_metadata_warns_but_stays_valid(
     monkeypatch, tmp_path
 ):
-    from podcast_ingest_core.validator import validate_transcript
+    from corpus_ingest_core.validator import validate_transcript
 
     _write_transcript(monkeypatch, tmp_path, include_legacy_metadata=True)
 
@@ -210,8 +210,9 @@ def test_validate_transcript_legacy_metadata_warns_but_stays_valid(
 
 
 def test_validate_transcript_cli_outputs_json(monkeypatch, capsys):
-    from podcast_ingest_core.models import TranscriptValidationResult
     from scripts import validate_transcript
+
+    from corpus_ingest_core.models import TranscriptValidationResult
 
     result = TranscriptValidationResult(
         podcast_id="gooaye",

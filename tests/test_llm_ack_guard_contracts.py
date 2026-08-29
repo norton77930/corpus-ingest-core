@@ -28,7 +28,7 @@ import pytest
 
 
 def test_semantic_core_signature_requires_ack_no_confirm_f03_resolved():
-    from podcast_ingest_core.semantic_summarizer import semantic_summarize_episode
+    from corpus_ingest_core.semantic_summarizer import semantic_summarize_episode
 
     parameters = inspect.signature(semantic_summarize_episode).parameters
     # Audit F-03 resolved in Batch 3A: the core function now enforces the
@@ -45,8 +45,8 @@ def test_semantic_core_signature_requires_ack_no_confirm_f03_resolved():
 def test_create_provider_requires_exact_ack_before_provider_construction(
     monkeypatch, bad_ack
 ):
-    from podcast_ingest_core import llm_provider
-    from podcast_ingest_core.errors import LLMProviderConfigError
+    from corpus_ingest_core import llm_provider
+    from corpus_ingest_core.errors import LLMProviderConfigError
 
     monkeypatch.setattr(
         llm_provider,
@@ -61,7 +61,7 @@ def test_create_provider_requires_exact_ack_before_provider_construction(
 
 
 def test_create_provider_with_exact_ack_constructs_provider(monkeypatch):
-    from podcast_ingest_core import llm_provider
+    from corpus_ingest_core import llm_provider
 
     sentinel = object()
     monkeypatch.setattr(
@@ -80,8 +80,8 @@ def test_create_provider_with_exact_ack_constructs_provider(monkeypatch):
 def test_semantic_core_rejects_wrong_ack_before_any_work(
     monkeypatch, bad_ack_kwargs
 ):
-    from podcast_ingest_core import semantic_summarizer
-    from podcast_ingest_core.errors import LLMProviderConfigError
+    from corpus_ingest_core import semantic_summarizer
+    from corpus_ingest_core.errors import LLMProviderConfigError
 
     # The entry-level guard must fire before profile loading, transcript
     # access, or provider construction — no fixtures are needed because none
@@ -108,7 +108,7 @@ def test_semantic_core_rejects_wrong_ack_before_any_work(
 
 
 def test_synthesis_core_signature_keeps_ack_guard():
-    from podcast_ingest_core.stock_lens_synthesis import (
+    from corpus_ingest_core.stock_lens_synthesis import (
         generate_stock_lens_synthesis_report,
     )
 
@@ -118,18 +118,19 @@ def test_synthesis_core_signature_keeps_ack_guard():
 
 
 def test_ack_constant_has_single_source_of_truth():
-    from podcast_ingest_core import (
-        llm_provider,
-        mcp_server,
-        research_workflow,
-        semantic_summarizer,
-        stock_lens_synthesis,
-    )
     from scripts import (
         run_corpus_episode_completion_workflow,
         run_research_llm_smoke,
         run_semantic_summary_smoke,
         summarize_episode,
+    )
+
+    from corpus_ingest_core import (
+        llm_provider,
+        mcp_server,
+        research_workflow,
+        semantic_summarizer,
+        stock_lens_synthesis,
     )
 
     canonical = semantic_summarizer.SEMANTIC_API_COST_ACK
@@ -184,8 +185,8 @@ def test_summarize_cli_semantic_requires_exact_ack_before_core(
 
 
 def test_mcp_semantic_dry_run_reports_env_name_only_never_value(monkeypatch):
-    from podcast_ingest_core import mcp_server
-    from podcast_ingest_core.models import TranscriptValidationResult
+    from corpus_ingest_core import mcp_server
+    from corpus_ingest_core.models import TranscriptValidationResult
 
     monkeypatch.setenv("FAKE_LLM_KEY", "fake-key-value")
     monkeypatch.setattr(
@@ -219,15 +220,16 @@ def test_mcp_semantic_dry_run_reports_env_name_only_never_value(monkeypatch):
     assert "fake-key-value" not in serialized
 
 def test_corpus_semantic_cli_reuses_canonical_ack_constant():
-    from podcast_ingest_core import llm_provider
     from scripts import run_corpus_semantic_remediation as corpus_semantic_cli
+
+    from corpus_ingest_core import llm_provider
 
     assert corpus_semantic_cli.SEMANTIC_API_COST_ACK is llm_provider.SEMANTIC_API_COST_ACK
 
 
 def test_completion_summary_rejects_bad_ack_before_selection_or_executor(monkeypatch):
-    from podcast_ingest_core import corpus_episode_completion_workflow_runner as runner
-    from podcast_ingest_core.errors import CorpusEpisodeCompletionWorkflowRunnerFailedError
+    from corpus_ingest_core import corpus_episode_completion_workflow_runner as runner
+    from corpus_ingest_core.errors import CorpusEpisodeCompletionWorkflowRunnerFailedError
 
     def forbidden(*args, **kwargs):
         pytest.fail("invalid acknowledgement reached completion workflow work")

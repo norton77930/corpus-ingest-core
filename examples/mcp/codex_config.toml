@@ -1,0 +1,13 @@
+# Codex CLI: merge into ~/.codex/config.toml
+#
+# Same caveat as the other two clients -- the server resolves data/ and
+# config/podcasts.yaml relative to its working directory, so either start it in
+# the right place or set both variables to absolute paths.
+
+[mcp_servers.corpus-ingest-core]
+command = "corpus-ingest-mcp"
+args = []
+
+[mcp_servers.corpus-ingest-core.env]
+CORPUS_INGEST_DATA_DIR = "/absolute/path/to/your/corpus-workspace/data"
+CORPUS_INGEST_CONFIG = "/absolute/path/to/your/corpus-workspace/config/podcasts.yaml"

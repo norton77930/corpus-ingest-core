@@ -35,7 +35,6 @@ from pathlib import Path
 
 import pytest
 
-
 ROOT = Path(__file__).resolve().parents[1]
 
 PROVIDER_CONSTRUCTOR = "OpenAICompatibleProvider("
@@ -46,19 +45,19 @@ FACTORY_MODULE = "llm_provider.py"
 def _app_python_files():
     """Application code that must reach the provider through the factory.
 
-    ``src/podcast_ingest_core/*.py`` core modules plus ``scripts/*.py`` entry
+    ``src/corpus_ingest_core/*.py`` core modules plus ``scripts/*.py`` entry
     points (both are flat directories). ``tests/`` is excluded: tests assert the
     runtime ban or go through ``create_provider``.
     """
 
-    core_dir = ROOT / "src" / "podcast_ingest_core"
+    core_dir = ROOT / "src" / "corpus_ingest_core"
     scripts_dir = ROOT / "scripts"
     return sorted(core_dir.glob("*.py")) + sorted(scripts_dir.glob("*.py"))
 
 
 def test_provider_constructed_only_in_factory_module():
     completion_core = (
-        ROOT / "src" / "podcast_ingest_core" / "corpus_episode_completion_workflow_runner.py"
+        ROOT / "src" / "corpus_ingest_core" / "corpus_episode_completion_workflow_runner.py"
     )
     assert completion_core in _app_python_files()
 
@@ -76,7 +75,7 @@ def test_provider_constructed_only_in_factory_module():
 
 
 def test_create_provider_keeps_keyword_only_api_cost_ack():
-    from podcast_ingest_core.llm_provider import create_provider
+    from corpus_ingest_core.llm_provider import create_provider
 
     parameters = inspect.signature(create_provider).parameters
     # The exact-ack gate depends on api_cost_ack staying keyword-only and
@@ -89,8 +88,8 @@ def test_create_provider_keeps_keyword_only_api_cost_ack():
 
 def test_direct_openai_compatible_provider_construction_is_rejected(monkeypatch):
     """Batch 3C: bare constructor must not bypass create_provider + api_cost_ack."""
-    from podcast_ingest_core.errors import LLMProviderConfigError
-    from podcast_ingest_core.llm_provider import OpenAICompatibleProvider
+    from corpus_ingest_core.errors import LLMProviderConfigError
+    from corpus_ingest_core.llm_provider import OpenAICompatibleProvider
 
     # Env would be sufficient for a successful build if the token gate were
     # missing — prove the refusal is about construction path, not config.
@@ -102,8 +101,8 @@ def test_direct_openai_compatible_provider_construction_is_rejected(monkeypatch)
 
 
 def test_direct_construction_rejects_forged_factory_token(monkeypatch):
-    from podcast_ingest_core.errors import LLMProviderConfigError
-    from podcast_ingest_core.llm_provider import OpenAICompatibleProvider
+    from corpus_ingest_core.errors import LLMProviderConfigError
+    from corpus_ingest_core.llm_provider import OpenAICompatibleProvider
 
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     monkeypatch.setenv("OPENAI_MODEL", "test-model")
@@ -113,7 +112,7 @@ def test_direct_construction_rejects_forged_factory_token(monkeypatch):
 
 
 def test_create_provider_with_exact_ack_still_builds_provider(monkeypatch):
-    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
+    from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
 
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     monkeypatch.setenv("OPENAI_MODEL", "test-model")

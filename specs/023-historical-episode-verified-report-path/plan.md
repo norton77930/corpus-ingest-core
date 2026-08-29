@@ -21,8 +21,8 @@ Local-only, thin interfaces, dry-run first for side effects (suggest is pure rea
 
 ```text
 specs/023-historical-episode-verified-report-path/
-src/podcast_ingest_core/historical_verified_report_path.py
-src/podcast_ingest_core/mcp_historical_verified_report_path.py
+src/corpus_ingest_core/historical_verified_report_path.py
+src/corpus_ingest_core/mcp_historical_verified_report_path.py
 scripts/suggest_historical_verified_report_next_step.py
 .agents/skills/historical-episode-verified-report-path/SKILL.md
 tests/test_historical_verified_report_path.py

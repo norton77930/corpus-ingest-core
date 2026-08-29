@@ -1,6 +1,15 @@
 <!--
 Sync Impact Report
 Version change: template -> 1.0.0
+Version change: 1.0.0 -> 1.0.1 (PATCH, 2026-08-29)
+- Title: "Podcast Ingestion Core" -> "Corpus Ingestion Core", following the
+  0.2.0 package rename. No principle, gate, or safety boundary is amended;
+  this is the wording clarification case in Governance.
+- Propagated: tests/test_spec_kit_constitution.py asserts the exact title,
+  version and amendment line, and is updated in the same commit.
+- Not renamed: "Gooaye Research System". That half names the system this
+  constitution was ratified for, which is a historical fact rather than a
+  product label.
 Modified principles:
 - Template principle placeholders -> Local Artifacts and Evidence Traceability
 - Template principle placeholders -> Thin Interfaces over Thick Core
@@ -23,7 +32,7 @@ Templates requiring updates:
 - N/A: .specify/templates/commands/*.md is not present in this scaffold
 Follow-up TODOs: none
 -->
-# Podcast Ingestion Core / Gooaye Research System Constitution
+# Corpus Ingestion Core / Gooaye Research System Constitution
 
 ## Core Principles
 
@@ -41,7 +50,7 @@ LLM synthesis boundaries.
 
 ### II. Thin Interfaces over Thick Core
 
-Runtime behavior MUST live in `src/podcast_ingest_core`. CLI scripts and MCP
+Runtime behavior MUST live in `src/corpus_ingest_core`. CLI scripts and MCP
 tools MUST remain thin wrappers that parse inputs, call core functions, and
 format responses. Public core functions MUST keep stable contracts unless a
 future approved phase explicitly changes them with tests and documentation.
@@ -176,4 +185,4 @@ Every implementation review MUST check compliance with dry-run behavior, LLM
 acknowledgement, secret handling, evidence separation, external-data boundaries,
 manual cache rebuild, no investment advice, and verification commands.
 
-**Version**: 1.0.0 | **Ratified**: 2026-06-30 | **Last Amended**: 2026-06-30
+**Version**: 1.0.1 | **Ratified**: 2026-06-30 | **Last Amended**: 2026-08-29

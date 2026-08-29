@@ -1,14 +1,14 @@
 from __future__ import annotations
 
 import argparse
-from dataclasses import asdict
 import json
-from pathlib import Path
 import sys
+from dataclasses import asdict
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import PodcastIngestCoreError, run_youtube_video_ingest
+from corpus_ingest_core import PodcastIngestCoreError, run_youtube_video_ingest
 
 
 def main(argv: list[str] | None = None) -> int:

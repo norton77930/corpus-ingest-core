@@ -16,7 +16,7 @@ Add one Core-owned latest-episode workflow that previews strictly without writes
 
 ## Constitution Check
 
-- Core implementation belongs in `src/podcast_ingest_core`; CLI and MCP are thin wrappers.
+- Core implementation belongs in `src/corpus_ingest_core`; CLI and MCP are thin wrappers.
 - `confirm=False` writes zero files; confirmation is explicit and episode-scoped with `expected_episode_ref` and exact `api_cost_ack`.
 - Semantic transfer happens only through existing acknowledged functionality; no `.env` is read by preview or invalid confirmation.
 - Research options are fixed safe values and optional verification is a local fixture only; no live market API.
@@ -36,7 +36,7 @@ specs/018-latest-episode-verified-research-report-workflow/
 ├── contracts/latest-episode-verified-research-report-workflow.md
 └── checklists/{requirements,safety}.md
 
-src/podcast_ingest_core/
+src/corpus_ingest_core/
 ├── latest_episode_verified_research_report_workflow_runner.py
 ├── verified_research_report.py
 ├── corpus_latest_episode_deterministic_workflow_runner.py

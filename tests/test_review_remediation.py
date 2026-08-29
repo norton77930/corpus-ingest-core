@@ -1,8 +1,7 @@
 from __future__ import annotations
 
-from concurrent.futures import ThreadPoolExecutor
-from datetime import datetime
 import json
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from threading import Event
 
@@ -10,9 +9,9 @@ import pytest
 
 
 def _configure_local_artifacts(monkeypatch, tmp_path: Path) -> Path:
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_index as corpus_index
-    import podcast_ingest_core.semantic_summary_smoke_review as review
+    import corpus_ingest_core.corpus_index as corpus_index
+    import corpus_ingest_core.semantic_summary_smoke_review as review
+    from corpus_ingest_core import storage
 
     for name, directory in (
         ("TRANSCRIPTS_DIR", "transcripts"),
@@ -35,7 +34,7 @@ def _write_transcript_and_summary(
     title: str = "EP700 Zulu",
     text: str | None = None,
 ) -> Path:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     _configure_local_artifacts(monkeypatch, tmp_path)
     transcript = storage.transcript_asset_paths("gooaye", episode_ref, title)
@@ -77,8 +76,8 @@ def _write_transcript_and_summary(
 
 def test_red_forged_all_pass_review_with_correct_metadata_is_not_authentic(monkeypatch, tmp_path):
     """A payload that is internally self-consistent is not evidence of evaluation."""
-    from podcast_ingest_core import semantic_summary_smoke_review as writer
-    from podcast_ingest_core.semantic_review_artifact import inspect_semantic_review
+    from corpus_ingest_core import semantic_summary_smoke_review as writer
+    from corpus_ingest_core.semantic_review_artifact import inspect_semantic_review
 
     summary = _write_transcript_and_summary(monkeypatch, tmp_path)
     created = writer.review_semantic_summary_smoke("gooaye", "EP700")
@@ -99,7 +98,7 @@ def test_red_forged_all_pass_review_with_correct_metadata_is_not_authentic(monke
 
 @pytest.mark.parametrize("authorization", ["Bearer AbCdEf0123456789._-~+/=", "bEaReR token_0123456789"])
 def test_red_bearer_authorization_is_rejected_by_semantic_reviewer(monkeypatch, tmp_path, authorization):
-    from podcast_ingest_core import semantic_summary_smoke_review as writer
+    from corpus_ingest_core import semantic_summary_smoke_review as writer
 
     _write_transcript_and_summary(monkeypatch, tmp_path, text=f"Bearer scan\n{authorization}")
 
@@ -109,10 +108,9 @@ def test_red_bearer_authorization_is_rejected_by_semantic_reviewer(monkeypatch, 
 
 
 def test_red_canonical_summary_uses_transcript_title_not_lexicographic_candidate(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
-    from podcast_ingest_core import corpus_index
-    from podcast_ingest_core import semantic_summary_smoke_review as writer
-    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as workflow
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as workflow
+    from corpus_ingest_core import corpus_index, storage
+    from corpus_ingest_core import semantic_summary_smoke_review as writer
 
     zulu = _write_transcript_and_summary(monkeypatch, tmp_path, title="EP700 Zulu")
     alpha = storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha")
@@ -136,7 +134,7 @@ def test_red_neutral_semantic_review_uses_low_level_disclaimer_policy_without_ll
     """Semantic review remains deterministic and compatible with safety disclaimers."""
     import inspect
 
-    import podcast_ingest_core.semantic_review_artifact as review
+    import corpus_ingest_core.semantic_review_artifact as review
 
     source = inspect.getsource(review)
     assert "stock_lens_synthesis" not in source
@@ -145,11 +143,11 @@ def test_red_neutral_semantic_review_uses_low_level_disclaimer_policy_without_ll
 
     evaluation = review.evaluate_semantic_review_bytes(
         (
-            "Summary mode: semantic-llm\nProvider: fixture\nModel: fixture\n"
-            "Transcript status: valid\n[00:00:00 - 00:00:05] fixture\n"
-            "## Chunk Summaries\n"
-            "This is not investment advice. No buy/sell/hold advice is provided."
-        ).encode("utf-8"),
+            b"Summary mode: semantic-llm\nProvider: fixture\nModel: fixture\n"
+            b"Transcript status: valid\n[00:00:00 - 00:00:05] fixture\n"
+            b"## Chunk Summaries\n"
+            b"This is not investment advice. No buy/sell/hold advice is provided."
+        ),
         semantic_summary_path=Path("summary.semantic.md"),
     )
 
@@ -162,7 +160,7 @@ def test_red_neutral_semantic_review_uses_low_level_disclaimer_policy_without_ll
 
 
 def test_red_same_second_review_writers_claim_distinct_complete_artifacts(monkeypatch, tmp_path):
-    from podcast_ingest_core import semantic_summary_smoke_review as writer
+    from corpus_ingest_core import semantic_summary_smoke_review as writer
 
     _write_transcript_and_summary(monkeypatch, tmp_path)
     monkeypatch.setattr(writer, "_next_available_path", lambda path: path)
@@ -177,8 +175,8 @@ def test_red_same_second_review_writers_claim_distinct_complete_artifacts(monkey
 
 
 def test_review_writer_holds_the_episode_claim_while_publishing(monkeypatch, tmp_path):
-    from podcast_ingest_core.episode_claim import _episode_writer_claim_is_held
-    from podcast_ingest_core import semantic_summary_smoke_review as writer
+    from corpus_ingest_core import semantic_summary_smoke_review as writer
+    from corpus_ingest_core.episode_claim import _episode_writer_claim_is_held
 
     _write_transcript_and_summary(monkeypatch, tmp_path)
     original_publish = writer._publish_review_artifacts
@@ -197,8 +195,8 @@ def test_review_writer_holds_the_episode_claim_while_publishing(monkeypatch, tmp
 
 
 def test_review_writer_reenters_an_existing_same_episode_claim(monkeypatch, tmp_path):
-    from podcast_ingest_core.episode_claim import episode_writer_claim
-    from podcast_ingest_core import semantic_summary_smoke_review as writer
+    from corpus_ingest_core import semantic_summary_smoke_review as writer
+    from corpus_ingest_core.episode_claim import episode_writer_claim
 
     _write_transcript_and_summary(monkeypatch, tmp_path)
 
@@ -209,7 +207,7 @@ def test_review_writer_reenters_an_existing_same_episode_claim(monkeypatch, tmp_
 
 
 def test_review_writer_serializes_external_same_episode_writer(monkeypatch, tmp_path):
-    from podcast_ingest_core import semantic_summary_smoke_review as writer
+    from corpus_ingest_core import semantic_summary_smoke_review as writer
 
     _write_transcript_and_summary(monkeypatch, tmp_path)
     original_publish = writer._publish_review_artifacts
@@ -243,8 +241,8 @@ def test_review_writer_serializes_external_same_episode_writer(monkeypatch, tmp_
 
 @pytest.mark.parametrize("selector", ["latest", "LATEST", "Latest"])
 def test_red_reserved_selector_is_rejected_before_completion_core_selection(monkeypatch, selector):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as workflow
-    from podcast_ingest_core import CorpusEpisodeCompletionWorkflowRunnerFailedError
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as workflow
+    from corpus_ingest_core import CorpusEpisodeCompletionWorkflowRunnerFailedError
 
     monkeypatch.setattr(
         workflow,
@@ -260,9 +258,9 @@ def test_red_reserved_selector_is_rejected_before_completion_core_selection(monk
 
 @pytest.mark.parametrize("selector", ["latest", "LATEST", "Latest"])
 def test_red_reserved_selector_is_rejected_before_018_core_rss_and_checkpoint(monkeypatch, selector):
-    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as workflow
-    from podcast_ingest_core import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
-    from podcast_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as workflow
+    from corpus_ingest_core import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
+    from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     monkeypatch.setattr(
         workflow,
@@ -281,7 +279,7 @@ def test_red_reserved_selector_is_rejected_before_018_core_rss_and_checkpoint(mo
 
 @pytest.mark.parametrize("selector", ["latest", "LATEST", "Latest"])
 def test_red_reserved_selector_is_rejected_by_mcp_before_core(monkeypatch, selector):
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     monkeypatch.setattr(
         mcp_server.completion_workflow_runner,
@@ -297,7 +295,7 @@ def test_red_reserved_selector_is_rejected_by_mcp_before_core(monkeypatch, selec
 
 
 def test_red_late_failed_checkpoint_cannot_downgrade_published_bundle(tmp_path):
-    import podcast_ingest_core.latest_episode_verified_research_report_workflow_runner as workflow
+    import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as workflow
 
     checkpoint = tmp_path / "EP700.checkpoint.json"
     digest = "a" * 64
@@ -330,8 +328,8 @@ def _same_second_process_review(root_text: str, result_queue) -> None:
     from datetime import datetime as real_datetime
     from pathlib import Path as local_path
 
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.semantic_summary_smoke_review as writer
+    import corpus_ingest_core.semantic_summary_smoke_review as writer
+    from corpus_ingest_core import storage
 
     root = local_path(root_text)
     storage.TRANSCRIPTS_DIR = root / "transcripts"
@@ -355,7 +353,7 @@ def _hold_artifact_claim_until_terminated(claim_path_text: str, result_queue) ->
     """Spawn target: hold an OS-backed claim until the parent terminates us."""
     import time
 
-    from podcast_ingest_core.artifact_lock import exclusive_artifact_claim
+    from corpus_ingest_core.artifact_lock import exclusive_artifact_claim
 
     with exclusive_artifact_claim(Path(claim_path_text), timeout_seconds=5.0):
         result_queue.put("held")
@@ -364,7 +362,7 @@ def _hold_artifact_claim_until_terminated(claim_path_text: str, result_queue) ->
 
 def _resume_artifact_claim(claim_path_text: str, result_queue) -> None:
     """Spawn target: prove a persistent lockfile is not a held OS lock."""
-    from podcast_ingest_core.artifact_lock import exclusive_artifact_claim
+    from corpus_ingest_core.artifact_lock import exclusive_artifact_claim
 
     try:
         with exclusive_artifact_claim(Path(claim_path_text), timeout_seconds=0.5):
@@ -420,7 +418,7 @@ def test_red_process_lifetime_claim_releases_after_terminated_holder_and_keeps_l
 
 def _resume_checkpoint_writer(root_text: str, result_queue) -> None:
     """Spawn target: resume a real checkpoint write after a killed holder."""
-    from podcast_ingest_core import latest_episode_verified_research_report_workflow_runner as runner
+    from corpus_ingest_core import latest_episode_verified_research_report_workflow_runner as runner
 
     checkpoint = Path(root_text) / "EP700.checkpoint.json"
     runner._write_checkpoint(
@@ -508,8 +506,8 @@ def test_red_inspector_skips_future_forged_and_rejected_candidates_for_latest_au
     """Filename order cannot let invalid future artifacts poison current provenance."""
     from datetime import datetime as real_datetime
 
-    from podcast_ingest_core import semantic_summary_smoke_review as writer
-    from podcast_ingest_core.semantic_review_artifact import inspect_semantic_review
+    from corpus_ingest_core import semantic_summary_smoke_review as writer
+    from corpus_ingest_core.semantic_review_artifact import inspect_semantic_review
 
     reports_dir = _configure_local_artifacts(monkeypatch, tmp_path)
     summary = _write_transcript_and_summary(monkeypatch, tmp_path)

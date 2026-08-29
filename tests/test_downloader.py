@@ -1,10 +1,9 @@
-from pathlib import Path
 import json
 import sys
 
 import pytest
 
-from podcast_ingest_core.models import Episode
+from corpus_ingest_core.models import Episode
 
 
 class FakeResponse:
@@ -32,7 +31,7 @@ def _episode(audio_url="https://example.com/audio/EP672.mp3", title="EP672 ÂèàÊñ
 
 
 def _use_tmp_audio_dir(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     audio_dir = tmp_path / "audio"
     monkeypatch.setattr(storage, "AUDIO_DIR", audio_dir)
@@ -40,7 +39,7 @@ def _use_tmp_audio_dir(monkeypatch, tmp_path):
 
 
 def test_download_audio_uses_episode_audio_url(monkeypatch, tmp_path):
-    from podcast_ingest_core import downloader
+    from corpus_ingest_core import downloader
 
     _use_tmp_audio_dir(monkeypatch, tmp_path)
     requested_urls = []
@@ -59,8 +58,8 @@ def test_download_audio_uses_episode_audio_url(monkeypatch, tmp_path):
 
 
 def test_download_audio_raises_when_audio_url_missing(monkeypatch):
-    from podcast_ingest_core import downloader
-    from podcast_ingest_core.errors import AudioUrlMissingError
+    from corpus_ingest_core import downloader
+    from corpus_ingest_core.errors import AudioUrlMissingError
 
     monkeypatch.setattr(downloader, "get_episode", lambda *_args: _episode(audio_url=None))
 
@@ -69,7 +68,7 @@ def test_download_audio_raises_when_audio_url_missing(monkeypatch):
 
 
 def test_download_audio_streams_to_target_and_removes_part(monkeypatch, tmp_path):
-    from podcast_ingest_core import downloader
+    from corpus_ingest_core import downloader
 
     _use_tmp_audio_dir(monkeypatch, tmp_path)
     monkeypatch.setattr(downloader, "get_episode", lambda *_args: _episode())
@@ -91,8 +90,8 @@ def test_download_audio_streams_to_target_and_removes_part(monkeypatch, tmp_path
 
 
 def test_download_audio_skips_existing_target_without_http(monkeypatch, tmp_path):
-    from podcast_ingest_core import downloader
-    from podcast_ingest_core.storage import audio_asset_path
+    from corpus_ingest_core import downloader
+    from corpus_ingest_core.storage import audio_asset_path
 
     _use_tmp_audio_dir(monkeypatch, tmp_path)
     episode = _episode()
@@ -115,8 +114,8 @@ def test_download_audio_skips_existing_target_without_http(monkeypatch, tmp_path
 
 
 def test_download_audio_raises_for_non_2xx(monkeypatch, tmp_path):
-    from podcast_ingest_core import downloader
-    from podcast_ingest_core.errors import DownloadFailedError
+    from corpus_ingest_core import downloader
+    from corpus_ingest_core.errors import DownloadFailedError
 
     _use_tmp_audio_dir(monkeypatch, tmp_path)
     monkeypatch.setattr(downloader, "get_episode", lambda *_args: _episode())
@@ -133,7 +132,7 @@ def test_download_audio_raises_for_non_2xx(monkeypatch, tmp_path):
 
 
 def test_audio_filename_removes_windows_illegal_characters(monkeypatch, tmp_path):
-    from podcast_ingest_core import downloader
+    from corpus_ingest_core import downloader
 
     _use_tmp_audio_dir(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -154,7 +153,7 @@ def test_audio_filename_removes_windows_illegal_characters(monkeypatch, tmp_path
 
 
 def test_url_extension_mp3_wins(monkeypatch, tmp_path):
-    from podcast_ingest_core import downloader
+    from corpus_ingest_core import downloader
 
     _use_tmp_audio_dir(monkeypatch, tmp_path)
     monkeypatch.setattr(downloader, "get_episode", lambda *_args: _episode())
@@ -170,7 +169,7 @@ def test_url_extension_mp3_wins(monkeypatch, tmp_path):
 
 
 def test_content_type_mp4_sets_m4a_when_url_has_no_extension(monkeypatch, tmp_path):
-    from podcast_ingest_core import downloader
+    from corpus_ingest_core import downloader
 
     _use_tmp_audio_dir(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -190,8 +189,9 @@ def test_content_type_mp4_sets_m4a_when_url_has_no_extension(monkeypatch, tmp_pa
 
 
 def test_download_cli_parses_podcast_and_episode(monkeypatch, capsys, tmp_path):
-    from podcast_ingest_core.models import AudioAsset
     from scripts import download_episode
+
+    from corpus_ingest_core.models import AudioAsset
 
     asset = AudioAsset(
         podcast_id="gooaye",
@@ -226,17 +226,17 @@ def test_download_audio_refuses_a_non_rss_source_with_a_source_aware_error():
     error must point there rather than failing inside the RSS lookup.
     """
 
-    from podcast_ingest_core import downloader
-    from podcast_ingest_core.errors import UnsupportedSourceTypeError
+    from corpus_ingest_core import downloader
+    from corpus_ingest_core.errors import UnsupportedSourceTypeError
 
     with pytest.raises(UnsupportedSourceTypeError, match="x-video"):
         downloader.download_audio("x-raytar", "2071290493581840707")
 
 
 def test_download_audio_refuses_youtube_and_names_the_ingest_path(monkeypatch):
-    from podcast_ingest_core import config, downloader
-    from podcast_ingest_core.errors import UnsupportedSourceTypeError
-    from podcast_ingest_core.models import PodcastProfile
+    from corpus_ingest_core import config, downloader
+    from corpus_ingest_core.errors import UnsupportedSourceTypeError
+    from corpus_ingest_core.models import PodcastProfile
 
     monkeypatch.setattr(
         config,

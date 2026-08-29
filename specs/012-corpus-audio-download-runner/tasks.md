@@ -31,11 +31,11 @@
 
 **CRITICAL**: No user story implementation can begin until this phase is complete.
 
-- [X] T005 Add audio download run filter, counts, row, result, and warning models in `src/podcast_ingest_core/models.py`
-- [X] T006 Add audio download runner error type in `src/podcast_ingest_core/errors.py`
-- [X] T007 Add `CorpusAudioDownloadRunAssetPaths` and `corpus_audio_download_run_asset_paths(podcast_id)` in `src/podcast_ingest_core/storage.py`
-- [X] T008 Create `src/podcast_ingest_core/corpus_audio_download_runner.py` with public function signature, run mode constants, audio selection constants, and no-op-safe module skeleton
-- [X] T009 Export audio download runner public function, error, and model types from `src/podcast_ingest_core/__init__.py`
+- [X] T005 Add audio download run filter, counts, row, result, and warning models in `src/corpus_ingest_core/models.py`
+- [X] T006 Add audio download runner error type in `src/corpus_ingest_core/errors.py`
+- [X] T007 Add `CorpusAudioDownloadRunAssetPaths` and `corpus_audio_download_run_asset_paths(podcast_id)` in `src/corpus_ingest_core/storage.py`
+- [X] T008 Create `src/corpus_ingest_core/corpus_audio_download_runner.py` with public function signature, run mode constants, audio selection constants, and no-op-safe module skeleton
+- [X] T009 Export audio download runner public function, error, and model types from `src/corpus_ingest_core/__init__.py`
 - [X] T010 Run foundational targeted tests `python -m pytest tests/test_corpus_audio_download_runner.py -k "contract or storage or error" --basetemp=.pytest-tmp/run-012-foundation`
 
 **Checkpoint**: Public contracts and module boundaries exist, but runner behavior is not complete.
@@ -59,10 +59,10 @@
 
 ### Implementation for User Story 1
 
-- [X] T017 [US1] Implement refreshed remediation plan loading and empty corpus dry-run handling in `src/podcast_ingest_core/corpus_audio_download_runner.py`
-- [X] T018 [US1] Implement audio selection for ready audio actions with audio status exactly `missing` in `src/podcast_ingest_core/corpus_audio_download_runner.py`
-- [X] T019 [US1] Implement skipped row reasons for available audio, blocked audio, non-ready source statuses, non-audio families, optional/gated actions, and unknown families in `src/podcast_ingest_core/corpus_audio_download_runner.py`
-- [X] T020 [US1] Implement dry-run result serialization with null report paths and no artifact writes in `src/podcast_ingest_core/corpus_audio_download_runner.py`
+- [X] T017 [US1] Implement refreshed remediation plan loading and empty corpus dry-run handling in `src/corpus_ingest_core/corpus_audio_download_runner.py`
+- [X] T018 [US1] Implement audio selection for ready audio actions with audio status exactly `missing` in `src/corpus_ingest_core/corpus_audio_download_runner.py`
+- [X] T019 [US1] Implement skipped row reasons for available audio, blocked audio, non-ready source statuses, non-audio families, optional/gated actions, and unknown families in `src/corpus_ingest_core/corpus_audio_download_runner.py`
+- [X] T020 [US1] Implement dry-run result serialization with null report paths and no artifact writes in `src/corpus_ingest_core/corpus_audio_download_runner.py`
 - [X] T021 [US1] Implement thin dry-run CLI `scripts/run_corpus_audio_download.py`
 - [X] T022 [US1] Add CLI dry-run stdout contract test for output paths and counts in `tests/test_corpus_audio_download_runner.py`
 - [X] T023 [US1] Run User Story 1 targeted tests `python -m pytest tests/test_corpus_audio_download_runner.py -k "dry_run or selection or unsafe or no_write or generated_at or cli" --basetemp=.pytest-tmp/run-012-us1`
@@ -89,11 +89,11 @@
 
 ### Implementation for User Story 2
 
-- [X] T031 [US2] Implement confirmed execution episode normalization, validation, and pre-download rejection in `src/podcast_ingest_core/corpus_audio_download_runner.py`
-- [X] T032 [US2] Implement synthetic rejected row for requested episode absent from refreshed remediation plan in `src/podcast_ingest_core/corpus_audio_download_runner.py`
-- [X] T033 [US2] Implement download dispatch using existing `download_audio(podcast_id, episode_ref)` in `src/podcast_ingest_core/corpus_audio_download_runner.py`
-- [X] T034 [US2] Implement downloaded versus reused outcome mapping and local output metadata extraction in `src/podcast_ingest_core/corpus_audio_download_runner.py`
-- [X] T035 [US2] Implement deterministic confirmed JSON and Markdown run report writers in `src/podcast_ingest_core/corpus_audio_download_runner.py`
+- [X] T031 [US2] Implement confirmed execution episode normalization, validation, and pre-download rejection in `src/corpus_ingest_core/corpus_audio_download_runner.py`
+- [X] T032 [US2] Implement synthetic rejected row for requested episode absent from refreshed remediation plan in `src/corpus_ingest_core/corpus_audio_download_runner.py`
+- [X] T033 [US2] Implement download dispatch using existing `download_audio(podcast_id, episode_ref)` in `src/corpus_ingest_core/corpus_audio_download_runner.py`
+- [X] T034 [US2] Implement downloaded versus reused outcome mapping and local output metadata extraction in `src/corpus_ingest_core/corpus_audio_download_runner.py`
+- [X] T035 [US2] Implement deterministic confirmed JSON and Markdown run report writers in `src/corpus_ingest_core/corpus_audio_download_runner.py`
 - [X] T036 [US2] Extend CLI parsing for `--confirm` and `--episode` in `scripts/run_corpus_audio_download.py`
 - [X] T037 [US2] Add CLI confirmed stdout and stderr contract tests in `tests/test_corpus_audio_download_runner.py`
 - [X] T038 [US2] Run User Story 2 targeted tests `python -m pytest tests/test_corpus_audio_download_runner.py -k "confirm or episode or download_audio or shell or reused or report or cli" --basetemp=.pytest-tmp/run-012-us2`
@@ -118,9 +118,9 @@
 
 ### Implementation for User Story 3
 
-- [X] T044 [US3] Implement per-episode downloader exception capture and failure row serialization without raw exception text or traceback leakage in `src/podcast_ingest_core/corpus_audio_download_runner.py`
-- [X] T045 [US3] Harden JSON, Markdown, stdout, and stderr serialization against full source URLs, query strings, prompts, raw LLM output, secrets, traceback bodies, market facts, and investment advice in `src/podcast_ingest_core/corpus_audio_download_runner.py` and `scripts/run_corpus_audio_download.py`
-- [X] T046 [US3] Add manual follow-up warning metadata for confirmed audio writes or reuse without calling `transcribe_episode`, `run_corpus_remediation`, or `rebuild_cache` in `src/podcast_ingest_core/corpus_audio_download_runner.py`
+- [X] T044 [US3] Implement per-episode downloader exception capture and failure row serialization without raw exception text or traceback leakage in `src/corpus_ingest_core/corpus_audio_download_runner.py`
+- [X] T045 [US3] Harden JSON, Markdown, stdout, and stderr serialization against full source URLs, query strings, prompts, raw LLM output, secrets, traceback bodies, market facts, and investment advice in `src/corpus_ingest_core/corpus_audio_download_runner.py` and `scripts/run_corpus_audio_download.py`
+- [X] T046 [US3] Add manual follow-up warning metadata for confirmed audio writes or reuse without calling `transcribe_episode`, `run_corpus_remediation`, or `rebuild_cache` in `src/corpus_ingest_core/corpus_audio_download_runner.py`
 - [X] T047 [US3] Run User Story 3 targeted tests `python -m pytest tests/test_corpus_audio_download_runner.py -k "failure or leak or boundary or investment or follow_up or cache" --basetemp=.pytest-tmp/run-012-us3`
 
 **Checkpoint**: Failed audio download is isolated and safety boundaries remain explicit.

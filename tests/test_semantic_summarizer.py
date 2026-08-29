@@ -9,7 +9,7 @@ import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
     monkeypatch.setattr(storage, "SUMMARIES_DIR", tmp_path / "summaries")
@@ -26,7 +26,7 @@ def _write_transcript(
     segment_count=None,
     completed=True,
 ):
-    from podcast_ingest_core.storage import transcript_asset_paths
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     if segments is None:
@@ -85,7 +85,7 @@ class FakeProvider:
 
 
 def test_semantic_summarizer_calls_validation_before_provider(monkeypatch, tmp_path):
-    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+    import corpus_ingest_core.semantic_summarizer as semantic_summarizer
 
     _write_transcript(monkeypatch, tmp_path)
     provider = FakeProvider()
@@ -113,7 +113,7 @@ def test_semantic_summarizer_calls_validation_before_provider(monkeypatch, tmp_p
 def test_semantic_summarizer_forwards_reasoning_effort_to_provider(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+    import corpus_ingest_core.semantic_summarizer as semantic_summarizer
 
     _write_transcript(monkeypatch, tmp_path)
     provider = FakeProvider()
@@ -137,7 +137,7 @@ def test_semantic_summarizer_forwards_reasoning_effort_to_provider(
 
 
 def test_semantic_summarizer_chunks_segments_by_time(monkeypatch, tmp_path):
-    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+    import corpus_ingest_core.semantic_summarizer as semantic_summarizer
 
     _write_transcript(monkeypatch, tmp_path)
     provider = FakeProvider()
@@ -160,7 +160,7 @@ def test_semantic_summarizer_chunks_segments_by_time(monkeypatch, tmp_path):
 
 
 def test_semantic_summarizer_chunks_segments_by_max_segments(monkeypatch, tmp_path):
-    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+    import corpus_ingest_core.semantic_summarizer as semantic_summarizer
 
     segments = [
         {"id": 1, "start": 0.0, "end": 1.0, "text": "a"},
@@ -186,7 +186,7 @@ def test_semantic_summarizer_chunks_segments_by_max_segments(monkeypatch, tmp_pa
 
 
 def test_semantic_summarizer_writes_semantic_markdown(monkeypatch, tmp_path):
-    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+    import corpus_ingest_core.semantic_summarizer as semantic_summarizer
 
     _write_transcript(monkeypatch, tmp_path)
     provider = FakeProvider()
@@ -211,7 +211,7 @@ def test_semantic_summarizer_writes_semantic_markdown(monkeypatch, tmp_path):
 
 
 def test_semantic_summarizer_generates_empty_summary_without_provider(monkeypatch, tmp_path):
-    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+    import corpus_ingest_core.semantic_summarizer as semantic_summarizer
 
     _write_transcript(
         monkeypatch,
@@ -243,8 +243,8 @@ def test_semantic_summarizer_generates_empty_summary_without_provider(monkeypatc
 
 
 def test_semantic_summarizer_rejects_partial_by_default(monkeypatch, tmp_path):
-    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
-    from podcast_ingest_core.errors import TranscriptParseError
+    import corpus_ingest_core.semantic_summarizer as semantic_summarizer
+    from corpus_ingest_core.errors import TranscriptParseError
 
     _write_transcript(monkeypatch, tmp_path, completed=False)
     monkeypatch.setattr(
@@ -263,7 +263,7 @@ def test_semantic_summarizer_rejects_partial_by_default(monkeypatch, tmp_path):
 
 
 def test_semantic_summarizer_allows_partial_when_requested(monkeypatch, tmp_path):
-    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+    import corpus_ingest_core.semantic_summarizer as semantic_summarizer
 
     _write_transcript(monkeypatch, tmp_path, completed=False)
     monkeypatch.setattr(semantic_summarizer, "_build_provider", lambda **kwargs: FakeProvider())
@@ -281,8 +281,8 @@ def test_semantic_summarizer_allows_partial_when_requested(monkeypatch, tmp_path
 
 
 def test_semantic_summarizer_missing_api_key_raises_config_error(monkeypatch, tmp_path):
-    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
-    from podcast_ingest_core.errors import LLMProviderConfigError
+    import corpus_ingest_core.semantic_summarizer as semantic_summarizer
+    from corpus_ingest_core.errors import LLMProviderConfigError
 
     _write_transcript(monkeypatch, tmp_path)
     monkeypatch.delenv("OPENAI_API_KEY", raising=False)
@@ -297,8 +297,8 @@ def test_semantic_summarizer_missing_api_key_raises_config_error(monkeypatch, tm
 
 
 def test_openai_provider_request_failure_raises_request_error(monkeypatch):
-    from podcast_ingest_core.errors import LLMProviderRequestError
-    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
+    from corpus_ingest_core.errors import LLMProviderRequestError
+    from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
 
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
 
@@ -312,7 +312,7 @@ def test_openai_provider_request_failure_raises_request_error(monkeypatch):
     def fake_post(*args, **kwargs):
         return Response()
 
-    import podcast_ingest_core.llm_provider as llm_provider
+    import corpus_ingest_core.llm_provider as llm_provider
 
     monkeypatch.setattr(llm_provider.requests, "post", fake_post)
     # Batch 3C: construct only via create_provider (exact ack + factory token).
@@ -327,7 +327,7 @@ def test_openai_provider_request_failure_raises_request_error(monkeypatch):
 
 
 def test_openai_provider_omits_reasoning_effort_by_default(monkeypatch):
-    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
+    from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
 
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     captured = {}
@@ -344,7 +344,7 @@ def test_openai_provider_omits_reasoning_effort_by_default(monkeypatch):
         captured["timeout"] = kwargs["timeout"]
         return Response()
 
-    import podcast_ingest_core.llm_provider as llm_provider
+    import corpus_ingest_core.llm_provider as llm_provider
 
     monkeypatch.setattr(llm_provider.requests, "post", fake_post)
     messages = [{"role": "user", "content": "hi"}]
@@ -363,7 +363,7 @@ def test_openai_provider_omits_reasoning_effort_by_default(monkeypatch):
 
 
 def test_openai_provider_uses_requested_read_timeout(monkeypatch):
-    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
+    from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
 
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     captured = {}
@@ -379,7 +379,7 @@ def test_openai_provider_uses_requested_read_timeout(monkeypatch):
         captured["timeout"] = kwargs["timeout"]
         return Response()
 
-    import podcast_ingest_core.llm_provider as llm_provider
+    import corpus_ingest_core.llm_provider as llm_provider
 
     monkeypatch.setattr(llm_provider.requests, "post", fake_post)
     provider = create_provider(
@@ -394,7 +394,7 @@ def test_openai_provider_uses_requested_read_timeout(monkeypatch):
 
 
 def test_openai_provider_sends_reasoning_effort_when_requested(monkeypatch):
-    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
+    from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
 
     monkeypatch.setenv("OPENAI_API_KEY", "test-key")
     captured = {}
@@ -410,7 +410,7 @@ def test_openai_provider_sends_reasoning_effort_when_requested(monkeypatch):
         captured["json"] = kwargs["json"]
         return Response()
 
-    import podcast_ingest_core.llm_provider as llm_provider
+    import corpus_ingest_core.llm_provider as llm_provider
 
     monkeypatch.setattr(llm_provider.requests, "post", fake_post)
     messages = [{"role": "user", "content": "hi"}]
@@ -430,7 +430,7 @@ def test_openai_provider_sends_reasoning_effort_when_requested(monkeypatch):
 
 
 def test_openai_provider_prefers_generic_model_and_base_url(monkeypatch):
-    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
+    from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
 
     monkeypatch.setenv("API_KEY", "test-key")
     monkeypatch.setenv("MODEL", "generic-model")
@@ -449,7 +449,7 @@ def test_openai_provider_prefers_generic_model_and_base_url(monkeypatch):
 
 
 def test_openai_provider_falls_back_to_legacy_openai_model_and_base_url(monkeypatch):
-    from podcast_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
+    from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK, create_provider
 
     monkeypatch.setenv("API_KEY", "test-key")
     monkeypatch.delenv("MODEL", raising=False)
@@ -468,8 +468,9 @@ def test_openai_provider_falls_back_to_legacy_openai_model_and_base_url(monkeypa
 
 
 def test_summarize_cli_parses_semantic_options(monkeypatch, capsys, tmp_path):
-    from podcast_ingest_core.models import SummaryAsset
     from scripts import summarize_episode
+
+    from corpus_ingest_core.models import SummaryAsset
 
     asset = SummaryAsset(
         podcast_id="gooaye",
@@ -582,8 +583,9 @@ def test_summarize_cli_semantic_mode_requires_exact_ack_before_provider(monkeypa
 
 
 def test_summarize_cli_loads_env_file_for_semantic_mode(monkeypatch, capsys, tmp_path):
-    from podcast_ingest_core.models import SummaryAsset
     from scripts import summarize_episode
+
+    from corpus_ingest_core.models import SummaryAsset
 
     env_path = tmp_path / ".env"
     env_path.write_text("API_KEY=secret-value\nMODEL=file-model\n", encoding="utf-8")
@@ -694,7 +696,7 @@ _EXPECTED_FINANCE_DOCUMENT = """# Gooaye 股癌 - EP672 語意摘要
 
 
 def _profile_with_summary(summary_profile):
-    from podcast_ingest_core.models import PodcastProfile
+    from corpus_ingest_core.models import PodcastProfile
 
     return PodcastProfile(
         podcast_id="gooaye",
@@ -712,7 +714,7 @@ def test_finance_rendering_is_byte_identical_to_the_pre_spec_037_document(
     """Every published verified research report descends from a semantic summary.
     This literal is the fixed point that keeps 股癌's shape from drifting."""
 
-    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+    import corpus_ingest_core.semantic_summarizer as semantic_summarizer
 
     paths = _write_transcript(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -736,7 +738,7 @@ def test_finance_rendering_is_byte_identical_to_the_pre_spec_037_document(
 def test_learning_notes_replaces_the_disclaimer_and_keeps_the_envelope(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+    import corpus_ingest_core.semantic_summarizer as semantic_summarizer
 
     _write_transcript(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -772,7 +774,7 @@ def test_learning_notes_replaces_the_disclaimer_and_keeps_the_envelope(
 def test_the_profile_reaches_the_provider_factory(monkeypatch, tmp_path):
     """FR-009: the shape follows the registered profile, not a call argument."""
 
-    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+    import corpus_ingest_core.semantic_summarizer as semantic_summarizer
 
     _write_transcript(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -804,7 +806,7 @@ def test_semantic_summarize_episode_has_no_per_run_profile_argument():
 
     import inspect
 
-    from podcast_ingest_core.semantic_summarizer import semantic_summarize_episode
+    from corpus_ingest_core.semantic_summarizer import semantic_summarize_episode
 
     assert "summary_profile" not in inspect.signature(
         semantic_summarize_episode
@@ -815,7 +817,7 @@ def test_empty_transcript_branch_still_honours_the_profile(monkeypatch, tmp_path
     """The empty-chunk path renders without ever building a provider, so it is
     the one place the profile reaches rendering through a different route."""
 
-    import podcast_ingest_core.semantic_summarizer as semantic_summarizer
+    import corpus_ingest_core.semantic_summarizer as semantic_summarizer
 
     _write_transcript(
         monkeypatch,

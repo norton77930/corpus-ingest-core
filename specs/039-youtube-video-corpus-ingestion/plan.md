@@ -29,7 +29,7 @@ Add YouTube as a third corpus source by reusing Spec 036's acquire stack, and cl
 ## Constitution Check
 
 - **I Local artifacts**: WAV, seed, and transcript trio at storage-derived paths; video never lands under `data/`.
-- **II Thin interfaces**: behaviour in `src/podcast_ingest_core`; `scripts/run_youtube_video_ingest.py` parses, calls, prints metadata-only JSON.
+- **II Thin interfaces**: behaviour in `src/corpus_ingest_core`; `scripts/run_youtube_video_ingest.py` parses, calls, prints metadata-only JSON.
 - **III Dry-run first**: `confirm=false` default; plan lists real identifiers and writes/reuses; no `.part` residue; a reuse must say reuse.
 - **IV LLM opt-in / secrets**: unused. No `.env`. Guest token only.
 - **V Evidence separation**: `[不確定：<guess>]` remains the transcriber's convention; this spec does not invent market facts.
@@ -60,26 +60,26 @@ No constitution violations. Complexity table not used.
 
 ```text
 specs/039-youtube-video-corpus-ingestion/
-src/podcast_ingest_core/video_acquire.py          (new: shared metadata/download/extract)
-src/podcast_ingest_core/youtube_video_ingest.py   (new: identity, seed, orchestrate)
-src/podcast_ingest_core/x_video_ingest.py         (call video_acquire; behaviour frozen)
-src/podcast_ingest_core/storage.py                (public is_safe_episode_ref; allow _)
-src/podcast_ingest_core/errors.py                 (YoutubeVideoIngest* errors)
-src/podcast_ingest_core/models.py                 (YoutubeVideoIngestResult)
-src/podcast_ingest_core/__init__.py               (export runner + errors)
-src/podcast_ingest_core/config.py                 (RSS refusal names YouTube ingest path)
-src/podcast_ingest_core/corpus_remediation_plan.py
-src/podcast_ingest_core/corpus_audio_download_runner.py
-src/podcast_ingest_core/corpus_local_transcription_runner.py
-src/podcast_ingest_core/corpus_episode_workflow_runner.py
-src/podcast_ingest_core/corpus_episode_completion_workflow_runner.py
-src/podcast_ingest_core/corpus_latest_episode_deterministic_workflow_runner.py
-src/podcast_ingest_core/episode_claim.py
-src/podcast_ingest_core/corpus_semantic_remediation_runner.py
-src/podcast_ingest_core/latest_episode_verified_research_report_workflow_runner.py
-src/podcast_ingest_core/mcp_episode_verified_research_report.py
-src/podcast_ingest_core/mcp_tools_corpus_workflows.py
-src/podcast_ingest_core/historical_verified_report_path.py
+src/corpus_ingest_core/video_acquire.py          (new: shared metadata/download/extract)
+src/corpus_ingest_core/youtube_video_ingest.py   (new: identity, seed, orchestrate)
+src/corpus_ingest_core/x_video_ingest.py         (call video_acquire; behaviour frozen)
+src/corpus_ingest_core/storage.py                (public is_safe_episode_ref; allow _)
+src/corpus_ingest_core/errors.py                 (YoutubeVideoIngest* errors)
+src/corpus_ingest_core/models.py                 (YoutubeVideoIngestResult)
+src/corpus_ingest_core/__init__.py               (export runner + errors)
+src/corpus_ingest_core/config.py                 (RSS refusal names YouTube ingest path)
+src/corpus_ingest_core/corpus_remediation_plan.py
+src/corpus_ingest_core/corpus_audio_download_runner.py
+src/corpus_ingest_core/corpus_local_transcription_runner.py
+src/corpus_ingest_core/corpus_episode_workflow_runner.py
+src/corpus_ingest_core/corpus_episode_completion_workflow_runner.py
+src/corpus_ingest_core/corpus_latest_episode_deterministic_workflow_runner.py
+src/corpus_ingest_core/episode_claim.py
+src/corpus_ingest_core/corpus_semantic_remediation_runner.py
+src/corpus_ingest_core/latest_episode_verified_research_report_workflow_runner.py
+src/corpus_ingest_core/mcp_episode_verified_research_report.py
+src/corpus_ingest_core/mcp_tools_corpus_workflows.py
+src/corpus_ingest_core/historical_verified_report_path.py
 scripts/run_youtube_video_ingest.py
 tests/test_youtube_video_ingest.py                (new)
 tests/test_video_acquire.py                       (new; fakes yt-dlp/av)

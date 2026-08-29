@@ -19,7 +19,7 @@ import ast
 import re
 from pathlib import Path
 
-SRC_DIR = Path(__file__).resolve().parents[1] / "src" / "podcast_ingest_core"
+SRC_DIR = Path(__file__).resolve().parents[1] / "src" / "corpus_ingest_core"
 SCRIPTS_DIR = Path(__file__).resolve().parents[1] / "scripts"
 
 GROUP_MODULES = (
@@ -135,7 +135,7 @@ def test_group_modules_are_imported_only_via_the_facade():
     session) would register its tools first. Ban direct imports everywhere
     except the facade itself."""
     import_pattern = re.compile(
-        r"(?:from|import)\s+(?:podcast_ingest_core\.|\.)?\s*mcp_tools_"
+        r"(?:from|import)\s+(?:corpus_ingest_core\.|\.)?\s*mcp_tools_"
     )
     self_name = Path(__file__).name
     offenders = []
@@ -154,7 +154,7 @@ def test_group_modules_are_imported_only_via_the_facade():
 
 
 def test_facade_exposes_every_contracted_alias():
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     missing = [name for name in FACADE_EXPORTS if not hasattr(mcp_server, name)]
     assert not missing, (
@@ -166,7 +166,7 @@ def test_facade_exposes_every_contracted_alias():
 def test_registered_tools_are_reexported_by_the_facade():
     import asyncio
 
-    from podcast_ingest_core import mcp_server
+    from corpus_ingest_core import mcp_server
 
     tools = asyncio.run(mcp_server.mcp.list_tools())
     missing = [tool.name for tool in tools if not hasattr(mcp_server, tool.name)]

@@ -1,41 +1,37 @@
 # Third-Party Notices
 
 This repository is licensed under the MIT License (see [LICENSE](LICENSE)), and
-that copyright covers the first-party work only. The directories listed below
-contain third-party source code that is redistributed here verbatim under its
-own license. Nothing in this repository's `LICENSE` alters or supersedes the
-terms below.
+that copyright covers the first-party work only.
 
-## NousResearch/hermes-agent
+**No third-party source is vendored on `main`.** Everything under `src/`,
+`tests/`, `scripts/`, and `specs/` on this branch is first-party work. The
+project's runtime dependencies are declared in `pyproject.toml` and installed
+from PyPI; they are not redistributed here.
 
-Two spec packages vendor an exact, byte-pinned snapshot of the upstream
-`NousResearch/hermes-agent` repository so that a source audit can be reproduced
-without fetching from the network:
+## NousResearch/hermes-agent (archived, still reachable by tag)
 
-| Path | Files | Pinned commit |
+Spec packages 026-034 vendored an exact, byte-pinned snapshot of the upstream
+`NousResearch/hermes-agent` repository so that a source audit could be
+reproduced without fetching from the network. That audit chain terminated
+BLOCKED and was removed from `main`; the complete history, including both
+snapshots, is preserved at the tag `archive/hermes-audit-chain`.
+
+A `git clone` fetches tags, so those bytes still travel with every copy of this
+repository. The upstream notice is therefore reproduced below, as its terms
+require.
+
+| Archived path (at `archive/hermes-audit-chain`) | Files | Pinned commit |
 | --- | --- | --- |
 | `specs/033-hermes-v019-pinned-source-loader-audit/upstream/NousResearch-hermes-agent-b7a05b6/` | 17 | `b7a05b6b6f509d14f708a2fe7b7c1d3559396ef6` |
 | `specs/034-hermes-v019-pinned-startup-source-graph/upstream/NousResearch-hermes-agent-b7a05b6/` | 20 | `b7a05b6b6f509d14f708a2fe7b7c1d3559396ef6` |
 
 Both snapshots come from upstream tree `3ae46c7c1576f9a3450a64729be314ba8e853eac`.
-Each file's SHA-256 is recorded in the corresponding
-`contracts/source-bundle-manifest.json`, and
-`tests/test_repository_secret_boundary.py` fails if any vendored byte drifts
-from its pinned digest. The two file lists differ because each spec pinned the
-subset its own audit needed; neither snapshot has been modified.
-
-These files are static audit inputs. They are read for source analysis and are
-never imported or executed by this project (`runtime_status=not_run`,
-`live_actions_authorized=false` in the spec 034 manifest).
+They were static audit inputs: read for source analysis, never imported or
+executed by this project, and never modified.
 
 Upstream project: <https://github.com/NousResearch/hermes-agent>
 
 ### License
-
-The upstream `LICENSE` is preserved verbatim at
-`specs/033-hermes-v019-pinned-source-loader-audit/upstream/NousResearch-hermes-agent-b7a05b6/LICENSE`
-and is reproduced in full here so that the notice travels with every copy of
-this repository, as its terms require.
 
 ```
 MIT License

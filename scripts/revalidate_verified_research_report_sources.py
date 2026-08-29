@@ -4,12 +4,12 @@ from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 import sys
+from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from podcast_ingest_core import (
+from corpus_ingest_core import (
     VerifiedResearchReportSourceRevalidationInputError,
     revalidate_verified_research_report_sources,
     verified_research_report_source_revalidation_result_to_dict,

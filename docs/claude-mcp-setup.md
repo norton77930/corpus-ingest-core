@@ -13,17 +13,17 @@ python scripts/validate_mcp_setup.py --podcast gooaye --query 台積電
 
 ## Generic Claude MCP Config 範例
 
-請把 `D:/path/to/podcast-ingest-core` 換成你的 repo 實際路徑。不要在設定中放 API key。
+請把 `D:/path/to/corpus-ingest-core` 換成你的 repo 實際路徑。不要在設定中放 API key。
 
 ```json
 {
   "mcpServers": {
-    "podcast-ingest-core": {
+    "corpus-ingest-core": {
       "command": "python",
       "args": [
-        "D:/path/to/podcast-ingest-core/scripts/run_mcp_server.py"
+        "D:/path/to/corpus-ingest-core/scripts/run_mcp_server.py"
       ],
-      "cwd": "D:/path/to/podcast-ingest-core"
+      "cwd": "D:/path/to/corpus-ingest-core"
     }
   }
 }

@@ -1,0 +1,17 @@
+# Profile registry for the synthetic sample corpus.
+#
+# This file exists so the sample corpus never has to be added to
+# `config/podcasts.yaml`: `tests/test_contracts.py` asserts the exact profile
+# set of that committed file, on purpose, so an operator's personal profile
+# cannot be committed by accident. Point `CORPUS_INGEST_CONFIG` here instead.
+#
+# `source_type: synthetic` is not an ingestion mode. It is a value no ingestion
+# path claims, so every feed-backed entry point (`list_episodes`,
+# `get_episode`, `download_audio`) refuses this profile with an explanation
+# instead of trying to fetch an RSS feed that does not exist. See
+# `examples/README.md` for which tools do and do not work here.
+podcasts:
+  sample:
+    display_name: The Synthetic Signal (fictional sample corpus)
+    source_type: synthetic
+    language: en

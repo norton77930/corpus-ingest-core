@@ -1,9 +1,9 @@
 from __future__ import annotations
 
-from dataclasses import fields, replace
 import hashlib
 import inspect
 import json
+from dataclasses import fields, replace
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -11,9 +11,9 @@ import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> None:
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_index as corpus_index
-    import podcast_ingest_core.semantic_summary_smoke_review as semantic_review
+    import corpus_ingest_core.corpus_index as corpus_index
+    import corpus_ingest_core.semantic_summary_smoke_review as semantic_review
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "AUDIO_DIR", tmp_path / "audio")
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
@@ -51,7 +51,7 @@ def _tree_manifest(root: Path) -> dict[str, tuple[str, int, int]]:
 
 
 def _write_seed(*, has_audio_url: bool = True) -> None:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     path = storage.corpus_episode_seed_asset_path("gooaye", "EP677")
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -77,7 +77,7 @@ def _write_seed(*, has_audio_url: bool = True) -> None:
 
 
 def _write_local_audio() -> None:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     path = storage.AUDIO_DIR / "gooaye" / "EP677__EP677 Alpha.mp3"
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -85,7 +85,7 @@ def _write_local_audio() -> None:
 
 
 def _write_transcript() -> None:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     paths = storage.transcript_asset_paths("gooaye", "EP677", "EP677 Alpha")
     paths.json_path.parent.mkdir(parents=True, exist_ok=True)
@@ -120,7 +120,7 @@ def _write_transcript() -> None:
 
 
 def _write_deterministic_artifacts() -> None:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     title = "EP677 Alpha"
     summary_path = storage.summary_asset_path("gooaye", "EP677", title)
@@ -198,7 +198,7 @@ def _write_deterministic_artifacts() -> None:
 
 
 def _write_semantic_summary() -> None:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     path = storage.semantic_summary_asset_path("gooaye", "EP677", "EP677 Alpha")
     path.parent.mkdir(parents=True, exist_ok=True)
@@ -206,7 +206,7 @@ def _write_semantic_summary() -> None:
 
 
 def _write_passing_semantic_review(tmp_path: Path) -> None:
-    from podcast_ingest_core.semantic_summary_smoke_review import (
+    from corpus_ingest_core.semantic_summary_smoke_review import (
         review_semantic_summary_smoke,
     )
 
@@ -216,7 +216,7 @@ def _write_passing_semantic_review(tmp_path: Path) -> None:
 
 
 def _write_stale_corpus_sentinels() -> dict[Path, bytes]:
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     asset_pairs = (
         storage.corpus_index_asset_paths("gooaye"),
@@ -242,7 +242,7 @@ def _write_stale_corpus_sentinels() -> dict[Path, bytes]:
                     }
                 ).encode("utf-8")
                 if path.suffix == ".json"
-                else f"# stale sentinel {index}\n".encode("utf-8")
+                else f"# stale sentinel {index}\n".encode()
             )
             path.write_bytes(payload)
             sentinels[path] = payload
@@ -250,8 +250,8 @@ def _write_stale_corpus_sentinels() -> dict[Path, bytes]:
 
 
 def _install_rss_episode(monkeypatch) -> None:
-    from podcast_ingest_core.models import Episode
-    import podcast_ingest_core.corpus_episode_intake as intake
+    import corpus_ingest_core.corpus_episode_intake as intake
+    from corpus_ingest_core.models import Episode
 
     monkeypatch.setattr(
         intake,
@@ -266,7 +266,7 @@ def _install_rss_episode(monkeypatch) -> None:
 
 
 def _selected_completion_row(action: str):
-    from podcast_ingest_core.models import CorpusEpisodeCompletionWorkflowRunRow
+    from corpus_ingest_core.models import CorpusEpisodeCompletionWorkflowRunRow
 
     return CorpusEpisodeCompletionWorkflowRunRow(
         episode_ref="EP677",
@@ -293,7 +293,7 @@ def _selected_completion_row(action: str):
 
 
 def test_completion_workflow_public_signature_and_exports():
-    import podcast_ingest_core as core
+    import corpus_ingest_core as core
 
     expected = [
         "podcast_id",
@@ -338,7 +338,7 @@ def test_completion_workflow_public_signature_and_exports():
 
 
 def test_completion_workflow_model_field_contracts():
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         CorpusEpisodeCompletionWorkflowRunCounts,
         CorpusEpisodeCompletionWorkflowRunFilter,
         CorpusEpisodeCompletionWorkflowRunResult,
@@ -425,7 +425,7 @@ def test_completion_workflow_model_field_contracts():
 def test_completion_workflow_storage_paths_do_not_create_directories(
     monkeypatch, tmp_path: Path
 ):
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "CORPUS_DIR", tmp_path / "corpus", raising=False)
 
@@ -449,11 +449,11 @@ def test_completion_workflow_storage_paths_do_not_create_directories(
 def test_dry_run_unseeded_latest_selects_intake_without_writes(
     monkeypatch, tmp_path: Path
 ):
-    from podcast_ingest_core.models import Episode
-    import podcast_ingest_core.corpus_episode_intake as intake
-    from podcast_ingest_core.corpus_episode_completion_workflow_runner import (
+    import corpus_ingest_core.corpus_episode_intake as intake
+    from corpus_ingest_core.corpus_episode_completion_workflow_runner import (
         run_corpus_episode_completion_workflow,
     )
+    from corpus_ingest_core.models import Episode
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     monkeypatch.setattr(
@@ -499,7 +499,7 @@ def test_dry_run_uses_real_snapshot_ladder_without_writes(
     corpus_state: str,
     expected_action: str,
 ):
-    from podcast_ingest_core.corpus_episode_completion_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_completion_workflow_runner import (
         run_corpus_episode_completion_workflow,
     )
 
@@ -551,7 +551,7 @@ def test_dry_run_uses_real_snapshot_ladder_without_writes(
 def test_contract_inauthentic_review_is_manual_only_for_dry_run_and_confirmation(
     monkeypatch, tmp_path: Path, defect: str
 ):
-    from podcast_ingest_core.corpus_episode_completion_workflow_runner import (
+    from corpus_ingest_core.corpus_episode_completion_workflow_runner import (
         run_corpus_episode_completion_workflow,
     )
 
@@ -604,15 +604,15 @@ def test_dry_run_ignores_stale_sentinels_and_reaches_no_side_effect_surface(
     monkeypatch,
     tmp_path: Path,
 ):
-    import podcast_ingest_core.corpus_audio_download_runner as audio_runner
-    import podcast_ingest_core.corpus_episode_intake as intake_runner
-    import podcast_ingest_core.corpus_episode_workflow_runner as workflow_runner
-    import podcast_ingest_core.corpus_index as corpus_index
-    import podcast_ingest_core.corpus_local_transcription_runner as transcription_runner
-    import podcast_ingest_core.corpus_remediation_plan as remediation_plan
-    import podcast_ingest_core.corpus_remediation_runner as remediation_runner
-    import podcast_ingest_core.corpus_semantic_remediation_runner as semantic_runner
-    from podcast_ingest_core.corpus_episode_completion_workflow_runner import (
+    import corpus_ingest_core.corpus_audio_download_runner as audio_runner
+    import corpus_ingest_core.corpus_episode_intake as intake_runner
+    import corpus_ingest_core.corpus_episode_workflow_runner as workflow_runner
+    import corpus_ingest_core.corpus_index as corpus_index
+    import corpus_ingest_core.corpus_local_transcription_runner as transcription_runner
+    import corpus_ingest_core.corpus_remediation_plan as remediation_plan
+    import corpus_ingest_core.corpus_remediation_runner as remediation_runner
+    import corpus_ingest_core.corpus_semantic_remediation_runner as semantic_runner
+    from corpus_ingest_core.corpus_episode_completion_workflow_runner import (
         run_corpus_episode_completion_workflow,
     )
 
@@ -673,7 +673,7 @@ def test_seeded_preview_reuses_one_snapshot_for_deterministic_and_semantic(
     monkeypatch,
     tmp_path: Path,
 ):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_seed()
@@ -797,8 +797,8 @@ def test_preview_rejects_unsafe_common_request_before_selection(
     options: dict[str, object],
     message: str,
 ):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
-    from podcast_ingest_core import CorpusEpisodeCompletionWorkflowRunnerFailedError
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
+    from corpus_ingest_core import CorpusEpisodeCompletionWorkflowRunnerFailedError
 
     def unexpected_read(*args, **kwargs):
         pytest.fail("invalid request reached RSS or snapshot selection")
@@ -815,8 +815,8 @@ def test_invalid_transcript_blocks_before_semantic_preview(
     tmp_path: Path,
     transcript_state: str,
 ):
-    from podcast_ingest_core import storage
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
+    from corpus_ingest_core import storage
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _install_rss_episode(monkeypatch)
@@ -864,7 +864,7 @@ def test_preview_failure_fails_closed_without_raw_dependency_leak(
     tmp_path: Path,
     failure_point: str,
 ):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     raw_error = RuntimeError("https://invalid.example/?token=leak-token raw body")
@@ -921,7 +921,7 @@ def test_preview_probe_failure_fails_closed_without_later_dispatch(
     tmp_path: Path,
     failure_point: str,
 ):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _write_seed()
@@ -986,7 +986,7 @@ def test_preview_probe_failure_fails_closed_without_later_dispatch(
 
 
 def test_result_to_dict_is_json_compatible_and_bounded(monkeypatch, tmp_path: Path):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _install_rss_episode(monkeypatch)
@@ -1029,8 +1029,8 @@ def test_confirmed_early_guards_precede_all_selection_work(
     options: dict[str, object],
     message: str,
 ):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
-    from podcast_ingest_core import CorpusEpisodeCompletionWorkflowRunnerFailedError
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
+    from corpus_ingest_core import CorpusEpisodeCompletionWorkflowRunnerFailedError
 
     def unexpected_work(*args, **kwargs):
         pytest.fail("invalid confirmed request reached selection or writing")
@@ -1043,7 +1043,7 @@ def test_confirmed_early_guards_precede_all_selection_work(
 
 
 def test_confirmed_action_drift_rejects_without_dispatch_or_report(monkeypatch):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     selected = _selected_completion_row("audio_download")
     calls: list[str] = []
@@ -1076,7 +1076,7 @@ def test_confirmed_action_drift_rejects_without_dispatch_or_report(monkeypatch):
 
 
 def test_confirmed_target_disappearance_rejects_without_dispatch_or_report(monkeypatch):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     selected = _selected_completion_row("audio_download")
     calls: list[str] = []
@@ -1114,7 +1114,7 @@ def test_confirmed_terminal_selection_stops_without_fallback_or_report(
     monkeypatch,
     selected_action: str,
 ):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     selected = _selected_completion_row(selected_action)
     selected = replace(
@@ -1167,7 +1167,7 @@ def test_confirmed_matching_action_dispatches_exactly_one_runner_then_reports(
     action: str,
     expected_runner: str,
 ):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     selected = _selected_completion_row(action)
     calls: list[tuple[str, dict]] = []
@@ -1274,7 +1274,7 @@ def test_confirmed_stage_status_maps_one_outcome_and_stops(
     source_status: str,
     expected_status: str,
 ):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     selected = _selected_completion_row("audio_download")
     reports: list[object] = []
@@ -1316,7 +1316,7 @@ def test_confirmed_stage_status_maps_one_outcome_and_stops(
 
 
 def test_confirmed_stage_exception_is_contained_and_stops_after_one_attempt(monkeypatch):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     selected = _selected_completion_row("audio_download")
     reports: list[object] = []
@@ -1353,7 +1353,7 @@ def test_confirmed_stage_attempt_writes_atomic_metadata_only_report(
     monkeypatch,
     tmp_path: Path,
 ):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     selected = _selected_completion_row("intake")
@@ -1403,7 +1403,7 @@ def test_confirmed_stage_attempt_writes_atomic_metadata_only_report(
 def test_confirmed_stage_attempt_warns_that_derived_metadata_requires_manual_refresh(
     monkeypatch,
 ):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     selected = _selected_completion_row("intake")
     monkeypatch.setattr(
@@ -1456,8 +1456,8 @@ def test_confirmed_report_write_failure_is_safe_and_does_not_compensate(
     monkeypatch,
     tmp_path: Path,
 ):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
-    from podcast_ingest_core import CorpusEpisodeCompletionWorkflowRunnerFailedError
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
+    from corpus_ingest_core import CorpusEpisodeCompletionWorkflowRunnerFailedError
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     selected = _selected_completion_row("intake")
@@ -1512,7 +1512,7 @@ def test_confirmed_report_write_failure_is_safe_and_does_not_compensate(
 
 
 def test_confirmed_semantic_review_ignores_all_llm_only_options(monkeypatch):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     selected = _selected_completion_row("semantic_review")
     captured: dict[str, object] = {}
@@ -1572,7 +1572,7 @@ def test_confirmed_semantic_review_ignores_all_llm_only_options(monkeypatch):
 def test_completion_workflow_outputs_filter_untrusted_paths_and_advice_text(
     monkeypatch, tmp_path: Path
 ):
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     selected = _selected_completion_row("intake")
@@ -1758,7 +1758,7 @@ def test_completion_cli_uses_category_only_error_output(monkeypatch, capsys):
 def test_red_confirmed_stage_preserves_safe_child_provenance_warnings_and_failure_category():
     """016 dispatch reports contained child outcome metadata without raw exception text."""
 
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     selected = _selected_completion_row("audio_download")
     safe_report = "data/corpus/gooaye/child-report.json"
@@ -1812,8 +1812,8 @@ def test_red_next_preview_validates_actual_semantic_summary_settings_after_fresh
 ):
     """A `next` preview may not advertise an impossible semantic-summary action."""
 
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
-    from podcast_ingest_core import CorpusEpisodeCompletionWorkflowRunnerFailedError
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
+    from corpus_ingest_core import CorpusEpisodeCompletionWorkflowRunnerFailedError
 
     selected = _selected_completion_row("semantic_summary")
     monkeypatch.setattr(
@@ -1840,8 +1840,8 @@ def test_red_confirmed_semantic_summary_validates_provider_model_before_child_di
 ):
     """Selected-action validation must complete before a provider-capable child runs."""
 
-    import podcast_ingest_core.corpus_episode_completion_workflow_runner as runner
-    from podcast_ingest_core import CorpusEpisodeCompletionWorkflowRunnerFailedError
+    import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
+    from corpus_ingest_core import CorpusEpisodeCompletionWorkflowRunnerFailedError
 
     selected = _selected_completion_row("semantic_summary")
     monkeypatch.setattr(

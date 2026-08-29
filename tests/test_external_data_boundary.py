@@ -7,7 +7,7 @@ import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
     monkeypatch.setattr(storage, "MAPPINGS_DIR", tmp_path / "mappings")
@@ -24,8 +24,8 @@ def _write_industry_mapping(
     mapping_status="final",
     corrupt=False,
 ):
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.storage import industry_chain_mapping_asset_paths
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.storage import industry_chain_mapping_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     transcript = storage.transcript_asset_paths(podcast_id, episode_ref, title)
@@ -132,7 +132,7 @@ external_data_checks:
 def test_generate_external_data_boundary_writes_json_and_markdown(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.external_data_boundary as external_data_boundary
+    import corpus_ingest_core.external_data_boundary as external_data_boundary
 
     config_path = _write_boundary_config(tmp_path)
     monkeypatch.setattr(external_data_boundary, "DEFAULT_BOUNDARY_CONFIG_PATH", config_path)
@@ -190,7 +190,7 @@ def test_generate_external_data_boundary_writes_json_and_markdown(
 def test_generate_external_data_boundary_warns_when_config_missing(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.external_data_boundary as external_data_boundary
+    import corpus_ingest_core.external_data_boundary as external_data_boundary
 
     monkeypatch.setattr(
         external_data_boundary,
@@ -213,8 +213,8 @@ def test_generate_external_data_boundary_warns_when_config_missing(
 def test_generate_external_data_boundary_rejects_missing_and_corrupt_mapping(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.external_data_boundary as external_data_boundary
-    from podcast_ingest_core.errors import ExternalDataBoundaryInputError
+    import corpus_ingest_core.external_data_boundary as external_data_boundary
+    from corpus_ingest_core.errors import ExternalDataBoundaryInputError
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     with pytest.raises(ExternalDataBoundaryInputError, match="industry chain mapping"):
@@ -228,8 +228,8 @@ def test_generate_external_data_boundary_rejects_missing_and_corrupt_mapping(
 def test_generate_external_data_boundary_handles_partial_mapping(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.external_data_boundary as external_data_boundary
-    from podcast_ingest_core.errors import ExternalDataBoundaryInputError
+    import corpus_ingest_core.external_data_boundary as external_data_boundary
+    from corpus_ingest_core.errors import ExternalDataBoundaryInputError
 
     config_path = _write_boundary_config(tmp_path)
     monkeypatch.setattr(external_data_boundary, "DEFAULT_BOUNDARY_CONFIG_PATH", config_path)
@@ -250,8 +250,8 @@ def test_generate_external_data_boundary_handles_partial_mapping(
 def test_generate_external_data_boundary_reuses_existing_without_force(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.external_data_boundary as external_data_boundary
-    from podcast_ingest_core.storage import external_data_boundary_asset_paths
+    import corpus_ingest_core.external_data_boundary as external_data_boundary
+    from corpus_ingest_core.storage import external_data_boundary_asset_paths
 
     config_path = _write_boundary_config(tmp_path)
     monkeypatch.setattr(external_data_boundary, "DEFAULT_BOUNDARY_CONFIG_PATH", config_path)
@@ -275,7 +275,7 @@ def test_generate_external_data_boundary_reuses_existing_without_force(
 
 
 def test_external_data_boundary_path_removes_illegal_characters_and_emoji():
-    from podcast_ingest_core.storage import external_data_boundary_asset_paths
+    from corpus_ingest_core.storage import external_data_boundary_asset_paths
 
     paths = external_data_boundary_asset_paths(
         "gooaye", "EP672", ' bad <title> 🐣 : / \\ | ? * ok '
@@ -290,8 +290,9 @@ def test_external_data_boundary_path_removes_illegal_characters_and_emoji():
 def test_external_data_boundary_cli_parses_options_and_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from podcast_ingest_core.models import ExternalDataBoundaryAsset
     from scripts import generate_external_data_boundary
+
+    from corpus_ingest_core.models import ExternalDataBoundaryAsset
 
     asset = ExternalDataBoundaryAsset(
         podcast_id="gooaye",

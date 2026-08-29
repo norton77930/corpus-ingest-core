@@ -27,9 +27,9 @@ read, cleaned, staged, or committed by these tasks.
 - [x] T001 Record the protected dirty-worktree baseline and verify `.specify/feature.json` remains ignored for 016 without reading `.env` or `data/`
 - [x] T002 [P] Add RED public API/model/error/export signature assertions for 016 to `tests/test_contracts.py` (FR-017)
 - [x] T003 [P] Add RED storage path and no-directory-allocation assertions to `tests/test_corpus_episode_completion_workflow_runner.py` (FR-015)
-- [x] T004 Add additive 016 immutable dataclasses with exact field order to `src/podcast_ingest_core/models.py`
-- [x] T005 Add `CorpusEpisodeCompletionWorkflowRunAssetPaths` and `corpus_episode_completion_workflow_run_asset_paths()` to `src/podcast_ingest_core/storage.py`
-- [x] T006 Add `CorpusEpisodeCompletionWorkflowRunnerFailedError` and additive public exports to `src/podcast_ingest_core/errors.py` and `src/podcast_ingest_core/__init__.py`
+- [x] T004 Add additive 016 immutable dataclasses with exact field order to `src/corpus_ingest_core/models.py`
+- [x] T005 Add `CorpusEpisodeCompletionWorkflowRunAssetPaths` and `corpus_episode_completion_workflow_run_asset_paths()` to `src/corpus_ingest_core/storage.py`
+- [x] T006 Add `CorpusEpisodeCompletionWorkflowRunnerFailedError` and additive public exports to `src/corpus_ingest_core/errors.py` and `src/corpus_ingest_core/__init__.py`
 - [x] T007 Run focused `tests/test_contracts.py` and `tests/test_corpus_episode_completion_workflow_runner.py` contract/storage tests and make the Phase 1 RED tests GREEN
 
 **Checkpoint**: Additive 016 types and paths exist without changing runtime behavior.
@@ -43,9 +43,9 @@ their public behavior.
 
 - [x] T008 [P] Add RED 014 compatibility and strict semantic-handoff tests to `tests/test_corpus_episode_workflow_runner.py` for invalid transcript, semantic-only blockers, non-semantic blockers, and `max_actions=1` (FR-003, FR-010)
 - [x] T009 [P] Add RED 015 shared-snapshot seam and public compatibility tests to `tests/test_corpus_semantic_remediation_runner.py` (FR-004, FR-017)
-- [x] T010 Extract `_preview_corpus_episode_workflow_from_snapshot()` in `src/podcast_ingest_core/corpus_episode_workflow_runner.py` with public 014 default behavior unchanged
-- [x] T011 Implement private 016 semantic-handoff mode in `src/podcast_ingest_core/corpus_episode_workflow_runner.py` that requires exact valid transcript, selects one deterministic row, and ignores only semantic-family blockers
-- [x] T012 Extract `_preview_corpus_semantic_remediation_from_snapshot()` in `src/podcast_ingest_core/corpus_semantic_remediation_runner.py` while preserving 015 builder/catch/public behavior
+- [x] T010 Extract `_preview_corpus_episode_workflow_from_snapshot()` in `src/corpus_ingest_core/corpus_episode_workflow_runner.py` with public 014 default behavior unchanged
+- [x] T011 Implement private 016 semantic-handoff mode in `src/corpus_ingest_core/corpus_episode_workflow_runner.py` that requires exact valid transcript, selects one deterministic row, and ignores only semantic-family blockers
+- [x] T012 Extract `_preview_corpus_semantic_remediation_from_snapshot()` in `src/corpus_ingest_core/corpus_semantic_remediation_runner.py` while preserving 015 builder/catch/public behavior
 - [x] T013 Run `tests/test_corpus_episode_workflow_runner.py` and `tests/test_corpus_semantic_remediation_runner.py` and make all seam/compatibility tests GREEN
 
 **Checkpoint**: 014 and 015 standalone contracts are unchanged; 016 has pure
@@ -74,13 +74,13 @@ effect surface is called.
 
 ### Implementation for User Story 1
 
-- [x] T021 [US1] Create `src/podcast_ingest_core/corpus_episode_completion_workflow_runner.py` with constants, bounded validators, safe labels, and fixed reason/category allowlists
-- [x] T022 [US1] Implement 013 dry-run selector resolution and safe canonical episode handling in `src/podcast_ingest_core/corpus_episode_completion_workflow_runner.py`
-- [x] T023 [US1] Implement unseeded intake selection and one 008/009 snapshot build for seeded episodes in `src/podcast_ingest_core/corpus_episode_completion_workflow_runner.py`
-- [x] T024 [US1] Implement deterministic-to-semantic selection using the shared 014/015 seams in `src/podcast_ingest_core/corpus_episode_completion_workflow_runner.py`
-- [x] T025 [US1] Implement one bounded row, risk flags, counts, warnings, filters, and terminal/manual-only mapping in `src/podcast_ingest_core/corpus_episode_completion_workflow_runner.py`
-- [x] T026 [US1] Implement recursive safe serialization and `result_to_dict()` in `src/podcast_ingest_core/corpus_episode_completion_workflow_runner.py` (FR-023 to FR-024)
-- [x] T027 [US1] Export `run_corpus_episode_completion_workflow()` and its result serializer from `src/podcast_ingest_core/__init__.py`
+- [x] T021 [US1] Create `src/corpus_ingest_core/corpus_episode_completion_workflow_runner.py` with constants, bounded validators, safe labels, and fixed reason/category allowlists
+- [x] T022 [US1] Implement 013 dry-run selector resolution and safe canonical episode handling in `src/corpus_ingest_core/corpus_episode_completion_workflow_runner.py`
+- [x] T023 [US1] Implement unseeded intake selection and one 008/009 snapshot build for seeded episodes in `src/corpus_ingest_core/corpus_episode_completion_workflow_runner.py`
+- [x] T024 [US1] Implement deterministic-to-semantic selection using the shared 014/015 seams in `src/corpus_ingest_core/corpus_episode_completion_workflow_runner.py`
+- [x] T025 [US1] Implement one bounded row, risk flags, counts, warnings, filters, and terminal/manual-only mapping in `src/corpus_ingest_core/corpus_episode_completion_workflow_runner.py`
+- [x] T026 [US1] Implement recursive safe serialization and `result_to_dict()` in `src/corpus_ingest_core/corpus_episode_completion_workflow_runner.py` (FR-023 to FR-024)
+- [x] T027 [US1] Export `run_corpus_episode_completion_workflow()` and its result serializer from `src/corpus_ingest_core/__init__.py`
 - [x] T028 [US1] Run `tests/test_corpus_episode_completion_workflow_runner.py` and make all User Story 1 tests GREEN
 
 **Checkpoint**: User Story 1 is independently usable as a strict zero-file preview.
@@ -109,11 +109,11 @@ other stage calls, and no fallback after drift/failure.
 
 ### Core Implementation for User Story 2
 
-- [x] T037 [US2] Implement confirmed `next`/`latest` and exact semantic acknowledgement early guards in `src/podcast_ingest_core/corpus_episode_completion_workflow_runner.py`
-- [x] T038 [US2] Implement fresh action-equality rejection and zero-dispatch terminal handling in `src/podcast_ingest_core/corpus_episode_completion_workflow_runner.py`
-- [x] T039 [US2] Implement exact one-runner dispatch for 013/012/011/010/015 with deterministic `max_actions=1` and review LLM-option isolation in `src/podcast_ingest_core/corpus_episode_completion_workflow_runner.py`
-- [x] T040 [US2] Implement bounded stage-result/exception mapping and confirmed stale-metadata/cache warnings in `src/podcast_ingest_core/corpus_episode_completion_workflow_runner.py`
-- [x] T041 [US2] Implement confirmed-only JSON/Markdown rendering and atomic report writing in `src/podcast_ingest_core/corpus_episode_completion_workflow_runner.py`
+- [x] T037 [US2] Implement confirmed `next`/`latest` and exact semantic acknowledgement early guards in `src/corpus_ingest_core/corpus_episode_completion_workflow_runner.py`
+- [x] T038 [US2] Implement fresh action-equality rejection and zero-dispatch terminal handling in `src/corpus_ingest_core/corpus_episode_completion_workflow_runner.py`
+- [x] T039 [US2] Implement exact one-runner dispatch for 013/012/011/010/015 with deterministic `max_actions=1` and review LLM-option isolation in `src/corpus_ingest_core/corpus_episode_completion_workflow_runner.py`
+- [x] T040 [US2] Implement bounded stage-result/exception mapping and confirmed stale-metadata/cache warnings in `src/corpus_ingest_core/corpus_episode_completion_workflow_runner.py`
+- [x] T041 [US2] Implement confirmed-only JSON/Markdown rendering and atomic report writing in `src/corpus_ingest_core/corpus_episode_completion_workflow_runner.py`
 - [x] T042 [US2] Run `tests/test_corpus_episode_completion_workflow_runner.py`, `tests/test_llm_ack_guard_contracts.py`, and `tests/test_llm_cli_no_leak.py` and make the confirmed Core suite GREEN
 
 ### Thin CLI for User Story 2
@@ -140,8 +140,8 @@ early-rejected dry-run path without corpus/provider writes.
 
 - [x] T047 [P] [US3] Add RED exact 13-tool registry, preserved-first-12, side-effect default, and bounded 016 schema assertions to `tests/test_mcp_tool_registry_contract.py` (FR-018)
 - [x] T048 [P] [US3] Add RED 016 MCP dry-run/confirmed/blocked/rejected/error envelope, forwarding, early-ack, and no-leak tests to `tests/test_mcp_server.py` (FR-019, SC-006 to SC-007)
-- [x] T049 [US3] Add a dedicated category-only completion workflow MCP call wrapper and `run_corpus_episode_completion_workflow` tool to `src/podcast_ingest_core/mcp_server.py`
-- [x] T050 [US3] Preserve every existing MCP tool signature/envelope while updating only the reviewed registry to exact 13 in `src/podcast_ingest_core/mcp_server.py`
+- [x] T049 [US3] Add a dedicated category-only completion workflow MCP call wrapper and `run_corpus_episode_completion_workflow` tool to `src/corpus_ingest_core/mcp_server.py`
+- [x] T050 [US3] Preserve every existing MCP tool signature/envelope while updating only the reviewed registry to exact 13 in `src/corpus_ingest_core/mcp_server.py`
 - [x] T051 [US3] Run `tests/test_mcp_server.py` and `tests/test_mcp_tool_registry_contract.py` and make the MCP suite GREEN
 
 ### Setup Validator Tests and Implementation

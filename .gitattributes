@@ -1,77 +1,13 @@
-# Line-ending policy for the digest-pinned Hermes audit surface.
+# Store every text file with LF in the repository.
 #
-# The Spec 026-034 audit chain pins file bytes with SHA-256: reviewed-artifact
-# manifests, source-bundle manifests, predecessor digests, and the pinned
-# upstream bundle are all hashed verbatim. This repository is authored on
-# Windows (CRLF) while `core.autocrlf=input` stores LF, so a clone that checks
-# out LF -- exactly the WSL/Linux host the Hermes runbook requires -- would
-# change those bytes and invalidate every digest. The failure surfaces as
-# BLOCKED_SOURCE_GRAPH and dozens of audit-test failures that look like a
-# security regression rather than an end-of-line conversion.
+# The authoring machine runs Windows and CI runs both windows-latest and
+# ubuntu-latest, so an unnormalized repository hands the two runners different
+# bytes for the same file. Normalizing on the way in makes the stored content
+# platform-independent; the working tree still gets whatever the checkout
+# platform prefers.
 #
-# Keep every digest-pinned surface byte-identical on all platforms.
-#
-# Every rule below sets the same attribute, so the grouping and the ordering
-# inside each group exist only to make the list reviewable: there are no
-# overriding later rules, and no path depends on where it appears. Adding a
-# hashed path to the "wrong" group still pins it; leaving one out silently
-# un-pins a file the audit chain hashes, which is the failure this file exists
-# to prevent. When a new Hermes or spec-03x surface lands, add it to the group
-# it belongs to and keep that group sorted.
-
-# The audit chain itself: spec packages 026-034.
-specs/026-hermes-mcp-integration/** -text
-specs/027-hermes-skill-routing-contracts/** -text
-specs/028-hermes-runtime-skill-routing-observation/** -text
-specs/029-hermes-blocked-tool-attempt-runtime-smoke/** -text
-specs/030-hermes-g1r-offline-remediation/** -text
-specs/031-hermes-g2-credentialless-activation-gate/** -text
-specs/032-hermes-g2-offline-attempt-executor/** -text
-specs/033-hermes-v019-pinned-source-loader-audit/** -text
-specs/034-hermes-v019-pinned-startup-source-graph/** -text
-
-# Files the chain hashes that are not themselves part of a spec package.
-# spec034's C6 support module reads these three configs back from the child
-# snapshot and compares SHA-256; pyproject.toml is byte-length pinned. They were
-# missing here until CI caught it: a GitHub Windows runner checks out with
-# core.autocrlf=true, which rewrote LF to CRLF and changed every one of those
-# digests, while an authoring machine using core.autocrlf=input never saw it.
-src/podcast_ingest_core/mcp_server.py -text
-config/external_data_boundary.yaml -text
-config/gooaye_lens.yaml -text
-config/industry_chain_mappings.yaml -text
-pyproject.toml -text
-
-# Sidecar deployment surface (Dockerfile, compose, runbook, helper shell).
-deploy/** -text
-
-# Runtime modules the chain hashes. The mcp_* entries are the MCP runtime and
-# its tool groups: spec 032's predecessor-digests.json pins their bytes, and a
-# glob would not cover them because mcp_tools_x_video.py and
-# mcp_tools_youtube_video.py are not in that manifest.
-src/podcast_ingest_core/hermes_*.py -text
-src/podcast_ingest_core/mcp_runtime.py -text
-src/podcast_ingest_core/mcp_tools_corpus_workflows.py -text
-src/podcast_ingest_core/mcp_tools_read.py -text
-src/podcast_ingest_core/mcp_tools_side_effect.py -text
-src/podcast_ingest_core/mcp_tools_verified_report_queries.py -text
-
-# Tests: the Hermes suites, the transport suite they share, and the
-# non-test_ helper module that spec034's final acceptance imports.
-tests/spec034_final_c6_support.py -text
-tests/test_hermes_*.py -text
-tests/test_mcp_http_transport.py -text
-tests/test_spec_02[6-9]*.py -text
-tests/test_spec_03*.py -text
-
-# Scripts: the offline entry points and the servers they drive. Both
-# `spec_03`/`spec03` spellings are listed on purpose -- the chain shipped
-# under both naming conventions.
-scripts/*hermes*.py -text
-scripts/*spec_03*.py -text
-scripts/verify_spec_029.py -text
-scripts/build_hermes_sidecar.sh -text
-scripts/export_spec029_tool_descriptor_snapshot.py -text
-scripts/run_mcp_deny_interposer.py -text
-scripts/run_mcp_http_server.py -text
-scripts/spec03*.py -text
+# This replaces a much longer policy that pinned roughly sixty paths with
+# `-text` so a byte-pinned audit chain (specs 026-034) could hash them. That
+# chain was archived at the `archive/hermes-audit-chain` tag and removed from
+# main, and nothing left in this repository hashes its own source files.
+* text=auto

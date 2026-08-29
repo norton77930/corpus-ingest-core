@@ -1,11 +1,11 @@
-from pathlib import Path
 import inspect
+from pathlib import Path
 
 import pytest
 
 
 def test_loads_registered_profiles_from_yaml():
-    from podcast_ingest_core.config import load_podcast_profiles
+    from corpus_ingest_core.config import load_podcast_profiles
 
     profiles = load_podcast_profiles(Path("config/podcasts.yaml"))
 
@@ -36,7 +36,7 @@ def test_loads_registered_profiles_from_yaml():
 
 
 def test_package_exports_required_core_functions():
-    import podcast_ingest_core as core
+    import corpus_ingest_core as core
 
     expected = {
         "list_episodes": ["podcast_id", "limit"],
@@ -253,14 +253,14 @@ def test_package_exports_required_core_functions():
 
 
 def test_storage_paths_are_deterministic_and_under_data():
-    from podcast_ingest_core.storage import (
+    from corpus_ingest_core.storage import (
         audio_path,
-        cache_path,
         cache_db_path,
-        mention_asset_paths,
+        cache_path,
         episode_intelligence_report_asset_paths,
         external_data_boundary_asset_paths,
         industry_chain_mapping_asset_paths,
+        mention_asset_paths,
         stock_lens_report_asset_paths,
         stock_lens_synthesis_asset_paths,
         summary_path,
@@ -319,7 +319,7 @@ def test_storage_paths_are_deterministic_and_under_data():
 
 
 def test_storage_rejects_unsafe_slugs():
-    from podcast_ingest_core.storage import audio_path
+    from corpus_ingest_core.storage import audio_path
 
     with pytest.raises(ValueError, match="podcast_id"):
         audio_path("../gooaye", "ep-001")
@@ -329,26 +329,27 @@ def test_storage_rejects_unsafe_slugs():
 
 
 def test_search_requires_cache_db(tmp_path):
-    from podcast_ingest_core import search_transcripts
-    from podcast_ingest_core.errors import SearchError
+    from corpus_ingest_core import search_transcripts
+    from corpus_ingest_core.errors import SearchError
 
     with pytest.raises(SearchError):
         search_transcripts("台積電", db_path=tmp_path / "missing.sqlite3")
 
 
 def test_public_search_functions_resolve_to_search_module():
-    from podcast_ingest_core import search_mentions, search_transcripts
+    from corpus_ingest_core import search_mentions, search_transcripts
 
     # F-14 (Batch 3B): a dead Phase 0 ``search_transcripts`` stub used to live
     # in storage.py. The public search API must resolve to the real search
     # module so callers (and future agents) never bind the wrong module.
-    assert search_transcripts.__module__ == "podcast_ingest_core.search"
-    assert search_mentions.__module__ == "podcast_ingest_core.search"
+    assert search_transcripts.__module__ == "corpus_ingest_core.search"
+    assert search_mentions.__module__ == "corpus_ingest_core.search"
 
 
 def test_search_result_models_include_phase_3b_fields():
     from dataclasses import fields
-    from podcast_ingest_core.models import (
+
+    from corpus_ingest_core.models import (
         MentionSearchResult,
         SemanticSummarySmokeReviewResult,
         TranscriptSearchResult,
@@ -381,10 +382,10 @@ def test_search_result_models_include_phase_3b_fields():
 
 
 def test_corpus_semantic_remediation_additive_public_contract():
-    from podcast_ingest_core import (
+    from corpus_ingest_core import (
         CorpusSemanticRemediationRunAssetPaths,
-        CorpusSemanticRemediationRunResult,
         CorpusSemanticRemediationRunnerFailedError,
+        CorpusSemanticRemediationRunResult,
         PodcastIngestCoreError,
         corpus_semantic_remediation_run_asset_paths,
         run_corpus_semantic_remediation,

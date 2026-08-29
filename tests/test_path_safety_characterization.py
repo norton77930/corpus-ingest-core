@@ -2,7 +2,7 @@
 
 specs/025-core-consolidation FR-003: this table was captured empirically from
 the pre-consolidation implementations on 2026-08-08 and MUST NOT change when
-the shared structural skeleton (`podcast_ingest_core.path_safety`) replaces the
+the shared structural skeleton (`corpus_ingest_core.path_safety`) replaces the
 copy-pasted bodies. Each column is a per-module spec'd contract:
 
 - A `corpus_episode_completion_workflow_runner` — absolute allowed, separator
@@ -26,16 +26,16 @@ from pathlib import Path
 
 import pytest
 
-from podcast_ingest_core.corpus_episode_completion_workflow_runner import (
+from corpus_ingest_core.corpus_episode_completion_workflow_runner import (
     _is_safe_local_path as predicate_a,
 )
-from podcast_ingest_core.corpus_episode_workflow_runner import (
+from corpus_ingest_core.corpus_episode_workflow_runner import (
     _is_safe_local_path as predicate_b,
 )
-from podcast_ingest_core.corpus_latest_episode_deterministic_workflow_runner import (
+from corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner import (
     _is_safe_local_path as predicate_d,
 )
-from podcast_ingest_core.corpus_semantic_remediation_runner import (
+from corpus_ingest_core.corpus_semantic_remediation_runner import (
     _is_safe_local_path as predicate_c,
 )
 

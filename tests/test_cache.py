@@ -6,7 +6,7 @@ import sys
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "TRANSCRIPTS_DIR", tmp_path / "transcripts")
     monkeypatch.setattr(storage, "SUMMARIES_DIR", tmp_path / "summaries")
@@ -24,7 +24,7 @@ def _write_transcript(
     segments=None,
     json_text=None,
 ):
-    from podcast_ingest_core.storage import transcript_asset_paths
+    from corpus_ingest_core.storage import transcript_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     if segments is None:
@@ -51,7 +51,7 @@ def _write_transcript(
 
 
 def _write_mentions(monkeypatch, tmp_path, *, podcast_id="gooaye", episode_ref="EP672", title="EP672 title"):
-    from podcast_ingest_core.storage import mention_asset_paths
+    from corpus_ingest_core.storage import mention_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = mention_asset_paths(podcast_id, episode_ref, title)
@@ -88,7 +88,7 @@ def _write_mentions(monkeypatch, tmp_path, *, podcast_id="gooaye", episode_ref="
 
 
 def test_initialize_cache_creates_schema(tmp_path):
-    from podcast_ingest_core.cache import initialize_cache
+    from corpus_ingest_core.cache import initialize_cache
 
     db_path = initialize_cache(tmp_path / "cache.sqlite3")
 
@@ -103,7 +103,7 @@ def test_initialize_cache_creates_schema(tmp_path):
 
 
 def test_is_fts5_available_returns_boolean(tmp_path):
-    from podcast_ingest_core.cache import initialize_cache, is_fts5_available
+    from corpus_ingest_core.cache import initialize_cache, is_fts5_available
 
     db_path = initialize_cache(tmp_path / "cache.sqlite3")
 
@@ -111,7 +111,7 @@ def test_is_fts5_available_returns_boolean(tmp_path):
 
 
 def test_index_episode_indexes_valid_transcript_segments(monkeypatch, tmp_path):
-    from podcast_ingest_core.cache import index_episode
+    from corpus_ingest_core.cache import index_episode
 
     _write_transcript(monkeypatch, tmp_path)
     db_path = tmp_path / "cache.sqlite3"
@@ -128,7 +128,7 @@ def test_index_episode_indexes_valid_transcript_segments(monkeypatch, tmp_path):
 
 
 def test_index_episode_indexes_mentions_json(monkeypatch, tmp_path):
-    from podcast_ingest_core.cache import index_episode
+    from corpus_ingest_core.cache import index_episode
 
     _write_transcript(monkeypatch, tmp_path)
     _write_mentions(monkeypatch, tmp_path)
@@ -150,7 +150,7 @@ def test_index_episode_indexes_mentions_json(monkeypatch, tmp_path):
 
 
 def test_index_episode_records_corrupt_transcript_problem(monkeypatch, tmp_path):
-    from podcast_ingest_core.cache import index_episode
+    from corpus_ingest_core.cache import index_episode
 
     _write_transcript(monkeypatch, tmp_path, json_text="{not-json")
 
@@ -161,7 +161,7 @@ def test_index_episode_records_corrupt_transcript_problem(monkeypatch, tmp_path)
 
 
 def test_index_episode_force_replaces_old_segments(monkeypatch, tmp_path):
-    from podcast_ingest_core.cache import index_episode
+    from corpus_ingest_core.cache import index_episode
 
     db_path = tmp_path / "cache.sqlite3"
     _write_transcript(monkeypatch, tmp_path)
@@ -181,7 +181,7 @@ def test_index_episode_force_replaces_old_segments(monkeypatch, tmp_path):
 
 
 def test_index_episode_records_warning_when_fts5_unavailable(monkeypatch, tmp_path):
-    from podcast_ingest_core import cache
+    from corpus_ingest_core import cache
 
     db_path = tmp_path / "cache.sqlite3"
     _write_transcript(monkeypatch, tmp_path)
@@ -194,7 +194,7 @@ def test_index_episode_records_warning_when_fts5_unavailable(monkeypatch, tmp_pa
 
 
 def test_rebuild_cache_scans_fixture_artifacts(monkeypatch, tmp_path):
-    from podcast_ingest_core.cache import rebuild_cache
+    from corpus_ingest_core.cache import rebuild_cache
 
     _write_transcript(monkeypatch, tmp_path)
     _write_mentions(monkeypatch, tmp_path)
@@ -206,8 +206,8 @@ def test_rebuild_cache_scans_fixture_artifacts(monkeypatch, tmp_path):
 
 
 def test_red_rebuild_cache_ignores_transient_artifact_siblings(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
-    from podcast_ingest_core.cache import rebuild_cache
+    from corpus_ingest_core import storage
+    from corpus_ingest_core.cache import rebuild_cache
 
     transcript = _write_transcript(monkeypatch, tmp_path)
     _write_mentions(monkeypatch, tmp_path)
@@ -228,7 +228,7 @@ def test_red_rebuild_cache_ignores_transient_artifact_siblings(monkeypatch, tmp_
 
 
 def test_rebuild_cache_does_not_fail_when_fts5_unavailable(monkeypatch, tmp_path):
-    from podcast_ingest_core import cache
+    from corpus_ingest_core import cache
 
     _write_transcript(monkeypatch, tmp_path)
     monkeypatch.setattr(cache, "is_fts5_available", lambda db_path=None: False)
@@ -244,8 +244,9 @@ def test_rebuild_cache_does_not_fail_when_fts5_unavailable(monkeypatch, tmp_path
 
 
 def test_rebuild_cache_cli_parses_options(monkeypatch, capsys, tmp_path):
-    from podcast_ingest_core.models import CacheRebuildResult
     from scripts import rebuild_cache
+
+    from corpus_ingest_core.models import CacheRebuildResult
 
     captured = {}
 

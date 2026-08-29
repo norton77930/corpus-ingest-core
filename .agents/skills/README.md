@@ -20,20 +20,18 @@ human-approval protocol — preview first, act only after the operator approves.
 | `latest-episode-verified-research-report/` | latest-episode verified report | `tests/test_latest_episode_verified_research_report_skill.py` |
 | `historical-episode-verified-report-path/` | historical-episode path | `tests/test_historical_verified_report_path_skill.py` |
 
-These are contracts, not prose. `tests/test_hermes_skill_protocol.py` runs the
-first four through `validate_skill_artifacts`, which fails the build when a
-`SKILL.md` loses its portable frontmatter, drops a required clause, reorders
-the approval clauses, or mentions **any** registry tool name other than the one
-that Skill is bound to. Editing a `SKILL.md` for style will break it.
+These are contracts, not prose. Each Skill's own contract test in the table
+above reads its `SKILL.md` and asserts the clauses that make it safe to hand to
+an agent: the approval boundary, the no-fallback clause, and the absence of
+client-specific or command markers. Editing a `SKILL.md` for style will break
+one of them.
 
-The four-vs-five split is deliberate and easy to get wrong:
-
-- `MANAGED_SKILLS` (`src/podcast_ingest_core/hermes_integration.py`) is the
-  exact four above that satisfy the Spec 027 single-tool contract.
-- `SYNCED_SKILLS` adds `historical-episode-verified-report-path`, which is what
-  actually ships to a Hermes install. It is an orchestrator that names four
-  tools by design, so it cannot satisfy the single-tool contract and carries
-  its own Spec 023 tests instead.
+> **Coverage note.** A second, cross-cutting validator once checked portable
+> frontmatter and single-tool binding across the first four Skills. It lived in
+> the Hermes integration modules and was archived with them at the
+> `archive/hermes-audit-chain` tag. The per-Skill contract tests above are
+> unaffected; the frontmatter and single-tool-name checks are not currently
+> enforced and are tracked as a follow-up.
 
 Adding a Skill here means adding its contract test too — an unchecked `SKILL.md`
 is a human-approval boundary with nothing holding it in place.

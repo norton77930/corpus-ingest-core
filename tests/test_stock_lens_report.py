@@ -7,7 +7,7 @@ import pytest
 
 
 def _use_tmp_data_dirs(monkeypatch, tmp_path):
-    from podcast_ingest_core import storage
+    from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "MAPPINGS_DIR", tmp_path / "mappings")
     monkeypatch.setattr(storage, "EXTERNAL_DIR", tmp_path / "external")
@@ -23,7 +23,7 @@ def _write_mapping(
     title="EP672 title",
     mapping_status="final",
 ):
-    from podcast_ingest_core.storage import industry_chain_mapping_asset_paths
+    from corpus_ingest_core.storage import industry_chain_mapping_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = industry_chain_mapping_asset_paths(podcast_id, episode_ref, title)
@@ -94,7 +94,7 @@ def _write_external_boundary(
     title="EP672 title",
     boundary_status="final",
 ):
-    from podcast_ingest_core.storage import external_data_boundary_asset_paths
+    from corpus_ingest_core.storage import external_data_boundary_asset_paths
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = external_data_boundary_asset_paths(podcast_id, episode_ref, title)
@@ -158,7 +158,7 @@ def _write_external_boundary(
 
 
 def test_generate_stock_lens_report_writes_json_and_markdown(monkeypatch, tmp_path):
-    import podcast_ingest_core.stock_lens as stock_lens
+    import corpus_ingest_core.stock_lens as stock_lens
 
     _write_mapping(monkeypatch, tmp_path)
     _write_external_boundary(monkeypatch, tmp_path)
@@ -198,7 +198,7 @@ def test_generate_stock_lens_report_writes_json_and_markdown(monkeypatch, tmp_pa
 def test_generate_stock_lens_report_matches_ticker_as_inferred_lead(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.stock_lens as stock_lens
+    import corpus_ingest_core.stock_lens as stock_lens
 
     _write_mapping(monkeypatch, tmp_path)
     _write_external_boundary(monkeypatch, tmp_path)
@@ -217,7 +217,7 @@ def test_generate_stock_lens_report_matches_ticker_as_inferred_lead(
 def test_generate_stock_lens_report_without_match_states_no_direct_evidence(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.stock_lens as stock_lens
+    import corpus_ingest_core.stock_lens as stock_lens
 
     _write_mapping(monkeypatch, tmp_path)
     _write_external_boundary(monkeypatch, tmp_path)
@@ -238,8 +238,8 @@ def test_generate_stock_lens_report_fails_when_external_boundary_missing(
 ):
     """Identity-bound stock-lens lineage requires the mapping's boundary artifact."""
 
-    import podcast_ingest_core.stock_lens as stock_lens
-    from podcast_ingest_core.errors import StockLensReportInputError
+    import corpus_ingest_core.stock_lens as stock_lens
+    from corpus_ingest_core.errors import StockLensReportInputError
 
     _write_mapping(monkeypatch, tmp_path)
 
@@ -252,8 +252,8 @@ def test_red_stock_lens_rejects_alpha_boundary_for_corrected_mapping(
 ):
     """A same-episode lexical boundary is never a substitute for mapping title identity."""
 
-    import podcast_ingest_core.stock_lens as stock_lens
-    from podcast_ingest_core.errors import StockLensReportInputError
+    import corpus_ingest_core.stock_lens as stock_lens
+    from corpus_ingest_core.errors import StockLensReportInputError
 
     _write_mapping(monkeypatch, tmp_path, episode_ref="EP672", title="EP672 Corrected")
     _write_external_boundary(monkeypatch, tmp_path, episode_ref="EP672", title="EP672 Alpha")
@@ -265,8 +265,8 @@ def test_red_stock_lens_rejects_alpha_boundary_for_corrected_mapping(
 def test_generate_stock_lens_report_handles_partial_matched_artifacts(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.stock_lens as stock_lens
-    from podcast_ingest_core.errors import StockLensReportInputError
+    import corpus_ingest_core.stock_lens as stock_lens
+    from corpus_ingest_core.errors import StockLensReportInputError
 
     _write_mapping(monkeypatch, tmp_path, mapping_status="partial-draft")
     _write_external_boundary(monkeypatch, tmp_path, boundary_status="partial-draft")
@@ -286,8 +286,8 @@ def test_generate_stock_lens_report_handles_partial_matched_artifacts(
 def test_generate_stock_lens_report_reuses_existing_without_force(
     monkeypatch, tmp_path
 ):
-    import podcast_ingest_core.stock_lens as stock_lens
-    from podcast_ingest_core.storage import stock_lens_report_asset_paths
+    import corpus_ingest_core.stock_lens as stock_lens
+    from corpus_ingest_core.storage import stock_lens_report_asset_paths
 
     _write_mapping(monkeypatch, tmp_path)
     _write_external_boundary(monkeypatch, tmp_path)
@@ -308,7 +308,7 @@ def test_generate_stock_lens_report_reuses_existing_without_force(
 
 
 def test_stock_lens_report_path_removes_illegal_characters_and_emoji():
-    from podcast_ingest_core.storage import stock_lens_report_asset_paths
+    from corpus_ingest_core.storage import stock_lens_report_asset_paths
 
     paths = stock_lens_report_asset_paths("gooaye", ' bad <stock> 🐣 : / \\ | ? * ok ')
 
@@ -321,8 +321,9 @@ def test_stock_lens_report_path_removes_illegal_characters_and_emoji():
 def test_stock_lens_report_cli_parses_options_and_outputs_json(
     monkeypatch, capsys, tmp_path
 ):
-    from podcast_ingest_core.models import StockLensReportAsset
     from scripts import generate_stock_lens_report
+
+    from corpus_ingest_core.models import StockLensReportAsset
 
     asset = StockLensReportAsset(
         podcast_id="gooaye",
