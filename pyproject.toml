@@ -28,7 +28,7 @@ classifiers = [
 dependencies = [
     "feedparser>=6.0",
     "faster-whisper>=1.1.0",
-    "mcp[cli]>=1.27,<2",
+    "mcp[cli]>=1.27,<3",
     "PyYAML>=6.0",
     "requests>=2.31",
     # Spec 036：X 影片取得。兩者都採惰性匯入，缺套件時由
