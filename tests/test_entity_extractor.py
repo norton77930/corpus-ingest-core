@@ -94,7 +94,7 @@ def test_extract_mentions_generates_json_and_markdown(monkeypatch, tmp_path):
     assert payload["extraction_mode"] == "deterministic-rules"
     assert "NVIDIA" in {mention["text"] for mention in payload["mentions"]}
     assert "# Gooaye 股癌 - EP672 Mentions" in markdown
-    assert "本檔案不構成投資建議" in markdown
+    assert "This file does not constitute investment advice." in markdown
 
 
 def test_extract_mentions_empty_transcript_generates_zero_mentions(monkeypatch, tmp_path):

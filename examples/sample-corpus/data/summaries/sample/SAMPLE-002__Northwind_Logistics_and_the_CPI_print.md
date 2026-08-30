@@ -1,4 +1,4 @@
-# The Synthetic Signal (fictional sample corpus) - SAMPLE-002 摘要
+# The Synthetic Signal (fictional sample corpus) - SAMPLE-002 Summary
 
 ## Metadata
 
@@ -10,42 +10,42 @@
 - Summary mode: extractive-template
 - Validation status: valid
 
-## 摘要狀態
+## Summary Status
 
-本摘要由 deterministic extractive-template summarizer 產生。
-它不使用外部 LLM，因此不會產生無法追溯到逐字稿的主觀推論。
+This summary was produced by the deterministic extractive-template summarizer.
+It calls no external LLM, so it adds no subjective inference that cannot be traced back to the transcript.
 
-## 本集概覽
+## Episode Overview
 
-- 逐字稿總段落數：16
-- 估計音檔長度：00:08:08
-- 可用文字長度：1547 字元
+- Total transcript segments: 16
+- Estimated audio length: 00:08:08
+- Available text length: 1547 characters
 
-## 時間軸摘要
+## Timeline Summary
 
 ### 00:00:00 - 00:05:00
 
-- 代表片段：
+- Representative segment:
   > This is episode two of The Synthetic Signal, and like episode one it is completely fabricated.
 
-- 代表片段：
+- Representative segment:
   > Ada Kestrel here with Milo Vance. Every company, price and statistic in this episode was invented for a software demo.
 
-- 代表片段：
+- Representative segment:
   > Northwind Logistics reported an invented eleven percent drop in spot freight rates this quarter.
 
 ### 00:05:00 - 00:10:00
 
-- 代表片段：
+- Representative segment:
   > That pushes Northwind Logistics towards daytime charging, which collides with their invented delivery windows.
 
-- 代表片段：
+- Representative segment:
   > The AI scheduling system they lease is supposed to solve exactly that, in this fiction.
 
-- 代表片段：
+- Representative segment:
   > It costs them a fictional nineteen dollars per GPU hour, billed monthly, and it is not clear it earns that back.
 
-## 可引用片段
+## Quotable Segments
 
 1. `[00:00:00 - 00:00:10]` This is episode two of The Synthetic Signal, and like episode one it is completely fabricated.
 2. `[00:00:10 - 00:00:24]` Ada Kestrel here with Milo Vance. Every company, price and statistic in this episode was invented for a software demo.
@@ -58,7 +58,7 @@
 9. `[00:02:53 - 00:03:25]` Harbour Robotics turns up here too, because Northwind Logistics is a fictional customer of theirs.
 10. `[00:03:25 - 00:03:59]` They bought two hundred imaginary picking arms and claim a thirty percent throughput gain.
 
-## 待 LLM 深度摘要 Prompt
+## LLM Deep Summary Prompt
 
 請根據本集逐字稿整理：
 1. 本集主題

@@ -204,7 +204,7 @@ def _render_markdown(
 ) -> str:
     non_empty_segments = [segment for segment in segments if segment["text"]]
     lines = [
-        f"# {display_name} - {episode_ref} 摘要",
+        f"# {display_name} - {episode_ref} Summary",
         "",
         "## Metadata",
         "",
@@ -216,18 +216,18 @@ def _render_markdown(
         f"- Summary mode: {SUMMARY_MODE}",
         f"- Validation status: {validation_status}",
         "",
-        "## 摘要狀態",
+        "## Summary Status",
         "",
-        "本摘要由 deterministic extractive-template summarizer 產生。",
-        "它不使用外部 LLM，因此不會產生無法追溯到逐字稿的主觀推論。",
+        "This summary was produced by the deterministic extractive-template summarizer.",
+        "It calls no external LLM, so it adds no subjective inference that cannot be traced back to the transcript.",
         "",
-        "## 本集概覽",
+        "## Episode Overview",
         "",
-        f"- 逐字稿總段落數：{segment_count}",
-        f"- 估計音檔長度：{_estimated_duration(segments)}",
-        f"- 可用文字長度：{len(transcript_text)} 字元",
+        f"- Total transcript segments: {segment_count}",
+        f"- Estimated audio length: {_estimated_duration(segments)}",
+        f"- Available text length: {len(transcript_text)} characters",
         "",
-        "## 時間軸摘要",
+        "## Timeline Summary",
         "",
     ]
     if validation_warnings:
@@ -236,13 +236,13 @@ def _render_markdown(
         lines.append("")
 
     if not non_empty_segments:
-        lines.extend(["此 transcript 沒有可摘要的語音 segments。", ""])
+        lines.extend(["This transcript has no speech segments to summarize.", ""])
     else:
         lines.extend(_timeline_lines(non_empty_segments, window_seconds))
 
-    lines.extend(["## 可引用片段", ""])
+    lines.extend(["## Quotable Segments", ""])
     if not non_empty_segments or max_quotes == 0:
-        lines.extend(["沒有可引用片段。", ""])
+        lines.extend(["No quotable segments.", ""])
     else:
         for index, segment in enumerate(non_empty_segments[:max_quotes], start=1):
             lines.append(
@@ -252,7 +252,7 @@ def _render_markdown(
 
     lines.extend(
         [
-            "## 待 LLM 深度摘要 Prompt",
+            "## LLM Deep Summary Prompt",
             "",
             *summary_profile.extractive_prompt_lines,
             "",
@@ -277,13 +277,13 @@ def _timeline_lines(segments: list[dict[str, Any]], window_seconds: int) -> list
             ]
         )
         for segment in grouped[window_start][:3]:
-            lines.extend(["- 代表片段：", f"  > {segment['text']}", ""])
+            lines.extend(["- Representative segment:", f"  > {segment['text']}", ""])
     return lines
 
 
 def _estimated_duration(segments: list[dict[str, Any]]) -> str:
     if not segments:
-        return "0 秒"
+        return "00:00:00"
     return _format_clock(max(segment["end"] for segment in segments))
 
 

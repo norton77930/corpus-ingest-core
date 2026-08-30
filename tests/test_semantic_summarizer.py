@@ -238,7 +238,7 @@ def test_semantic_summarizer_generates_empty_summary_without_provider(monkeypatc
     assert asset.generated is True
     assert asset.chunk_count == 0
     assert provider.chunk_calls == []
-    assert "此 transcript 沒有可摘要的語音 segments。" in content
+    assert "This transcript has no speech segments to summarize." in content
 
 
 def test_semantic_summarizer_rejects_partial_by_default(monkeypatch, tmp_path):
@@ -646,7 +646,7 @@ def test_summarize_cli_loads_env_file_for_semantic_mode(monkeypatch, capsys, tmp
 
 # --- Spec 037: summary profiles ---------------------------------------------
 
-_EXPECTED_FINANCE_DOCUMENT = """# Gooaye 股癌 - EP672 語意摘要
+_EXPECTED_FINANCE_DOCUMENT = """# Gooaye 股癌 - EP672 Semantic Summary
 
 ## Metadata
 
@@ -662,7 +662,7 @@ _EXPECTED_FINANCE_DOCUMENT = """# Gooaye 股癌 - EP672 語意摘要
 - Model: test-model
 - Chunk count: 3
 
-## 摘要限制
+## Summary Limitations
 
 本摘要由 LLM 根據逐字稿產生。所有重點應盡量附 timestamp evidence。
 本摘要不構成投資建議。
@@ -751,7 +751,7 @@ def test_learning_notes_replaces_the_disclaimer_and_keeps_the_envelope(monkeypat
     assert "本摘要僅整理影片內容，結論請回到 timestamp 驗證。" in content
 
     # The envelope did not. Four downstream readers depend on each of these.
-    assert "## 摘要限制" in content
+    assert "## Summary Limitations" in content
     assert "## Chunk Summaries" in content
     assert "Summary mode: semantic-llm" in content
     assert "Provider:" in content

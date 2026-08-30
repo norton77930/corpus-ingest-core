@@ -246,7 +246,7 @@ modules read its structure:
 | `verified_research_lineage.py:820` | `summary_mode == "semantic-llm"` |
 
 A summary profile may change what the LLM is asked to produce and the body text
-under `## 摘要限制`. It may not change a heading, the Metadata block, or
+under `## Summary Limitations`. It may not change a heading, the Metadata block, or
 `SUMMARY_MODE`. `tests/test_summary_profiles.py` enforces that no profile body
 line can start with `#`.
 

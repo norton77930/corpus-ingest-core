@@ -7,7 +7,7 @@
   "device": "none",
   "compute_type": "none",
   "vad_filter": false,
-  "generated_at": "2026-08-29T06:10:20Z",
+  "generated_at": "2026-08-30T17:44:25Z",
   "source_audio_path": "examples\\sample-corpus\\data\\audio\\sample\\SAMPLE-002__Northwind_Logistics_and_the_CPI_print.mp3",
   "source_audio_size_bytes": null,
   "last_segment_end_seconds": 488.0,

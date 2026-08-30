@@ -27,7 +27,7 @@ LEARNING_SUMMARY = """# @Raytar - learning notes
 - Provider: openai-compatible
 - Model: fake
 
-## 摘要限制
+## Summary Limitations
 
 本摘要由 LLM 根據逐字稿產生。
 

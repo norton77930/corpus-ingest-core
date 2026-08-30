@@ -280,11 +280,11 @@ def _render_markdown(*, display_name: str, payload: dict[str, Any]) -> str:
         )
     lines.extend(
         [
-            "## 注意事項",
+            "## Disclaimer",
             "",
-            "本檔案不構成投資建議。",
-            "本階段未查詢外部市場資料，所有 external data 狀態皆為 not_requested / not_fetched。",
-            "inferred_from_industry candidates 是未查證研究線索，不代表 podcast 明確提到。",
+            "This file does not constitute investment advice.",
+            "This stage queries no external market data; every external data status is not_requested / not_fetched.",
+            "inferred_from_industry candidates are unverified research leads, not explicit podcast mentions.",
             "",
         ]
     )

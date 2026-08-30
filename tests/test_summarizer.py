@@ -68,7 +68,7 @@ def test_summarize_episode_generates_markdown_from_transcript(monkeypatch, tmp_p
     assert asset.already_exists is False
     assert asset.summary_mode == "extractive-template"
     assert asset.segment_count == 3
-    assert "# Gooaye 股癌 - EP672 摘要" in content
+    assert "# Gooaye 股癌 - EP672 Summary" in content
     assert "## Metadata" in content
     assert "deterministic extractive-template summarizer" in content
 
@@ -115,7 +115,7 @@ def test_summarize_episode_generates_empty_segment_summary(monkeypatch, tmp_path
 
     content = asset.summary_path.read_text(encoding="utf-8")
     assert asset.segment_count == 0
-    assert "此 transcript 沒有可摘要的語音 segments。" in content
+    assert "This transcript has no speech segments to summarize." in content
 
 
 def test_summarize_episode_generates_timeline_and_quotes(monkeypatch, tmp_path):
@@ -126,10 +126,10 @@ def test_summarize_episode_generates_timeline_and_quotes(monkeypatch, tmp_path):
     asset = summarizer.summarize_episode("gooaye", "EP672", max_quotes=2, window_seconds=300)
 
     content = asset.summary_path.read_text(encoding="utf-8")
-    assert "## 時間軸摘要" in content
+    assert "## Timeline Summary" in content
     assert "### 00:00:00 - 00:05:00" in content
     assert "### 00:05:00 - 00:10:00" in content
-    assert "## 可引用片段" in content
+    assert "## Quotable Segments" in content
     assert "1. `[00:00:00 - 00:00:12]` 第一段文字" in content
     assert "2. `[00:05:05 - 00:05:30]` 第二段比較長的文字" in content
 
@@ -283,7 +283,7 @@ def test_summarize_cli_parses_options_and_outputs_json(monkeypatch, capsys, tmp_
 
 _FINANCE_EXTRACTIVE_BLOCK = "\n".join(
     [
-        "## 待 LLM 深度摘要 Prompt",
+        "## LLM Deep Summary Prompt",
         "",
         "請根據本集逐字稿整理：",
         "1. 本集主題",
@@ -339,7 +339,7 @@ def test_extractive_learning_notes_prompt_block_drops_the_market_sections(monkey
     asset = summarizer.summarize_episode("gooaye", "EP672")
     content = Path(asset.summary_path).read_text(encoding="utf-8")
 
-    assert "## 待 LLM 深度摘要 Prompt" in content
+    assert "## LLM Deep Summary Prompt" in content
     assert "核心觀念" in content
     assert "不要補充逐字稿沒有的內容。" in content
     for unwanted in ("市場觀點", "股票", "總經觀點", "廣告段落", "不要產生投資建議"):

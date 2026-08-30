@@ -73,6 +73,49 @@ Claude Code and Codex, a set of prompts to try, and a small **synthetic** sample
 corpus so the search and evidence tools return real results before you have
 transcribed anything of your own.
 
+## What it produces
+
+One episode yields transcripts (`.txt`, `.srt`, `.json`), a summary, a mention
+index, and a row in the SQLite index. The claim in "Why it exists" is not a
+slogan -- it is the shape of the data. Every extracted mention carries the
+segments it came from:
+
+```json
+{
+  "type": "industry",
+  "text": "AI",
+  "evidence": [
+    {
+      "segment_id": 9,
+      "timestamp": "[00:02:30 - 00:02:58]",
+      "text": "The interesting part is not the bill. It is that they moved the AI workload off rented capacity and onto hardware they own."
+    }
+  ]
+}
+```
+
+So "the show discussed AI infrastructure costs" is never something you have to
+take on trust. It resolves to a segment id, a timestamp, and the sentence that
+was actually said -- and from there back to that second of audio.
+
+The deterministic summary is built the same way, quoting segments rather than
+paraphrasing them:
+
+```text
+  ## Timeline Summary
+
+  ### 00:00:00 - 00:05:00
+
+  - Representative segment:
+    > Today we are talking about Harbour Robotics, a fictional company that
+    > builds picking arms for fictional warehouses.
+```
+
+Both samples above are real output, taken from
+[`examples/sample-corpus/`](examples/sample-corpus) -- a synthetic corpus that
+ships already indexed, so the search and evidence tools return results before
+you have transcribed anything of your own.
+
 ## Architecture
 
 ```mermaid

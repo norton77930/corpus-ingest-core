@@ -36,7 +36,9 @@ from .workflow_derivation_profiles import (
     WORKFLOW_DERIVATION_PROFILE,
 )
 
-CACHE_STALE_WARNING = "SQLite cache may be stale; rebuild cache manually. 本流程不會自動重建。"
+CACHE_STALE_WARNING = (
+    "SQLite cache may be stale; rebuild cache manually. This workflow never rebuilds it automatically."
+)
 DEFAULT_CONTEXT_PATH = Path(__file__).resolve().parents[2] / "config" / "operator_workflow.yaml"
 _JSON_FENCE = re.compile(r"```(?:json)?\s*(\{.*\})\s*```", re.DOTALL)
 _MAX_SOURCE_BYTES = 2 * 1024 * 1024
@@ -268,6 +270,28 @@ def _validate_generated(bodies: dict[str, str], allowed_tools: list[str]) -> Non
                 raise WorkflowDerivationError(f"{key} missing heading {heading}")
         if matched_investment_advice_guard(text) is not None:
             raise WorkflowDerivationError(f"{key} failed prohibited_advice")
+        # Inert, and deliberately left that way for now.
+        #
+        # This reads as a fourth validation -- every other check in this loop
+        # raises WorkflowDerivationError -- but its body has been `pass` since
+        # spec 042 introduced it (ced711a); it was never gutted, it was never
+        # finished. What it appears to look for is a derived document that
+        # mentions 逐字稿 (the transcript) *without* 不得 (the prohibition),
+        # i.e. the model inverting the profile's "不得閱讀或要求逐字稿"
+        # instruction into an invitation to read one. That would be an
+        # instruction-inversion detector.
+        #
+        # Not completed here, for two reasons. The heuristic is thin -- it
+        # turns on two Chinese words co-occurring, so it would fire on
+        # perfectly correct documents and miss any inversion phrased
+        # differently. And no spec asks for it: 042's checklist covers the
+        # *input* boundary (CHK004, transcript never reaches the provider),
+        # which the runner enforces by never reading one, and says nothing
+        # about this output-side check.
+        #
+        # The condition is kept rather than deleted so the intent is not lost.
+        # Completing it means writing the rule into the spec and giving it a
+        # test first, not turning this into a raise and hoping.
         if "逐字稿" in text and "不得" not in text:
             pass
         forbidden_tools = []

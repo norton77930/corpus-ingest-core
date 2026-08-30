@@ -186,7 +186,7 @@ def _write_semantic_context(
     summary_path.write_text(
         "\n".join(
             [
-                "# Gooaye 股癌 - EP672 語意摘要",
+                "# Gooaye 股癌 - EP672 Semantic Summary",
                 "",
                 "## Metadata",
                 "",
@@ -335,7 +335,7 @@ def test_stock_lens_synthesis_confirm_writes_json_and_markdown(monkeypatch, tmp_
     assert payload["source_report_status"] == "final"
     assert payload["llm_input_boundary"] == "phase-6f-stock-lens-json-only"
     assert "synthesis_text" in payload
-    assert "不構成投資建議" in markdown
+    assert "This report does not constitute investment advice." in markdown
     assert "No buy/sell/hold advice" in markdown
     assert "raw transcript was not used" in markdown
     assert "今天聊到台積電" in prompt_text

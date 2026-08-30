@@ -43,7 +43,7 @@ def _write_semantic_summary(
     path.write_text(
         "\n".join(
             [
-                "# Gooaye 股癌 - EP672 語意摘要",
+                "# Gooaye 股癌 - EP672 Semantic Summary",
                 "## Metadata",
                 "- Podcast ID: gooaye",
                 "- Episode: EP672",
@@ -51,7 +51,7 @@ def _write_semantic_summary(
                 "- Summary mode: semantic-llm",
                 "- Provider: openai-compatible",
                 "- Model: GB10",
-                "## 摘要限制",
+                "## Summary Limitations",
                 "本摘要不構成投資建議。",
                 "## 本集主題",
                 f"- semantic point {timestamp}",
@@ -519,7 +519,7 @@ def test_single_review_inspector_rejects_valid_external_review_path(
 
 _LEARNING_NOTES_SUMMARY = "\n".join(
     [
-        "# @Raytar (X) - 2071290493581840707 語意摘要",
+        "# @Raytar (X) - 2071290493581840707 Semantic Summary",
         "",
         "## Metadata",
         "",
@@ -530,7 +530,7 @@ _LEARNING_NOTES_SUMMARY = "\n".join(
         "- Provider: openai-compatible",
         "- Model: GB10",
         "",
-        "## 摘要限制",
+        "## Summary Limitations",
         "",
         "本摘要由 LLM 根據逐字稿產生。所有重點應盡量附 timestamp evidence。",
         "本摘要僅整理影片內容，結論請回到 timestamp 驗證。",

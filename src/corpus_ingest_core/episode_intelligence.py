@@ -366,10 +366,10 @@ def _render_markdown(
     lines.extend(
         [
             "",
-            "## 注意事項",
+            "## Disclaimer",
             "",
-            "本報告不構成投資建議。",
-            "本報告只整理 podcast evidence，未查證外部市場資料。",
+            "This report does not constitute investment advice.",
+            "This report only organizes podcast evidence and verifies no external market data.",
             "",
         ]
     )
@@ -389,7 +389,7 @@ def _mention_bullets(mentions: list[dict[str, Any]]) -> list[str]:
 
 def _estimated_duration(segments: list[dict[str, Any]]) -> str:
     if not segments:
-        return "0 秒"
+        return "00:00:00"
     return _format_clock(max(segment["end"] for segment in segments))
 
 
