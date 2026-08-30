@@ -106,7 +106,10 @@ unfixable = ["F401"]
 known-first-party = ["corpus_ingest_core"]
 
 [tool.mypy]
-python_version = "3.11"
+# No python_version pin. It was "3.11", and the 3.12 CI job then analysed
+# that interpreter's numpy stubs under 3.11 rules and died on a `type`
+# statement it could not parse. Each job should check against the version
+# it is actually running.
 files = ["src"]
 # Third-party packages here ship no stubs (faster_whisper, feedparser, av,
 # yt_dlp, mcp). Without this every import of them is an error and the real
