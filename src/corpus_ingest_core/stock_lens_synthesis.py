@@ -632,9 +632,9 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     lines.extend(
         [
             "",
-            "## 注意事項",
+            "## Disclaimer",
             "",
-            "本報告不構成投資建議。",
+            "This report does not constitute investment advice.",
             "No buy/sell/hold advice. No target price. No guaranteed returns.",
             (
                 "This artifact is LLM-assisted synthesis over Phase 6F JSON and reviewed semantic summary context."

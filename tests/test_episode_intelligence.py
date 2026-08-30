@@ -187,7 +187,7 @@ def test_generate_episode_intelligence_report_writes_json_and_markdown(monkeypat
     assert "# Gooaye 股癌 - EP672 Episode Intelligence Report" in markdown
     assert "## Explicit Mentions" in markdown
     assert "[00:01:23 - 00:01:30]" in markdown
-    assert "本報告不構成投資建議" in markdown
+    assert "This report does not constitute investment advice." in markdown
 
 
 def test_generate_episode_intelligence_report_warns_when_mentions_missing(monkeypatch, tmp_path):

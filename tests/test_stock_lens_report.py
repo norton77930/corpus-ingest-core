@@ -189,7 +189,7 @@ def test_generate_stock_lens_report_writes_json_and_markdown(monkeypatch, tmp_pa
         ],
     }
     assert payload["gooaye_lens"]["dimension_count"] == 6
-    assert "本報告不構成投資建議" in markdown
+    assert "This report does not constitute investment advice." in markdown
     assert "No target price" in markdown
 
 

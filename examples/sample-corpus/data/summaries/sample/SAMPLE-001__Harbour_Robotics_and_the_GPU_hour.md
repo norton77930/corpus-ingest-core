@@ -1,4 +1,4 @@
-# The Synthetic Signal (fictional sample corpus) - SAMPLE-001 摘要
+# The Synthetic Signal (fictional sample corpus) - SAMPLE-001 Summary
 
 ## Metadata
 
@@ -10,50 +10,50 @@
 - Summary mode: extractive-template
 - Validation status: valid
 
-## 摘要狀態
+## Summary Status
 
-本摘要由 deterministic extractive-template summarizer 產生。
-它不使用外部 LLM，因此不會產生無法追溯到逐字稿的主觀推論。
+This summary was produced by the deterministic extractive-template summarizer.
+It calls no external LLM, so it adds no subjective inference that cannot be traced back to the transcript.
 
-## 本集概覽
+## Episode Overview
 
-- 逐字稿總段落數：22
-- 估計音檔長度：00:12:02
-- 可用文字長度：2405 字元
+- Total transcript segments: 22
+- Estimated audio length: 00:12:02
+- Available text length: 2405 characters
 
-## 時間軸摘要
+## Timeline Summary
 
 ### 00:00:00 - 00:05:00
 
-- 代表片段：
+- Representative segment:
   > Welcome to The Synthetic Signal. Everything in this feed is invented: the companies, the numbers, the hosts, and this warning.
 
-- 代表片段：
+- Representative segment:
   > I am Ada Kestrel, and across the desk is Milo Vance. Neither of us exists, and none of this is investment advice.
 
-- 代表片段：
+- Representative segment:
   > Today we are talking about Harbour Robotics, a fictional company that builds picking arms for fictional warehouses.
 
 ### 00:05:00 - 00:10:00
 
-- 代表片段：
+- Representative segment:
   > After the break: Meridian Grid, a fictional utility that nobody should model anything on.
 
-- 代表片段：
+- Representative segment:
   > Meridian Grid announced an invented tariff change that lifts the price of overnight power by nine percent.
 
-- 代表片段：
+- Representative segment:
   > For Harbour Robotics that matters, because in this story their charging fleet runs overnight.
 
 ### 00:10:00 - 00:15:00
 
-- 代表片段：
+- Representative segment:
   > That is the whole point of this sample corpus: search it, cite it, and remember that every word was written for a demo.
 
-- 代表片段：
+- Representative segment:
   > Next episode we will invent a CPI print and pretend to care about it. Thanks for listening to nobody.
 
-## 可引用片段
+## Quotable Segments
 
 1. `[00:00:00 - 00:00:09]` Welcome to The Synthetic Signal. Everything in this feed is invented: the companies, the numbers, the hosts, and this warning.
 2. `[00:00:09 - 00:00:21]` I am Ada Kestrel, and across the desk is Milo Vance. Neither of us exists, and none of this is investment advice.
@@ -66,7 +66,7 @@
 9. `[00:02:30 - 00:02:58]` The interesting part is not the bill. It is that they moved the AI workload off rented capacity and onto hardware they own.
 10. `[00:02:58 - 00:03:29]` Northwind Logistics, another company we made up, went the other way and rents every hour it uses.
 
-## 待 LLM 深度摘要 Prompt
+## LLM Deep Summary Prompt
 
 請根據本集逐字稿整理：
 1. 本集主題

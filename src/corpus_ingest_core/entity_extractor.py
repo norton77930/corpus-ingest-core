@@ -404,11 +404,11 @@ def _render_markdown(
         f"- Segment count: {segment_count}",
         f"- Mention count: {len(mentions)}",
         "",
-        "## 注意事項",
+        "## Disclaimer",
         "",
-        "本檔案由 deterministic rules 產生，不代表完整語意理解。",
-        "所有 mention 必須回到 timestamp evidence。",
-        "本檔案不構成投資建議。",
+        "Produced by deterministic rules. This is not semantic understanding.",
+        "Every mention must be traceable to timestamp evidence.",
+        "This file does not constitute investment advice.",
         "",
     ]
     for mention_type in MARKDOWN_TYPE_ORDER:

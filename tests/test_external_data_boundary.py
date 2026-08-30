@@ -180,7 +180,7 @@ def test_generate_external_data_boundary_writes_json_and_markdown(monkeypatch, t
     assert "# Gooaye 股癌 - EP672 External Data Boundary" in markdown
     assert "not_requested" in markdown
     assert "not_fetched" in markdown
-    assert "本檔案不構成投資建議" in markdown
+    assert "This file does not constitute investment advice." in markdown
 
 
 def test_generate_external_data_boundary_warns_when_config_missing(monkeypatch, tmp_path):

@@ -33,7 +33,9 @@ from .study_guide_profiles import (
 )
 from .summary_profiles import LEARNING_NOTES
 
-CACHE_STALE_WARNING = "SQLite cache may be stale; rebuild cache manually. 本流程不會自動重建。"
+CACHE_STALE_WARNING = (
+    "SQLite cache may be stale; rebuild cache manually. This workflow never rebuilds it automatically."
+)
 _CHUNK_SPLIT = re.compile(r"(?im)^##\s+Chunk Summaries\s*$")
 _HEADING = re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?(.+?)\s*$")
 _TIMESTAMP = re.compile(r"\[\d{2}:\d{2}:\d{2}\s*-\s*\d{2}:\d{2}:\d{2}\]")

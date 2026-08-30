@@ -133,7 +133,8 @@ class XVideoIngestResult:
 # 字面，快取守衛測試就會判定為未經審查的自動重建風險（憲章原則 VIII）。其他
 # runner 也是這樣表達同一件事。註解本身同樣不能出現該字面。
 CACHE_STALE_WARNING = (
-    "SQLite cache may be stale; rebuild cache manually. 本流程不會自動重建，這一集要等你手動重建 cache 之後才搜尋得到。"
+    "SQLite cache may be stale; rebuild cache manually. This run does not rebuild "
+    "it, so this episode is not searchable until you do."
 )
 
 

@@ -43,7 +43,8 @@ _YOUTUBE_HOSTS = {
 }
 
 CACHE_STALE_WARNING = (
-    "SQLite cache may be stale; rebuild cache manually. 本流程不會自動重建，這一集要等你手動重建 cache 之後才搜尋得到。"
+    "SQLite cache may be stale; rebuild cache manually. This run does not rebuild "
+    "it, so this episode is not searchable until you do."
 )
 
 

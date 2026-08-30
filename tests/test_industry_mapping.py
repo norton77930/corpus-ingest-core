@@ -191,7 +191,7 @@ def test_generate_industry_chain_mapping_writes_json_and_markdown(monkeypatch, t
     assert "# Gooaye 股癌 - EP672 Industry Chain Mapping" in markdown
     assert "podcast_explicit" in markdown
     assert "inferred_from_industry" in markdown
-    assert "本檔案不構成投資建議" in markdown
+    assert "This file does not constitute investment advice." in markdown
 
 
 def test_generate_industry_chain_mapping_warns_without_fabricating_candidates(monkeypatch, tmp_path):

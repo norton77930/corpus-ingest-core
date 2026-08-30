@@ -397,7 +397,7 @@ def _render_empty_markdown(
         provider_name=provider_name,
         model_name=model_name,
         chunk_summaries=[],
-        final_summary="此 transcript 沒有可摘要的語音 segments。",
+        final_summary="This transcript has no speech segments to summarize.",
     )
 
 
@@ -418,7 +418,7 @@ def _render_semantic_markdown(
     final_summary: str,
 ) -> str:
     lines = [
-        f"# {display_name} - {episode_ref} 語意摘要",
+        f"# {display_name} - {episode_ref} Semantic Summary",
         "",
         "## Metadata",
         "",
@@ -434,7 +434,7 @@ def _render_semantic_markdown(
         f"- Model: {model_name or ''}",
         f"- Chunk count: {len(chunk_summaries)}",
         "",
-        "## 摘要限制",
+        "## Summary Limitations",
         "",
         *summary_profile.limitation_lines,
         "",
@@ -456,7 +456,7 @@ def _render_semantic_markdown(
         for index, chunk_summary in enumerate(chunk_summaries, start=1):
             lines.extend([f"### Chunk {index}", "", chunk_summary.strip(), ""])
     else:
-        lines.extend(["此 transcript 沒有可摘要的語音 segments。", ""])
+        lines.extend(["This transcript has no speech segments to summarize.", ""])
     return "\n".join(lines)
 
 
