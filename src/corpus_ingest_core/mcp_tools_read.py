@@ -18,7 +18,7 @@ from .models import Episode
 
 @mcp.tool()
 def list_episodes(podcast_id: str = "gooaye", limit: int = 10) -> dict[str, Any]:
-    """列出指定 podcast 最近集數；不回傳完整 audio_url。"""
+    """Read-only tool: list one podcast's recent episodes. Never returns the full audio_url."""
 
     return mcp_runtime._tool_call(
         lambda: [
@@ -30,14 +30,14 @@ def list_episodes(podcast_id: str = "gooaye", limit: int = 10) -> dict[str, Any]
 
 @mcp.tool()
 def get_episode(podcast_id: str = "gooaye", episode_ref: str = "latest") -> dict[str, Any]:
-    """查詢單一 podcast episode metadata；支援 latest 與大小寫不敏感 EP ref。"""
+    """Read-only tool: look up one podcast episode's metadata. Accepts latest and a case-insensitive EP ref."""
 
     return mcp_runtime._tool_call(lambda: _episode_to_safe_dict(feed_reader.get_episode(podcast_id, episode_ref)))
 
 
 @mcp.tool()
 def validate_transcript(podcast_id: str = "gooaye", episode_ref: str = "latest") -> dict[str, Any]:
-    """檢查既有 transcript artifacts 是否完整、有效或疑似 partial。"""
+    """Read-only tool: report whether the existing transcript artifacts are complete, valid, or likely partial."""
 
     return mcp_runtime._tool_call(lambda: validator.validate_transcript(podcast_id, episode_ref))
 
@@ -51,10 +51,10 @@ def search_transcripts(
     context_segments: int = 0,
     case_sensitive: bool = False,
 ) -> dict[str, Any]:
-    """搜尋 SQLite cache 中的 transcript segments；不會自動 rebuild cache。"""
+    """Read-only tool: search transcript segments in the SQLite cache. Never rebuilds the cache automatically."""
 
     if not query.strip():
-        return tool_error("query 不可為空。", "ValueError")
+        return tool_error("query must not be empty.", "ValueError")
     return mcp_runtime._tool_call(
         lambda: search_module.search_transcripts(
             query=query,
@@ -75,10 +75,10 @@ def search_mentions(
     limit: int = 10,
     case_sensitive: bool = False,
 ) -> dict[str, Any]:
-    """搜尋 SQLite cache 中的 deterministic mentions 與 timestamp evidence。"""
+    """Read-only tool: search deterministic mentions and their timestamp evidence in the SQLite cache."""
 
     if not query.strip():
-        return tool_error("query 不可為空。", "ValueError")
+        return tool_error("query must not be empty.", "ValueError")
     return mcp_runtime._tool_call(
         lambda: search_module.search_mentions(
             query=query,
@@ -92,7 +92,7 @@ def search_mentions(
 
 @mcp.tool()
 def rebuild_cache(podcast_id: str | None = None, force: bool = False) -> dict[str, Any]:
-    """Maintenance tool：重建 SQLite cache；只索引既有 artifacts，不下載、不轉錄、不摘要。"""
+    """Maintenance tool: rebuild the SQLite cache. Indexes existing artifacts only: no download, no transcription, no summary."""
 
     return mcp_runtime._tool_call(lambda: cache_module.rebuild_cache(podcast_id=podcast_id, force=force))
 

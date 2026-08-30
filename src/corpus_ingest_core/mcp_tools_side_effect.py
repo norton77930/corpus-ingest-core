@@ -61,7 +61,7 @@ def download_audio(
     confirm: bool = False,
     force: bool = False,
 ) -> dict[str, Any]:
-    """Side-effect tool：需要 confirm=true 才會下載 podcast audio。"""
+    """Side-effect tool: downloads podcast audio only with confirm=true. confirm=false previews the plan and writes nothing."""
 
     if not confirm:
         return tool_action_plan(
@@ -97,7 +97,7 @@ def summarize_episode_extractive(
     max_quotes: int = 10,
     window_seconds: int = 300,
 ) -> dict[str, Any]:
-    """Side-effect tool：需要 confirm=true 才會寫入 deterministic extractive summary。"""
+    """Side-effect tool: writes the deterministic extractive summary only with confirm=true. No LLM, no network."""
 
     clamped_max_quotes = mcp_runtime._clamp(max_quotes, 0, MAX_QUOTES)
     clamped_window_seconds = mcp_runtime._clamp(window_seconds, MIN_WINDOW_SECONDS, MAX_WINDOW_SECONDS)
@@ -138,7 +138,7 @@ def extract_mentions(
     allow_partial: bool = False,
     max_evidence_per_mention: int = 5,
 ) -> dict[str, Any]:
-    """Side-effect tool：需要 confirm=true 才會寫入 deterministic mention artifacts。"""
+    """Side-effect tool: writes deterministic mention artifacts only with confirm=true. No LLM, no network."""
 
     clamped_max_evidence = mcp_runtime._clamp(
         max_evidence_per_mention,
@@ -185,7 +185,7 @@ def transcribe_episode(
     vad_filter: bool = False,
     force: bool = False,
 ) -> dict[str, Any]:
-    """Long-running side-effect tool：需要 confirm=true 才會下載/取得音檔並轉錄。"""
+    """Long-running side-effect tool: downloads or reuses the audio and transcribes locally only with confirm=true."""
 
     validation_error = _validate_transcription_options(model, device, compute_type)
     if validation_error is not None:
@@ -246,7 +246,7 @@ def semantic_summarize_episode(
     max_segments_per_chunk: int = 120,
     allow_partial: bool = False,
 ) -> dict[str, Any]:
-    """API-cost side-effect tool：需要 confirm=true 與 exact api_cost_ack 才會呼叫外部 LLM。"""
+    """API-cost side-effect tool: calls an external LLM only with confirm=true and the exact api_cost_ack."""
 
     validation_error = _validate_semantic_options(provider, api_key_env)
     if validation_error is not None:
@@ -351,7 +351,7 @@ def run_research_workflow(
     max_evidence_per_candidate: int = 5,
     max_stock_evidence_items: int = 10,
 ) -> dict[str, Any]:
-    """Side-effect workflow tool：dry-run first，confirmed LLM steps require exact ack。"""
+    """Side-effect workflow tool: dry-run first; confirmed LLM steps require the exact ack."""
 
     normalized_stock_query = stock_query.strip() if stock_query else None
     validation_error = _validate_workflow_options(

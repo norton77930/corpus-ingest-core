@@ -26,7 +26,7 @@ def ingest_youtube_video(
     title: str | None = None,
     force: bool = False,
 ) -> dict[str, Any]:
-    """Side-effect tool：confirm=false 是 preview（零寫入，會讀公開 metadata）。"""
+    """Side-effect tool: confirm=false is a zero-write preview that still reads public metadata over the network. No api_cost_ack: this tool calls no LLM."""
 
     inputs = {
         "url": url,

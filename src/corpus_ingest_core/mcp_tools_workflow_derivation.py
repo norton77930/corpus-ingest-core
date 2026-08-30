@@ -32,7 +32,7 @@ def derive_workflow_bundle(
     force: bool = False,
     api_cost_ack: str = "",
 ) -> dict[str, Any]:
-    """Side-effect tool：confirm=false 是 preview（零寫入、零網路）。"""
+    """Side-effect tool: confirm=false is a zero-write, zero-network preview. confirm=true calls an external LLM and needs the exact api_cost_ack."""
 
     inputs = {
         "podcast_id": podcast_id,
