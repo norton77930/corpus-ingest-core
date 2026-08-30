@@ -179,6 +179,8 @@ feature.
   product boundaries a change must not cross, and the hash-pinned files that
   must not be edited
 - [`SECURITY.md`](SECURITY.md) — reporting a vulnerability privately
+- [`docs/releasing.md`](docs/releasing.md) — cutting a release, and the
+  one-time PyPI setup it depends on
 - [`docs/ai-development-framework.md`](docs/ai-development-framework.md),
   [`docs/verification-matrix.md`](docs/verification-matrix.md),
   [`docs/architecture-decision-records/README.md`](docs/architecture-decision-records/README.md),
