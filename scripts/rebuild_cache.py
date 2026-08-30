@@ -11,7 +11,7 @@ from corpus_ingest_core import PodcastIngestCoreError, rebuild_cache
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="重建 SQLite metadata cache。")
+    parser = argparse.ArgumentParser(description="Rebuild the SQLite metadata cache.")
     parser.add_argument("--podcast")
     parser.add_argument("--force", action="store_true")
     args = parser.parse_args()

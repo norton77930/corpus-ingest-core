@@ -59,7 +59,7 @@ def search_transcripts(
                 for row in rows
             ]
     except sqlite3.Error as exc:
-        raise SearchError(f"搜尋 transcript cache 失敗：{exc}") from exc
+        raise SearchError(f"Failed to search the transcript cache: {exc}") from exc
 
 
 def search_mentions(
@@ -107,7 +107,7 @@ def search_mentions(
         with sqlite3.connect(resolved_path) as connection:
             rows = connection.execute(sql, parameters).fetchall()
     except sqlite3.Error as exc:
-        raise SearchError(f"搜尋 mention cache 失敗：{exc}") from exc
+        raise SearchError(f"Failed to search the mention cache: {exc}") from exc
 
     return [
         MentionSearchResult(
@@ -255,12 +255,14 @@ def _resolve_transcript_search_mode(
     case_sensitive: bool,
 ) -> str:
     if requested_mode not in _VALID_TRANSCRIPT_SEARCH_MODES:
-        raise SearchError(f"未知 search_mode：{requested_mode}")
+        raise SearchError(f"Unknown search_mode: {requested_mode}")
     if requested_mode == "like":
         return "like"
     if requested_mode == "fts":
         if not _is_fts_ready(db_path):
-            raise SearchError("SQLite FTS5 不可用或 cache 尚未建立 FTS table，無法使用 search_mode=fts。")
+            raise SearchError(
+                "search_mode=fts is unavailable: SQLite FTS5 is missing, or the cache has no FTS table yet."
+            )
         return "fts"
     if case_sensitive or _contains_non_ascii(query) or not _is_fts_ready(db_path):
         return "fallback"
@@ -315,18 +317,18 @@ def _fts_phrase_query(query: str) -> str:
 
 def _validate_search_input(query: str, limit: int) -> None:
     if not query.strip():
-        raise SearchError("query 不可為空。")
+        raise SearchError("query must not be empty.")
     if limit < 1:
-        raise SearchError("limit 必須大於 0。")
+        raise SearchError("limit must be greater than 0.")
 
 
 def _validate_context_segments(context_segments: int) -> None:
     if context_segments < 0 or context_segments > _MAX_CONTEXT_SEGMENTS:
-        raise SearchError("context_segments 必須介於 0 到 5。")
+        raise SearchError("context_segments must be between 0 and 5.")
 
 
 def _resolve_existing_db_path(db_path: str | Path | None) -> Path:
     resolved_path = Path(db_path) if db_path is not None else storage.cache_db_path()
     if not resolved_path.exists():
-        raise SearchError(f"SQLite cache 不存在：{resolved_path}")
+        raise SearchError(f"SQLite cache does not exist: {resolved_path}")
     return resolved_path

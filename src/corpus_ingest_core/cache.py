@@ -106,7 +106,7 @@ def initialize_cache(db_path: str | Path | None = None) -> Path:
             if is_fts5_available(resolved_path):
                 connection.executescript(FTS_SCHEMA_SQL)
     except (OSError, sqlite3.Error) as exc:
-        raise CacheInitializationError(f"初始化 SQLite cache 失敗：{exc}") from exc
+        raise CacheInitializationError(f"Failed to initialize the SQLite cache: {exc}") from exc
     return resolved_path
 
 
@@ -194,7 +194,7 @@ def index_episode(
             )
             _replace_mentions(connection, podcast_id, episode_ref, mentions, mention_evidence)
     except sqlite3.Error as exc:
-        raise EpisodeIndexError(f"索引 episode 失敗：{podcast_id}/{episode_ref}: {exc}") from exc
+        raise EpisodeIndexError(f"Failed to index episode {podcast_id}/{episode_ref}: {exc}") from exc
 
     return EpisodeIndexResult(
         podcast_id=podcast_id,
@@ -257,7 +257,7 @@ def _resolve_db_path(db_path: str | Path | None) -> Path:
 def _load_json_object(path: Path) -> dict[str, Any]:
     payload = json.loads(path.read_text(encoding="utf-8"))
     if not isinstance(payload, dict):
-        raise ValueError("JSON root 必須是 object")
+        raise ValueError("JSON root must be an object")
     return payload
 
 
@@ -267,11 +267,11 @@ def _optional_text(value: Any) -> str | None:
 
 def _normalize_segments(raw_segments: Any) -> list[dict[str, Any]]:
     if not isinstance(raw_segments, list):
-        raise ValueError("segments 必須是 list")
+        raise ValueError("segments must be a list")
     segments: list[dict[str, Any]] = []
     for index, segment in enumerate(raw_segments, start=1):
         if not isinstance(segment, dict):
-            raise ValueError(f"segment {index} 必須是 object")
+            raise ValueError(f"segment {index} must be an object")
         start = _optional_float(segment.get("start"))
         end = _optional_float(segment.get("end"))
         text = str(segment.get("text", "")).strip()

@@ -32,9 +32,9 @@ def generate_industry_chain_mapping(
     """從 Phase 6B episode intelligence report 產生 deterministic industry mapping。"""
 
     if max_candidates_per_node < 1:
-        raise ValueError("max_candidates_per_node 必須大於 0。")
+        raise ValueError("max_candidates_per_node must be greater than 0.")
     if max_evidence_per_candidate < 1:
-        raise ValueError("max_evidence_per_candidate 必須大於 0。")
+        raise ValueError("max_evidence_per_candidate must be greater than 0.")
 
     profile = load_podcast_profile(podcast_id)
     transcript_identity = current_canonical_transcript_identity(podcast_id, episode_ref)
@@ -44,15 +44,17 @@ def generate_industry_chain_mapping(
         else storage.episode_intelligence_report_asset_paths(podcast_id, episode_ref, transcript_identity.title)
     )
     if report_paths is None or not report_paths.json_path.exists():
-        raise IndustryMappingInputError(f"找不到 episode intelligence report：{podcast_id}/{episode_ref}")
+        raise IndustryMappingInputError(f"Episode intelligence report not found: {podcast_id}/{episode_ref}")
 
     report_payload = _load_report_payload(report_paths.json_path)
     _validate_report_identity(report_payload, podcast_id, episode_ref)
     report_status = _required_text(report_payload, "report_status")
     if report_status == "partial-draft" and not allow_partial:
-        raise IndustryMappingInputError("episode intelligence report status is partial-draft；請使用 --allow-partial。")
+        raise IndustryMappingInputError(
+            "episode intelligence report status is partial-draft; pass --allow-partial to proceed."
+        )
     if report_status not in {"final", "partial-draft"}:
-        raise IndustryMappingInputError(f"episode intelligence report status 不支援：{report_status}")
+        raise IndustryMappingInputError(f"Unsupported episode intelligence report status: {report_status}")
 
     title = _required_text(report_payload, "title")
     mapping_paths = industry_chain_mapping_asset_paths(podcast_id, episode_ref, title)
@@ -130,11 +132,11 @@ def _load_report_payload(json_path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(json_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        raise IndustryMappingInputError(f"episode intelligence report JSON 格式錯誤：{json_path}") from exc
+        raise IndustryMappingInputError(f"Malformed episode intelligence report JSON: {json_path}") from exc
     except OSError as exc:
-        raise IndustryMappingInputError(f"無法讀取 episode intelligence report：{exc}") from exc
+        raise IndustryMappingInputError(f"Could not read the episode intelligence report: {exc}") from exc
     if not isinstance(payload, dict):
-        raise IndustryMappingInputError("episode intelligence report JSON 必須是 object。")
+        raise IndustryMappingInputError("The episode intelligence report JSON must be an object.")
     return payload
 
 
@@ -142,13 +144,15 @@ def _validate_report_identity(payload: dict[str, Any], podcast_id: str, episode_
     payload_podcast_id = _required_text(payload, "podcast_id")
     payload_episode_ref = _required_text(payload, "episode_ref")
     if payload_podcast_id != podcast_id or payload_episode_ref != episode_ref:
-        raise IndustryMappingInputError("episode intelligence report 的 podcast_id 或 episode_ref 不符合請求。")
+        raise IndustryMappingInputError(
+            "The episode intelligence report podcast_id or episode_ref does not match the request."
+        )
 
 
 def _required_text(payload: dict[str, Any], key: str) -> str:
     value = payload.get(key)
     if not isinstance(value, str) or not value.strip():
-        raise IndustryMappingInputError(f"episode intelligence report 缺少有效欄位：{key}")
+        raise IndustryMappingInputError(f"Episode intelligence report is missing a valid field: {key}")
     return value
 
 
@@ -477,4 +481,4 @@ def _write_mapping(
                 part_path.unlink(missing_ok=True)
             except OSError:
                 pass
-        raise IndustryMappingFailedError(f"寫入 industry chain mapping 失敗：{exc}") from exc
+        raise IndustryMappingFailedError(f"Failed to write the industry chain mapping: {exc}") from exc

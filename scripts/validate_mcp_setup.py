@@ -33,9 +33,9 @@ EPISODE_VERIFIED_RESEARCH_REPORT_SKILL_PATH = (
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="驗證本機 MCP server setup readiness。")
-    parser.add_argument("--podcast", default="gooaye", help="Podcast ID，預設 gooaye。")
-    parser.add_argument("--query", default=DEFAULT_QUERY, help="Search smoke query。")
+    parser = argparse.ArgumentParser(description="Validate local MCP server setup readiness.")
+    parser.add_argument("--podcast", default="gooaye", help="Podcast ID (default: gooaye).")
+    parser.add_argument("--query", default=DEFAULT_QUERY, help="Search smoke query.")
     return parser.parse_args(argv)
 
 

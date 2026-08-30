@@ -48,7 +48,7 @@ def verify_external_data_boundary(
         else external_data_boundary_asset_paths(podcast_id, episode_ref, transcript_identity.title)
     )
     if paths is None or not paths.json_path.exists():
-        raise ExternalDataVerificationInputError(f"找不到 external boundary：{podcast_id}/{episode_ref}")
+        raise ExternalDataVerificationInputError(f"External boundary not found: {podcast_id}/{episode_ref}")
 
     try:
         boundary_input_raw = paths.json_path.read_bytes()
@@ -58,13 +58,15 @@ def verify_external_data_boundary(
     _validate_boundary_identity(payload, podcast_id, episode_ref)
     boundary_mode = _required_text(payload, "boundary_mode")
     if boundary_mode != SUPPORTED_BOUNDARY_MODE:
-        raise ExternalDataVerificationInputError(f"external boundary mode 不支援：{boundary_mode}")
+        raise ExternalDataVerificationInputError(f"Unsupported external boundary mode: {boundary_mode}")
 
     boundary_status = _required_text(payload, "boundary_status")
     if boundary_status == "partial-draft" and not allow_partial:
-        raise ExternalDataVerificationInputError("external boundary status is partial-draft；請使用 --allow-partial。")
+        raise ExternalDataVerificationInputError(
+            "external boundary status is partial-draft; pass --allow-partial to proceed."
+        )
     if boundary_status not in {"final", "partial-draft"}:
-        raise ExternalDataVerificationInputError(f"external boundary status 不支援：{boundary_status}")
+        raise ExternalDataVerificationInputError(f"Unsupported external boundary status: {boundary_status}")
 
     title = _required_text(payload, "title")
     candidates = _candidate_boundaries(payload)
@@ -191,23 +193,25 @@ def _load_boundary_payload(json_path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(json_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        raise ExternalDataVerificationInputError(f"external boundary JSON 格式錯誤：{json_path}") from exc
+        raise ExternalDataVerificationInputError(f"Malformed external boundary JSON: {json_path}") from exc
     except OSError as exc:
-        raise ExternalDataVerificationInputError(f"無法讀取 external boundary：{exc}") from exc
+        raise ExternalDataVerificationInputError(f"Could not read the external boundary: {exc}") from exc
     if not isinstance(payload, dict):
-        raise ExternalDataVerificationInputError("external boundary JSON 必須是 object。")
+        raise ExternalDataVerificationInputError("The external boundary JSON must be an object.")
     return payload
 
 
 def _validate_boundary_identity(payload: dict[str, Any], podcast_id: str, episode_ref: str) -> None:
     if payload.get("podcast_id") != podcast_id or payload.get("episode_ref") != episode_ref:
-        raise ExternalDataVerificationInputError("external boundary 的 podcast_id 或 episode_ref 不符合請求。")
+        raise ExternalDataVerificationInputError(
+            "The external boundary podcast_id or episode_ref does not match the request."
+        )
 
 
 def _required_text(payload: dict[str, Any], key: str) -> str:
     value = payload.get(key)
     if not isinstance(value, str) or not value.strip():
-        raise ExternalDataVerificationInputError(f"external boundary 缺少有效欄位：{key}")
+        raise ExternalDataVerificationInputError(f"External boundary is missing a valid field: {key}")
     return value
 
 
@@ -388,7 +392,9 @@ def _write_preverification_boundary_snapshot(podcast_id: str, episode_ref: str, 
     except ExternalDataVerificationFailedError:
         raise
     except OSError as exc:
-        raise ExternalDataVerificationFailedError(f"寫入 preverification boundary snapshot 失敗：{exc}") from exc
+        raise ExternalDataVerificationFailedError(
+            f"Failed to write the preverification boundary snapshot: {exc}"
+        ) from exc
     finally:
         try:
             stage_path.unlink(missing_ok=True)
@@ -416,4 +422,4 @@ def _write_boundary(json_path: Path, markdown_path: Path, payload: dict[str, Any
                 part_path.unlink(missing_ok=True)
             except OSError:
                 pass
-        raise ExternalDataVerificationFailedError(f"寫入 external data verification 失敗：{exc}") from exc
+        raise ExternalDataVerificationFailedError(f"Failed to write the external data verification: {exc}") from exc

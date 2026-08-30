@@ -149,11 +149,13 @@ def resolve_summary_profile(name: object = UNSET) -> SummaryProfile:
     if name is UNSET:
         return SUMMARY_PROFILES[DEFAULT_SUMMARY_PROFILE]
 
-    known = "、".join(sorted(SUMMARY_PROFILES))
+    known = ", ".join(sorted(SUMMARY_PROFILES))
     if not isinstance(name, str) or not name.strip():
-        raise UnknownSummaryProfileError(f"summary_profile 必須是非空字串，收到 {name!r}。已知的值：{known}。")
+        raise UnknownSummaryProfileError(
+            f"summary_profile must be a non-empty string, got {name!r}. Known values: {known}."
+        )
 
     try:
         return SUMMARY_PROFILES[name.strip()]
     except KeyError as exc:
-        raise UnknownSummaryProfileError(f"未知的 summary_profile：{name!r}。已知的值：{known}。") from exc
+        raise UnknownSummaryProfileError(f"Unknown summary_profile: {name!r}. Known values: {known}.") from exc

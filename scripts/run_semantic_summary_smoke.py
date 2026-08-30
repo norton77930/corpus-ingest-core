@@ -53,7 +53,7 @@ def main() -> None:
     podcast_id = args.podcast_option or args.podcast_id
     episode_ref = args.episode_option or args.episode_ref
     if podcast_id is None or episode_ref is None:
-        parser.error("必須提供 --podcast 與 --episode，或 positional podcast_id episode_ref。")
+        parser.error("Provide --podcast and --episode, or positional podcast_id episode_ref.")
 
     try:
         local_env_result = _load_local_env_from_args(args)

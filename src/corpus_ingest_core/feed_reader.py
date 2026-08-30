@@ -15,7 +15,7 @@ def list_episodes(podcast_id: str, limit: int = 10) -> list[Episode]:
 
     profile = require_rss_profile(podcast_id)
     if limit < 1:
-        raise ValueError("limit 必須大於 0。")
+        raise ValueError("limit must be greater than 0.")
 
     rss_url, episode_prefix = _rss_feed_fields(profile)
     return _read_episodes(profile.podcast_id, rss_url, episode_prefix)[:limit]
@@ -25,7 +25,7 @@ def get_episode(podcast_id: str, episode_ref: str) -> Episode:
     """從 podcast RSS 取得單一 episode。"""
 
     if not episode_ref:
-        raise ValueError("episode_ref 不可為空。")
+        raise ValueError("episode_ref must not be empty.")
 
     profile = require_rss_profile(podcast_id)
     rss_url, episode_prefix = _rss_feed_fields(profile)
@@ -33,14 +33,14 @@ def get_episode(podcast_id: str, episode_ref: str) -> Episode:
     if episode_ref.lower() == "latest":
         if episodes:
             return episodes[0]
-        raise EpisodeNotFoundError(f"找不到 podcast_id={podcast_id} 的最新 episode。")
+        raise EpisodeNotFoundError(f"No latest episode for podcast_id={podcast_id}.")
 
     requested_ref = episode_ref.casefold()
     for episode in episodes:
         if episode.episode_ref.casefold() == requested_ref:
             return episode
 
-    raise EpisodeNotFoundError(f"找不到 podcast_id={podcast_id} 的 episode：{episode_ref}")
+    raise EpisodeNotFoundError(f"No episode {episode_ref} for podcast_id={podcast_id}")
 
 
 def _rss_feed_fields(profile: PodcastProfile) -> tuple[str, str]:
@@ -55,7 +55,9 @@ def _rss_feed_fields(profile: PodcastProfile) -> tuple[str, str]:
     """
 
     if profile.rss_url is None or profile.default_episode_prefix is None:
-        raise ValueError(f"{profile.podcast_id} 是 RSS 來源，但 profile 缺少 rss_url 或 default_episode_prefix。")
+        raise ValueError(
+            f"{profile.podcast_id} is an RSS source, but its profile is missing rss_url or default_episode_prefix."
+        )
     return profile.rss_url, profile.default_episode_prefix
 
 

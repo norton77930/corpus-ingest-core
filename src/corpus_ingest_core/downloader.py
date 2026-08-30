@@ -25,7 +25,7 @@ def download_audio(podcast_id: str, episode_ref: str) -> AudioAsset:
 
     episode = get_episode(podcast_id, episode_ref)
     if episode.audio_url is None:
-        raise AudioUrlMissingError(f"episode {episode.podcast_id}/{episode.episode_ref} 沒有 audio_url。")
+        raise AudioUrlMissingError(f"episode {episode.podcast_id}/{episode.episode_ref} has no audio_url.")
 
     extension = _extension_from_url(episode.audio_url)
     if extension is not None:
@@ -39,7 +39,7 @@ def download_audio(podcast_id: str, episode_ref: str) -> AudioAsset:
     try:
         content_type = _content_type(response)
         if not _is_success(response.status_code):
-            raise DownloadFailedError(f"下載失敗：{episode.audio_url} 回傳 HTTP {response.status_code}。")
+            raise DownloadFailedError(f"Download failed: {episode.audio_url} returned HTTP {response.status_code}.")
 
         if target_path is None:
             extension = _extension_from_content_type(content_type)
@@ -67,7 +67,7 @@ def _open_stream(url: str):
     try:
         return requests.get(url, stream=True, timeout=DOWNLOAD_TIMEOUT)
     except requests.RequestException as exc:
-        raise DownloadFailedError(f"下載失敗：{url}，{exc}") from exc
+        raise DownloadFailedError(f"Download failed: {url}: {exc}") from exc
 
 
 def _write_stream_to_file(response, target_path: Path) -> None:

@@ -65,7 +65,7 @@ def derive_identity(url: str) -> XVideoIdentity:
     parsed = urlparse(url.strip())
     match = _STATUS_PATH_PATTERN.match(parsed.path) if parsed.netloc.lower() in _X_HOSTS else None
     if match is None:
-        raise ValueError(f"不是 X 貼文網址：{url}")
+        raise ValueError(f"Not an X post URL: {url}")
 
     handle = match.group("handle")
     status_id = match.group("status_id")
@@ -163,7 +163,7 @@ def run_x_video_ingest(
         # 這是整條流程最先、也最常失敗的一步：貼文沒有影片、已刪除、轉私密，
         # 或 yt-dlp 的 X extractor 壞掉。它同時位在 dry-run 路徑上，所以第三方
         # 例外若不在這裡收斂，使用者第一次執行看到的就會是 traceback。
-        raise XVideoIngestFailedError(f"解析來源 metadata 失敗：{exc}") from exc
+        raise XVideoIngestFailedError(f"Failed to resolve source metadata: {exc}") from exc
 
     seed = build_seed(identity, info, title)
 
@@ -327,7 +327,7 @@ def _acquire_audio(url: str, audio_target: Path, work_dir: str | Path | None) ->
         # yt-dlp 的 DownloadError 與 PyAV 的 FFmpegError 都直接繼承 Exception，
         # 不是 OSError；X 的 extractor 又特別常壞。只接 OSError 會讓第三方例外
         # 直接拋穿到 CLI，而 CLI 只處理本專案的錯誤型別。
-        raise XVideoIngestFailedError(f"取得音訊失敗：{exc}") from exc
+        raise XVideoIngestFailedError(f"Audio acquisition failed: {exc}") from exc
     finally:
         # 成功時 replace 已經把 .part 移走，這裡是 no-op；失敗時無論哪種例外
         # 都不會有殘留檔案留在 data/audio/。

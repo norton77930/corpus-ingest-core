@@ -98,11 +98,11 @@ def generate_stock_lens_synthesis_report(
     """從 Phase 6F stock lens JSON 產生 LLM synthesis artifact。"""
 
     if not stock_query.strip():
-        raise ValueError("stock_query 必須是非空字串。")
+        raise ValueError("stock_query must be a non-empty string.")
     if max_prompt_chars < 1:
-        raise ValueError("max_prompt_chars 必須大於 0。")
+        raise ValueError("max_prompt_chars must be greater than 0.")
     if semantic_context_max_chars < 1:
-        raise ValueError("semantic_context_max_chars 必須大於 0。")
+        raise ValueError("semantic_context_max_chars must be greater than 0.")
     require_finance_summary_profile(podcast_id)
 
     source_paths = storage.stock_lens_report_asset_paths(podcast_id, stock_query)
@@ -289,11 +289,11 @@ def _load_source_payload(json_path: Path, *, required: bool) -> dict[str, Any] |
     try:
         payload = json.loads(json_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        raise StockLensSynthesisInputError(f"stock lens JSON 格式錯誤：{json_path}") from exc
+        raise StockLensSynthesisInputError(f"Malformed stock lens JSON: {json_path}") from exc
     except OSError as exc:
-        raise StockLensSynthesisInputError(f"無法讀取 stock lens report：{exc}") from exc
+        raise StockLensSynthesisInputError(f"Could not read the stock lens report: {exc}") from exc
     if not isinstance(payload, dict):
-        raise StockLensSynthesisInputError("stock lens JSON 必須是 object。")
+        raise StockLensSynthesisInputError("The stock lens JSON must be an object.")
     return payload
 
 
@@ -306,13 +306,15 @@ def _source_report_status(payload: dict[str, Any] | None) -> str:
 
 def _validate_source_payload(payload: dict[str, Any], *, allow_partial: bool) -> None:
     if _required_text(payload, "report_mode") != SOURCE_REPORT_MODE:
-        raise StockLensSynthesisInputError("stock lens report_mode 不支援。")
+        raise StockLensSynthesisInputError("Unsupported stock lens report_mode.")
     status = _required_text(payload, "report_status")
     if status == "partial-draft":
         if not allow_partial:
-            raise StockLensSynthesisInputError("stock lens report status is partial-draft；請使用 --allow-partial。")
+            raise StockLensSynthesisInputError(
+                "stock lens report status is partial-draft; pass --allow-partial to proceed."
+            )
     elif status not in {"final", "no-direct-podcast-evidence"}:
-        raise StockLensSynthesisInputError(f"stock lens report_status 不支援：{status}")
+        raise StockLensSynthesisInputError(f"Unsupported stock lens report_status: {status}")
     _required_text(payload, "podcast_id")
     _required_text(payload, "stock_query")
     for key in (
@@ -323,13 +325,13 @@ def _validate_source_payload(payload: dict[str, Any], *, allow_partial: bool) ->
         "external_verification_needs",
     ):
         if key not in payload:
-            raise StockLensSynthesisInputError(f"stock lens report 缺少欄位：{key}")
+            raise StockLensSynthesisInputError(f"Stock lens report is missing a field: {key}")
 
 
 def _required_text(payload: dict[str, Any], key: str) -> str:
     value = payload.get(key)
     if not isinstance(value, str) or not value.strip():
-        raise StockLensSynthesisInputError(f"stock lens synthesis input 缺少有效欄位：{key}")
+        raise StockLensSynthesisInputError(f"Stock lens synthesis input is missing a valid field: {key}")
     return value
 
 
@@ -485,7 +487,7 @@ def _extract_semantic_context(summary_path: Path) -> tuple[str, list[str]]:
     try:
         text = summary_path.read_text(encoding="utf-8")
     except OSError as exc:
-        raise StockLensSynthesisInputError(f"無法讀取 semantic summary context：{summary_path}") from exc
+        raise StockLensSynthesisInputError(f"Could not read the semantic summary context: {summary_path}") from exc
 
     before_chunks = re.split(r"(?im)^##\s+Chunk Summaries\s*$", text, maxsplit=1)[0]
     before_chunks = _SECRET_LIKE_PATTERN.sub("[redacted-secret]", before_chunks)
@@ -670,7 +672,7 @@ def _write_synthesis(
                 part_path.unlink(missing_ok=True)
             except OSError:
                 pass
-        raise StockLensSynthesisFailedError(f"寫入 stock lens synthesis 失敗：{exc}") from exc
+        raise StockLensSynthesisFailedError(f"Failed to write the stock lens synthesis: {exc}") from exc
 
 
 def _load_existing_synthesis(json_path: Path) -> dict[str, Any]:

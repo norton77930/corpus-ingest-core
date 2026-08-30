@@ -209,7 +209,7 @@ def test_generate_external_data_boundary_rejects_missing_and_corrupt_mapping(mon
     from corpus_ingest_core.errors import ExternalDataBoundaryInputError
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
-    with pytest.raises(ExternalDataBoundaryInputError, match="industry chain mapping"):
+    with pytest.raises(ExternalDataBoundaryInputError, match="Industry chain mapping not found"):
         external_data_boundary.generate_external_data_boundary("gooaye", "EP999")
 
     _write_industry_mapping(monkeypatch, tmp_path, corrupt=True)

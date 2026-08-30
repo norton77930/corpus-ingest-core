@@ -34,9 +34,9 @@ def generate_stock_lens_report(
     """從既有 local research artifacts 產生 deterministic stock lens report。"""
 
     if not stock_query.strip():
-        raise ValueError("stock_query 必須是非空字串。")
+        raise ValueError("stock_query must be a non-empty string.")
     if max_evidence_items < 1:
-        raise ValueError("max_evidence_items 必須大於 0。")
+        raise ValueError("max_evidence_items must be greater than 0.")
 
     profile = load_podcast_profile(podcast_id)
     report_paths = storage.stock_lens_report_asset_paths(podcast_id, stock_query)
@@ -68,7 +68,7 @@ def generate_stock_lens_report(
     for mapping_path in mapping_paths:
         mapping_payload = _load_mapping_payload(mapping_path)
         if _required_text(mapping_payload, "mapping_mode") != SUPPORTED_MAPPING_MODE:
-            raise StockLensReportInputError(f"industry mapping mode 不支援：{mapping_path}")
+            raise StockLensReportInputError(f"Unsupported industry mapping mode: {mapping_path}")
         if mapping_payload.get("podcast_id") != podcast_id:
             raise StockLensReportInputError("industry mapping identity does not match podcast")
         episode_ref = _required_text(mapping_payload, "episode_ref")
@@ -97,21 +97,21 @@ def generate_stock_lens_report(
         if mapping_status == "partial-draft":
             if not allow_partial:
                 raise StockLensReportInputError(
-                    "matched industry mapping status is partial-draft；請使用 --allow-partial。"
+                    "matched industry mapping status is partial-draft; pass --allow-partial to proceed."
                 )
             has_partial = True
         elif mapping_status != "final":
-            raise StockLensReportInputError(f"industry mapping status 不支援：{mapping_status}")
+            raise StockLensReportInputError(f"Unsupported industry mapping status: {mapping_status}")
 
         boundary_status = _required_text(boundary_payload, "boundary_status")
         if boundary_status == "partial-draft":
             if not allow_partial:
                 raise StockLensReportInputError(
-                    "matched external boundary status is partial-draft；請使用 --allow-partial。"
+                    "matched external boundary status is partial-draft; pass --allow-partial to proceed."
                 )
             has_partial = True
         elif boundary_status != "final":
-            raise StockLensReportInputError(f"external boundary status 不支援：{boundary_status}")
+            raise StockLensReportInputError(f"Unsupported external boundary status: {boundary_status}")
 
         boundary_candidates = _boundary_candidates(boundary_payload)
         for candidate in matched_candidates:
@@ -195,11 +195,11 @@ def _load_mapping_payload(json_path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(json_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        raise StockLensReportInputError(f"industry mapping JSON 格式錯誤：{json_path}") from exc
+        raise StockLensReportInputError(f"Malformed industry mapping JSON: {json_path}") from exc
     except OSError as exc:
-        raise StockLensReportInputError(f"無法讀取 industry mapping：{exc}") from exc
+        raise StockLensReportInputError(f"Could not read the industry mapping: {exc}") from exc
     if not isinstance(payload, dict):
-        raise StockLensReportInputError("industry mapping JSON 必須是 object。")
+        raise StockLensReportInputError("The industry mapping JSON must be an object.")
     return payload
 
 
@@ -214,11 +214,11 @@ def _load_boundary_payload(*, podcast_id: str, episode_ref: str, title: str) -> 
     try:
         payload = json.loads(paths.json_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        raise StockLensReportInputError(f"external boundary JSON 格式錯誤：{paths.json_path}") from exc
+        raise StockLensReportInputError(f"Malformed external boundary JSON: {paths.json_path}") from exc
     except OSError as exc:
-        raise StockLensReportInputError(f"無法讀取 external boundary：{exc}") from exc
+        raise StockLensReportInputError(f"Could not read the external boundary: {exc}") from exc
     if not isinstance(payload, dict):
-        raise StockLensReportInputError("external boundary JSON 必須是 object。")
+        raise StockLensReportInputError("The external boundary JSON must be an object.")
     if (
         payload.get("podcast_id") != podcast_id
         or payload.get("episode_ref") != episode_ref
@@ -226,7 +226,7 @@ def _load_boundary_payload(*, podcast_id: str, episode_ref: str, title: str) -> 
     ):
         raise StockLensReportInputError("external boundary identity does not match mapping")
     if _required_text(payload, "boundary_mode") != SUPPORTED_BOUNDARY_MODE:
-        raise StockLensReportInputError(f"external boundary mode 不支援：{paths.json_path}")
+        raise StockLensReportInputError(f"Unsupported external boundary mode: {paths.json_path}")
     return payload
 
 
@@ -245,7 +245,7 @@ def _input_identity(role: str, path: Path) -> dict[str, str]:
 def _required_text(payload: dict[str, Any], key: str) -> str:
     value = payload.get(key)
     if not isinstance(value, str) or not value.strip():
-        raise StockLensReportInputError(f"stock lens input 缺少有效欄位：{key}")
+        raise StockLensReportInputError(f"Stock lens input is missing a valid field: {key}")
     return value
 
 
@@ -513,4 +513,4 @@ def _write_report(
                 part_path.unlink(missing_ok=True)
             except OSError:
                 pass
-        raise StockLensReportFailedError(f"寫入 stock lens report 失敗：{exc}") from exc
+        raise StockLensReportFailedError(f"Failed to write the stock lens report: {exc}") from exc

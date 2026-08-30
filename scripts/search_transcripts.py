@@ -11,7 +11,7 @@ from corpus_ingest_core import PodcastIngestCoreError, search_transcripts
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="搜尋 SQLite cache 中的 transcript segments。")
+    parser = argparse.ArgumentParser(description="Search transcript segments in the SQLite cache.")
     parser.add_argument("--query", required=True)
     parser.add_argument("--podcast")
     parser.add_argument("--limit", type=int, default=20)

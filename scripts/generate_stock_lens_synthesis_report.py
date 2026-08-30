@@ -28,7 +28,7 @@ from corpus_ingest_core.storage import title_slug
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="產生 Phase 6J stock lens LLM synthesis report。")
+    parser = argparse.ArgumentParser(description="Generate the Phase 6J stock lens LLM synthesis report.")
     parser.add_argument("podcast_id", nargs="?")
     parser.add_argument("stock_query", nargs="?")
     parser.add_argument("--podcast", dest="podcast_option")
@@ -54,7 +54,7 @@ def main() -> None:
     podcast_id = args.podcast_option or args.podcast_id
     stock_query = args.stock_option or args.stock_query
     if podcast_id is None or stock_query is None:
-        parser.error("必須提供 --podcast 與 --stock，或 positional podcast_id stock_query。")
+        parser.error("Provide --podcast and --stock, or positional podcast_id stock_query.")
 
     try:
         local_env_result = _load_local_env_from_args(args)

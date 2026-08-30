@@ -948,7 +948,7 @@ def _write_index(
                 part_path.unlink(missing_ok=True)
             except OSError:
                 pass
-        raise CorpusIndexFailedError(f"寫入 corpus artifact index 失敗：{exc}") from exc
+        raise CorpusIndexFailedError(f"Failed to write the corpus artifact index: {exc}") from exc
 
 
 def _safe_int(value: Any, default: int = 0) -> int:

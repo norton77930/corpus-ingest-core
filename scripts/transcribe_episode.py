@@ -11,7 +11,7 @@ from corpus_ingest_core.transcriber import DEFAULT_TRANSCRIPTION_MODEL, transcri
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="轉錄單一 podcast episode。")
+    parser = argparse.ArgumentParser(description="Transcribe one podcast episode.")
     parser.add_argument("podcast_id", nargs="?")
     parser.add_argument("episode_ref", nargs="?")
     parser.add_argument("--podcast", dest="podcast_option")
@@ -31,7 +31,7 @@ def main() -> None:
     podcast_id = args.podcast_option or args.podcast_id
     episode_ref = args.episode_option or args.episode_ref
     if podcast_id is None or episode_ref is None:
-        parser.error("必須提供 --podcast 與 --episode，或 positional podcast_id episode_ref。")
+        parser.error("Provide --podcast and --episode, or positional podcast_id episode_ref.")
 
     model_name = args.model or DEFAULT_TRANSCRIPTION_MODEL
     print(

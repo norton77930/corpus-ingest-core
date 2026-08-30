@@ -12,7 +12,9 @@ from corpus_ingest_core import GooayeLensConfigError, load_gooaye_lens_model
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="檢查本機 Gooaye Lens model config 並輸出 JSON metadata。")
+    parser = argparse.ArgumentParser(
+        description="Inspect the local Gooaye Lens model config and print its JSON metadata."
+    )
     parser.add_argument("--path", default="config/gooaye_lens.yaml")
     args = parser.parse_args()
 

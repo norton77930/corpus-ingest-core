@@ -230,7 +230,7 @@ def _result(
     part_paths: list[Path],
 ) -> TranscriptValidationResult:
     if status not in VALIDATION_STATUSES:
-        raise ValueError(f"未知 transcript validation status：{status}")
+        raise ValueError(f"Unknown transcript validation status: {status}")
     return TranscriptValidationResult(
         podcast_id=podcast_id,
         episode_ref=episode_ref,

@@ -58,7 +58,7 @@ def derive_youtube_identity(url: str, info: dict[str, Any] | None = None) -> You
     else:
         channel_id = _channel_id_from_info(info)
         if channel_id is None:
-            raise ValueError(f"無法推導 YouTube podcast_id：{url}")
+            raise ValueError(f"Could not derive a YouTube podcast_id: {url}")
         channel_slug = _channel_id_slug(channel_id)
         podcast_id = f"yt-{channel_slug}"
     storage._safe_slug(podcast_id, "podcast_id")
@@ -75,7 +75,7 @@ def parse_youtube_video_id(url: str) -> str:
     parsed = urlparse(url.strip())
     host = parsed.netloc.lower()
     if host not in _YOUTUBE_HOSTS:
-        raise ValueError(f"不是 YouTube 影片網址：{url}")
+        raise ValueError(f"Not a YouTube video URL: {url}")
 
     candidate = ""
     if host in {"youtu.be", "www.youtu.be"}:
@@ -89,9 +89,9 @@ def parse_youtube_video_id(url: str) -> str:
             if len(parts) >= 2 and parts[0] in {"shorts", "embed", "live", "v"}:
                 candidate = parts[1]
     if candidate[:1] in {"-", "_"}:
-        raise ValueError("YouTube video id 不能以 - 或 _ 開頭")
+        raise ValueError("A YouTube video id must not start with - or _")
     if not _VIDEO_ID_PATTERN.fullmatch(candidate):
-        raise ValueError(f"不是 YouTube 影片網址：{url}")
+        raise ValueError(f"Not a YouTube video URL: {url}")
     return candidate
 
 
@@ -142,7 +142,7 @@ def run_youtube_video_ingest(
     except PodcastIngestCoreError:
         raise
     except Exception as exc:
-        raise YoutubeVideoIngestFailedError(f"解析來源 metadata 失敗：{exc}") from exc
+        raise YoutubeVideoIngestFailedError(f"Failed to resolve source metadata: {exc}") from exc
 
     identity = derive_youtube_identity(url, info)
     seed = build_seed(identity, info, title)
@@ -279,7 +279,9 @@ def _acquire_audio(url: str, audio_target: Path, work_dir: str | Path | None) ->
         resolved_work_dir = Path(tempfile.mkdtemp(prefix="yt-video-"))
     else:
         if _work_dir_is_under_data(work_dir):
-            raise YoutubeVideoIngestFailedError("work_dir 不可位於 data/ 底下；來源影片不得寫入 corpus 樹。")
+            raise YoutubeVideoIngestFailedError(
+                "work_dir must not sit under data/; source video must never be written into the corpus tree."
+            )
         resolved_work_dir = Path(os.path.abspath(str(work_dir)))
     part_path = audio_target.with_suffix(audio_target.suffix + ".part")
     try:
@@ -291,7 +293,7 @@ def _acquire_audio(url: str, audio_target: Path, work_dir: str | Path | None) ->
     except PodcastIngestCoreError:
         raise
     except Exception as exc:
-        raise YoutubeVideoIngestFailedError(f"取得音訊失敗：{exc}") from exc
+        raise YoutubeVideoIngestFailedError(f"Audio acquisition failed: {exc}") from exc
     finally:
         try:
             part_path.unlink(missing_ok=True)
@@ -402,7 +404,7 @@ def _channel_id_from_info(info: dict[str, Any] | None) -> str | None:
 def _channel_id_slug(channel_id: str) -> str:
     cleaned = channel_id.strip().lower()
     if re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", cleaned) is None:
-        raise ValueError(f"channel_id 無法在不折損字元的情況下變成 podcast_id slug：{channel_id}")
+        raise ValueError(f"channel_id cannot become a podcast_id slug without dropping characters: {channel_id}")
     return cleaned
 
 
@@ -411,7 +413,7 @@ def _handle_slug(handle: str) -> str:
     cleaned = re.sub(r"[^a-z0-9-]", "", cleaned)
     cleaned = re.sub(r"-{2,}", "-", cleaned).strip("-")
     if not cleaned:
-        raise ValueError(f"無法從 handle 推導 slug：{handle}")
+        raise ValueError(f"Could not derive a slug from handle: {handle}")
     return cleaned
 
 

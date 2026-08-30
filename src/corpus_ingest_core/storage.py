@@ -669,7 +669,7 @@ def ensure_data_directories() -> None:
 
 def _safe_slug(value: str, field_name: str) -> str:
     if not isinstance(value, str) or not _SAFE_SLUG_PATTERN.fullmatch(value):
-        raise ValueError(f"{field_name} 必須是小寫 slug，只允許 a-z、0-9 與 -。")
+        raise ValueError(f"{field_name} must be a lowercase slug using only a-z, 0-9, and -.")
     return value
 
 
@@ -689,7 +689,7 @@ def is_safe_episode_ref(value: object, *, max_length: int | None = None) -> bool
 
 def _safe_episode_ref(value: str) -> str:
     if not is_safe_episode_ref(value):
-        raise ValueError("episode_ref 必須只包含 A-Z、a-z、0-9、- 與 _。")
+        raise ValueError("episode_ref may contain only A-Z, a-z, 0-9, -, and _.")
     return value
 
 

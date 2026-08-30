@@ -139,9 +139,9 @@ def _load_index_payload(index_json_path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(index_json_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        raise CorpusRemediationPlanFailedError(f"讀取 corpus artifact index 失敗：{exc}") from exc
+        raise CorpusRemediationPlanFailedError(f"Failed to read the corpus artifact index: {exc}") from exc
     if not isinstance(payload, dict):
-        raise CorpusRemediationPlanFailedError("corpus artifact index root 必須是 object。")
+        raise CorpusRemediationPlanFailedError("The corpus artifact index root must be an object.")
     return payload
 
 
@@ -490,7 +490,7 @@ def _write_plan(
                 part_path.unlink(missing_ok=True)
             except OSError:
                 pass
-        raise CorpusRemediationPlanFailedError(f"寫入 corpus remediation plan 失敗：{exc}") from exc
+        raise CorpusRemediationPlanFailedError(f"Failed to write the corpus remediation plan: {exc}") from exc
 
 
 def _safe_text(value: Any, default: str) -> str:

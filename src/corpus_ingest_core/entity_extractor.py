@@ -132,7 +132,7 @@ def extract_mentions(
     """從 transcript segments 擷取 deterministic mentions。"""
 
     if max_evidence_per_mention < 1:
-        raise MentionExtractionInputError("max_evidence_per_mention 必須大於 0。")
+        raise MentionExtractionInputError("max_evidence_per_mention must be greater than 0.")
 
     profile = load_podcast_profile(podcast_id)
     validation = validate_transcript(podcast_id, episode_ref)
@@ -140,14 +140,14 @@ def extract_mentions(
 
     transcript_paths = resolve_canonical_transcript_asset_paths(podcast_id, episode_ref)
     if transcript_paths is None:
-        raise TranscriptMissingError(f"找不到逐字稿 JSON：{podcast_id}/{episode_ref}")
+        raise TranscriptMissingError(f"Transcript JSON not found: {podcast_id}/{episode_ref}")
 
     payload = _load_transcript_payload(transcript_paths.json_path)
     title = _required_text(payload, "title")
     payload_podcast_id = _required_text(payload, "podcast_id")
     payload_episode_ref = _required_text(payload, "episode_ref")
     if payload_podcast_id != podcast_id or payload_episode_ref != episode_ref:
-        raise TranscriptParseError("逐字稿 JSON 的 podcast_id 或 episode_ref 不符合請求。")
+        raise TranscriptParseError("The transcript JSON's podcast_id or episode_ref does not match the request.")
 
     segment_count = _required_int(payload, "segment_count")
     segments = _normalize_segments(payload.get("segments"))
@@ -206,55 +206,55 @@ def extract_mentions(
 def _raise_for_invalid_transcript(status: str, problems: list[str], allow_partial: bool) -> None:
     details = "; ".join(problems)
     if status == "missing":
-        raise TranscriptMissingError(f"找不到逐字稿：{details}")
+        raise TranscriptMissingError(f"Transcript not found: {details}")
     if status == "incomplete_outputs":
-        raise TranscriptMissingError(f"逐字稿輸出不完整：{details}")
+        raise TranscriptMissingError(f"Transcript output is incomplete: {details}")
     if status == "corrupt":
-        raise TranscriptParseError(f"逐字稿 JSON 格式錯誤：{details}")
+        raise TranscriptParseError(f"Malformed transcript JSON: {details}")
     if status == "partial" and not allow_partial:
-        raise TranscriptParseError("transcript validation status is partial；請使用 --allow-partial。")
+        raise TranscriptParseError("transcript validation status is partial; pass --allow-partial to proceed.")
 
 
 def _load_transcript_payload(json_path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(json_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        raise TranscriptParseError(f"逐字稿 JSON 格式錯誤：{json_path}") from exc
+        raise TranscriptParseError(f"Malformed transcript JSON: {json_path}") from exc
     except OSError as exc:
-        raise TranscriptMissingError(f"無法讀取逐字稿 JSON：{exc}") from exc
+        raise TranscriptMissingError(f"Could not read the transcript JSON: {exc}") from exc
     if not isinstance(payload, dict):
-        raise TranscriptParseError("逐字稿 JSON 必須是 object。")
+        raise TranscriptParseError("The transcript JSON must be an object.")
     return payload
 
 
 def _required_text(payload: dict[str, Any], key: str) -> str:
     value = payload.get(key)
     if not isinstance(value, str) or not value.strip():
-        raise TranscriptParseError(f"逐字稿 JSON 缺少有效欄位：{key}")
+        raise TranscriptParseError(f"Transcript JSON is missing a valid field: {key}")
     return value
 
 
 def _required_int(payload: dict[str, Any], key: str) -> int:
     value = payload.get(key)
     if not isinstance(value, int):
-        raise TranscriptParseError(f"逐字稿 JSON 缺少有效欄位：{key}")
+        raise TranscriptParseError(f"Transcript JSON is missing a valid field: {key}")
     return value
 
 
 def _normalize_segments(raw_segments: Any) -> list[dict[str, Any]]:
     if not isinstance(raw_segments, list):
-        raise TranscriptParseError("逐字稿 JSON 的 segments 必須是 list。")
+        raise TranscriptParseError("The transcript JSON's segments must be a list.")
 
     segments: list[dict[str, Any]] = []
     for index, segment in enumerate(raw_segments, start=1):
         if not isinstance(segment, dict):
-            raise TranscriptParseError("逐字稿 JSON 的每個 segment 必須是 object。")
+            raise TranscriptParseError("Every segment in the transcript JSON must be an object.")
         try:
             start = float(segment["start"])
             end = float(segment["end"])
             text = str(segment.get("text", "")).strip()
         except (KeyError, TypeError, ValueError) as exc:
-            raise TranscriptParseError("逐字稿 segment 缺少 start、end 或 text。") from exc
+            raise TranscriptParseError("A transcript segment is missing start, end, or text.") from exc
         segments.append(
             {
                 "id": segment.get("id", index),
@@ -468,7 +468,7 @@ def _write_outputs(
                 part_path.unlink(missing_ok=True)
             except OSError:
                 pass
-        raise MentionExtractionFailedError(f"寫入 mention extraction 輸出失敗：{exc}") from exc
+        raise MentionExtractionFailedError(f"Failed to write the mention extraction output: {exc}") from exc
 
 
 def _format_clock(seconds: float) -> str:

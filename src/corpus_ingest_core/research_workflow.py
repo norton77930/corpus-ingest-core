@@ -217,7 +217,7 @@ def run_research_workflow(
 
 def _validate_positive(name: str, value: int) -> None:
     if value < 1:
-        raise ValueError(f"{name} 必須大於 0。")
+        raise ValueError(f"{name} must be greater than 0.")
 
 
 def _normalize_stock_query(stock_query: str | None) -> str | None:

@@ -606,7 +606,7 @@ def test_stock_lens_synthesis_rejects_bad_source_inputs(monkeypatch, tmp_path):
     paths = stock_lens_report_asset_paths("gooaye", "台積電")
     paths.json_path.parent.mkdir(parents=True, exist_ok=True)
     paths.json_path.write_text("{", encoding="utf-8")
-    with pytest.raises(StockLensSynthesisInputError, match="格式錯誤"):
+    with pytest.raises(StockLensSynthesisInputError, match="Malformed stock lens JSON"):
         synthesis.generate_stock_lens_synthesis_report(
             "gooaye",
             "台積電",
@@ -615,7 +615,7 @@ def test_stock_lens_synthesis_rejects_bad_source_inputs(monkeypatch, tmp_path):
         )
 
     _write_stock_lens(monkeypatch, tmp_path, report_mode="unsupported")
-    with pytest.raises(StockLensSynthesisInputError, match="不支援"):
+    with pytest.raises(StockLensSynthesisInputError, match="Unsupported stock lens report_mode"):
         synthesis.generate_stock_lens_synthesis_report(
             "gooaye",
             "台積電",

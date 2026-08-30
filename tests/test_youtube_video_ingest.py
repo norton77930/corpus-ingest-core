@@ -52,7 +52,7 @@ def test_non_youtube_url_is_refused_before_metadata(monkeypatch) -> None:
         raise AssertionError("must not resolve metadata")
 
     monkeypatch.setattr(youtube_video_ingest, "_resolve_metadata", refuse)
-    with pytest.raises(ValueError, match="不是 YouTube"):
+    with pytest.raises(ValueError, match="Not a YouTube video URL"):
         youtube_video_ingest.run_youtube_video_ingest("https://example.com/not-youtube")
 
 
@@ -97,7 +97,7 @@ def test_hyphenated_handle_is_lossless() -> None:
 
 
 def test_channel_id_with_underscore_fails_closed() -> None:
-    with pytest.raises(ValueError, match="不折損"):
+    with pytest.raises(ValueError, match="without dropping characters"):
         derive_youtube_identity(
             _WATCH_URL,
             {"channel": "The Verge", "channel_id": "UCabc_defghijklmnopqrstu"},
@@ -113,9 +113,9 @@ def test_handle_from_channel_url() -> None:
 
 
 def test_video_id_starting_with_hyphen_or_underscore_is_refused() -> None:
-    with pytest.raises(ValueError, match="不能以"):
+    with pytest.raises(ValueError, match="must not start with"):
         parse_youtube_video_id("https://youtu.be/-abcdefghij")
-    with pytest.raises(ValueError, match="不能以"):
+    with pytest.raises(ValueError, match="must not start with"):
         parse_youtube_video_id("https://youtu.be/_abcdefghij")
 
 

@@ -264,7 +264,7 @@ def test_verify_external_data_boundary_rejects_missing_corrupt_and_unsupported(m
     from corpus_ingest_core.external_data_verification import verify_external_data_boundary
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
-    with pytest.raises(ExternalDataVerificationInputError, match="external boundary"):
+    with pytest.raises(ExternalDataVerificationInputError, match="External boundary not found"):
         verify_external_data_boundary("gooaye", "EP999", confirm=True)
 
     _write_boundary(monkeypatch, tmp_path, corrupt=True)
