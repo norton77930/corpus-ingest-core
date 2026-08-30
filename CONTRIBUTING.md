@@ -40,6 +40,11 @@ Full setup and porting notes, including GPU transcription, are in
 [`docs/install-and-porting.md`](docs/install-and-porting.md).
 Cutting a release is in [`docs/releasing.md`](docs/releasing.md).
 
+If you have not driven the project end to end yet, run through
+[`docs/usage.md`](docs/usage.md) first. It is organised by task rather than by
+API, and knowing which confirmation gate belongs to which tool will save you
+from proposing a change that quietly removes one.
+
 ## Verifying a change
 
 ```powershell

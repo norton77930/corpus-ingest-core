@@ -39,7 +39,24 @@ cd corpus-ingest-core
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e .[dev]
+```
 
+### 先看它跑起來,只要幾秒
+
+專案內附一份已經轉錄並建好索引的合成語料,不必先下載任何東西,
+搜尋與證據類工具立刻就會回答:
+
+```powershell
+$env:CORPUS_INGEST_DATA_DIR = "examples/sample-corpus/data"
+$env:CORPUS_INGEST_CONFIG   = "examples/sample-corpus/podcasts.yaml"
+python scripts/search_transcripts.py --podcast sample --query harbour --limit 5
+```
+
+跑下面真實 pipeline 之前,記得把這兩個變數取消。
+
+### 真實 pipeline
+
+```powershell
 python scripts/list_episodes.py --podcast gooaye --limit 5
 python scripts/download_episode.py --podcast gooaye --episode latest
 python scripts/transcribe_episode.py --podcast gooaye --episode latest --model tiny --device cpu --compute-type int8
@@ -108,6 +125,19 @@ Deterministic 摘要也是同樣做法,引用段落而不是改寫它:
 [`examples/sample-corpus/`](examples/sample-corpus) —— 一份已建好索引的合成語料,
 不必先轉錄任何東西,搜尋與證據類工具就會回傳結果。
 
+## 目前實作到哪
+
+已實作:RSS episode listing 與 lookup、音檔下載、本機 faster-whisper 轉錄、
+transcript validation、deterministic 抽取式摘要、可 opt-in 且帶 review gate 的
+LLM 語意摘要、deterministic mention extraction、SQLite metadata cache 與搜尋、
+X 與 YouTube 影片擷取、deterministic 研究 artifacts(episode intelligence、
+產業鏈 mapping、external data boundary、stock lens)、以 content digest 版本化的
+verified research report bundle,以及兩種 transport 的 MCP server。
+
+未實作:Web UI、排程、embedding 與 vector search。外部市場資料刻意限制在本機
+fixture — 沒有 live market API,要加入的話必須是一次明確且經過審查的決定,
+而不是順手加的功能。
+
 ## 架構
 
 ```mermaid
@@ -159,30 +189,26 @@ Mention 抽取遵循同樣的原則:它用 deterministic rules 掃描公司、ti
 ### Agent 介面
 
 MCP server 用單一 `FastMCP` instance 把同一組 core functions 提供給 AI agent:
-本機 client 走 stdio,經審查的 sidecar 提供只綁定 `127.0.0.1:8767/mcp` 的
-Streamable HTTP。
+本機 client 走 stdio,另一條是只綁定 `127.0.0.1:8767/mcp` 的 Streamable HTTP。
+同一份 registry、同一組守衛,兩種 transport。
 
 每個會寫檔、下載或花錢的 tool 都預設 `confirm=false`,先回傳 action plan 而不執行。
 會把逐字稿送到外部 provider 的 tool,除此之外還要求一段精確的 acknowledgement。
 沒有任何 tool 會在你不知情的狀況下重建搜尋索引。
 
+這個預設刻意不方便,所以 [`.agents/skills/`](.agents/skills) 底下有 7 個 Skill
+負責把「你一句明確的要求」轉成「一次獲得授權的執行」:預覽、說明風險、問一次、
+做一次、停下來。涵蓋處理最新一集、一次只推進一步、擷取 X 或 YouTube 影片,
+以及 verified research report 的幾條路徑。沒有 Skill 的 agent 一樣叫得動每個
+tool,只是得多問你一次。
+
+[`docs/usage.md`](docs/usage.md) 把每個任務對應到它的 CLI 指令、該怎麼跟 agent 說、
+以及有沒有對應的 Skill。
+
 ```powershell
 python scripts/validate_mcp_setup.py --podcast gooaye --query 台積電
 python scripts/run_mcp_server.py
 ```
-
-## 目前實作到哪
-
-已實作:RSS episode listing 與 lookup、音檔下載、本機 faster-whisper 轉錄、
-transcript validation、deterministic 抽取式摘要、可 opt-in 且帶 review gate 的
-LLM 語意摘要、deterministic mention extraction、SQLite metadata cache 與搜尋、
-X 與 YouTube 影片擷取、deterministic 研究 artifacts(episode intelligence、
-產業鏈 mapping、external data boundary、stock lens)、以 content digest 版本化的
-verified research report bundle,以及兩種 transport 的 MCP server。
-
-未實作:Web UI、排程、embedding 與 vector search。外部市場資料刻意限制在本機
-fixture — 沒有 live market API,要加入的話必須是一次明確且經過審查的決定,
-而不是順手加的功能。
 
 ## 文件
 
