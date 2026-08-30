@@ -69,6 +69,45 @@ claude mcp add corpus-ingest-core -- uvx --from git+https://github.com/norton779
 搜尋與證據類工具就會回傳真實結果。
 不會寫死任何特定節目。
 
+## 它產出什麼
+
+一集會產出逐字稿(`.txt`、`.srt`、`.json`)、摘要、mention 索引,以及 SQLite
+索引裡的一筆資料。「每個 claim 都能回溯」不是標語,而是資料本身的形狀 ——
+每一個抽出的 mention 都帶著它的來源段落:
+
+```json
+{
+  "type": "industry",
+  "text": "AI",
+  "evidence": [
+    {
+      "segment_id": 9,
+      "timestamp": "[00:02:30 - 00:02:58]",
+      "text": "The interesting part is not the bill. It is that they moved the AI workload off rented capacity and onto hardware they own."
+    }
+  ]
+}
+```
+
+所以「這集討論了 AI 基礎設施成本」永遠不需要你選擇相信。它可以還原成一個
+segment id、一個時間戳、以及當下真正說出口的那句話 —— 再從那裡回到音檔的那一秒。
+
+Deterministic 摘要也是同樣做法,引用段落而不是改寫它:
+
+```text
+  ## Timeline Summary
+
+  ### 00:00:00 - 00:05:00
+
+  - Representative segment:
+    > Today we are talking about Harbour Robotics, a fictional company that
+    > builds picking arms for fictional warehouses.
+```
+
+以上兩段都是真實輸出,取自
+[`examples/sample-corpus/`](examples/sample-corpus) —— 一份已建好索引的合成語料,
+不必先轉錄任何東西,搜尋與證據類工具就會回傳結果。
+
 ## 架構
 
 ```mermaid
