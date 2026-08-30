@@ -38,6 +38,7 @@ streams; PyAV converts the selected source media to the corpus WAV.
 
 Full setup and porting notes, including GPU transcription, are in
 [`docs/install-and-porting.md`](docs/install-and-porting.md).
+Cutting a release is in [`docs/releasing.md`](docs/releasing.md).
 
 ## Verifying a change
 

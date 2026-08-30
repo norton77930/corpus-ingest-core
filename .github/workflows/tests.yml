@@ -54,8 +54,16 @@ jobs:
       - name: Lint
         run: python -m ruff check src tests scripts
 
+      # Twice, on purpose. mypy analyses the platform it runs on, so a
+      # Windows-only branch guarded by sys.platform is simply pruned there --
+      # and a Linux-only one is pruned on the Windows job. Checking the other
+      # platform's view too means a contributor on either OS can reproduce
+      # what CI sees with a single flag, instead of finding out from a red job.
       - name: Types
         run: python -m mypy
+
+      - name: Types (other platform's view)
+        run: python -m mypy --platform ${{ runner.os == 'Windows' && 'linux' || 'win32' }}
 
       # No --ignore list: the whole suite runs and is expected to be fully
       # green. test_mcp_http_transport spawns a subprocess, so it goes red when

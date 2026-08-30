@@ -2415,7 +2415,10 @@ def _write_checkpoint_locked(
 def _sanitize_result_value(value: Any) -> Any:
     if isinstance(value, Path):
         return _safe_result_path(value)
-    if is_dataclass(value):
+    # `is_dataclass` 對 dataclass 的「類別本身」也回 True，但 `asdict` 只接受
+    # instance，傳 class 進去會炸 TypeError。類別不是要輸出的值，讓它往下落到
+    # 最後的 `return None`（本函式對無法安全表述之值的一貫處理）。
+    if is_dataclass(value) and not isinstance(value, type):
         return _sanitize_result_value(asdict(value))
     if value is None or isinstance(value, bool) or isinstance(value, int):
         return value

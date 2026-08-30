@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 import stat
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -301,6 +302,17 @@ def _open_directory_descriptor(directory: Path) -> int:
 def _windows_open_directory_descriptor(directory: Path) -> int:
     """Open a directory without delete sharing, then transfer it to a CRT fd."""
 
+    # mypy prunes a branch guarded by sys.platform, but not one guarded by
+    # os.name -- which is what the call sites use. Without this early exit
+    # it analyses the Windows-only body on Linux and reports five phantom
+    # attr-defined errors for ctypes.WinDLL and msvcrt.
+    #
+    # The check is not decoration either: both call sites gate on
+    # os.name == "nt", so reaching here anywhere else means a caller lost
+    # its guard, and failing loudly beats an AttributeError from ctypes.
+    if sys.platform != "win32":  # pragma: no cover - Windows-only path
+        raise RuntimeError("this path requires Windows")
+
     import ctypes
     import msvcrt
     from ctypes import wintypes
@@ -398,6 +410,17 @@ def _opened_handle_final_path(descriptor: int) -> Path | None:
 
 def _windows_final_path_from_descriptor(descriptor: int) -> Path | None:
     """Use a pointer-sized, explicitly typed GetFinalPathNameByHandleW ABI."""
+
+    # mypy prunes a branch guarded by sys.platform, but not one guarded by
+    # os.name -- which is what the call sites use. Without this early exit
+    # it analyses the Windows-only body on Linux and reports five phantom
+    # attr-defined errors for ctypes.WinDLL and msvcrt.
+    #
+    # The check is not decoration either: both call sites gate on
+    # os.name == "nt", so reaching here anywhere else means a caller lost
+    # its guard, and failing loudly beats an AttributeError from ctypes.
+    if sys.platform != "win32":  # pragma: no cover - Windows-only path
+        raise RuntimeError("this path requires Windows")
 
     try:
         import ctypes

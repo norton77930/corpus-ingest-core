@@ -24,11 +24,15 @@ from .corpus_remediation_runner import (
 from .episode_claim import episode_writer_claimed
 from .errors import CorpusEpisodeWorkflowRunnerFailedError
 from .models import (
+    CorpusAudioDownloadRunResult,
+    CorpusEpisodeIntakeRunResult,
     CorpusEpisodeWorkflowRunCounts,
     CorpusEpisodeWorkflowRunFilter,
     CorpusEpisodeWorkflowRunResult,
     CorpusEpisodeWorkflowRunRow,
     CorpusEpisodeWorkflowRunWarning,
+    CorpusLocalTranscriptionRunResult,
+    CorpusRemediationRunResult,
 )
 from .path_safety import is_safe_local_path_structure
 from .run_report_io import write_part_staged_report_pair
@@ -584,6 +588,12 @@ def _execute_selected_stage(
     allow_partial: bool,
     max_actions: int | None,
 ) -> CorpusEpisodeWorkflowRunRow:
+    result: (
+        CorpusEpisodeIntakeRunResult
+        | CorpusAudioDownloadRunResult
+        | CorpusLocalTranscriptionRunResult
+        | CorpusRemediationRunResult
+    )
     try:
         if selected_stage == STAGE_INTAKE:
             result = run_corpus_episode_intake(
@@ -795,7 +805,10 @@ def _stage_row(
 ) -> CorpusEpisodeWorkflowRunRow:
     reason = _workflow_owned_reason(stage, status, reason)
     try:
-        source_row = replace(source_row, warnings=[])
+        # None 走 replace() 一樣會拿到 TypeError，先擋掉只是把「沒有 source_row」
+        # 這個正常情況從例外路徑拉回正常路徑，結果不變。
+        if source_row is not None:
+            source_row = replace(source_row, warnings=[])
     except (TypeError, ValueError):
         source_row = None
     return CorpusEpisodeWorkflowRunRow(

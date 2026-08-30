@@ -239,8 +239,7 @@ def _issues_from_input_error(message: str) -> list[ReadinessIssue]:
     if match is not None:
         role = match.group("role").strip().replace(" ", "_")
         # "stale or invalid" from lineage validator covers both missing record and mismatch.
-        kind: IssueKind = "stale"
-        return [ReadinessIssue(role=role, kind=kind)]
+        return [ReadinessIssue(role=role, kind="stale")]
 
     if "lineage is missing or untrusted" in text:
         return [ReadinessIssue(role="lineage", kind="missing")]

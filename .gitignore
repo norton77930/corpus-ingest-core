@@ -18,6 +18,10 @@ __pycache__/
 .pytest-tmp/
 # Coverage writes .coverage next to pyproject; CI fails the run if anything
 # untracked survives it.
+# Cygwin/Git-Bash crash dumps. One got committed by a `git add -A`; the
+# working-tree check in CI would not have caught it, because it was tracked
+# from that moment on.
+*.stackdump
 .coverage
 .coverage.*
 htmlcov/

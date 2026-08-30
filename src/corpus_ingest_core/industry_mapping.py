@@ -95,6 +95,7 @@ def generate_industry_chain_mapping(
     else:
         nodes, stock_candidates, mapping_warnings = [], [], []
     warnings.extend(mapping_warnings)
+    mapping_status = _mapping_status(report_status)
     payload = {
         "podcast_id": podcast_id,
         "episode_ref": episode_ref,
@@ -105,7 +106,7 @@ def generate_industry_chain_mapping(
             "max_evidence_per_candidate": max_evidence_per_candidate,
         },
         "mapping_config": _config_file_identity(DEFAULT_MAPPING_CONFIG_PATH),
-        "mapping_status": _mapping_status(report_status),
+        "mapping_status": mapping_status,
         "source_status": {
             "episode_intelligence_report": "available",
             "mapping_config": "available" if mapping_config else "missing_or_empty",
@@ -128,7 +129,7 @@ def generate_industry_chain_mapping(
         title=title,
         mapping_json_path=mapping_paths.json_path,
         mapping_markdown_path=mapping_paths.markdown_path,
-        mapping_status=payload["mapping_status"],
+        mapping_status=mapping_status,
         node_count=len(nodes),
         candidate_count=len(stock_candidates),
         warning_count=len(warnings),

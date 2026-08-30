@@ -15,7 +15,7 @@ from .models import StockLensReportAsset
 REPORT_MODE = "deterministic-stock-lens-v1"
 SUPPORTED_MAPPING_MODE = "deterministic-industry-chain-v1"
 SUPPORTED_BOUNDARY_MODE = "external-data-boundary-v1"
-NO_EXTERNAL_BOUNDARY = {
+NO_EXTERNAL_BOUNDARY: dict[str, Any] = {
     "external_verification_status": "not_requested",
     "source_status": "not_fetched",
     "data_date": None,

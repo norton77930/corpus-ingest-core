@@ -1,0 +1,70 @@
+name: publish
+
+# Publishes to PyPI when a release is published, using Trusted Publishing
+# (OIDC). No API token is stored in this repository or in its secrets: PyPI
+# verifies the workflow's identity directly, so there is nothing here to leak
+# and nothing to rotate.
+#
+# This will not work until the PyPI side is configured once, by hand, by the
+# account that will own the project. See docs/releasing.md.
+#
+# Deliberately triggered by `release: published` rather than by a tag push. A
+# tag can be pushed by accident; publishing a release is a separate, explicit
+# act, and a version on PyPI can never be replaced.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: '3.12'
+
+      - name: Build
+        run: |
+          python -m pip install --upgrade build
+          python -m build
+
+      # The version in the artifact must match the tag being released.
+      # Publishing 0.2.0 from a v0.3.0 release is unrecoverable: PyPI does not
+      # allow a version to be replaced.
+      - name: Version matches the tag
+        if: github.event_name == 'release'
+        run: |
+          tag="${GITHUB_REF_NAME#v}"
+          built=$(ls dist/*.whl | head -1 | sed -E 's/.*-([0-9][^-]*)-py3.*/\1/')
+          echo "tag=$tag built=$built"
+          if [ "$tag" != "$built" ]; then
+            echo "::error::tag $tag does not match built version $built"
+            exit 1
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    environment: pypi
+    permissions:
+      # Required for Trusted Publishing. This is the whole credential.
+      id-token: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: dist
+          path: dist/
+
+      - uses: pypa/gh-action-pypi-publish@release/v1

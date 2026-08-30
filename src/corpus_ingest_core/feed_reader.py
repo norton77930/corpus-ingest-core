@@ -7,7 +7,7 @@ import feedparser
 
 from .config import require_rss_profile
 from .errors import EpisodeNotFoundError
-from .models import Episode
+from .models import Episode, PodcastProfile
 
 
 def list_episodes(podcast_id: str, limit: int = 10) -> list[Episode]:
@@ -17,9 +17,8 @@ def list_episodes(podcast_id: str, limit: int = 10) -> list[Episode]:
     if limit < 1:
         raise ValueError("limit 必須大於 0。")
 
-    return _read_episodes(profile.podcast_id, profile.rss_url, profile.default_episode_prefix)[
-        :limit
-    ]
+    rss_url, episode_prefix = _rss_feed_fields(profile)
+    return _read_episodes(profile.podcast_id, rss_url, episode_prefix)[:limit]
 
 
 def get_episode(podcast_id: str, episode_ref: str) -> Episode:
@@ -29,9 +28,8 @@ def get_episode(podcast_id: str, episode_ref: str) -> Episode:
         raise ValueError("episode_ref 不可為空。")
 
     profile = require_rss_profile(podcast_id)
-    episodes = _read_episodes(
-        profile.podcast_id, profile.rss_url, profile.default_episode_prefix
-    )
+    rss_url, episode_prefix = _rss_feed_fields(profile)
+    episodes = _read_episodes(profile.podcast_id, rss_url, episode_prefix)
     if episode_ref.lower() == "latest":
         if episodes:
             return episodes[0]
@@ -43,6 +41,25 @@ def get_episode(podcast_id: str, episode_ref: str) -> Episode:
             return episode
 
     raise EpisodeNotFoundError(f"找不到 podcast_id={podcast_id} 的 episode：{episode_ref}")
+
+
+def _rss_feed_fields(profile: PodcastProfile) -> tuple[str, str]:
+    """取出 RSS 讀取真正需要的兩個欄位，缺一就當場說清楚。
+
+    ``config._parse_profile`` 對 RSS 來源是用 ``_required_text`` 讀 ``rss_url``
+    與 ``default_episode_prefix``，所以走設定檔的路徑不會是 None；但
+    ``PodcastProfile`` 的型別允許 None（非 RSS 來源沒有 feed），手工建構或
+    未來新增的載入路徑就可能漏掉。與其把 None 餵進 ``feedparser.parse``、
+    換來一個沒有 entries 的空 feed 和「找不到 episode」這種誤導訊息，不如在
+    這裡直接指出是 profile 缺欄位。
+    """
+
+    if profile.rss_url is None or profile.default_episode_prefix is None:
+        raise ValueError(
+            f"{profile.podcast_id} 是 RSS 來源，但 profile 缺少 rss_url 或 "
+            "default_episode_prefix。"
+        )
+    return profile.rss_url, profile.default_episode_prefix
 
 
 def _read_episodes(

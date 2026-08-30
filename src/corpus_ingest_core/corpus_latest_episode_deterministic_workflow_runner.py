@@ -23,11 +23,15 @@ from .corpus_remediation_runner import run_corpus_remediation
 from .episode_claim import episode_writer_claimed
 from .errors import CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError
 from .models import (
+    CorpusAudioDownloadRunResult,
+    CorpusEpisodeIntakeRunResult,
     CorpusLatestEpisodeDeterministicWorkflowRunCounts,
     CorpusLatestEpisodeDeterministicWorkflowRunFilter,
     CorpusLatestEpisodeDeterministicWorkflowRunResult,
     CorpusLatestEpisodeDeterministicWorkflowRunRow,
     CorpusLatestEpisodeDeterministicWorkflowRunWarning,
+    CorpusLocalTranscriptionRunResult,
+    CorpusRemediationRunResult,
 )
 from .path_safety import is_safe_local_path_structure
 
@@ -394,6 +398,12 @@ def _execute_stage(
     transcription_vad_filter: bool,
     selected_row: CorpusLatestEpisodeDeterministicWorkflowRunRow,
 ) -> CorpusLatestEpisodeDeterministicWorkflowRunRow:
+    source_result: (
+        CorpusEpisodeIntakeRunResult
+        | CorpusAudioDownloadRunResult
+        | CorpusLocalTranscriptionRunResult
+        | CorpusRemediationRunResult
+    )
     try:
         if selected_stage == STAGE_INTAKE:
             source_result = run_corpus_episode_intake(
