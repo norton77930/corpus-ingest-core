@@ -28,6 +28,12 @@ classifiers = [
 dependencies = [
     "feedparser>=6.0",
     "faster-whisper>=1.1.0",
+    # The ceiling is held by hand. Every agent-facing contract in this
+    # project sits on mcp: one FastMCP instance, a 25-tool registry whose
+    # order is part of the compatibility promise, and both transports.
+    # Raising it means running the suite against the new major and reading
+    # tests/test_mcp_tool_registry_contract.py, not widening a range.
+    # .github/dependabot.yml stops the bot from proposing it.
     "mcp[cli]>=1.27,<2",
     "PyYAML>=6.0",
     "requests>=2.31",

@@ -12,6 +12,18 @@ updates:
     # yt-dlp is deliberately excluded from grouping: YouTube breaks older
     # releases and the failure is confusing (metadata resolves, then the media
     # URL returns HTTP 403), so its bumps deserve their own PR.
+    ignore:
+      # mcp is not an ordinary dependency here. The whole agent surface -- the
+      # single FastMCP instance, the 25-tool registry whose *order* is a
+      # compatibility contract, and both transports -- sits on it. A major bump
+      # is a question to answer by running the suite against 2.x on purpose,
+      # not a ceiling to widen so the proposal stops coming back. PR #2 asked
+      # for exactly that widening and was closed.
+      #
+      # Minor and patch releases still arrive automatically: the >=1.27 floor
+      # is untouched. Only the major ceiling is held by hand.
+      - dependency-name: "mcp"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: /
