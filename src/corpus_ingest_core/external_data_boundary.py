@@ -88,13 +88,14 @@ def generate_external_data_boundary(
         _candidate_boundary(candidate, checks)
         for candidate in _stock_candidates(mapping_payload)
     ]
+    boundary_status = _boundary_status(mapping_status)
     payload = {
         "podcast_id": podcast_id,
         "episode_ref": episode_ref,
         "title": title,
         "boundary_mode": BOUNDARY_MODE,
         "boundary_config": _config_file_identity(DEFAULT_BOUNDARY_CONFIG_PATH),
-        "boundary_status": _boundary_status(mapping_status),
+        "boundary_status": boundary_status,
         "source_status": {
             "industry_mapping": "available",
             "boundary_config": "available" if boundary_config else "missing_or_empty",
@@ -118,7 +119,7 @@ def generate_external_data_boundary(
         title=title,
         boundary_json_path=boundary_paths.json_path,
         boundary_markdown_path=boundary_paths.markdown_path,
-        boundary_status=payload["boundary_status"],
+        boundary_status=boundary_status,
         candidate_count=len(candidates),
         warning_count=len(warnings),
         generated=True,

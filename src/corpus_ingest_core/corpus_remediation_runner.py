@@ -490,19 +490,23 @@ def _planned_writes(
     if family == "extractive_summary":
         return [str(storage.summary_asset_path(podcast_id, episode_ref, title))]
     if family == "mentions":
-        paths = storage.mention_asset_paths(podcast_id, episode_ref, title)
-        return [str(paths.json_path), str(paths.markdown_path)]
+        mention_paths = storage.mention_asset_paths(podcast_id, episode_ref, title)
+        return [str(mention_paths.json_path), str(mention_paths.markdown_path)]
     if family == "episode_intelligence":
-        paths = storage.episode_intelligence_report_asset_paths(
+        report_paths = storage.episode_intelligence_report_asset_paths(
             podcast_id, episode_ref, title
         )
-        return [str(paths.json_path), str(paths.markdown_path)]
+        return [str(report_paths.json_path), str(report_paths.markdown_path)]
     if family == "industry_mapping":
-        paths = storage.industry_chain_mapping_asset_paths(podcast_id, episode_ref, title)
-        return [str(paths.json_path), str(paths.markdown_path)]
+        mapping_paths = storage.industry_chain_mapping_asset_paths(
+            podcast_id, episode_ref, title
+        )
+        return [str(mapping_paths.json_path), str(mapping_paths.markdown_path)]
     if family == "external_boundary":
-        paths = storage.external_data_boundary_asset_paths(podcast_id, episode_ref, title)
-        return [str(paths.json_path), str(paths.markdown_path)]
+        boundary_paths = storage.external_data_boundary_asset_paths(
+            podcast_id, episode_ref, title
+        )
+        return [str(boundary_paths.json_path), str(boundary_paths.markdown_path)]
     return []
 
 

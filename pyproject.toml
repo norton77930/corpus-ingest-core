@@ -119,43 +119,23 @@ warn_unused_configs = true
 warn_redundant_casts = true
 warn_unused_ignores = true
 
-# Baseline, not an exemption. mypy finds 87 errors across these 30 modules; the
-# other 54 under src/ are already clean and are gated from now on, so a new
+# Baseline, not an exemption. mypy finds 60 errors across these 10 modules; the
+# other 74 under src/ are already clean and are gated from now on, so a new
 # module starts type-checked and cannot join this list without an edit here.
 # Shrink it: delete a line, run mypy, fix what it reports. The list is small on
 # purpose so that is a normal-sized piece of work rather than a project.
 [[tool.mypy.overrides]]
 module = [
     "corpus_ingest_core.artifact_lock",
-    "corpus_ingest_core.config",
     "corpus_ingest_core.corpus_episode_completion_workflow_runner",
-    "corpus_ingest_core.corpus_episode_workflow_runner",
     "corpus_ingest_core.corpus_index",
-    "corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner",
-    "corpus_ingest_core.corpus_remediation_runner",
-    "corpus_ingest_core.downloader",
-    "corpus_ingest_core.episode_verified_research_report_workflow_runner",
-    "corpus_ingest_core.external_data_boundary",
-    "corpus_ingest_core.external_data_verification",
-    "corpus_ingest_core.feed_reader",
-    "corpus_ingest_core.gooaye_lens",
-    "corpus_ingest_core.industry_mapping",
     "corpus_ingest_core.latest_episode_verified_research_report_workflow_runner",
-    "corpus_ingest_core.llm_profiles",
-    "corpus_ingest_core.llm_provider",
     "corpus_ingest_core.mcp_tools_side_effect",
     "corpus_ingest_core.mcp_tools_stock_lens",
     "corpus_ingest_core.mcp_verified_research_report_catalog",
-    "corpus_ingest_core.secure_local_snapshot",
-    "corpus_ingest_core.stock_lens",
-    "corpus_ingest_core.validator",
     "corpus_ingest_core.verified_research_lineage",
     "corpus_ingest_core.verified_research_report_catalog",
     "corpus_ingest_core.verified_research_report_source_revalidation",
-    "corpus_ingest_core.video_acquire",
-    "corpus_ingest_core.workflow_derivation",
-    "corpus_ingest_core.x_video_ingest",
-    "corpus_ingest_core.youtube_video_ingest",
 ]
 ignore_errors = true
 

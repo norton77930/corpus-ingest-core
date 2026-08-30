@@ -332,7 +332,7 @@ def _acquire_audio(url: str, audio_target: Path, work_dir: str | Path | None) ->
 
     owns_work_dir = work_dir is None
     resolved_work_dir = (
-        Path(tempfile.mkdtemp(prefix="x-video-")) if owns_work_dir else Path(work_dir)
+        Path(tempfile.mkdtemp(prefix="x-video-")) if work_dir is None else Path(work_dir)
     )
     part_path = audio_target.with_suffix(audio_target.suffix + ".part")
     try:

@@ -286,7 +286,7 @@ def _work_dir_is_under_data(work_dir: str | Path) -> bool:
 
 def _acquire_audio(url: str, audio_target: Path, work_dir: str | Path | None) -> None:
     owns_work_dir = work_dir is None
-    if owns_work_dir:
+    if work_dir is None:
         resolved_work_dir = Path(tempfile.mkdtemp(prefix="yt-video-"))
     else:
         if _work_dir_is_under_data(work_dir):

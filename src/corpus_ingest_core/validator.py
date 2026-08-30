@@ -2,11 +2,28 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
-from typing import Any
+from typing import Any, TypedDict
 
 from . import storage
 from .canonical_transcript import resolve_canonical_transcript_asset_paths
 from .models import TranscriptValidationResult
+
+
+class _NormalizedSegment(TypedDict):
+    """`_normalize_segments` 的輸出形狀。
+
+    用 TypedDict 而非 ``dict[str, float | str | int]``，是因為呼叫端要的是
+    ``end`` 的真實型別（``float``）；用鬆散的 union 會讓 ``last_segment_end``
+    看起來可能是字串，而它永遠不是。
+    """
+
+    # id 直接沿用 JSON 裡的值（缺就用序號），本模組不讀它，所以宣告成 object
+    # 而不是編一個它其實不保證的 union。
+    id: object
+    start: float
+    end: float
+    text: str
+
 
 VALIDATION_STATUSES = {
     "missing",
@@ -251,8 +268,8 @@ def _load_json(json_path: Path, problems: list[str]) -> dict[str, Any] | None:
 
 def _normalize_segments(
     segments: list[Any], problems: list[str]
-) -> list[dict[str, float | str | int]]:
-    normalized = []
+) -> list[_NormalizedSegment]:
+    normalized: list[_NormalizedSegment] = []
     previous_start = 0.0
     for index, segment in enumerate(segments, start=1):
         if not isinstance(segment, dict):

@@ -164,7 +164,7 @@ def acquire_wav(
 ) -> None:
     owns_work_dir = work_dir is None
     resolved_work_dir = (
-        Path(tempfile.mkdtemp(prefix=work_prefix)) if owns_work_dir else Path(work_dir)
+        Path(tempfile.mkdtemp(prefix=work_prefix)) if work_dir is None else Path(work_dir)
     )
     part_path = audio_target.with_suffix(audio_target.suffix + ".part")
     try:
