@@ -32,7 +32,7 @@ def generate_stock_lens_report(
     allow_partial: bool = False,
     max_evidence_items: int = 10,
 ) -> dict[str, Any]:
-    """Side-effect tool：需要 confirm=true 才會寫入 deterministic stock lens report。"""
+    """Side-effect tool: writes the deterministic stock lens report only with confirm=true. Local artifacts only: no market API, no LLM."""
 
     clamped_max_evidence = mcp_runtime._clamp(
         max_evidence_items,

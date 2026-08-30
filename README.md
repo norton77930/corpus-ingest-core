@@ -41,6 +41,24 @@ cd corpus-ingest-core
 python -m venv .venv
 .\.venv\Scripts\Activate.ps1
 python -m pip install -e .[dev]
+```
+
+### See it work first, in seconds
+
+A synthetic corpus ships already transcribed and indexed, so the search and
+evidence tools answer before you have downloaded anything:
+
+```powershell
+$env:CORPUS_INGEST_DATA_DIR = "examples/sample-corpus/data"
+$env:CORPUS_INGEST_CONFIG   = "examples/sample-corpus/podcasts.yaml"
+python scripts/search_transcripts.py --podcast sample --query harbour --limit 5
+```
+
+Unset both variables before running the real pipeline below.
+
+### The real pipeline
+
+```powershell
 
 python scripts/list_episodes.py --podcast gooaye --limit 5
 python scripts/download_episode.py --podcast gooaye --episode latest
@@ -116,6 +134,21 @@ Both samples above are real output, taken from
 ships already indexed, so the search and evidence tools return results before
 you have transcribed anything of your own.
 
+## What works today
+
+Implemented: RSS episode listing and lookup, audio download, local
+faster-whisper transcription, transcript validation, deterministic extractive
+summaries, opt-in LLM semantic summaries with a review gate, deterministic
+mention extraction, SQLite metadata cache and search, X and YouTube video
+ingest, deterministic research artifacts (episode intelligence, industry chain
+mapping, external data boundary, stock lens), verified research report bundles
+with content-digest versioning, and the MCP server over both transports.
+
+Not implemented: web UI, scheduling, embeddings, and vector search. External
+market data is deliberately bounded to local fixtures — there is no live market
+API, and adding one would be an explicit, reviewed decision rather than a
+feature.
+
 ## Architecture
 
 ```mermaid
@@ -172,36 +205,38 @@ does not claim to be.
 ### Agent interface
 
 The MCP server exposes the same core functions to AI agents over a single
-`FastMCP` instance: stdio for local clients, and a reviewed sidecar serving
-Streamable HTTP bound to `127.0.0.1:8767/mcp` only.
+`FastMCP` instance: stdio for local clients, and Streamable HTTP bound to
+`127.0.0.1:8767/mcp` only. Same registry, same guards, two transports.
 
 Every tool that writes, downloads, or spends money defaults to `confirm=false`
 and returns an action plan instead of acting. Tools that would send transcript
 text to an external provider require an exact acknowledgement string on top of
 that. No tool rebuilds the search index behind your back.
 
+That default is deliberately inconvenient, so seven Skills under
+[`.agents/skills/`](.agents/skills) carry the protocol for turning one plain
+request into one authorised run: preview, explain the risks, ask once, act
+once, stop. They cover processing the latest episode, advancing an episode a
+single step at a time, ingesting an X or a YouTube video, and the verified
+research report paths. An agent without them can still call every tool -- it
+just has to ask you twice.
+
+[`docs/usage.md`](docs/usage.md) pairs each task with its CLI command, what to
+say to an agent, and which Skill applies.
+
 ```powershell
-python scripts/validate_mcp_setup.py --podcast gooaye --query TSMC
+python scripts/validate_mcp_setup.py
 python scripts/run_mcp_server.py
 ```
 
-## What works today
-
-Implemented: RSS episode listing and lookup, audio download, local
-faster-whisper transcription, transcript validation, deterministic extractive
-summaries, opt-in LLM semantic summaries with a review gate, deterministic
-mention extraction, SQLite metadata cache and search, X and YouTube video
-ingest, deterministic research artifacts (episode intelligence, industry chain
-mapping, external data boundary, stock lens), verified research report bundles
-with content-digest versioning, and the MCP server over both transports.
-
-Not implemented: web UI, scheduling, embeddings, and vector search. External
-market data is deliberately bounded to local fixtures — there is no live market
-API, and adding one would be an explicit, reviewed decision rather than a
-feature.
-
 ## Documentation
 
+Start with the usage guide if you know what you want to do but not which
+command or tool does it; the rest of the list is reference material.
+
+- [`docs/usage.md`](docs/usage.md) — task-first guide: what each source type can
+  do, and the CLI command, the agent phrasing, and the Skill for each common
+  task
 - [`examples/`](examples/) — agent configs, prompts to try, and a synthetic
   sample corpus that needs no transcription
 - [`docs/api.md`](docs/api.md) — complete function reference, output paths, CLI

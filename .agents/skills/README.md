@@ -19,12 +19,20 @@ human-approval protocol — preview first, act only after the operator approves.
 | `episode-verified-research-report/` | named-episode verified report | `tests/test_episode_verified_research_report_skill.py` |
 | `latest-episode-verified-research-report/` | latest-episode verified report | `tests/test_latest_episode_verified_research_report_skill.py` |
 | `historical-episode-verified-report-path/` | historical-episode path | `tests/test_historical_verified_report_path_skill.py` |
+| `x-video-ingest/` | one X post video into the corpus | `tests/test_x_video_ingest_skill.py` |
+| `youtube-video-ingest/` | one YouTube video into the corpus | `tests/test_youtube_video_ingest_skill.py` |
 
 These are contracts, not prose. Each Skill's own contract test in the table
 above reads its `SKILL.md` and asserts the clauses that make it safe to hand to
 an agent: the approval boundary, the no-fallback clause, and the absence of
 client-specific or command markers. Editing a `SKILL.md` for style will break
 one of them.
+
+The two video Skills carry one clause the podcast Skills do not need. Their
+preview is zero-write but **not** zero-network: `ingest_x_video` and
+`ingest_youtube_video` resolve public source metadata before they can plan a
+single write. The Skill must say so before it asks for approval, because the
+operator is approving a second network step, not the first one.
 
 > **Coverage note.** A second, cross-cutting validator once checked portable
 > frontmatter and single-tool binding across the first four Skills. It lived in
