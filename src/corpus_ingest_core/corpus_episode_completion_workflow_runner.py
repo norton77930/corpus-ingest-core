@@ -50,9 +50,7 @@ _SAFE_IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 _SAFE_PROVIDER_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$")
 _SAFE_MODEL_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
 _SAFE_ENVIRONMENT_PATTERN = re.compile(r"^[A-Z_][A-Z0-9_]{0,127}$")
-_SAFE_BASE_URL_PATTERN = re.compile(
-    r"^https?://[A-Za-z0-9.-]+(?::[0-9]{1,5})?(?:/[A-Za-z0-9._~/-]*)?$"
-)
+_SAFE_BASE_URL_PATTERN = re.compile(r"^https?://[A-Za-z0-9.-]+(?::[0-9]{1,5})?(?:/[A-Za-z0-9._~/-]*)?$")
 _ALLOWED_PLANNED_READS = {"configured podcast RSS feed", "in-memory corpus snapshot"}
 _FORBIDDEN_OUTPUT_FRAGMENTS = (
     "http://",
@@ -239,9 +237,7 @@ def run_corpus_episode_completion_workflow(
             *warnings,
             *_confirmed_warnings(canonical_episode_ref),
         ]
-        report_paths = storage.corpus_episode_completion_workflow_run_asset_paths(
-            normalized_podcast_id
-        )
+        report_paths = storage.corpus_episode_completion_workflow_run_asset_paths(normalized_podcast_id)
         result = _build_result(
             podcast_id=normalized_podcast_id,
             selector=selector,
@@ -310,8 +306,7 @@ def _write_run_report(result: CorpusEpisodeCompletionWorkflowRunResult) -> None:
         )
     except OSError as exc:
         raise CorpusEpisodeCompletionWorkflowRunnerFailedError(
-            "failed to write completion workflow report: "
-            f"{type(exc).__name__}"
+            f"failed to write completion workflow report: {type(exc).__name__}"
         ) from exc
 
 
@@ -382,22 +377,30 @@ def _preview_selection(
             confirm=False,
         )
     except Exception as exc:  # noqa: BLE001 - retain a bounded dry-run result.
-        return _blocked_row(
-            episode_ref=None,
-            status="failed",
-            reason="episode selector inspection failed",
-            failure_category=_safe_exception_category(type(exc).__name__),
-        ), ACTION_BLOCKED, None, []
+        return (
+            _blocked_row(
+                episode_ref=None,
+                status="failed",
+                reason="episode selector inspection failed",
+                failure_category=_safe_exception_category(type(exc).__name__),
+            ),
+            ACTION_BLOCKED,
+            None,
+            [],
+        )
 
-    canonical_episode_ref = _safe_episode_ref(
-        getattr(intake_result, "resolved_episode_ref", None)
-    )
+    canonical_episode_ref = _safe_episode_ref(getattr(intake_result, "resolved_episode_ref", None))
     if canonical_episode_ref is None:
-        return _blocked_row(
-            episode_ref=None,
-            status="blocked",
-            reason="episode selector could not be resolved",
-        ), ACTION_BLOCKED, None, []
+        return (
+            _blocked_row(
+                episode_ref=None,
+                status="blocked",
+                reason="episode selector could not be resolved",
+            ),
+            ACTION_BLOCKED,
+            None,
+            [],
+        )
 
     if not storage.corpus_episode_seed_asset_path(
         podcast_id,
@@ -405,32 +408,28 @@ def _preview_selection(
     ).exists():
         intake_row = _first_row(intake_result)
         return (
-        CorpusEpisodeCompletionWorkflowRunRow(
-            episode_ref=canonical_episode_ref,
-            action=ACTION_INTAKE,
-            status="selected",
-            reason="episode seed metadata is missing",
-            requires_confirmation=True,
-            requires_api_cost_ack=False,
-            network_risk=True,
-            local_compute_risk=False,
-            transcript_transfer_risk=False,
-            may_incur_api_cost=False,
-            manual_only=False,
-            planned_reads=_safe_planned_reads(
-                getattr(intake_row, "planned_reads", [])
+            CorpusEpisodeCompletionWorkflowRunRow(
+                episode_ref=canonical_episode_ref,
+                action=ACTION_INTAKE,
+                status="selected",
+                reason="episode seed metadata is missing",
+                requires_confirmation=True,
+                requires_api_cost_ack=False,
+                network_risk=True,
+                local_compute_risk=False,
+                transcript_transfer_risk=False,
+                may_incur_api_cost=False,
+                manual_only=False,
+                planned_reads=_safe_planned_reads(getattr(intake_row, "planned_reads", [])),
+                planned_writes=_safe_string_list(getattr(intake_row, "planned_writes", [])),
+                output_paths=[],
+                source_report_paths=[],
+                stage_counts={},
+                provider=None,
+                model=None,
+                failure_category=None,
+                warnings=[],
             ),
-            planned_writes=_safe_string_list(
-                getattr(intake_row, "planned_writes", [])
-            ),
-            output_paths=[],
-            source_report_paths=[],
-            stage_counts={},
-            provider=None,
-            model=None,
-            failure_category=None,
-            warnings=[],
-        ),
             ACTION_INTAKE,
             canonical_episode_ref,
             [],
@@ -444,12 +443,17 @@ def _preview_selection(
             index_payload=index_snapshot.payload,
         )
     except Exception as exc:  # noqa: BLE001 - fresh snapshot failures are bounded.
-        return _blocked_row(
-            episode_ref=canonical_episode_ref,
-            status="failed",
-            reason="corpus snapshot evaluation failed",
-            failure_category=_safe_exception_category(type(exc).__name__),
-        ), ACTION_BLOCKED, canonical_episode_ref, []
+        return (
+            _blocked_row(
+                episode_ref=canonical_episode_ref,
+                status="failed",
+                reason="corpus snapshot evaluation failed",
+                failure_category=_safe_exception_category(type(exc).__name__),
+            ),
+            ACTION_BLOCKED,
+            canonical_episode_ref,
+            [],
+        )
 
     try:
         deterministic = _preview_corpus_episode_workflow_from_snapshot(
@@ -461,12 +465,17 @@ def _preview_selection(
             allow_semantic_handoff=True,
         )
     except Exception as exc:  # noqa: BLE001 - private preview remains fail-closed.
-        return _blocked_row(
-            episode_ref=canonical_episode_ref,
-            status="failed",
-            reason="workflow stage inspection failed",
-            failure_category=_safe_exception_category(type(exc).__name__),
-        ), ACTION_BLOCKED, canonical_episode_ref, []
+        return (
+            _blocked_row(
+                episode_ref=canonical_episode_ref,
+                status="failed",
+                reason="workflow stage inspection failed",
+                failure_category=_safe_exception_category(type(exc).__name__),
+            ),
+            ACTION_BLOCKED,
+            canonical_episode_ref,
+            [],
+        )
 
     selected_stage = deterministic.get("selected_stage")
     source_row = _first_row_from_mapping(deterministic)
@@ -497,20 +506,23 @@ def _preview_selection(
         )
 
     try:
-        semantic_row, semantic_action, _semantic_warnings = (
-            _preview_corpus_semantic_remediation_from_snapshot(
-                podcast_id,
-                canonical_episode_ref,
-                plan_payload=plan_snapshot.payload,
-            )
+        semantic_row, semantic_action, _semantic_warnings = _preview_corpus_semantic_remediation_from_snapshot(
+            podcast_id,
+            canonical_episode_ref,
+            plan_payload=plan_snapshot.payload,
         )
     except Exception as exc:  # noqa: BLE001 - semantic inspection is bounded.
-        return _blocked_row(
-            episode_ref=canonical_episode_ref,
-            status="failed",
-            reason="semantic stage inspection failed",
-            failure_category=_safe_exception_category(type(exc).__name__),
-        ), ACTION_BLOCKED, canonical_episode_ref, []
+        return (
+            _blocked_row(
+                episode_ref=canonical_episode_ref,
+                status="failed",
+                reason="semantic stage inspection failed",
+                failure_category=_safe_exception_category(type(exc).__name__),
+            ),
+            ACTION_BLOCKED,
+            canonical_episode_ref,
+            [],
+        )
 
     if semantic_action in {ACTION_SEMANTIC_SUMMARY, ACTION_SEMANTIC_REVIEW}:
         return (
@@ -650,9 +662,7 @@ def _confirmed_row_from_stage_result(
     source_result: object,
 ) -> CorpusEpisodeCompletionWorkflowRunRow:
     source_rows = [
-        row
-        for row in getattr(source_result, "rows", [])
-        if getattr(row, "episode_ref", None) == episode_ref
+        row for row in getattr(source_result, "rows", []) if getattr(row, "episode_ref", None) == episode_ref
     ]
     status = _confirmed_status(source_rows)
     child_report_paths = [
@@ -670,10 +680,7 @@ def _confirmed_row_from_stage_result(
     )
     child_warnings = [
         *_collect_row_values(source_rows, "warnings"),
-        *[
-            getattr(warning, "message", warning)
-            for warning in (getattr(source_result, "warnings", []) or [])
-        ],
+        *[getattr(warning, "message", warning) for warning in (getattr(source_result, "warnings", []) or [])],
     ]
     return replace(
         selected_row,
@@ -681,29 +688,18 @@ def _confirmed_row_from_stage_result(
         reason=f"{selected_action} {status}",
         requires_confirmation=False,
         manual_only=status in {"blocked", "failed"},
-        planned_reads=_safe_paths_or_labels(
-            _collect_row_values(source_rows, "planned_reads")
-        ),
-        planned_writes=_safe_string_list(
-            _collect_row_values(source_rows, "planned_writes")
-        ),
-        output_paths=_safe_string_list(
-            _collect_row_values(source_rows, "output_paths")
-        ),
+        planned_reads=_safe_paths_or_labels(_collect_row_values(source_rows, "planned_reads")),
+        planned_writes=_safe_string_list(_collect_row_values(source_rows, "planned_writes")),
+        output_paths=_safe_string_list(_collect_row_values(source_rows, "output_paths")),
         source_report_paths=_safe_string_list(child_report_paths),
-        stage_counts=_safe_stage_counts(
-            getattr(source_result, "stage_counts", {})
-        ),
+        stage_counts=_safe_stage_counts(getattr(source_result, "stage_counts", {})),
         failure_category=failure_category,
         warnings=_safe_warning_list(child_warnings),
     )
 
 
 def _confirmed_status(rows: list[object]) -> str:
-    statuses = {
-        getattr(row, "outcome_status", getattr(row, "status", None))
-        for row in rows
-    }
+    statuses = {getattr(row, "outcome_status", getattr(row, "status", None)) for row in rows}
     if "failed" in statuses:
         return "failed"
     if statuses & {"executed", "downloaded", "seeded"}:
@@ -776,9 +772,7 @@ def _build_result(
             action=requested_action,
             transcription_model=_safe_identifier_or_none(transcription_model),
             transcription_device=_safe_identifier_or_omitted(transcription_device),
-            transcription_compute_type=_safe_identifier_or_omitted(
-                transcription_compute_type
-            ),
+            transcription_compute_type=_safe_identifier_or_omitted(transcription_compute_type),
             transcription_vad_filter=transcription_vad_filter,
             semantic_provider=filter_provider,
             semantic_model=filter_model,
@@ -860,16 +854,10 @@ def _row_from_stage(
         transcript_transfer_risk=False,
         may_incur_api_cost=False,
         manual_only=False,
-        planned_reads=_safe_paths_or_labels(
-            getattr(source_row, "planned_reads", [])
-        ),
-        planned_writes=_safe_string_list(
-            getattr(source_row, "planned_writes", [])
-        ),
+        planned_reads=_safe_paths_or_labels(getattr(source_row, "planned_reads", [])),
+        planned_writes=_safe_string_list(getattr(source_row, "planned_writes", [])),
         output_paths=_safe_string_list(getattr(source_row, "output_paths", [])),
-        source_report_paths=_safe_string_list(
-            getattr(source_row, "source_report_paths", [])
-        ),
+        source_report_paths=_safe_string_list(getattr(source_row, "source_report_paths", [])),
         stage_counts=_safe_stage_counts(getattr(source_row, "stage_counts", {})),
         provider=None,
         model=None,
@@ -889,11 +877,7 @@ def _row_from_semantic(
         episode_ref=episode_ref,
         action=action,
         status="selected",
-        reason=(
-            "semantic summary is missing"
-            if is_summary
-            else "semantic review is missing"
-        ),
+        reason=("semantic summary is missing" if is_summary else "semantic review is missing"),
         requires_confirmation=True,
         requires_api_cost_ack=is_summary,
         network_risk=is_summary,
@@ -901,16 +885,10 @@ def _row_from_semantic(
         transcript_transfer_risk=is_summary,
         may_incur_api_cost=is_summary,
         manual_only=False,
-        planned_reads=_safe_paths_or_labels(
-            getattr(source_row, "planned_reads", [])
-        ),
-        planned_writes=_safe_string_list(
-            getattr(source_row, "planned_writes", [])
-        ),
+        planned_reads=_safe_paths_or_labels(getattr(source_row, "planned_reads", [])),
+        planned_writes=_safe_string_list(getattr(source_row, "planned_writes", [])),
         output_paths=_safe_string_list(getattr(source_row, "output_paths", [])),
-        source_report_paths=_safe_string_list(
-            getattr(source_row, "source_report_paths", [])
-        ),
+        source_report_paths=_safe_string_list(getattr(source_row, "source_report_paths", [])),
         stage_counts=_safe_stage_counts(getattr(source_row, "stage_counts", {})),
         provider=None,
         model=None,
@@ -935,14 +913,10 @@ def _completed_row(
         transcript_transfer_risk=False,
         may_incur_api_cost=False,
         manual_only=False,
-        planned_reads=_safe_paths_or_labels(
-            getattr(source_row, "planned_reads", [])
-        ),
+        planned_reads=_safe_paths_or_labels(getattr(source_row, "planned_reads", [])),
         planned_writes=[],
         output_paths=[],
-        source_report_paths=_safe_string_list(
-            getattr(source_row, "source_report_paths", [])
-        ),
+        source_report_paths=_safe_string_list(getattr(source_row, "source_report_paths", [])),
         stage_counts=_safe_stage_counts(getattr(source_row, "stage_counts", {})),
         provider=None,
         model=None,
@@ -964,11 +938,7 @@ def _blocked_row_from_source(
         episode_ref=episode_ref,
         action=ACTION_BLOCKED,
         status=status,
-        reason=(
-            "workflow stage inspection failed"
-            if status == "failed"
-            else "next workflow stage is blocked"
-        ),
+        reason=("workflow stage inspection failed" if status == "failed" else "next workflow stage is blocked"),
         requires_confirmation=False,
         requires_api_cost_ack=False,
         network_risk=False,
@@ -976,20 +946,14 @@ def _blocked_row_from_source(
         transcript_transfer_risk=False,
         may_incur_api_cost=False,
         manual_only=True,
-        planned_reads=_safe_paths_or_labels(
-            getattr(source_row, "planned_reads", [])
-        ),
+        planned_reads=_safe_paths_or_labels(getattr(source_row, "planned_reads", [])),
         planned_writes=[],
         output_paths=[],
-        source_report_paths=_safe_string_list(
-            getattr(source_row, "source_report_paths", [])
-        ),
+        source_report_paths=_safe_string_list(getattr(source_row, "source_report_paths", [])),
         stage_counts=_safe_stage_counts(getattr(source_row, "stage_counts", {})),
         provider=None,
         model=None,
-        failure_category=_safe_exception_category(
-            getattr(source_row, "failure_category", None)
-        ),
+        failure_category=_safe_exception_category(getattr(source_row, "failure_category", None)),
         warnings=[],
     )
 
@@ -1019,10 +983,7 @@ def _confirmed_warnings(
         CorpusEpisodeCompletionWorkflowRunWarning(
             scope="corpus",
             episode_ref=episode_ref,
-            message=(
-                "Persisted corpus index and remediation plan may be stale; "
-                "refresh them manually."
-            ),
+            message=("Persisted corpus index and remediation plan may be stale; refresh them manually."),
         ),
         CorpusEpisodeCompletionWorkflowRunWarning(
             scope="cache",
@@ -1052,9 +1013,7 @@ def _normalize_selector(value: str | None) -> str:
         return DEFAULT_SELECTOR
     if _SAFE_IDENTIFIER_PATTERN.fullmatch(normalized):
         if normalized.casefold().startswith(f"{DEFAULT_SELECTOR}-"):
-            raise CorpusEpisodeCompletionWorkflowRunnerFailedError(
-                "episode_ref is invalid"
-            )
+            raise CorpusEpisodeCompletionWorkflowRunnerFailedError("episode_ref is invalid")
         return normalized
     raise CorpusEpisodeCompletionWorkflowRunnerFailedError("episode_ref is invalid")
 
@@ -1085,9 +1044,7 @@ def _validate_semantic_summary_settings(
     """Validate settings only when fresh selection can execute semantic summary."""
 
     _require_positive_int(semantic_chunk_seconds, "semantic_chunk_seconds")
-    _require_positive_int(
-        semantic_max_segments_per_chunk, "semantic_max_segments_per_chunk"
-    )
+    _require_positive_int(semantic_max_segments_per_chunk, "semantic_max_segments_per_chunk")
     if (
         not isinstance(semantic_provider, str)
         or not _SAFE_PROVIDER_PATTERN.fullmatch(semantic_provider)
@@ -1107,19 +1064,13 @@ def _validate_semantic_summary_settings(
         or _safe_output_text(semantic_base_url) != semantic_base_url
     ):
         raise CorpusEpisodeCompletionWorkflowRunnerFailedError("semantic_base_url is invalid")
-    if not isinstance(semantic_api_key_env, str) or not _SAFE_ENVIRONMENT_PATTERN.fullmatch(
-        semantic_api_key_env
-    ):
+    if not isinstance(semantic_api_key_env, str) or not _SAFE_ENVIRONMENT_PATTERN.fullmatch(semantic_api_key_env):
         raise CorpusEpisodeCompletionWorkflowRunnerFailedError("semantic_api_key_env is invalid")
 
 
 CONFIRMED_ACTION_MUST_BE_EXPLICIT_MESSAGE = "confirmed action must be explicit"
-CONFIRMED_EPISODE_REF_MUST_BE_CANONICAL_MESSAGE = (
-    "confirmed episode_ref must be canonical"
-)
-SEMANTIC_SUMMARY_REQUIRES_EXACT_ACK_MESSAGE = (
-    "semantic_summary requires exact api_cost_ack"
-)
+CONFIRMED_EPISODE_REF_MUST_BE_CANONICAL_MESSAGE = "confirmed episode_ref must be canonical"
+SEMANTIC_SUMMARY_REQUIRES_EXACT_ACK_MESSAGE = "semantic_summary requires exact api_cost_ack"
 
 
 def confirmed_request_rejection_reason(
@@ -1149,9 +1100,7 @@ def _require_confirmed_request(
     action: str,
     api_cost_ack: str,
 ) -> None:
-    reason = confirmed_request_rejection_reason(
-        selector=selector, action=action, api_cost_ack=api_cost_ack
-    )
+    reason = confirmed_request_rejection_reason(selector=selector, action=action, api_cost_ack=api_cost_ack)
     if reason is not None:
         raise CorpusEpisodeCompletionWorkflowRunnerFailedError(reason)
 
@@ -1176,11 +1125,7 @@ def _safe_planned_reads(values: object) -> list[str]:
 def _safe_paths_or_labels(values: object) -> list[str]:
     if not isinstance(values, list):
         return []
-    return [
-        value
-        for value in values
-        if value in _ALLOWED_PLANNED_READS or _is_safe_local_path(value)
-    ]
+    return [value for value in values if value in _ALLOWED_PLANNED_READS or _is_safe_local_path(value)]
 
 
 def _safe_string_list(values: object) -> list[str]:
@@ -1211,10 +1156,7 @@ def _safe_stage_counts(value: object) -> dict[str, int]:
     return {
         key: count
         for key, count in value.items()
-        if isinstance(key, str)
-        and _SAFE_IDENTIFIER_PATTERN.fullmatch(key)
-        and isinstance(count, int)
-        and count >= 0
+        if isinstance(key, str) and _SAFE_IDENTIFIER_PATTERN.fullmatch(key) and isinstance(count, int) and count >= 0
     }
 
 

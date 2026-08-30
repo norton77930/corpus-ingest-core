@@ -12,9 +12,7 @@ from corpus_ingest_core.corpus_audio_download_runner import result_to_dict
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Preview or run one bounded corpus audio download."
-    )
+    parser = argparse.ArgumentParser(description="Preview or run one bounded corpus audio download.")
     parser.add_argument("--podcast", required=True, dest="podcast_id")
     parser.add_argument("--confirm", action="store_true")
     parser.add_argument("--episode", dest="episode_ref")

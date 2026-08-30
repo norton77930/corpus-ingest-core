@@ -13,9 +13,7 @@ from corpus_ingest_core.serialization import to_jsonable
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Create a deterministic semantic summary smoke review report."
-    )
+    parser = argparse.ArgumentParser(description="Create a deterministic semantic summary smoke review report.")
     parser.add_argument("podcast_id", nargs="?")
     parser.add_argument("episode_ref", nargs="?")
     parser.add_argument("--podcast", dest="podcast_option")

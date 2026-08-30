@@ -174,9 +174,7 @@ def test_generate_stock_lens_report_writes_json_and_markdown(monkeypatch, tmp_pa
     assert payload["report_mode"] == "deterministic-stock-lens-v1"
     assert payload["query_match_summary"]["direct_podcast_evidence_count"] == 1
     assert payload["direct_podcast_evidence"][0]["company_name"] == "台積電"
-    assert payload["direct_podcast_evidence"][0]["evidence"][0]["timestamp"] == (
-        "[00:01:23 - 00:01:30]"
-    )
+    assert payload["direct_podcast_evidence"][0]["evidence"][0]["timestamp"] == ("[00:01:23 - 00:01:30]")
     assert payload["direct_podcast_evidence"][0]["external_boundary"] == {
         "external_verification_status": "not_requested",
         "source_status": "not_fetched",
@@ -195,9 +193,7 @@ def test_generate_stock_lens_report_writes_json_and_markdown(monkeypatch, tmp_pa
     assert "No target price" in markdown
 
 
-def test_generate_stock_lens_report_matches_ticker_as_inferred_lead(
-    monkeypatch, tmp_path
-):
+def test_generate_stock_lens_report_matches_ticker_as_inferred_lead(monkeypatch, tmp_path):
     import corpus_ingest_core.stock_lens as stock_lens
 
     _write_mapping(monkeypatch, tmp_path)
@@ -214,9 +210,7 @@ def test_generate_stock_lens_report_matches_ticker_as_inferred_lead(
     assert payload["inferred_research_leads"][0]["evidence_status"] == "inferred_from_industry"
 
 
-def test_generate_stock_lens_report_without_match_states_no_direct_evidence(
-    monkeypatch, tmp_path
-):
+def test_generate_stock_lens_report_without_match_states_no_direct_evidence(monkeypatch, tmp_path):
     import corpus_ingest_core.stock_lens as stock_lens
 
     _write_mapping(monkeypatch, tmp_path)
@@ -233,9 +227,7 @@ def test_generate_stock_lens_report_without_match_states_no_direct_evidence(
     assert "no direct podcast evidence found" in markdown
 
 
-def test_generate_stock_lens_report_fails_when_external_boundary_missing(
-    monkeypatch, tmp_path
-):
+def test_generate_stock_lens_report_fails_when_external_boundary_missing(monkeypatch, tmp_path):
     """Identity-bound stock-lens lineage requires the mapping's boundary artifact."""
 
     import corpus_ingest_core.stock_lens as stock_lens
@@ -247,9 +239,7 @@ def test_generate_stock_lens_report_fails_when_external_boundary_missing(
         stock_lens.generate_stock_lens_report("gooaye", "台積電")
 
 
-def test_red_stock_lens_rejects_alpha_boundary_for_corrected_mapping(
-    monkeypatch, tmp_path
-):
+def test_red_stock_lens_rejects_alpha_boundary_for_corrected_mapping(monkeypatch, tmp_path):
     """A same-episode lexical boundary is never a substitute for mapping title identity."""
 
     import corpus_ingest_core.stock_lens as stock_lens
@@ -262,9 +252,7 @@ def test_red_stock_lens_rejects_alpha_boundary_for_corrected_mapping(
         stock_lens.generate_stock_lens_report("gooaye", "台積電")
 
 
-def test_generate_stock_lens_report_handles_partial_matched_artifacts(
-    monkeypatch, tmp_path
-):
+def test_generate_stock_lens_report_handles_partial_matched_artifacts(monkeypatch, tmp_path):
     import corpus_ingest_core.stock_lens as stock_lens
     from corpus_ingest_core.errors import StockLensReportInputError
 
@@ -274,18 +262,14 @@ def test_generate_stock_lens_report_handles_partial_matched_artifacts(
     with pytest.raises(StockLensReportInputError, match="partial-draft"):
         stock_lens.generate_stock_lens_report("gooaye", "台積電")
 
-    asset = stock_lens.generate_stock_lens_report(
-        "gooaye", "台積電", allow_partial=True
-    )
+    asset = stock_lens.generate_stock_lens_report("gooaye", "台積電", allow_partial=True)
     payload = json.loads(asset.report_json_path.read_text(encoding="utf-8"))
 
     assert asset.report_status == "partial-draft"
     assert payload["report_status"] == "partial-draft"
 
 
-def test_generate_stock_lens_report_reuses_existing_without_force(
-    monkeypatch, tmp_path
-):
+def test_generate_stock_lens_report_reuses_existing_without_force(monkeypatch, tmp_path):
     import corpus_ingest_core.stock_lens as stock_lens
     from corpus_ingest_core.storage import stock_lens_report_asset_paths
 
@@ -310,7 +294,7 @@ def test_generate_stock_lens_report_reuses_existing_without_force(
 def test_stock_lens_report_path_removes_illegal_characters_and_emoji():
     from corpus_ingest_core.storage import stock_lens_report_asset_paths
 
-    paths = stock_lens_report_asset_paths("gooaye", ' bad <stock> 🐣 : / \\ | ? * ok ')
+    paths = stock_lens_report_asset_paths("gooaye", " bad <stock> 🐣 : / \\ | ? * ok ")
 
     assert not any(character in paths.json_path.name for character in '<>:"/\\|?*')
     assert "🐣" not in paths.json_path.name
@@ -318,9 +302,7 @@ def test_stock_lens_report_path_removes_illegal_characters_and_emoji():
     assert paths.markdown_path.name == "bad_stock_ok.stock-lens.md"
 
 
-def test_stock_lens_report_cli_parses_options_and_outputs_json(
-    monkeypatch, capsys, tmp_path
-):
+def test_stock_lens_report_cli_parses_options_and_outputs_json(monkeypatch, capsys, tmp_path):
     from scripts import generate_stock_lens_report
 
     from corpus_ingest_core.models import StockLensReportAsset

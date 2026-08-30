@@ -5,13 +5,7 @@ from __future__ import annotations
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL = (
-    ROOT
-    / ".agents"
-    / "skills"
-    / "historical-episode-verified-report-path"
-    / "SKILL.md"
-)
+SKILL = ROOT / ".agents" / "skills" / "historical-episode-verified-report-path" / "SKILL.md"
 EXPECTED_DESCRIPTION = (
     "Human-controlled path for one named historical episode toward a verified "
     "research report—suggest next step, preview, one approved MCP confirm, then stop."

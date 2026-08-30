@@ -22,9 +22,7 @@ def _use_tmp_data_dirs(monkeypatch, tmp_path: Path) -> Path:
     monkeypatch.setattr(storage, "EXTERNAL_DIR", tmp_path / "external")
     monkeypatch.setattr(storage, "CORPUS_DIR", tmp_path / "corpus", raising=False)
     review_dir = tmp_path / "evals" / "research-llm-smoke" / "reports"
-    monkeypatch.setattr(
-        corpus_index, "SEMANTIC_REVIEW_REPORTS_DIR", review_dir, raising=False
-    )
+    monkeypatch.setattr(corpus_index, "SEMANTIC_REVIEW_REPORTS_DIR", review_dir, raising=False)
     return review_dir
 
 
@@ -248,9 +246,7 @@ def _write_external_boundary(
             "episode_ref": episode_ref,
             "title": title,
             "boundary_status": "final",
-            "candidate_boundaries": [
-                {"company_name": "TSMC", "notes": "boundary body must not leak"}
-            ],
+            "candidate_boundaries": [{"company_name": "TSMC", "notes": "boundary body must not leak"}],
         },
     )
     paths.markdown_path.write_text("# boundary body must not leak", encoding="utf-8")
@@ -283,9 +279,14 @@ def _write_semantic_review(
     checks = [
         {"name": name, "status": "pass", "message": "fixture"}
         for name in (
-            "semantic_summary_exists", "secret_leak", "traceback_leak",
-            "raw_transcript_dump", "timestamp_evidence", "chunk_summaries",
-            "metadata", "prohibited_advice",
+            "semantic_summary_exists",
+            "secret_leak",
+            "traceback_leak",
+            "raw_transcript_dump",
+            "timestamp_evidence",
+            "chunk_summaries",
+            "metadata",
+            "prohibited_advice",
         )
     ]
     if review_status == "failed":
@@ -307,13 +308,9 @@ def _write_semantic_review(
         "checks": checks,
         "not_investment_advice_notice": True,
     }
-    summary_paths = sorted(
-        (storage.SUMMARIES_DIR / podcast_id).glob(f"{episode_ref}__*.semantic.md")
-    )
+    summary_paths = sorted((storage.SUMMARIES_DIR / podcast_id).glob(f"{episode_ref}__*.semantic.md"))
     if summary_paths:
-        payload["semantic_summary_sha256"] = hashlib.sha256(
-            summary_paths[0].read_bytes()
-        ).hexdigest()
+        payload["semantic_summary_sha256"] = hashlib.sha256(summary_paths[0].read_bytes()).hexdigest()
     _write_json(json_path, payload)
     json_path.with_suffix(".md").write_text("# review body must not leak", encoding="utf-8")
     return json_path
@@ -411,9 +408,7 @@ def test_corpus_remediation_public_result_contract_exports(tmp_path):
     assert callable(generate_corpus_remediation_plan)
 
 
-def test_corpus_remediation_plan_snapshot_builds_without_writes_until_persisted(
-    monkeypatch, tmp_path
-):
+def test_corpus_remediation_plan_snapshot_builds_without_writes_until_persisted(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_index as corpus_index
     import corpus_ingest_core.corpus_remediation_plan as remediation_plan
     from corpus_ingest_core import storage
@@ -449,7 +444,6 @@ def test_corpus_remediation_plan_snapshot_builds_without_writes_until_persisted(
     assert not list(plan_paths.json_path.parent.glob("*.part"))
 
 
-
 def test_generate_corpus_remediation_plan_writes_empty_plan(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
@@ -467,9 +461,7 @@ def test_generate_corpus_remediation_plan_writes_empty_plan(monkeypatch, tmp_pat
     assert "Episode count: 0" in markdown
 
 
-def test_generate_corpus_remediation_plan_markdown_includes_contract_summary(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_markdown_includes_contract_summary(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -478,18 +470,13 @@ def test_generate_corpus_remediation_plan_markdown_includes_contract_summary(
 
     markdown = result.plan_markdown_path.read_text(encoding="utf-8")
     assert f"Source index: {result.source_corpus_index_json_path}" in markdown
-    assert (
-        f"Source index Markdown: {result.source_corpus_index_markdown_path}"
-        in markdown
-    )
+    assert f"Source index Markdown: {result.source_corpus_index_markdown_path}" in markdown
     assert "| Metric | Count |" in markdown
     assert "| episode_count | 0 |" in markdown
     assert "| action_count | 0 |" in markdown
 
 
-def test_generate_corpus_remediation_plan_refreshes_index_first(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_refreshes_index_first(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_remediation_plan as remediation
     from corpus_ingest_core import storage
     from corpus_ingest_core.models import CorpusArtifactFamilyCounts, CorpusIndexResult
@@ -547,9 +534,7 @@ def test_generate_corpus_remediation_plan_refreshes_index_first(
             index_markdown_path=paths.markdown_path,
             episode_count=1,
             warning_count=0,
-            artifact_family_counts={
-                "audio": CorpusArtifactFamilyCounts(available=0, missing=1, unreadable=0)
-            },
+            artifact_family_counts={"audio": CorpusArtifactFamilyCounts(available=0, missing=1, unreadable=0)},
         )
 
     monkeypatch.setattr(remediation, "generate_corpus_index", fake_generate_corpus_index)
@@ -560,9 +545,7 @@ def test_generate_corpus_remediation_plan_refreshes_index_first(
     assert _payload(result)["episodes"][0]["episode_ref"] == "EP900"
 
 
-def test_generate_corpus_remediation_plan_orders_actions_and_counts(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_orders_actions_and_counts(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -597,9 +580,7 @@ def test_generate_corpus_remediation_plan_orders_actions_and_counts(
     assert "corpus-remediation-plan" in markdown
 
 
-def test_generate_corpus_remediation_plan_uses_seed_audio_availability(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_uses_seed_audio_availability(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _write_episode_seed(
@@ -629,9 +610,7 @@ def test_generate_corpus_remediation_plan_uses_seed_audio_availability(
     assert "feed audio is unavailable" in no_audio["reason"]
 
 
-def test_generate_corpus_remediation_plan_uses_contract_action_types(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_uses_contract_action_types(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -640,17 +619,11 @@ def test_generate_corpus_remediation_plan_uses_contract_action_types(
     result = generate_corpus_remediation_plan("gooaye")
 
     allowed_action_types = {"download", "transcribe", "generate", "review", "inspect"}
-    action_types = {
-        action["action_type"]
-        for row in _payload(result)["episodes"]
-        for action in row["actions"]
-    }
+    action_types = {action["action_type"] for row in _payload(result)["episodes"] for action in row["actions"]}
     assert action_types <= allowed_action_types
 
 
-def test_generate_corpus_remediation_plan_is_deterministic_and_has_no_timestamp(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_is_deterministic_and_has_no_timestamp(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -668,9 +641,7 @@ def test_generate_corpus_remediation_plan_is_deterministic_and_has_no_timestamp(
     assert "2026-01-01T00:00:00Z" not in first_json
 
 
-def test_generate_corpus_remediation_plan_cli_prints_output_paths_and_counts(
-    monkeypatch, capsys, tmp_path
-):
+def test_generate_corpus_remediation_plan_cli_prints_output_paths_and_counts(monkeypatch, capsys, tmp_path):
     from scripts import generate_corpus_remediation_plan as cli
 
     from corpus_ingest_core.models import (
@@ -718,9 +689,7 @@ def test_generate_corpus_remediation_plan_cli_prints_output_paths_and_counts(
     assert payload["gated_action_count"] == 1
 
 
-def test_generate_corpus_remediation_plan_marks_transcript_blockers(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_marks_transcript_blockers(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -739,9 +708,7 @@ def test_generate_corpus_remediation_plan_marks_transcript_blockers(
     assert all("transcript" in action["blocking_artifacts"] for action in blocked[:3])
 
 
-def test_generate_corpus_remediation_plan_contains_unreadable_warning(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_contains_unreadable_warning(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -760,9 +727,7 @@ def test_generate_corpus_remediation_plan_contains_unreadable_warning(
     assert mentions["reason"] == "mentions artifact is unreadable"
 
 
-def test_generate_corpus_remediation_plan_blocks_downstream_missing_upstream(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_blocks_downstream_missing_upstream(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -780,9 +745,7 @@ def test_generate_corpus_remediation_plan_blocks_downstream_missing_upstream(
     assert _action(row, "extractive_summary")["blocking_artifacts"] == ["transcript"]
 
 
-def test_generate_corpus_remediation_plan_blocks_external_boundary_when_transcript_missing(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_blocks_external_boundary_when_transcript_missing(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -798,9 +761,7 @@ def test_generate_corpus_remediation_plan_blocks_external_boundary_when_transcri
     assert boundary["blocking_artifacts"] == ["transcript"]
 
 
-def test_generate_corpus_remediation_plan_blocks_industry_mapping_when_transcript_missing(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_blocks_industry_mapping_when_transcript_missing(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -816,9 +777,7 @@ def test_generate_corpus_remediation_plan_blocks_industry_mapping_when_transcrip
     assert mapping["blocking_artifacts"] == ["transcript"]
 
 
-def test_generate_corpus_remediation_plan_blocks_semantic_review_when_transcript_missing(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_blocks_semantic_review_when_transcript_missing(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -834,9 +793,7 @@ def test_generate_corpus_remediation_plan_blocks_semantic_review_when_transcript
     assert semantic_summary["blocking_artifacts"] == ["transcript"]
 
 
-def test_generate_corpus_remediation_plan_marks_semantic_summary_gated(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_marks_semantic_summary_gated(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -853,9 +810,7 @@ def test_generate_corpus_remediation_plan_marks_semantic_summary_gated(
     assert "API_KEY" not in semantic["suggested_command"]
 
 
-def test_generate_corpus_remediation_plan_reports_semantic_review_metadata(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_reports_semantic_review_metadata(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     review_dir = _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -881,9 +836,7 @@ def test_generate_corpus_remediation_plan_reports_semantic_review_metadata(
     assert semantic_review["warning_count"] == 2
 
 
-def test_generate_corpus_remediation_plan_has_semantic_review_action_after_summary(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_has_semantic_review_action_after_summary(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -902,9 +855,7 @@ def test_generate_corpus_remediation_plan_has_semantic_review_action_after_summa
 
 
 def test_corpus_remediation_plan_import_surface_stays_plan_only():
-    source = Path("src/corpus_ingest_core/corpus_remediation_plan.py").read_text(
-        encoding="utf-8"
-    )
+    source = Path("src/corpus_ingest_core/corpus_remediation_plan.py").read_text(encoding="utf-8")
     forbidden_fragments = [
         "from .cache import",
         "from .downloader import",
@@ -931,9 +882,7 @@ def test_corpus_remediation_plan_import_surface_stays_plan_only():
         assert fragment not in source
 
 
-def test_generate_corpus_remediation_plan_excludes_raw_body_and_secret_text(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_excludes_raw_body_and_secret_text(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     review_dir = _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -984,9 +933,7 @@ def test_generate_corpus_remediation_plan_excludes_raw_body_and_secret_text(
         assert text not in markdown
 
 
-def test_generate_corpus_remediation_plan_does_not_execute_remediation_boundaries(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_remediation_plan_does_not_execute_remediation_boundaries(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_plan import generate_corpus_remediation_plan
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)

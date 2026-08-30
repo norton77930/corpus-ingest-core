@@ -49,7 +49,11 @@ P = ParamSpec("P")
 T = TypeVar("T")
 _SAFE_PODCAST_ID = re.compile(r"^[a-z0-9][a-z0-9-]{0,127}$")
 _WINDOWS_RESERVED = {
-    "CON", "PRN", "AUX", "NUL", *(f"COM{number}" for number in range(1, 10)),
+    "CON",
+    "PRN",
+    "AUX",
+    "NUL",
+    *(f"COM{number}" for number in range(1, 10)),
     *(f"LPT{number}" for number in range(1, 10)),
 }
 
@@ -73,38 +77,24 @@ def _episode_writer_claim_is_held(podcast_id: object, episode_ref: object) -> bo
     """Return whether this context currently owns the exact writer claim."""
 
     try:
-        podcast_id, episode_ref = validate_episode_writer_claim_identity(
-            podcast_id, episode_ref
-        )
+        podcast_id, episode_ref = validate_episode_writer_claim_identity(podcast_id, episode_ref)
     except ValueError:
         return False
     held_claims = _CURRENT_EPISODE_CLAIMS.get()
-    held = (
-        held_claims.get(f"{podcast_id}\x00{episode_ref}")
-        if held_claims is not None
-        else None
-    )
+    held = held_claims.get(f"{podcast_id}\x00{episode_ref}") if held_claims is not None else None
     return held is not None and held.depth > 0
 
 
-def _mint_controlled_regeneration_capability(
-    podcast_id: str, episode_ref: str
-) -> _ControlledRegenerationCapability:
+def _mint_controlled_regeneration_capability(podcast_id: str, episode_ref: str) -> _ControlledRegenerationCapability:
     """Mint one package-private overwrite authority only beneath a writer claim."""
 
-    podcast_id, episode_ref = validate_episode_writer_claim_identity(
-        podcast_id, episode_ref
-    )
+    podcast_id, episode_ref = validate_episode_writer_claim_identity(podcast_id, episode_ref)
     if not _episode_writer_claim_is_held(podcast_id, episode_ref):
         raise ValueError("controlled regeneration writer claim is not held")
-    return _ControlledRegenerationCapability(
-        podcast_id, episode_ref, _CONTROLLED_REGENERATION_CAPABILITY_NONCE
-    )
+    return _ControlledRegenerationCapability(podcast_id, episode_ref, _CONTROLLED_REGENERATION_CAPABILITY_NONCE)
 
 
-def _validate_controlled_regeneration_capability(
-    capability: object, podcast_id: str, episode_ref: str
-) -> None:
+def _validate_controlled_regeneration_capability(capability: object, podcast_id: str, episode_ref: str) -> None:
     """Fail closed unless an unused authority matches the currently held claim."""
 
     if (
@@ -118,9 +108,7 @@ def _validate_controlled_regeneration_capability(
         raise ValueError("controlled regeneration authority is invalid")
 
 
-def _consume_controlled_regeneration_capability(
-    capability: object, podcast_id: str, episode_ref: str
-) -> None:
+def _consume_controlled_regeneration_capability(capability: object, podcast_id: str, episode_ref: str) -> None:
     """Consume authority exactly once immediately before the forced writer."""
 
     _validate_controlled_regeneration_capability(capability, podcast_id, episode_ref)
@@ -137,9 +125,7 @@ def episode_writer_claim(
 ) -> Iterator[None]:
     """Acquire one reentrant local/cross-process writer and cost claim."""
 
-    podcast_id, episode_ref = validate_episode_writer_claim_identity(
-        podcast_id, episode_ref
-    )
+    podcast_id, episode_ref = validate_episode_writer_claim_identity(podcast_id, episode_ref)
     key = f"{podcast_id}\x00{episode_ref}"
     held_claims = _CURRENT_EPISODE_CLAIMS.get()
     held = held_claims.get(key) if held_claims is not None else None
@@ -151,12 +137,7 @@ def episode_writer_claim(
             held.depth -= 1
         return
 
-    claim_path = (
-        storage.CORPUS_DIR
-        / podcast_id
-        / ".episode-claims"
-        / f"{episode_ref}.writer.claim"
-    )
+    claim_path = storage.CORPUS_DIR / podcast_id / ".episode-claims" / f"{episode_ref}.writer.claim"
     manager = exclusive_artifact_claim(claim_path, timeout_seconds=timeout_seconds)
     manager.__enter__()
     new_claims = dict(held_claims or {})
@@ -188,9 +169,7 @@ def episode_writer_claimed(function: Callable[P, T]) -> Callable[P, T]:
         episode_ref = bound.arguments.get("episode_ref")
         if podcast_id is None or episode_ref is None:
             return function(*args, **kwargs)
-        podcast_id, episode_ref = validate_episode_writer_claim_identity(
-            podcast_id, episode_ref
-        )
+        podcast_id, episode_ref = validate_episode_writer_claim_identity(podcast_id, episode_ref)
         with episode_writer_claim(podcast_id, episode_ref):
             return function(*args, **kwargs)
 

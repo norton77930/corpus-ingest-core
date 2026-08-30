@@ -19,12 +19,8 @@ from .mcp_runtime import mcp, tool_action_plan
 
 MIN_EVIDENCE_ITEMS = 1
 MAX_EVIDENCE_ITEMS = 50
-STOCK_LENS_CACHE_STALE_WARNING = (
-    "Cache may be stale after completion; run rebuild_cache manually."
-)
-NOT_INVESTMENT_ADVICE = (
-    "Research framework only: no buy/sell/hold, target price, or guaranteed return."
-)
+STOCK_LENS_CACHE_STALE_WARNING = "Cache may be stale after completion; run rebuild_cache manually."
+NOT_INVESTMENT_ADVICE = "Research framework only: no buy/sell/hold, target price, or guaranteed return."
 
 
 @mcp.tool()

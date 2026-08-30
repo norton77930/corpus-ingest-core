@@ -28,9 +28,7 @@ from corpus_ingest_core.storage import title_slug
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="產生 Phase 6J stock lens LLM synthesis report。"
-    )
+    parser = argparse.ArgumentParser(description="產生 Phase 6J stock lens LLM synthesis report。")
     parser.add_argument("podcast_id", nargs="?")
     parser.add_argument("stock_query", nargs="?")
     parser.add_argument("--podcast", dest="podcast_option")
@@ -66,9 +64,7 @@ def main() -> None:
         raise SystemExit(1) from exc
 
     debug_output_path = (
-        _debug_output_path(podcast_id=podcast_id, stock_query=stock_query)
-        if args.debug_llm_output
-        else None
+        _debug_output_path(podcast_id=podcast_id, stock_query=stock_query) if args.debug_llm_output else None
     )
     previous_debug_output_path = os.environ.get(DEBUG_OUTPUT_PATH_ENV)
     if debug_output_path is not None:
@@ -123,11 +119,7 @@ def _debug_output_path(*, podcast_id: str, stock_query: str) -> Path:
 
 
 def _resolve_llm_options(args: argparse.Namespace) -> tuple[str, str | None, str | None, str]:
-    profile = (
-        load_llm_profile(args.llm_profile, args.llm_profile_path)
-        if args.llm_profile
-        else None
-    )
+    profile = load_llm_profile(args.llm_profile, args.llm_profile_path) if args.llm_profile else None
     provider = args.provider or (profile.provider if profile else "openai-compatible")
     model = args.model or (profile.model if profile else None)
     base_url = args.base_url or (profile.base_url if profile else None)

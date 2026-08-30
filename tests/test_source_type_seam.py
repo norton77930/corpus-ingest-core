@@ -116,9 +116,7 @@ def test_audio_runner_refuses_video_seed_even_if_plan_says_ready() -> None:
 def test_audio_runner_reason_names_youtube_ingest_cli() -> None:
     episode = {
         "episode_ref": "dQw4w9WgXcQ",
-        "source_metadata": _seed_meta(
-            "yt-video", "https://www.youtube.com/watch?v=dQw4w9WgXcQ"
-        ),
+        "source_metadata": _seed_meta("yt-video", "https://www.youtube.com/watch?v=dQw4w9WgXcQ"),
         "artifact_status": {"audio": {"status": "missing"}},
         "actions": [
             {

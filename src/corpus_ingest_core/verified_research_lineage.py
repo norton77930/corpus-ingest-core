@@ -56,12 +56,7 @@ class _CurrentVerifiedResearchLineageEvidence:
 def lineage_path(podcast_id: str, episode_ref: str) -> Path:
     """Return the pure 018-owned lineage-sidecar path."""
 
-    return (
-        storage.CORPUS_DIR
-        / podcast_id
-        / "verified-research"
-        / f"{episode_ref}.lineage.json"
-    )
+    return storage.CORPUS_DIR / podcast_id / "verified-research" / f"{episode_ref}.lineage.json"
 
 
 def record_current_verified_research_lineage(
@@ -109,17 +104,11 @@ def record_current_verified_research_lineage(
     if not isinstance(generation_proofs, dict) or set(generation_proofs) != requested:
         raise VerifiedResearchReportInputError("verified report generation proofs are required")
     proofs = generation_proofs
-    in_place_fixture_commit = _is_in_place_fixture_commit(
-        requested, current, artifacts, proofs
-    )
+    in_place_fixture_commit = _is_in_place_fixture_commit(requested, current, artifacts, proofs)
     for role in requested:
         entry = current[role]
         proof = _validated_generation_proof(role, entry, proofs[role])
-        if (
-            proof["execution"] == "generated"
-            and proof["pre_sha256"] is not None
-            and not in_place_fixture_commit
-        ):
+        if proof["execution"] == "generated" and proof["pre_sha256"] is not None and not in_place_fixture_commit:
             raise VerifiedResearchReportInputError("verified report generated proof is invalid")
         if role == "transcript":
             if proof["execution"] != "external_selector":
@@ -133,10 +122,7 @@ def record_current_verified_research_lineage(
             existing_proof = existing_entry.get("generation_proof")
             existing_current = _normalized_current_entry(role, existing_entry)
             existing_current.pop("generation_proof", None)
-            if (
-                existing_current != entry
-                or not _generation_proof_matches_current(role, entry, existing_proof)
-            ):
+            if existing_current != entry or not _generation_proof_matches_current(role, entry, existing_proof):
                 raise VerifiedResearchReportInputError("verified report reused lineage proof is invalid")
         artifacts[role] = {**entry, "generation_proof": proof}
     payload = {
@@ -185,9 +171,7 @@ def validate_current_verified_research_lineage(
     effective_summary_options = summary_options
     if effective_summary_options is None:
         recorded_summary = artifacts.get("semantic_summary")
-        effective_summary_options = (
-            recorded_summary.get("options") if isinstance(recorded_summary, dict) else None
-        )
+        effective_summary_options = recorded_summary.get("options") if isinstance(recorded_summary, dict) else None
 
     try:
         current = _current_artifacts(
@@ -271,9 +255,7 @@ def _current_verified_research_lineage_evidence(
     effective_summary_options = summary_options
     if effective_summary_options is None:
         recorded_summary = artifacts.get("semantic_summary")
-        effective_summary_options = (
-            recorded_summary.get("options") if isinstance(recorded_summary, dict) else None
-        )
+        effective_summary_options = recorded_summary.get("options") if isinstance(recorded_summary, dict) else None
     try:
         current = _current_artifacts(
             podcast_id,
@@ -393,18 +375,14 @@ def _current_artifacts(
             upstream={"transcript": _reference(transcript_entry)},
             options={
                 "extraction_mode": _required_mode(mentions, "extraction_mode", "mentions"),
-                "max_evidence_per_mention": _artifact_positive_option(
-                    mentions, "max_evidence_per_mention", 5
-                ),
+                "max_evidence_per_mention": _artifact_positive_option(mentions, "max_evidence_per_mention", 5),
             },
         )
 
     if "intelligence" in required:
         assert title is not None and transcript_entry is not None
         mentions_entry = current["mentions"]
-        intelligence_path = storage.episode_intelligence_report_asset_paths(
-            podcast_id, episode_ref, title
-        ).json_path
+        intelligence_path = storage.episode_intelligence_report_asset_paths(podcast_id, episode_ref, title).json_path
         intelligence_raw = _read_bytes(intelligence_path, "intelligence")
         intelligence = _read_json(intelligence_raw, "intelligence")
         _identity_title(intelligence, podcast_id, episode_ref, "intelligence")
@@ -418,18 +396,14 @@ def _current_artifacts(
             options={
                 "report_mode": _required_mode(intelligence, "report_mode", "intelligence"),
                 "window_seconds": _artifact_positive_option(intelligence, "window_seconds", 300),
-                "max_evidence_per_section": _artifact_positive_option(
-                    intelligence, "max_evidence_per_section", 5
-                ),
+                "max_evidence_per_section": _artifact_positive_option(intelligence, "max_evidence_per_section", 5),
             },
         )
 
     if "industry_mapping" in required:
         assert title is not None
         intelligence_entry = current["intelligence"]
-        mapping_path = storage.industry_chain_mapping_asset_paths(
-            podcast_id, episode_ref, title
-        ).json_path
+        mapping_path = storage.industry_chain_mapping_asset_paths(podcast_id, episode_ref, title).json_path
         mapping_raw = _read_bytes(mapping_path, "industry mapping")
         mapping = _read_json(mapping_raw, "industry mapping")
         _identity_title(mapping, podcast_id, episode_ref, "industry mapping")
@@ -439,12 +413,8 @@ def _current_artifacts(
             upstream={"intelligence": _reference(intelligence_entry)},
             options={
                 "mapping_mode": _required_mode(mapping, "mapping_mode", "industry mapping"),
-                "max_candidates_per_node": _artifact_positive_option(
-                    mapping, "max_candidates_per_node", 5
-                ),
-                "max_evidence_per_candidate": _artifact_positive_option(
-                    mapping, "max_evidence_per_candidate", 5
-                ),
+                "max_candidates_per_node": _artifact_positive_option(mapping, "max_candidates_per_node", 5),
+                "max_evidence_per_candidate": _artifact_positive_option(mapping, "max_evidence_per_candidate", 5),
                 "mapping_config": _config_identity(_mapping_config_path()),
             },
         )
@@ -452,9 +422,7 @@ def _current_artifacts(
     if "external_boundary" in required:
         assert title is not None
         mapping_entry = current["industry_mapping"]
-        boundary_path = storage.external_data_boundary_asset_paths(
-            podcast_id, episode_ref, title
-        ).json_path
+        boundary_path = storage.external_data_boundary_asset_paths(podcast_id, episode_ref, title).json_path
         boundary_raw = _read_bytes(boundary_path, "external boundary")
         boundary = _read_json(boundary_raw, "external boundary")
         _identity_title(boundary, podcast_id, episode_ref, "external boundary")
@@ -469,9 +437,7 @@ def _current_artifacts(
         )
 
     if "fixture" in required:
-        current["fixture"] = _fixture_entry(
-            current["external_boundary"], boundary, boundary_raw=boundary_raw
-        )
+        current["fixture"] = _fixture_entry(current["external_boundary"], boundary, boundary_raw=boundary_raw)
 
     if "stock_lens" in required:
         if stock_query is None:
@@ -495,9 +461,7 @@ def _current_artifacts(
             },
             options={
                 "report_mode": _required_mode(stock, "report_mode", "stock lens"),
-                "max_evidence_items": _artifact_positive_option(
-                    stock, "max_evidence_items", 10
-                ),
+                "max_evidence_items": _artifact_positive_option(stock, "max_evidence_items", 10),
                 "lens_config": _config_identity(_lens_config_path()),
             },
         )
@@ -585,9 +549,7 @@ def _fixture_entry(
     }
 
 
-def _stock_lens_input_set(
-    stock: dict[str, Any], *, expected_inputs: dict[str, str]
-) -> list[dict[str, str]]:
+def _stock_lens_input_set(stock: dict[str, Any], *, expected_inputs: dict[str, str]) -> list[dict[str, str]]:
     """Compare hostile stock metadata against Core-derived inputs before reads."""
 
     expected_roles = {"industry_mapping", "external_boundary"}
@@ -638,10 +600,7 @@ def _is_in_place_fixture_commit(
     old_boundary = existing.get("external_boundary")
     boundary_proof = proofs.get("external_boundary")
     fixture_proof = proofs.get("fixture")
-    if not all(
-        isinstance(value, dict)
-        for value in (boundary, fixture, old_boundary, boundary_proof, fixture_proof)
-    ):
+    if not all(isinstance(value, dict) for value in (boundary, fixture, old_boundary, boundary_proof, fixture_proof)):
         return False
     try:
         checked_boundary = _validated_generation_proof("external_boundary", boundary, boundary_proof)
@@ -682,9 +641,7 @@ def _is_recorded_in_place_fixture_proof(role: str, artifacts: dict[str, Any]) ->
         boundary_proof = boundary_entry.pop("generation_proof")
         fixture_entry = dict(fixture)
         fixture_proof = fixture_entry.pop("generation_proof")
-        checked_boundary = _validated_generation_proof(
-            "external_boundary", boundary_entry, boundary_proof
-        )
+        checked_boundary = _validated_generation_proof("external_boundary", boundary_entry, boundary_proof)
         checked_fixture = _validated_generation_proof("fixture", fixture_entry, fixture_proof)
     except (KeyError, VerifiedResearchReportInputError):
         return False
@@ -704,13 +661,13 @@ def _is_recorded_in_place_fixture_proof(role: str, artifacts: dict[str, Any]) ->
 
 
 def _validated_generation_proof(
-    role: str, entry: dict[str, Any], proof: dict[str, Any],
+    role: str,
+    entry: dict[str, Any],
+    proof: dict[str, Any],
 ) -> dict[str, Any]:
     """Accept only a role-bound controlled-write proof for this exact output."""
 
-    if not isinstance(proof, dict) or set(proof) != {
-        "expected_path", "pre_sha256", "post_sha256", "execution"
-    }:
+    if not isinstance(proof, dict) or set(proof) != {"expected_path", "pre_sha256", "post_sha256", "execution"}:
         raise VerifiedResearchReportInputError("verified report generation proof is invalid")
     expected_path = proof.get("expected_path")
     pre_sha256 = proof.get("pre_sha256")
@@ -719,20 +676,15 @@ def _validated_generation_proof(
     if (
         not isinstance(expected_path, str)
         or expected_path != entry["path"]
-        or pre_sha256 is not None and not _is_sha256(pre_sha256)
+        or pre_sha256 is not None
+        and not _is_sha256(pre_sha256)
         or not isinstance(post_sha256, str)
         or post_sha256 != entry["sha256"]
         or not isinstance(execution, str)
-        or execution not in {
-            "generated", "external_selector", "reused_current_lineage", "regenerated"
-        }
+        or execution not in {"generated", "external_selector", "reused_current_lineage", "regenerated"}
         or (
             execution == "regenerated"
-            and (
-                role != "semantic_summary"
-                or not isinstance(pre_sha256, str)
-                or pre_sha256 == post_sha256
-            )
+            and (role != "semantic_summary" or not isinstance(pre_sha256, str) or pre_sha256 == post_sha256)
         )
     ):
         raise VerifiedResearchReportInputError("verified report generation proof is invalid")
@@ -744,9 +696,7 @@ def _validated_generation_proof(
     }
 
 
-def _generation_proof_matches_current(
-    role: str, entry: dict[str, Any], proof: object
-) -> bool:
+def _generation_proof_matches_current(role: str, entry: dict[str, Any], proof: object) -> bool:
     try:
         _validated_generation_proof(role, entry, proof)  # type: ignore[arg-type]
     except VerifiedResearchReportInputError:
@@ -755,9 +705,7 @@ def _generation_proof_matches_current(
 
 
 def _is_sha256(value: object) -> bool:
-    return isinstance(value, str) and len(value) == 64 and all(
-        character in "0123456789abcdef" for character in value
-    )
+    return isinstance(value, str) and len(value) == 64 and all(character in "0123456789abcdef" for character in value)
 
 
 def _entry(
@@ -796,19 +744,13 @@ def _summary_options(value: dict[str, Any] | None) -> dict[str, Any]:
         "requested_chunk_seconds",
         "requested_max_segments_per_chunk",
     }
-    new_requested_keys = {
-        "requested_reasoning_effort", "requested_read_timeout_seconds"
-    }
+    new_requested_keys = {"requested_reasoning_effort", "requested_read_timeout_seconds"}
     requested_keys = legacy_requested_keys | new_requested_keys
     actual_keys = {"actual_provider", "actual_model"}
     actual_present = actual_keys & set(value)
     supplied_requested = set(value) - actual_present
-    if (
-        actual_present not in (set(), actual_keys)
-        or (
-            supplied_requested != legacy_requested_keys
-            and supplied_requested != requested_keys
-        )
+    if actual_present not in (set(), actual_keys) or (
+        supplied_requested != legacy_requested_keys and supplied_requested != requested_keys
     ):
         raise VerifiedResearchReportInputError("verified report semantic summary lineage options are invalid")
     normalized = {
@@ -820,10 +762,7 @@ def _summary_options(value: dict[str, Any] | None) -> dict[str, Any]:
         normalized.get("summary_mode") != "semantic-llm"
         or not isinstance(normalized.get("requested_provider"), str)
         or not normalized["requested_provider"]
-        or (
-            normalized.get("requested_model") is not None
-            and not isinstance(normalized.get("requested_model"), str)
-        )
+        or (normalized.get("requested_model") is not None and not isinstance(normalized.get("requested_model"), str))
         or (
             normalized.get("requested_base_url_identity_sha256") is not None
             and not _is_sha256(normalized.get("requested_base_url_identity_sha256"))
@@ -865,11 +804,7 @@ def _normalized_current_entry(role: str, entry: dict[str, Any]) -> dict[str, Any
         requested = _summary_options(raw_options)
         normalized["options"] = {
             **requested,
-            **{
-                key: raw_options[key]
-                for key in ("actual_provider", "actual_model")
-                if key in raw_options
-            },
+            **{key: raw_options[key] for key in ("actual_provider", "actual_model") if key in raw_options},
         }
     return normalized
 
@@ -880,22 +815,16 @@ def _semantic_summary_actual_dependency_identity(raw: bytes) -> dict[str, str | 
     try:
         text = raw.decode("utf-8")
     except UnicodeDecodeError as exc:
-        raise VerifiedResearchReportInputError(
-            "verified report semantic summary metadata is invalid"
-        ) from exc
+        raise VerifiedResearchReportInputError("verified report semantic summary metadata is invalid") from exc
     values: dict[str, str | None] = {}
     for key, label in (("actual_provider", "Provider"), ("actual_model", "Model")):
         match = re.search(rf"(?m)^-?\s*{label}:\s*(.*)$", text)
         if match is None:
-            raise VerifiedResearchReportInputError(
-                "verified report semantic summary metadata is invalid"
-            )
+            raise VerifiedResearchReportInputError("verified report semantic summary metadata is invalid")
         value = match.group(1).strip()
         values[key] = value or None
     if values["actual_provider"] is None:
-        raise VerifiedResearchReportInputError(
-            "verified report semantic summary metadata is invalid"
-        )
+        raise VerifiedResearchReportInputError("verified report semantic summary metadata is invalid")
     return values
 
 

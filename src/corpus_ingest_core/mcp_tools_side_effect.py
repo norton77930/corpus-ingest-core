@@ -49,12 +49,8 @@ MAX_SEMANTIC_CHUNK_SECONDS = 1800
 MIN_SEMANTIC_SEGMENTS_PER_CHUNK = 20
 MAX_SEMANTIC_SEGMENTS_PER_CHUNK = 300
 CACHE_STALE_WARNING = "Cache may be stale. Run rebuild_cache to index updated artifacts."
-SEMANTIC_CACHE_STALE_WARNING = (
-    "Cache may be stale. Run rebuild_cache to index updated semantic summary artifact."
-)
-WORKFLOW_CACHE_STALE_WARNING = (
-    "Cache may be stale. Run rebuild_cache to index updated research workflow artifacts."
-)
+SEMANTIC_CACHE_STALE_WARNING = "Cache may be stale. Run rebuild_cache to index updated semantic summary artifact."
+WORKFLOW_CACHE_STALE_WARNING = "Cache may be stale. Run rebuild_cache to index updated research workflow artifacts."
 _SAFE_ENV_VAR_PATTERN = re.compile(r"^[A-Z_][A-Z0-9_]*$")
 
 
@@ -104,9 +100,7 @@ def summarize_episode_extractive(
     """Side-effect tool：需要 confirm=true 才會寫入 deterministic extractive summary。"""
 
     clamped_max_quotes = mcp_runtime._clamp(max_quotes, 0, MAX_QUOTES)
-    clamped_window_seconds = mcp_runtime._clamp(
-        window_seconds, MIN_WINDOW_SECONDS, MAX_WINDOW_SECONDS
-    )
+    clamped_window_seconds = mcp_runtime._clamp(window_seconds, MIN_WINDOW_SECONDS, MAX_WINDOW_SECONDS)
     inputs = {
         "podcast_id": podcast_id,
         "episode_ref": episode_ref,
@@ -258,9 +252,7 @@ def semantic_summarize_episode(
     if validation_error is not None:
         return validation_error
 
-    clamped_chunk_seconds = mcp_runtime._clamp(
-        chunk_seconds, MIN_SEMANTIC_CHUNK_SECONDS, MAX_SEMANTIC_CHUNK_SECONDS
-    )
+    clamped_chunk_seconds = mcp_runtime._clamp(chunk_seconds, MIN_SEMANTIC_CHUNK_SECONDS, MAX_SEMANTIC_CHUNK_SECONDS)
     clamped_max_segments = mcp_runtime._clamp(
         max_segments_per_chunk,
         MIN_SEMANTIC_SEGMENTS_PER_CHUNK,
@@ -284,9 +276,7 @@ def semantic_summarize_episode(
             tool_name="semantic_summarize_episode",
             action="Generate semantic LLM summary from an existing transcript.",
             inputs=inputs,
-            writes=[
-                f"data/summaries/{podcast_id}/{episode_ref}__{{safe_title_slug}}.semantic.md"
-            ],
+            writes=[f"data/summaries/{podcast_id}/{episode_ref}__{{safe_title_slug}}.semantic.md"],
             risks=[
                 "Calls an external LLM API",
                 "May incur API costs",
@@ -304,15 +294,12 @@ def semantic_summarize_episode(
             chunk_seconds=clamped_chunk_seconds,
             max_segments_per_chunk=clamped_max_segments,
         )
-        response["next_step"] = (
-            "Call this tool again with confirm=true and the exact api_cost_ack string to execute."
-        )
+        response["next_step"] = "Call this tool again with confirm=true and the exact api_cost_ack string to execute."
         return response
 
     if api_cost_ack != SEMANTIC_API_COST_ACK:
         return tool_error(
-            "semantic_summarize_episode requires exact api_cost_ack: "
-            f"{SEMANTIC_API_COST_ACK}",
+            f"semantic_summarize_episode requires exact api_cost_ack: {SEMANTIC_API_COST_ACK}",
             "ValueError",
         )
 
@@ -381,8 +368,7 @@ def run_research_workflow(
     requires_llm_ack = include_semantic_summary or include_stock_lens_synthesis
     if confirm and requires_llm_ack and api_cost_ack != SEMANTIC_API_COST_ACK:
         return tool_error(
-            "run_research_workflow requires exact api_cost_ack for external LLM steps: "
-            f"{SEMANTIC_API_COST_ACK}",
+            f"run_research_workflow requires exact api_cost_ack for external LLM steps: {SEMANTIC_API_COST_ACK}",
             "ValueError",
         )
 
@@ -492,9 +478,7 @@ def _workflow_dry_run_call(
         action="Run the local research workflow from existing podcast artifacts.",
         inputs=inputs,
         writes=result.planned_writes,
-        risks=_unique(
-            risk for step in result.steps for risk in step.risks
-        ),
+        risks=_unique(risk for step in result.steps for risk in step.risks),
         requires_confirmation=result.requires_confirmation,
     )
     response["workflow_status"] = result.workflow_status
@@ -510,11 +494,7 @@ def _workflow_dry_run_call(
         response["required_acknowledgement"] = result.required_acknowledgement
     response["next_step"] = (
         "Call this tool again with confirm=true"
-        + (
-            " and the exact api_cost_ack string"
-            if result.requires_api_cost_ack
-            else ""
-        )
+        + (" and the exact api_cost_ack string" if result.requires_api_cost_ack else "")
         + " to execute."
     )
     return response
@@ -543,9 +523,7 @@ def _audio_asset_to_safe_dict(audio_asset: AudioAsset) -> dict[str, Any]:
     return data
 
 
-def _validate_transcription_options(
-    model: str, device: str, compute_type: str
-) -> dict[str, Any] | None:
+def _validate_transcription_options(model: str, device: str, compute_type: str) -> dict[str, Any] | None:
     if model not in ALLOWED_TRANSCRIPTION_MODELS:
         return tool_error(f"unsupported model: {model}", "ValueError")
     if device not in ALLOWED_TRANSCRIPTION_DEVICES:
@@ -614,14 +592,11 @@ def _semantic_transcript_preview(
         }
 
     estimated_by_segments = (
-        math.ceil(validation.segment_count / max_segments_per_chunk)
-        if validation.segment_count > 0
-        else 0
+        math.ceil(validation.segment_count / max_segments_per_chunk) if validation.segment_count > 0 else 0
     )
     estimated_by_time = (
         math.ceil(validation.last_segment_end_seconds / chunk_seconds)
-        if validation.last_segment_end_seconds is not None
-        and validation.last_segment_end_seconds > 0
+        if validation.last_segment_end_seconds is not None and validation.last_segment_end_seconds > 0
         else 0
     )
     return {

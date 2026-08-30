@@ -52,7 +52,11 @@ jobs:
       # Lint and types run before the suite: they take seconds and fail for
       # reasons a nine-minute test run would only obscure.
       - name: Lint
-        run: python -m ruff check src tests scripts
+        run: python -m ruff check src tests scripts examples
+
+      # --check, not a reformat. CI reports drift; it never rewrites the tree.
+      - name: Format
+        run: python -m ruff format --check src tests scripts examples
 
       # Twice, on purpose. mypy analyses the platform it runs on, so a
       # Windows-only branch guarded by sys.platform is simply pruned there --

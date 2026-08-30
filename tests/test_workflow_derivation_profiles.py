@@ -13,10 +13,7 @@ def test_bundle_keys_are_05_and_06_only():
 
 
 def test_prompt_forbids_transcript_and_unnamed_tools():
-    text = (
-        WORKFLOW_DERIVATION_PROFILE.system_message
-        + WORKFLOW_DERIVATION_PROFILE.user_instructions
-    )
+    text = WORKFLOW_DERIVATION_PROFILE.system_message + WORKFLOW_DERIVATION_PROFILE.user_instructions
     assert "逐字稿" in text
     assert "清單以外" in text or "context 沒有" in text
     assert "投資" in text

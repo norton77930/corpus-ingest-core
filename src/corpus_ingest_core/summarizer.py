@@ -39,9 +39,7 @@ def summarize_episode(
     if validation.status == "missing":
         raise TranscriptMissingError(f"找不到逐字稿 JSON：{podcast_id}/{episode_ref}")
     if validation.status == "incomplete_outputs":
-        raise TranscriptMissingError(
-            f"逐字稿輸出不完整：{'; '.join(validation.problems)}"
-        )
+        raise TranscriptMissingError(f"逐字稿輸出不完整：{'; '.join(validation.problems)}")
     if validation.status == "corrupt":
         raise TranscriptParseError(f"逐字稿 JSON 格式錯誤：{'; '.join(validation.problems)}")
     if validation.status == "partial" and not allow_partial:

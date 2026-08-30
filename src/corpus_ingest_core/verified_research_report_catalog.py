@@ -184,28 +184,38 @@ def _exact_bundle_evidence(locator: dict[str, str]) -> _ExactBundleEvidence:
     if entries is None:
         return _evidence(locator, "invalid", checks)
     checks["exact_file_set"] = True
-    manifest_snapshot = _secure_snapshot(root, bundle_dir.path / "manifest.json", entries["manifest.json"], max_bytes=_MAX_MANIFEST_BYTES)
+    manifest_snapshot = _secure_snapshot(
+        root, bundle_dir.path / "manifest.json", entries["manifest.json"], max_bytes=_MAX_MANIFEST_BYTES
+    )
     manifest = _manifest_from_snapshot(manifest_snapshot)
     if manifest is None:
         return _evidence(locator, "invalid", checks)
     checks["manifest_schema"] = manifest.get("schema_version") == REPORT_SCHEMA_VERSION
     checks["identity"] = _manifest_identity_is_consistent(manifest, locator)
     summary = _safe_projection(manifest, **locator)
-    report_json_snapshot = _secure_snapshot(root, bundle_dir.path / "report.json", entries["report.json"], max_bytes=_MAX_REPORT_BYTES)
-    report_markdown_snapshot = _secure_snapshot(root, bundle_dir.path / "report.md", entries["report.md"], max_bytes=_MAX_REPORT_BYTES)
-    checks["report_json_integrity"] = _report_json_is_consistent(report_json_snapshot.raw if report_json_snapshot is not None else None, manifest, locator)
-    checks["report_markdown_integrity"] = _file_matches_manifest(report_markdown_snapshot.raw if report_markdown_snapshot is not None else None, manifest, "report.md")
+    report_json_snapshot = _secure_snapshot(
+        root, bundle_dir.path / "report.json", entries["report.json"], max_bytes=_MAX_REPORT_BYTES
+    )
+    report_markdown_snapshot = _secure_snapshot(
+        root, bundle_dir.path / "report.md", entries["report.md"], max_bytes=_MAX_REPORT_BYTES
+    )
+    checks["report_json_integrity"] = _report_json_is_consistent(
+        report_json_snapshot.raw if report_json_snapshot is not None else None, manifest, locator
+    )
+    checks["report_markdown_integrity"] = _file_matches_manifest(
+        report_markdown_snapshot.raw if report_markdown_snapshot is not None else None, manifest, "report.md"
+    )
     if not _exact_bundle_entries_match(root, bundle_dir.path, entries):
         checks["exact_file_set"] = False
-    if not _verified_directory_chain_is_stable(
-        root, (root_directory, podcast_dir, episode_dir, bundle_dir)
-    ):
+    if not _verified_directory_chain_is_stable(root, (root_directory, podcast_dir, episode_dir, bundle_dir)):
         checks["containment"] = False
     return _evidence(locator, "valid" if all(checks.values()) else "invalid", checks, manifest, summary)
 
 
 def _evidence(
-    locator: dict[str, str], status: str, checks: dict[str, bool],
+    locator: dict[str, str],
+    status: str,
+    checks: dict[str, bool],
     manifest: dict[str, Any] | None = None,
     safe_metadata: VerifiedResearchReportCatalogItem | None = None,
 ) -> _ExactBundleEvidence:
@@ -281,11 +291,7 @@ def _catalog_root() -> tuple[_CatalogRoot | None, str]:
         return None, "missing"
     except OSError:
         return None, "invalid"
-    if (
-        _is_reparse(root, root_stat)
-        or not stat.S_ISDIR(root_stat.st_mode)
-        or not _safe_root_ancestor_chain(root)
-    ):
+    if _is_reparse(root, root_stat) or not stat.S_ISDIR(root_stat.st_mode) or not _safe_root_ancestor_chain(root):
         return None, "invalid"
     return _CatalogRoot(root, _path_identity(root_stat)), "available"
 
@@ -343,8 +349,7 @@ def _safe_regular_file(root: _CatalogRoot, candidate: Path) -> bool:
 def _is_reparse(path: Path, path_stat: Any) -> bool:
     del path
     return stat.S_ISLNK(path_stat.st_mode) or bool(
-        getattr(path_stat, "st_file_attributes", 0)
-        & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+        getattr(path_stat, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
     )
 
 
@@ -588,10 +593,7 @@ def _path_text_is_contained(root: Path, candidate: Path) -> bool:
 
 
 def _is_reparse_stat(path_stat: Any) -> bool:
-    return bool(
-        getattr(path_stat, "st_file_attributes", 0)
-        & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
-    )
+    return bool(getattr(path_stat, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0))
 
 
 def _path_identity(path_stat: Any) -> _PathIdentity:
@@ -693,9 +695,7 @@ def _inspection(
         checks=checks,
         source_currentness_status="not_evaluated",
         safe_metadata=safe_metadata,
-        not_investment_advice=(
-            safe_metadata.not_investment_advice if safe_metadata is not None else None
-        ),
+        not_investment_advice=(safe_metadata.not_investment_advice if safe_metadata is not None else None),
     )
 
 
@@ -752,9 +752,7 @@ def _verified_directory_is_stable(root: _CatalogRoot, directory: _VerifiedDirect
     )
 
 
-def _verified_directory_chain_is_stable(
-    root: _CatalogRoot, directories: tuple[_VerifiedDirectory, ...]
-) -> bool:
+def _verified_directory_chain_is_stable(root: _CatalogRoot, directories: tuple[_VerifiedDirectory, ...]) -> bool:
     return all(_verified_directory_is_stable(root, directory) for directory in directories)
 
 
@@ -803,10 +801,7 @@ def _file_matches_manifest(raw: bytes | None, manifest: dict[str, Any], filename
         or isinstance(expected.get("size_bytes"), bool)
     ):
         return False
-    return (
-        expected["size_bytes"] == len(raw)
-        and expected["sha256"] == hashlib.sha256(raw).hexdigest()
-    )
+    return expected["size_bytes"] == len(raw) and expected["sha256"] == hashlib.sha256(raw).hexdigest()
 
 
 def _matches_query(item: VerifiedResearchReportCatalogItem, query: str) -> bool:
@@ -822,9 +817,10 @@ def _matches_query(item: VerifiedResearchReportCatalogItem, query: str) -> bool:
 
 
 def _normalize_query(query: str) -> str:
-    if not isinstance(query, str) or len(query) > _MAX_QUERY_LENGTH or any(
-        unicodedata.category(character).startswith("C") and not character.isspace()
-        for character in query
+    if (
+        not isinstance(query, str)
+        or len(query) > _MAX_QUERY_LENGTH
+        or any(unicodedata.category(character).startswith("C") and not character.isspace() for character in query)
     ):
         raise VerifiedResearchReportCatalogInputError("catalog query is invalid")
     normalized = " ".join(unicodedata.normalize("NFKC", query).casefold().split())
@@ -838,10 +834,7 @@ def _is_safe_podcast_id(value: str) -> bool:
 
 
 def _is_safe_episode_ref(value: str) -> bool:
-    return (
-        storage.is_safe_episode_ref(value)
-        and value.casefold() not in _RESERVED_EPISODE_REFS
-    )
+    return storage.is_safe_episode_ref(value) and value.casefold() not in _RESERVED_EPISODE_REFS
 
 
 def _validate_required_identifier(value: str, field: str) -> str:

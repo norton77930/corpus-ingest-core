@@ -45,18 +45,13 @@ ALLOWED_FAKE_SECRETS = {
     "sk-test-secret",
     "sk-test-secret-value",
 }
-PRIVATE_ENDPOINT_PATTERN = re.compile(
-    r"https?://(?:10\.|192\.168\.|172\.(?:1[6-9]|2[0-9]|3[01])\.)"
-)
+PRIVATE_ENDPOINT_PATTERN = re.compile(r"https?://(?:10\.|192\.168\.|172\.(?:1[6-9]|2[0-9]|3[01])\.)")
+
 
 def _scannable_files() -> list[Path]:
     files = []
     for current_root, directories, filenames in os.walk(ROOT):
-        directories[:] = sorted(
-            directory
-            for directory in directories
-            if directory not in EXCLUDED_DIR_NAMES
-        )
+        directories[:] = sorted(directory for directory in directories if directory not in EXCLUDED_DIR_NAMES)
         for filename in sorted(filenames):
             path = Path(current_root) / filename
             relative = path.relative_to(ROOT)
@@ -153,9 +148,7 @@ def test_no_secret_like_api_key_in_committable_files():
                 if match.group(0) in ALLOWED_FAKE_SECRETS:
                     continue
                 # Truncate the match so this guard never reprints a full key.
-                violations.append(
-                    f"{path.relative_to(ROOT).as_posix()}:{line_number}: {match.group(0)[:8]}..."
-                )
+                violations.append(f"{path.relative_to(ROOT).as_posix()}:{line_number}: {match.group(0)[:8]}...")
     assert not violations, (
         "secret-like API key values found in committable files "
         f"(rotate the key and replace with placeholders): {violations}"
@@ -170,9 +163,7 @@ def test_no_private_internal_endpoint_in_committable_files():
             continue
         for line_number, line in enumerate(text.splitlines(), start=1):
             if PRIVATE_ENDPOINT_PATTERN.search(line):
-                violations.append(
-                    f"{path.relative_to(ROOT).as_posix()}:{line_number}: {line.strip()[:80]}"
-                )
+                violations.append(f"{path.relative_to(ROOT).as_posix()}:{line_number}: {line.strip()[:80]}")
     assert not violations, (
         "private/internal network endpoints found in committable files "
         f"(use placeholders such as https://api.example.com/v1): {violations}"

@@ -21,9 +21,7 @@ from .verified_research_report import (
 
 _RESERVED_SELECTORS = frozenset({"latest", "next"})
 # Closed patterns owned by lineage/assembly error text (spaces form of role names).
-_ROLE_LINEAGE_RE = re.compile(
-    r"^verified report (?P<role>.+?) lineage is stale or invalid$"
-)
+_ROLE_LINEAGE_RE = re.compile(r"^verified report (?P<role>.+?) lineage is stale or invalid$")
 _EXACT_GATE_MESSAGES: dict[str, tuple[str, Literal["missing", "stale", "gate"]]] = {
     "verified report lineage is missing or untrusted": ("lineage", "missing"),
     "verified report lineage is invalid": ("lineage", "gate"),
@@ -104,12 +102,8 @@ def run_episode_verified_research_report_workflow(
     if not isinstance(confirm, bool):
         raise EpisodeVerifiedResearchReportWorkflowRunnerFailedError("confirm is invalid")
     if not isinstance(include_fixture_verification, bool):
-        raise EpisodeVerifiedResearchReportWorkflowRunnerFailedError(
-            "include_fixture_verification is invalid"
-        )
-    if stock_query is not None and (
-        not isinstance(stock_query, str) or not stock_query.strip()
-    ):
+        raise EpisodeVerifiedResearchReportWorkflowRunnerFailedError("include_fixture_verification is invalid")
+    if stock_query is not None and (not isinstance(stock_query, str) or not stock_query.strip()):
         raise EpisodeVerifiedResearchReportWorkflowRunnerFailedError("stock_query is invalid")
     normalized_stock = stock_query.strip() if isinstance(stock_query, str) else None
 
@@ -149,8 +143,7 @@ def run_episode_verified_research_report_workflow(
         publish_readiness = ReadinessSnapshot(
             ready=False,
             assembly=None,
-            issues=_issues_from_input_error(str(exc))
-            or [ReadinessIssue(role="publication", kind="gate")],
+            issues=_issues_from_input_error(str(exc)) or [ReadinessIssue(role="publication", kind="gate")],
         )
         return _build_result(
             podcast_id=podcast_id,
@@ -213,9 +206,7 @@ def _inspect_readiness(
             include_fixture_verification=include_fixture_verification,
         )
     except VerifiedResearchReportInputError as exc:
-        issues = _issues_from_input_error(str(exc)) or [
-            ReadinessIssue(role="readiness", kind="gate")
-        ]
+        issues = _issues_from_input_error(str(exc)) or [ReadinessIssue(role="readiness", kind="gate")]
         return ReadinessSnapshot(ready=False, assembly=None, issues=issues)
     except Exception as exc:  # pragma: no cover - defensive bounded gate
         return ReadinessSnapshot(
@@ -295,14 +286,10 @@ def _build_result(
 
 def _normalize_episode_ref(episode_ref: str) -> str:
     if not isinstance(episode_ref, str) or not episode_ref.strip():
-        raise EpisodeVerifiedResearchReportWorkflowRunnerFailedError(
-            "episode_ref is invalid"
-        )
+        raise EpisodeVerifiedResearchReportWorkflowRunnerFailedError("episode_ref is invalid")
     normalized = episode_ref.strip()
     if normalized.casefold() in _RESERVED_SELECTORS:
-        raise EpisodeVerifiedResearchReportWorkflowRunnerFailedError(
-            "episode_ref rejects reserved latest selectors"
-        )
+        raise EpisodeVerifiedResearchReportWorkflowRunnerFailedError("episode_ref rejects reserved latest selectors")
     return normalized
 
 

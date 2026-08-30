@@ -12,9 +12,7 @@ from corpus_ingest_core.corpus_episode_workflow_runner import result_to_dict
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Preview or run the next safe corpus episode workflow stage."
-    )
+    parser = argparse.ArgumentParser(description="Preview or run the next safe corpus episode workflow stage.")
     parser.add_argument("--podcast", required=True, dest="podcast_id")
     parser.add_argument("--episode", default="latest", dest="episode_ref")
     parser.add_argument("--stage", dest="stage")

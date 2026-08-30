@@ -195,9 +195,7 @@ def _transcript_asset(
     )
 
 
-def test_preview_corpus_local_transcription_from_in_memory_plan(
-    monkeypatch, tmp_path
-):
+def test_preview_corpus_local_transcription_from_in_memory_plan(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_local_transcription_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.models import (
@@ -209,9 +207,7 @@ def test_preview_corpus_local_transcription_from_in_memory_plan(
     audio_path = storage.AUDIO_DIR / "gooaye" / "EP677__Alpha.mp3"
     audio_path.parent.mkdir(parents=True, exist_ok=True)
     audio_path.write_bytes(b"mp3")
-    payload = _plan_payload(
-        [_episode_payload("EP677", title="Alpha", audio_path=str(audio_path))]
-    )
+    payload = _plan_payload([_episode_payload("EP677", title="Alpha", audio_path=str(audio_path))])
     paths = storage.corpus_remediation_plan_asset_paths("gooaye")
     plan_result = CorpusRemediationPlanResult(
         podcast_id="gooaye",
@@ -244,9 +240,7 @@ def test_preview_corpus_local_transcription_from_in_memory_plan(
     assert not paths.markdown_path.exists()
 
 
-def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(
-    monkeypatch, tmp_path
-):
+def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_local_transcription_runner as runner
     from corpus_ingest_core import storage
 
@@ -293,7 +287,6 @@ def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(
     assert result.report_markdown_path is None
     assert not report_paths.json_path.exists()
     assert not report_paths.markdown_path.exists()
-
 
 
 def test_corpus_local_transcription_run_asset_paths_contract():
@@ -364,9 +357,7 @@ def test_corpus_local_transcription_public_result_contract_exports(tmp_path):
 
     assert asdict(result)["filters"]["episode_ref"] == "EP672"
     assert result.counts.selected_count == 1
-    assert CorpusLocalTranscriptionRunnerFailedError.__name__ == (
-        "CorpusLocalTranscriptionRunnerFailedError"
-    )
+    assert CorpusLocalTranscriptionRunnerFailedError.__name__ == ("CorpusLocalTranscriptionRunnerFailedError")
     assert callable(run_corpus_local_transcription)
 
 
@@ -440,8 +431,12 @@ def test_dry_run_selects_only_local_audio_transcript_missing(monkeypatch, tmp_pa
                 _episode_payload("EP001", audio_path=str(selected_audio)),
                 _episode_payload("EP002", audio_status="missing", audio_path=None),
                 _episode_payload("EP003", audio_path=str(missing_path)),
-                _episode_payload("EP004", audio_path=str(selected_audio), transcript_status="valid", transcript_action_status=None),
-                _episode_payload("EP005", audio_path=str(selected_audio), transcript_status="empty", transcript_action_status=None),
+                _episode_payload(
+                    "EP004", audio_path=str(selected_audio), transcript_status="valid", transcript_action_status=None
+                ),
+                _episode_payload(
+                    "EP005", audio_path=str(selected_audio), transcript_status="empty", transcript_action_status=None
+                ),
             ]
         ),
     )
@@ -508,9 +503,7 @@ def test_dry_run_skips_unsafe_transcript_states_and_other_families(monkeypatch, 
     assert "stock_lens_synthesis" in reasons
 
 
-def test_dry_run_no_transcription_download_model_load_or_report_write(
-    monkeypatch, tmp_path
-):
+def test_dry_run_no_transcription_download_model_load_or_report_write(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_local_transcription_runner as runner
     from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
@@ -563,9 +556,7 @@ def test_dry_run_is_deterministic_and_has_no_generated_at(monkeypatch, tmp_path)
     assert "generated_at" not in text
 
 
-def test_run_corpus_local_transcription_cli_dry_run_outputs_json(
-    monkeypatch, capsys, tmp_path
-):
+def test_run_corpus_local_transcription_cli_dry_run_outputs_json(monkeypatch, capsys, tmp_path):
     from scripts import run_corpus_local_transcription as cli
 
     from corpus_ingest_core.models import (
@@ -621,9 +612,7 @@ def test_run_corpus_local_transcription_cli_dry_run_outputs_json(
     assert payload["skipped_count"] == 1
 
 
-def test_confirmed_execution_rejects_missing_episode_before_transcription(
-    monkeypatch, tmp_path
-):
+def test_confirmed_execution_rejects_missing_episode_before_transcription(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_local_transcription_runner as runner
     from corpus_ingest_core import CorpusLocalTranscriptionRunnerFailedError
     from corpus_ingest_core.corpus_local_transcription_runner import (
@@ -646,9 +635,7 @@ def test_confirmed_execution_rejects_missing_episode_before_transcription(
 
 
 @pytest.mark.parametrize("episode_ref", ["", "   "])
-def test_confirmed_execution_rejects_blank_episode_before_transcription(
-    monkeypatch, tmp_path, episode_ref
-):
+def test_confirmed_execution_rejects_blank_episode_before_transcription(monkeypatch, tmp_path, episode_ref):
     import corpus_ingest_core.corpus_local_transcription_runner as runner
     from corpus_ingest_core import CorpusLocalTranscriptionRunnerFailedError
     from corpus_ingest_core.corpus_local_transcription_runner import (
@@ -665,9 +652,7 @@ def test_confirmed_execution_rejects_blank_episode_before_transcription(
     assert calls == []
 
 
-def test_confirmed_execution_records_absent_requested_episode_as_rejected(
-    monkeypatch, tmp_path
-):
+def test_confirmed_execution_records_absent_requested_episode_as_rejected(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_local_transcription_runner as runner
     from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
@@ -693,9 +678,7 @@ def test_confirmed_execution_records_absent_requested_episode_as_rejected(
     assert result.rows[-1].reason == "requested episode is not present in refreshed remediation plan"
 
 
-def test_confirmed_execution_records_non_eligible_episode_without_transcription(
-    monkeypatch, tmp_path
-):
+def test_confirmed_execution_records_non_eligible_episode_without_transcription(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_local_transcription_runner as runner
     from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
@@ -724,9 +707,7 @@ def test_confirmed_execution_records_non_eligible_episode_without_transcription(
     assert result.report_json_path.exists()
 
 
-def test_dry_run_planned_writes_match_local_transcriber_output_paths(
-    monkeypatch, tmp_path
-):
+def test_dry_run_planned_writes_match_local_transcriber_output_paths(monkeypatch, tmp_path):
     from corpus_ingest_core import storage
     from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
@@ -759,9 +740,7 @@ def test_dry_run_planned_writes_match_local_transcriber_output_paths(
     ]
 
 
-def test_confirmed_execution_passes_explicit_audio_path_and_force_false(
-    monkeypatch, tmp_path
-):
+def test_confirmed_execution_passes_explicit_audio_path_and_force_false(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_local_transcription_runner as runner
     from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
@@ -829,9 +808,7 @@ def test_confirmed_execution_never_calls_download_or_shell(monkeypatch, tmp_path
 
     result = run_corpus_local_transcription("gooaye", confirm=True, episode_ref="EP001")
 
-    source = Path("src/corpus_ingest_core/corpus_local_transcription_runner.py").read_text(
-        encoding="utf-8"
-    )
+    source = Path("src/corpus_ingest_core/corpus_local_transcription_runner.py").read_text(encoding="utf-8")
     assert "download_audio" not in source
     assert "subprocess" not in source
     assert result.counts.executed_count == 1
@@ -1016,9 +993,7 @@ def test_transcription_failure_records_metadata_without_traceback(monkeypatch, t
     assert "Traceback" not in combined
 
 
-def test_outputs_do_not_leak_raw_transcript_prompt_llm_secret_or_traceback(
-    monkeypatch, tmp_path, capsys
-):
+def test_outputs_do_not_leak_raw_transcript_prompt_llm_secret_or_traceback(monkeypatch, tmp_path, capsys):
     from scripts import run_corpus_local_transcription as cli
 
     import corpus_ingest_core.corpus_local_transcription_runner as runner
@@ -1047,14 +1022,12 @@ def test_outputs_do_not_leak_raw_transcript_prompt_llm_secret_or_traceback(
                         "episode_ref": "EP001",
                         "artifact_family": "transcript",
                         "message": "TOKEN=abc123 bearer xyz provider_config=hidden",
-                    }
+                    },
                 ],
             )
         ]
     )
-    payload["episodes"][0]["artifact_status"]["transcript"]["body"] = (
-        "raw transcript sentinel must not leak"
-    )
+    payload["episodes"][0]["artifact_status"]["transcript"]["body"] = "raw transcript sentinel must not leak"
     payload["episodes"][0]["artifact_status"]["semantic_summary"] = {
         "status": "missing",
         "body": "prompt text sentinel raw LLM output sentinel",
@@ -1092,9 +1065,7 @@ def test_outputs_do_not_leak_raw_transcript_prompt_llm_secret_or_traceback(
         assert forbidden not in combined
 
 
-def test_boundary_guard_excludes_forbidden_surfaces_without_execution(
-    monkeypatch, tmp_path
-):
+def test_boundary_guard_excludes_forbidden_surfaces_without_execution(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_local_transcription_runner as runner
     from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
@@ -1126,17 +1097,16 @@ def test_boundary_guard_excludes_forbidden_surfaces_without_execution(
     monkeypatch.setattr(
         runner,
         "transcribe_episode",
-        lambda podcast_id, episode_ref, **kwargs: calls.append("transcribe")
-        or _transcript_asset(tmp_path, episode_ref=episode_ref),
+        lambda podcast_id, episode_ref, **kwargs: (
+            calls.append("transcribe") or _transcript_asset(tmp_path, episode_ref=episode_ref)
+        ),
     )
 
     result = run_corpus_local_transcription("gooaye", confirm=True, episode_ref="EP001")
 
     assert calls == ["transcribe"]
     assert result.counts.executed_count == 1
-    source = Path("src/corpus_ingest_core/corpus_local_transcription_runner.py").read_text(
-        encoding="utf-8"
-    )
+    source = Path("src/corpus_ingest_core/corpus_local_transcription_runner.py").read_text(encoding="utf-8")
     forbidden_fragments = [
         "from .cache import",
         "from .downloader import",
@@ -1154,9 +1124,7 @@ def test_boundary_guard_excludes_forbidden_surfaces_without_execution(
         assert fragment not in source
 
 
-def test_confirmed_writes_manual_cache_stale_warning_without_rebuild(
-    monkeypatch, tmp_path
-):
+def test_confirmed_writes_manual_cache_stale_warning_without_rebuild(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_local_transcription_runner as runner
     from corpus_ingest_core.corpus_local_transcription_runner import (
         run_corpus_local_transcription,
@@ -1179,9 +1147,7 @@ def test_confirmed_writes_manual_cache_stale_warning_without_rebuild(
     result = run_corpus_local_transcription("gooaye", confirm=True, episode_ref="EP001")
 
     assert any("cache" in warning.message.lower() for warning in result.warnings)
-    source = Path("src/corpus_ingest_core/corpus_local_transcription_runner.py").read_text(
-        encoding="utf-8"
-    )
+    source = Path("src/corpus_ingest_core/corpus_local_transcription_runner.py").read_text(encoding="utf-8")
     assert "rebuild_cache(" not in source
 
 

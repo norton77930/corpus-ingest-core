@@ -21,9 +21,7 @@ from .errors import PodcastIngestCoreError
 from .mcp_runtime import mcp, tool_action_plan, tool_error
 
 WORKFLOW_DERIVATION_CACHE_STALE_WARNING = workflow_derivation.CACHE_STALE_WARNING
-NOT_INVESTMENT_ADVICE = (
-    "Research framework only: no buy/sell/hold, target price, or guaranteed return."
-)
+NOT_INVESTMENT_ADVICE = "Research framework only: no buy/sell/hold, target price, or guaranteed return."
 
 
 @mcp.tool()
@@ -65,10 +63,8 @@ def derive_workflow_bundle(
             writes=result.planned_writes,
             risks=[
                 "Preview constructs no provider and writes nothing",
-                "Confirmed execution calls an external LLM and incurs cost; it "
-                "requires the exact api_cost_ack",
-                "The operator workflow context is read from the repository default; "
-                "this tool accepts no path",
+                "Confirmed execution calls an external LLM and incurs cost; it requires the exact api_cost_ack",
+                "The operator workflow context is read from the repository default; this tool accepts no path",
                 WORKFLOW_DERIVATION_CACHE_STALE_WARNING,
                 NOT_INVESTMENT_ADVICE,
             ],

@@ -46,6 +46,4 @@ def test_guest_download_asks_for_audio_and_never_needs_a_muxer(tmp_path: Path) -
 
 def test_assert_guest_options_requires_ignoreconfig() -> None:
     with pytest.raises(VideoAcquireFailedError, match="ignoreconfig"):
-        video_acquire._assert_guest_options(
-            {"quiet": True, "no_warnings": True, "skip_download": True}
-        )
+        video_acquire._assert_guest_options({"quiet": True, "no_warnings": True, "skip_download": True})

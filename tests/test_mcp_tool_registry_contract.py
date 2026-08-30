@@ -39,9 +39,7 @@ LEGACY_SIDE_EFFECT_TOOLS = {
 COMPLETION_WORKFLOW_TOOL = "run_corpus_episode_completion_workflow"
 LATEST_DETERMINISTIC_WORKFLOW_TOOL = "run_corpus_latest_episode_deterministic_workflow"
 VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL = "run_latest_episode_verified_research_report_workflow"
-EPISODE_VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL = (
-    "run_episode_verified_research_report_workflow"
-)
+EPISODE_VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL = "run_episode_verified_research_report_workflow"
 VERIFIED_RESEARCH_REPORT_CATALOG_TOOL = "query_verified_research_report_catalog"
 SOURCE_REVALIDATION_TOOL = "revalidate_verified_research_report_sources"
 COVERAGE_TOOL = "query_verified_research_report_coverage"
@@ -126,7 +124,7 @@ def test_workflow_tools_are_appended_after_the_preserved_twelve_tool_order():
         STOCK_LENS_TOOL,
         X_VIDEO_INGEST_TOOL,
         YOUTUBE_VIDEO_INGEST_TOOL,
-    WORKFLOW_DERIVATION_TOOL,
+        WORKFLOW_DERIVATION_TOOL,
     ]
 
 
@@ -138,21 +136,153 @@ def test_tools_one_through_twenty_one_preserve_exact_signature_order_and_default
         "list_episodes": [("podcast_id", "gooaye"), ("limit", 10)],
         "get_episode": [("podcast_id", "gooaye"), ("episode_ref", "latest")],
         "validate_transcript": [("podcast_id", "gooaye"), ("episode_ref", "latest")],
-        "search_transcripts": [("query", required), ("podcast_id", "gooaye"), ("limit", 10), ("search_mode", "auto"), ("context_segments", 0), ("case_sensitive", False)],
-        "search_mentions": [("query", required), ("podcast_id", "gooaye"), ("mention_type", None), ("limit", 10), ("case_sensitive", False)],
+        "search_transcripts": [
+            ("query", required),
+            ("podcast_id", "gooaye"),
+            ("limit", 10),
+            ("search_mode", "auto"),
+            ("context_segments", 0),
+            ("case_sensitive", False),
+        ],
+        "search_mentions": [
+            ("query", required),
+            ("podcast_id", "gooaye"),
+            ("mention_type", None),
+            ("limit", 10),
+            ("case_sensitive", False),
+        ],
         "rebuild_cache": [("podcast_id", None), ("force", False)],
         "download_audio": [("podcast_id", "gooaye"), ("episode_ref", "latest"), ("confirm", False), ("force", False)],
-        "summarize_episode_extractive": [("podcast_id", "gooaye"), ("episode_ref", "latest"), ("confirm", False), ("force", False), ("allow_partial", False), ("max_quotes", 10), ("window_seconds", 300)],
-        "extract_mentions": [("podcast_id", "gooaye"), ("episode_ref", "latest"), ("confirm", False), ("force", False), ("allow_partial", False), ("max_evidence_per_mention", 5)],
-        "transcribe_episode": [("podcast_id", "gooaye"), ("episode_ref", "latest"), ("confirm", False), ("model", "tiny"), ("device", "cpu"), ("compute_type", "int8"), ("vad_filter", False), ("force", False)],
-        "semantic_summarize_episode": [("podcast_id", "gooaye"), ("episode_ref", "latest"), ("confirm", False), ("api_cost_ack", ""), ("provider", "openai-compatible"), ("model", None), ("base_url", None), ("api_key_env", "OPENAI_API_KEY"), ("force", False), ("chunk_seconds", 600), ("max_segments_per_chunk", 120), ("allow_partial", False)],
-        "run_research_workflow": [("podcast_id", "gooaye"), ("episode_ref", "latest"), ("stock_query", None), ("confirm", False), ("force", False), ("allow_partial", False), ("include_semantic_summary", False), ("include_stock_lens_synthesis", False), ("api_cost_ack", ""), ("semantic_provider", "openai-compatible"), ("semantic_model", None), ("semantic_base_url", None), ("semantic_api_key_env", "OPENAI_API_KEY"), ("semantic_chunk_seconds", 600), ("semantic_max_segments_per_chunk", 120), ("synthesis_provider", "openai-compatible"), ("synthesis_model", None), ("synthesis_base_url", None), ("synthesis_api_key_env", "OPENAI_API_KEY"), ("synthesis_max_prompt_chars", 24000), ("max_evidence_per_mention", 5), ("report_window_seconds", 300), ("max_evidence_per_section", 5), ("max_candidates_per_node", 5), ("max_evidence_per_candidate", 5), ("max_stock_evidence_items", 10)],
-        "run_corpus_episode_completion_workflow": [("podcast_id", required), ("episode_ref", "latest"), ("action", "next"), ("confirm", False), ("api_cost_ack", ""), ("transcription_model", None), ("transcription_device", "cpu"), ("transcription_compute_type", "int8"), ("transcription_vad_filter", False), ("semantic_provider", "openai-compatible"), ("semantic_model", None), ("semantic_base_url", None), ("semantic_api_key_env", "OPENAI_API_KEY"), ("semantic_chunk_seconds", 600), ("semantic_max_segments_per_chunk", 120)],
-        "run_corpus_latest_episode_deterministic_workflow": [("podcast_id", required), ("confirm", False), ("transcription_model", None), ("transcription_device", "cpu"), ("transcription_compute_type", "int8"), ("transcription_vad_filter", False)],
-        "run_latest_episode_verified_research_report_workflow": [("podcast_id", required), ("confirm", False), ("expected_episode_ref", None), ("api_cost_ack", ""), ("stock_query", None), ("include_fixture_verification", False), ("transcription_model", None), ("transcription_device", "cpu"), ("transcription_compute_type", "int8"), ("transcription_vad_filter", False), ("semantic_provider", "openai-compatible"), ("semantic_model", None), ("semantic_chunk_seconds", 600), ("semantic_max_segments_per_chunk", 120)],
-        "run_episode_verified_research_report_workflow": [("podcast_id", required), ("episode_ref", required), ("confirm", False), ("stock_query", None), ("include_fixture_verification", False)],
-        "query_verified_research_report_catalog": [("action", "list"), ("podcast_id", None), ("episode_ref", None), ("source_digest", None), ("query", None), ("limit", 50)],
-        "revalidate_verified_research_report_sources": [("podcast_id", required), ("episode_ref", required), ("source_digest", required)],
+        "summarize_episode_extractive": [
+            ("podcast_id", "gooaye"),
+            ("episode_ref", "latest"),
+            ("confirm", False),
+            ("force", False),
+            ("allow_partial", False),
+            ("max_quotes", 10),
+            ("window_seconds", 300),
+        ],
+        "extract_mentions": [
+            ("podcast_id", "gooaye"),
+            ("episode_ref", "latest"),
+            ("confirm", False),
+            ("force", False),
+            ("allow_partial", False),
+            ("max_evidence_per_mention", 5),
+        ],
+        "transcribe_episode": [
+            ("podcast_id", "gooaye"),
+            ("episode_ref", "latest"),
+            ("confirm", False),
+            ("model", "tiny"),
+            ("device", "cpu"),
+            ("compute_type", "int8"),
+            ("vad_filter", False),
+            ("force", False),
+        ],
+        "semantic_summarize_episode": [
+            ("podcast_id", "gooaye"),
+            ("episode_ref", "latest"),
+            ("confirm", False),
+            ("api_cost_ack", ""),
+            ("provider", "openai-compatible"),
+            ("model", None),
+            ("base_url", None),
+            ("api_key_env", "OPENAI_API_KEY"),
+            ("force", False),
+            ("chunk_seconds", 600),
+            ("max_segments_per_chunk", 120),
+            ("allow_partial", False),
+        ],
+        "run_research_workflow": [
+            ("podcast_id", "gooaye"),
+            ("episode_ref", "latest"),
+            ("stock_query", None),
+            ("confirm", False),
+            ("force", False),
+            ("allow_partial", False),
+            ("include_semantic_summary", False),
+            ("include_stock_lens_synthesis", False),
+            ("api_cost_ack", ""),
+            ("semantic_provider", "openai-compatible"),
+            ("semantic_model", None),
+            ("semantic_base_url", None),
+            ("semantic_api_key_env", "OPENAI_API_KEY"),
+            ("semantic_chunk_seconds", 600),
+            ("semantic_max_segments_per_chunk", 120),
+            ("synthesis_provider", "openai-compatible"),
+            ("synthesis_model", None),
+            ("synthesis_base_url", None),
+            ("synthesis_api_key_env", "OPENAI_API_KEY"),
+            ("synthesis_max_prompt_chars", 24000),
+            ("max_evidence_per_mention", 5),
+            ("report_window_seconds", 300),
+            ("max_evidence_per_section", 5),
+            ("max_candidates_per_node", 5),
+            ("max_evidence_per_candidate", 5),
+            ("max_stock_evidence_items", 10),
+        ],
+        "run_corpus_episode_completion_workflow": [
+            ("podcast_id", required),
+            ("episode_ref", "latest"),
+            ("action", "next"),
+            ("confirm", False),
+            ("api_cost_ack", ""),
+            ("transcription_model", None),
+            ("transcription_device", "cpu"),
+            ("transcription_compute_type", "int8"),
+            ("transcription_vad_filter", False),
+            ("semantic_provider", "openai-compatible"),
+            ("semantic_model", None),
+            ("semantic_base_url", None),
+            ("semantic_api_key_env", "OPENAI_API_KEY"),
+            ("semantic_chunk_seconds", 600),
+            ("semantic_max_segments_per_chunk", 120),
+        ],
+        "run_corpus_latest_episode_deterministic_workflow": [
+            ("podcast_id", required),
+            ("confirm", False),
+            ("transcription_model", None),
+            ("transcription_device", "cpu"),
+            ("transcription_compute_type", "int8"),
+            ("transcription_vad_filter", False),
+        ],
+        "run_latest_episode_verified_research_report_workflow": [
+            ("podcast_id", required),
+            ("confirm", False),
+            ("expected_episode_ref", None),
+            ("api_cost_ack", ""),
+            ("stock_query", None),
+            ("include_fixture_verification", False),
+            ("transcription_model", None),
+            ("transcription_device", "cpu"),
+            ("transcription_compute_type", "int8"),
+            ("transcription_vad_filter", False),
+            ("semantic_provider", "openai-compatible"),
+            ("semantic_model", None),
+            ("semantic_chunk_seconds", 600),
+            ("semantic_max_segments_per_chunk", 120),
+        ],
+        "run_episode_verified_research_report_workflow": [
+            ("podcast_id", required),
+            ("episode_ref", required),
+            ("confirm", False),
+            ("stock_query", None),
+            ("include_fixture_verification", False),
+        ],
+        "query_verified_research_report_catalog": [
+            ("action", "list"),
+            ("podcast_id", None),
+            ("episode_ref", None),
+            ("source_digest", None),
+            ("query", None),
+            ("limit", 50),
+        ],
+        "revalidate_verified_research_report_sources": [
+            ("podcast_id", required),
+            ("episode_ref", required),
+            ("source_digest", required),
+        ],
         "query_verified_research_report_coverage": [("podcast_id", required), ("has_bundle", None), ("limit", 50)],
         "suggest_historical_verified_report_next_step": [("podcast_id", required), ("episode_ref", required)],
         "list_verified_report_gap_backlog": [("podcast_id", required), ("limit", 50)],
@@ -174,9 +304,7 @@ def test_side_effect_tools_default_to_dry_run_confirm_false():
     for name in sorted(SIDE_EFFECT_TOOLS):
         signature = inspect.signature(getattr(mcp_server, name))
         assert "confirm" in signature.parameters, f"{name} must take a confirm flag"
-        assert signature.parameters["confirm"].default is False, (
-            f"{name} must default to confirm=False (dry-run first)"
-        )
+        assert signature.parameters["confirm"].default is False, f"{name} must default to confirm=False (dry-run first)"
 
 
 def test_success_envelope_shape():
@@ -259,9 +387,7 @@ def test_each_client_setup_doc_locks_the_current_registry_contract():
         assert "現在有 exact 13 個 reviewed tools" not in setup
         assert "current registry has exactly 17" not in setup
 
-    framework = (ROOT / "docs" / "ai-development-framework.md").read_text(
-        encoding="utf-8"
-    )
+    framework = (ROOT / "docs" / "ai-development-framework.md").read_text(encoding="utf-8")
     assert "恰 14 個" not in framework
     assert "恰 25 個" in framework
 
@@ -326,9 +452,7 @@ def test_completion_workflow_tool_mirrors_the_bounded_core_schema():
 def test_latest_deterministic_workflow_tool_exposes_only_local_inputs():
     from corpus_ingest_core import mcp_server
 
-    signature = inspect.signature(
-        mcp_server.run_corpus_latest_episode_deterministic_workflow
-    )
+    signature = inspect.signature(mcp_server.run_corpus_latest_episode_deterministic_workflow)
     assert list(signature.parameters) == [
         "podcast_id",
         "confirm",

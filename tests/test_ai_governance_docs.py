@@ -169,6 +169,7 @@ def test_readme_agents_and_verification_matrix_cross_link_governance_docs():
     assert "git diff --check" in matrix
     assert "test_ai_governance_docs.py" in matrix
 
+
 def test_015_docs_preserve_llm_secret_mcp_and_cache_boundaries():
     root = Path(__file__).resolve().parents[1]
     combined = "\n".join(
@@ -195,12 +196,7 @@ def test_016_docs_preserve_human_controlled_mcp_and_skill_boundaries():
     readiness = _read(DOCS / "mcp-readiness.md")
     tool_eval = _read(DOCS / "mcp-tool-use-eval.md")
     prompts = _read(DOCS / "mcp-eval-prompts.md")
-    quickstart = _read(
-        ROOT
-        / "specs"
-        / "016-corpus-episode-completion-workflow-runner"
-        / "quickstart.md"
-    )
+    quickstart = _read(ROOT / "specs" / "016-corpus-episode-completion-workflow-runner" / "quickstart.md")
 
     assert "run_corpus_episode_completion_workflow" in codex_setup
     assert "corpus-episode-completion" in codex_setup

@@ -18,9 +18,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 
 CLAIM_PATTERNS = (
-    re.compile(
-        r"exact(?:ly)?\s+(\d+)\s+(?:reviewed\s+|MCP\s+)*tools", re.IGNORECASE
-    ),
+    re.compile(r"exact(?:ly)?\s+(\d+)\s+(?:reviewed\s+|MCP\s+)*tools", re.IGNORECASE),
     re.compile(r"恰(?:好)?\s*(?:暴露\s*)?(\d+)\s*個"),
     # "22 個 MCP tools" and "tool registry 完整（22 個）" both survived three
     # tool additions in docs/install-and-porting.md because neither carries
@@ -92,28 +90,20 @@ def test_every_tool_count_claim_is_current_or_marked_historical():
             # stages, 欄位...) out of the tool-count check.
             if "tool" not in lowered and "mcp" not in lowered and "工具" not in line:
                 continue
-            counts = [
-                int(match.group(1))
-                for pattern in CLAIM_PATTERNS
-                for match in pattern.finditer(line)
-            ]
+            counts = [int(match.group(1)) for pattern in CLAIM_PATTERNS for match in pattern.finditer(line)]
             if not counts:
                 continue
             marker_text = lowered
             for false_positive in MARKER_FALSE_POSITIVES:
                 marker_text = marker_text.replace(false_positive, " ")
-            marked_historical = any(
-                marker in marker_text for marker in HISTORICAL_MARKERS
-            )
+            marked_historical = any(marker in marker_text for marker in HISTORICAL_MARKERS)
             for count in counts:
                 if count == expected or marked_historical:
                     continue
                 problems.append(
-                    f"{path.relative_to(ROOT)}:{line_number}: "
-                    f"claims {count} tools, live registry has {expected}"
+                    f"{path.relative_to(ROOT)}:{line_number}: claims {count} tools, live registry has {expected}"
                 )
     assert not problems, (
         "tool-count claims drifted from the live registry — update the count "
-        "or mark the line as historical (was/had/before/landed/當時/...): "
-        + "; ".join(problems)
+        "or mark the line as historical (was/had/before/landed/當時/...): " + "; ".join(problems)
     )

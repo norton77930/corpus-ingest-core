@@ -90,9 +90,7 @@ def test_review_research_llm_smoke_generates_passed_report(monkeypatch, tmp_path
     assert "Quality Checks" in markdown
 
 
-def test_review_research_llm_smoke_accepts_reviewed_semantic_boundary(
-    monkeypatch, tmp_path
-):
+def test_review_research_llm_smoke_accepts_reviewed_semantic_boundary(monkeypatch, tmp_path):
     import corpus_ingest_core.research_llm_smoke_review as review
 
     _write_synthesis_artifacts(
@@ -116,13 +114,8 @@ def test_review_research_llm_smoke_accepts_reviewed_semantic_boundary(
 
     payload = json.loads(result.review_json_path.read_text(encoding="utf-8"))
     assert result.review_status == "passed"
-    assert any(
-        check["name"] == "input_boundary" and check["status"] == "pass"
-        for check in payload["checks"]
-    )
-    assert payload["llm_input_boundary"] == (
-        "phase-6f-stock-lens-json-plus-reviewed-semantic-summary"
-    )
+    assert any(check["name"] == "input_boundary" and check["status"] == "pass" for check in payload["checks"])
+    assert payload["llm_input_boundary"] == ("phase-6f-stock-lens-json-plus-reviewed-semantic-summary")
 
 
 @pytest.mark.parametrize(
@@ -155,9 +148,7 @@ def test_review_research_llm_smoke_accepts_reviewed_semantic_boundary(
         },
     ],
 )
-def test_review_research_llm_smoke_fails_inconsistent_semantic_boundary(
-    monkeypatch, tmp_path, payload_extra
-):
+def test_review_research_llm_smoke_fails_inconsistent_semantic_boundary(monkeypatch, tmp_path, payload_extra):
     import corpus_ingest_core.research_llm_smoke_review as review
 
     _write_synthesis_artifacts(monkeypatch, tmp_path, payload_extra=payload_extra)
@@ -167,10 +158,7 @@ def test_review_research_llm_smoke_fails_inconsistent_semantic_boundary(
 
     payload = json.loads(result.review_json_path.read_text(encoding="utf-8"))
     assert result.review_status == "failed"
-    assert any(
-        check["name"] == "input_boundary" and check["status"] == "fail"
-        for check in payload["checks"]
-    )
+    assert any(check["name"] == "input_boundary" and check["status"] == "fail" for check in payload["checks"])
 
 
 def test_review_research_llm_smoke_blocks_missing_artifacts(monkeypatch, tmp_path):
@@ -211,9 +199,7 @@ def test_review_research_llm_smoke_blocks_corrupt_json(monkeypatch, tmp_path):
         ("This has a guaranteed return of 20%.", "prohibited_advice"),
     ],
 )
-def test_review_research_llm_smoke_fails_safety_issues(
-    monkeypatch, tmp_path, markdown_extra, expected_check
-):
+def test_review_research_llm_smoke_fails_safety_issues(monkeypatch, tmp_path, markdown_extra, expected_check):
     import corpus_ingest_core.research_llm_smoke_review as review
 
     _write_synthesis_artifacts(monkeypatch, tmp_path, markdown_extra=markdown_extra)
@@ -223,15 +209,10 @@ def test_review_research_llm_smoke_fails_safety_issues(
 
     payload = json.loads(result.review_json_path.read_text(encoding="utf-8"))
     assert result.review_status == "failed"
-    assert any(
-        check["name"] == expected_check and check["status"] == "fail"
-        for check in payload["checks"]
-    )
+    assert any(check["name"] == expected_check and check["status"] == "fail" for check in payload["checks"])
 
 
-def test_review_research_llm_smoke_warns_when_external_status_context_is_missing(
-    monkeypatch, tmp_path
-):
+def test_review_research_llm_smoke_warns_when_external_status_context_is_missing(monkeypatch, tmp_path):
     import corpus_ingest_core.research_llm_smoke_review as review
 
     _write_synthesis_artifacts(
@@ -245,10 +226,7 @@ def test_review_research_llm_smoke_warns_when_external_status_context_is_missing
 
     payload = json.loads(result.review_json_path.read_text(encoding="utf-8"))
     assert result.review_status == "passed"
-    assert any(
-        check["name"] == "external_status_boundary" and check["status"] == "warn"
-        for check in payload["checks"]
-    )
+    assert any(check["name"] == "external_status_boundary" and check["status"] == "warn" for check in payload["checks"])
 
 
 def test_review_research_llm_smoke_cli_parses_arguments(monkeypatch, tmp_path, capsys):

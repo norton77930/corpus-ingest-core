@@ -222,9 +222,7 @@ def test_confirm_writes_seed_wav_and_reuses_transcriber(monkeypatch, tmp_data_di
     sibling.parent.mkdir(parents=True, exist_ok=True)
     sibling.write_text("untouched", encoding="utf-8")
 
-    monkeypatch.setattr(
-        youtube_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO)
-    )
+    monkeypatch.setattr(youtube_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO))
     monkeypatch.setattr(
         youtube_video_ingest,
         "_download_video",
@@ -256,9 +254,7 @@ def test_confirm_writes_seed_wav_and_reuses_transcriber(monkeypatch, tmp_data_di
     assert result.not_investment_advice is True
     assert result.report_json_path is not None
     assert Path(result.report_json_path).is_file()
-    expected_audio = storage.audio_asset_path(
-        "yt-raytar", _VIDEO_ID, result.title, ".wav"
-    )
+    expected_audio = storage.audio_asset_path("yt-raytar", _VIDEO_ID, result.title, ".wav")
     assert expected_audio.exists()
     assert not list((tmp_data_dirs / "audio").rglob("*.mp4"))
     seed_path = storage.corpus_episode_seed_asset_path("yt-raytar", _VIDEO_ID)
@@ -296,9 +292,7 @@ def test_work_dir_alt_case_under_data_is_refused(monkeypatch, tmp_data_dirs: Pat
         pytest.skip("filesystem is case-sensitive; there is no alias to refuse")
     forbidden = swapped / "scratch"
     with pytest.raises(YoutubeVideoIngestFailedError, match="data"):
-        youtube_video_ingest.run_youtube_video_ingest(
-            _WATCH_URL, confirm=True, work_dir=forbidden
-        )
+        youtube_video_ingest.run_youtube_video_ingest(_WATCH_URL, confirm=True, work_dir=forbidden)
 
 
 def test_work_dir_under_data_is_refused_before_download(monkeypatch, tmp_data_dirs: Path) -> None:
@@ -313,6 +307,4 @@ def test_work_dir_under_data_is_refused_before_download(monkeypatch, tmp_data_di
     forbidden = storage.DATA_DIR / "scratch"
     forbidden.mkdir(parents=True, exist_ok=True)
     with pytest.raises(YoutubeVideoIngestFailedError, match="data"):
-        youtube_video_ingest.run_youtube_video_ingest(
-            _WATCH_URL, confirm=True, work_dir=forbidden
-        )
+        youtube_video_ingest.run_youtube_video_ingest(_WATCH_URL, confirm=True, work_dir=forbidden)

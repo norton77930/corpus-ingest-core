@@ -13,9 +13,7 @@ ALLOWED_PROFILE_FIELDS = {"provider", "model", "base_url", "api_key_env", "unava
 SECRET_FIELD_TOKENS = ("api_key", "token", "secret")
 
 
-def load_llm_profile(
-    profile_id: str, path: str | Path = DEFAULT_LLM_PROFILES_CONFIG_PATH
-) -> LLMProfile:
+def load_llm_profile(profile_id: str, path: str | Path = DEFAULT_LLM_PROFILES_CONFIG_PATH) -> LLMProfile:
     """Load an LLM provider profile without reading API key values."""
 
     normalized_profile_id = _required_text(profile_id, "profile_id")
@@ -39,9 +37,7 @@ def load_llm_profile(
     _reject_secret_like_fields(raw_profile)
     unsupported_fields = sorted(set(raw_profile) - ALLOWED_PROFILE_FIELDS)
     if unsupported_fields:
-        raise LLMProviderConfigError(
-            f"LLM profile has unsupported fields: {', '.join(unsupported_fields)}"
-        )
+        raise LLMProviderConfigError(f"LLM profile has unsupported fields: {', '.join(unsupported_fields)}")
 
     if _profile_is_unavailable(raw_profile):
         available = sorted(
@@ -53,9 +49,7 @@ def load_llm_profile(
             and not _profile_is_unavailable(body)
         )
         suffix = f" Available profiles: {', '.join(available)}." if available else ""
-        raise LLMProviderConfigError(
-            f"LLM profile unavailable: {normalized_profile_id}.{suffix}"
-        )
+        raise LLMProviderConfigError(f"LLM profile unavailable: {normalized_profile_id}.{suffix}")
 
     provider = _required_text(raw_profile.get("provider"), "provider")
     if provider != "openai-compatible":
@@ -85,9 +79,7 @@ def _reject_secret_like_fields(profile: dict[str, Any]) -> None:
         if normalized == "api_key_env":
             continue
         if any(token in normalized for token in SECRET_FIELD_TOKENS):
-            raise LLMProviderConfigError(
-                f"LLM profile must not contain secret-like field: {field_name}"
-            )
+            raise LLMProviderConfigError(f"LLM profile must not contain secret-like field: {field_name}")
 
 
 def _required_text(value: Any, field_name: str) -> str:

@@ -5,8 +5,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_PATH = ROOT / ".agents" / "skills" / "corpus-episode-completion" / "SKILL.md"
 EXPECTED_DESCRIPTION = (
-    "Safely preview and advance one podcast episode by one explicit "
-    "MCP-managed action with human approval."
+    "Safely preview and advance one podcast episode by one explicit MCP-managed action with human approval."
 )
 
 
@@ -45,14 +44,10 @@ def test_completion_skill_never_uses_an_automatic_or_local_fallback_path():
     skill = _skill_text()
     lowered = skill.casefold()
 
-    assert (
-        "do not start another preview or action unless the user makes a new request"
-        in lowered
-    )
+    assert "do not start another preview or action unless the user makes a new request" in lowered
     assert (
         "do not use a terminal, cli, another side-effect tool, cron/scheduler, retry, "
-        "or autonomous loop as a fallback"
-        in lowered
+        "or autonomous loop as a fallback" in lowered
     )
     for client_specific_or_command_marker in (
         "codex-only",

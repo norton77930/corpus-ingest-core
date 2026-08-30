@@ -72,9 +72,7 @@ def _build_corpus_index_snapshot(podcast_id: str) -> _CorpusIndexSnapshot:
         "index_mode": INDEX_MODE,
         "source_scope": SOURCE_SCOPE,
         "episode_count": len(rows),
-        "artifact_family_counts": {
-            family: asdict(counts) for family, counts in family_counts.items()
-        },
+        "artifact_family_counts": {family: asdict(counts) for family, counts in family_counts.items()},
         "warning_count": warning_count,
         "episodes": [asdict(row) for row in rows],
         "not_investment_advice": True,
@@ -124,9 +122,7 @@ def _discover_episode_refs(podcast_id: str) -> list[str]:
     return sorted(refs)
 
 
-def _episode_refs_from_directory(
-    directory: Path, predicate: Callable[[Path], bool]
-) -> set[str]:
+def _episode_refs_from_directory(directory: Path, predicate: Callable[[Path], bool]) -> set[str]:
     if not directory.exists():
         return set()
     refs: set[str] = set()
@@ -178,11 +174,7 @@ def _build_episode_row(podcast_id: str, episode_ref: str) -> CorpusEpisodeRow:
         "semantic_review": _semantic_review_status(
             podcast_id,
             episode_ref,
-            semantic_summary_path=(
-                Path(semantic_summary_path)
-                if isinstance(semantic_summary_path, str)
-                else None
-            ),
+            semantic_summary_path=(Path(semantic_summary_path) if isinstance(semantic_summary_path, str) else None),
         ),
         "mentions": _mentions_status(podcast_id, episode_ref),
         "episode_intelligence": _episode_intelligence_status(podcast_id, episode_ref),
@@ -192,16 +184,11 @@ def _build_episode_row(podcast_id: str, episode_ref: str) -> CorpusEpisodeRow:
         "workflow_derivation": _workflow_derivation_status(podcast_id, episode_ref),
     }
     missing_artifacts = [
-        family
-        for family in SUPPORTED_ARTIFACT_FAMILIES
-        if artifact_status[family]["status"] == "missing"
+        family for family in SUPPORTED_ARTIFACT_FAMILIES if artifact_status[family]["status"] == "missing"
     ]
     warnings: list[str] = []
     for family in SUPPORTED_ARTIFACT_FAMILIES:
-        warnings.extend(
-            f"{family}: {warning}"
-            for warning in artifact_status[family].get("warnings", [])
-        )
+        warnings.extend(f"{family}: {warning}" for warning in artifact_status[family].get("warnings", []))
     return CorpusEpisodeRow(
         podcast_id=podcast_id,
         episode_ref=episode_ref,
@@ -358,9 +345,7 @@ def _summary_status(
         candidates = sorted(summary_dir.glob(f"{episode_ref}__*.semantic.md"))
     else:
         candidates = [
-            path
-            for path in sorted(summary_dir.glob(f"{episode_ref}__*.md"))
-            if not path.name.endswith(".semantic.md")
+            path for path in sorted(summary_dir.glob(f"{episode_ref}__*.md")) if not path.name.endswith(".semantic.md")
         ]
     if not candidates:
         missing = {**_missing_status(), "exists": False, "path": None}
@@ -379,8 +364,7 @@ def _summary_status(
                 "readability_status": "missing",
                 "candidate_count": len(candidates),
                 "warnings": [
-                    "noncanonical semantic summary candidates ignored; "
-                    "transcript-title-bound summary is missing"
+                    "noncanonical semantic summary candidates ignored; transcript-title-bound summary is missing"
                 ],
                 "warning_count": 1,
             }
@@ -539,9 +523,7 @@ def _study_guide_status(podcast_id: str, episode_ref: str) -> dict[str, Any]:
 def _mentions_status(podcast_id: str, episode_ref: str) -> dict[str, Any]:
     return _json_artifact_status(
         family="mentions",
-        candidates=_standard_suffix_candidates(
-            storage.MENTIONS_DIR / podcast_id, episode_ref, ".mentions.json"
-        ),
+        candidates=_standard_suffix_candidates(storage.MENTIONS_DIR / podcast_id, episode_ref, ".mentions.json"),
         markdown_suffix=".mentions.md",
         metadata_fields=("title", "mention_count"),
         array_count_fields=("mentions",),
@@ -557,17 +539,13 @@ def _mentions_status(podcast_id: str, episode_ref: str) -> dict[str, Any]:
 def _episode_intelligence_status(podcast_id: str, episode_ref: str) -> dict[str, Any]:
     return _json_artifact_status(
         family="episode_intelligence",
-        candidates=_standard_suffix_candidates(
-            storage.REPORTS_DIR / podcast_id, episode_ref, ".intelligence.json"
-        ),
+        candidates=_standard_suffix_candidates(storage.REPORTS_DIR / podcast_id, episode_ref, ".intelligence.json"),
         markdown_suffix=".intelligence.md",
         status_key="report_status",
         metadata_fields=("title", "report_status", "transcript_validation", "segment_count"),
         fields=lambda payload: {
             "report_status": _safe_text(payload.get("report_status"), "available"),
-            "transcript_status": _nested_text(
-                payload, ("transcript_validation", "status"), "unknown"
-            ),
+            "transcript_status": _nested_text(payload, ("transcript_validation", "status"), "unknown"),
             "segment_count": _safe_int(
                 payload.get("segment_count"),
                 default=_nested_int(payload, ("transcript_validation", "segment_count"), 0),
@@ -579,9 +557,7 @@ def _episode_intelligence_status(podcast_id: str, episode_ref: str) -> dict[str,
 def _industry_mapping_status(podcast_id: str, episode_ref: str) -> dict[str, Any]:
     return _json_artifact_status(
         family="industry_mapping",
-        candidates=_standard_suffix_candidates(
-            storage.MAPPINGS_DIR / podcast_id, episode_ref, ".industry-map.json"
-        ),
+        candidates=_standard_suffix_candidates(storage.MAPPINGS_DIR / podcast_id, episode_ref, ".industry-map.json"),
         markdown_suffix=".industry-map.md",
         status_key="mapping_status",
         metadata_fields=(
@@ -640,9 +616,7 @@ def _semantic_review_status(
     *,
     semantic_summary_path: Path | None = None,
 ) -> dict[str, Any]:
-    candidates, rejected, ignored_warnings = _semantic_review_candidates(
-        podcast_id, episode_ref
-    )
+    candidates, rejected, ignored_warnings = _semantic_review_candidates(podcast_id, episode_ref)
     if not candidates and not rejected:
         return {
             **_missing_status(),
@@ -674,15 +648,14 @@ def _semantic_review_status(
     metadata, unreadable_warning = _load_json_metadata(
         inspection_path,
         fields=(
-            "check_count", "failed_check_count", "warning_count", "blocked_check_count",
+            "check_count",
+            "failed_check_count",
+            "warning_count",
+            "blocked_check_count",
         ),
         array_count_fields=("checks",),
     )
-    payload = (
-        payload
-        if isinstance(payload, dict)
-        else metadata if isinstance(metadata, dict) else {}
-    )
+    payload = payload if isinstance(payload, dict) else metadata if isinstance(metadata, dict) else {}
     warnings = [*ignored_warnings]
     if unreadable_warning is not None:
         warnings.append(unreadable_warning)
@@ -699,6 +672,7 @@ def _semantic_review_status(
         "warnings": warnings,
         "paths": {"json": str(inspection_path), "markdown": str(inspection_path.with_suffix(".md"))},
     }
+
 
 def _json_artifact_status(
     *,
@@ -766,9 +740,7 @@ def _standard_candidates(
     return [
         path
         for path in sorted(directory.iterdir())
-        if path.is_file()
-        and predicate(path)
-        and _episode_ref_from_artifact_name(path) == episode_ref
+        if path.is_file() and predicate(path) and _episode_ref_from_artifact_name(path) == episode_ref
     ]
 
 
@@ -776,9 +748,7 @@ def _standard_json_candidates(directory: Path, episode_ref: str) -> list[Path]:
     return _standard_candidates(directory, episode_ref, lambda path: path.suffix == ".json")
 
 
-def _standard_suffix_candidates(
-    directory: Path, episode_ref: str, suffix: str
-) -> list[Path]:
+def _standard_suffix_candidates(directory: Path, episode_ref: str, suffix: str) -> list[Path]:
     return _standard_candidates(
         directory,
         episode_ref,
@@ -786,27 +756,15 @@ def _standard_suffix_candidates(
     )
 
 
-def _semantic_review_candidates(
-    podcast_id: str, episode_ref: str
-) -> tuple[list[Path], list[Path], list[str]]:
-    candidates, rejected = semantic_review_candidates(
-        SEMANTIC_REVIEW_REPORTS_DIR, podcast_id, episode_ref
-    )
-    return candidates, rejected, [
-        f"ignored non-timestamped semantic review candidate: {path}"
-        for path in rejected
-    ]
+def _semantic_review_candidates(podcast_id: str, episode_ref: str) -> tuple[list[Path], list[Path], list[str]]:
+    candidates, rejected = semantic_review_candidates(SEMANTIC_REVIEW_REPORTS_DIR, podcast_id, episode_ref)
+    return candidates, rejected, [f"ignored non-timestamped semantic review candidate: {path}" for path in rejected]
 
 
 def _duplicate_warnings(family: str, candidates: list[Path], selected: Path) -> list[str]:
     if len(candidates) <= 1:
         return []
-    return [
-        (
-            f"duplicate {family} candidates found; selected {selected}; "
-            f"candidate_count={len(candidates)}"
-        )
-    ]
+    return [(f"duplicate {family} candidates found; selected {selected}; candidate_count={len(candidates)}")]
 
 
 def _paired_markdown_path(json_path: Path, markdown_suffix: str) -> Path:
@@ -873,10 +831,7 @@ def _episode_title(
 def _artifact_family_counts(
     rows: list[CorpusEpisodeRow],
 ) -> dict[str, CorpusArtifactFamilyCounts]:
-    counts = {
-        family: {"available": 0, "missing": 0, "unreadable": 0}
-        for family in SUPPORTED_ARTIFACT_FAMILIES
-    }
+    counts = {family: {"available": 0, "missing": 0, "unreadable": 0} for family in SUPPORTED_ARTIFACT_FAMILIES}
     for row in rows:
         for family in SUPPORTED_ARTIFACT_FAMILIES:
             status = row.artifact_status[family]["status"]
@@ -887,10 +842,7 @@ def _artifact_family_counts(
             else:
                 bucket = "available"
             counts[family][bucket] += 1
-    return {
-        family: CorpusArtifactFamilyCounts(**family_counts)
-        for family, family_counts in counts.items()
-    }
+    return {family: CorpusArtifactFamilyCounts(**family_counts) for family, family_counts in counts.items()}
 
 
 def _render_markdown(payload: dict[str, Any]) -> str:
@@ -911,9 +863,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     ]
     for family in SUPPORTED_ARTIFACT_FAMILIES:
         counts = payload["artifact_family_counts"][family]
-        lines.append(
-            f"| {family} | {counts['available']} | {counts['missing']} | {counts['unreadable']} |"
-        )
+        lines.append(f"| {family} | {counts['available']} | {counts['missing']} | {counts['unreadable']} |")
 
     lines.extend(
         [
@@ -933,32 +883,18 @@ def _render_markdown(payload: dict[str, Any]) -> str:
                 [
                     _markdown_cell(row["episode_ref"]),
                     _markdown_cell(row["title"]),
-                    _markdown_cell(
-                        status["transcript"].get(
-                            "validation_status", status["transcript"]["status"]
-                        )
-                    ),
+                    _markdown_cell(status["transcript"].get("validation_status", status["transcript"]["status"])),
                     _markdown_cell(status["semantic_summary"]["status"]),
-                    _markdown_cell(
-                        status["semantic_review"].get(
-                            "review_status", status["semantic_review"]["status"]
-                        )
-                    ),
+                    _markdown_cell(status["semantic_review"].get("review_status", status["semantic_review"]["status"])),
                     _markdown_cell(status["mentions"].get("mention_count", 0)),
                     _markdown_cell(
-                        status["episode_intelligence"].get(
-                            "report_status", status["episode_intelligence"]["status"]
-                        )
+                        status["episode_intelligence"].get("report_status", status["episode_intelligence"]["status"])
                     ),
                     _markdown_cell(
-                        status["industry_mapping"].get(
-                            "mapping_status", status["industry_mapping"]["status"]
-                        )
+                        status["industry_mapping"].get("mapping_status", status["industry_mapping"]["status"])
                     ),
                     _markdown_cell(
-                        status["external_boundary"].get(
-                            "boundary_status", status["external_boundary"]["status"]
-                        )
+                        status["external_boundary"].get("boundary_status", status["external_boundary"]["status"])
                     ),
                     _markdown_cell(missing),
                     _markdown_cell(len(row["warnings"])),

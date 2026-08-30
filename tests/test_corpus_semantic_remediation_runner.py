@@ -46,9 +46,7 @@ def _tree_manifest(root: Path) -> dict[str, tuple[str, int, int]]:
     return manifest
 
 
-def test_red_private_regeneration_executor_rejects_missing_authority_before_summarizer(
-    monkeypatch, tmp_path
-):
+def test_red_private_regeneration_executor_rejects_missing_authority_before_summarizer(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     from corpus_ingest_core import CorpusSemanticRemediationRunnerFailedError
 
@@ -79,9 +77,7 @@ def test_red_private_regeneration_executor_rejects_missing_authority_before_summ
     assert calls == []
 
 
-def test_private_regeneration_capability_rejects_wrong_episode_and_reuse(
-    monkeypatch, tmp_path
-):
+def test_private_regeneration_capability_rejects_wrong_episode_and_reuse(monkeypatch, tmp_path):
     from types import SimpleNamespace
 
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
@@ -125,9 +121,7 @@ def test_private_regeneration_capability_rejects_wrong_episode_and_reuse(
                 "gooaye", "EP701", authorization=wrong_episode, **common
             )
         authorization = _mint_controlled_regeneration_capability("gooaye", "EP700")
-        runner._run_controlled_semantic_summary_regeneration(
-            "gooaye", "EP700", authorization=authorization, **common
-        )
+        runner._run_controlled_semantic_summary_regeneration("gooaye", "EP700", authorization=authorization, **common)
         with pytest.raises(CorpusSemanticRemediationRunnerFailedError):
             runner._run_controlled_semantic_summary_regeneration(
                 "gooaye", "EP700", authorization=authorization, **common
@@ -227,9 +221,7 @@ def test_semantic_remediation_public_signature_and_exports():
     assert signature.parameters["chunk_seconds"].default == 600
     assert signature.parameters["max_segments_per_chunk"].default == 120
     assert signature.parameters["progress_callback"].default is None
-    assert core.CorpusSemanticRemediationRunnerFailedError.__name__ == (
-        "CorpusSemanticRemediationRunnerFailedError"
-    )
+    assert core.CorpusSemanticRemediationRunnerFailedError.__name__ == ("CorpusSemanticRemediationRunnerFailedError")
 
 
 def test_semantic_remediation_model_field_contracts():
@@ -304,20 +296,14 @@ def test_semantic_remediation_model_field_contracts():
     ]
 
 
-def test_semantic_remediation_storage_paths_do_not_create_directories(
-    monkeypatch, tmp_path: Path
-):
+def test_semantic_remediation_storage_paths_do_not_create_directories(monkeypatch, tmp_path: Path):
     from corpus_ingest_core import storage
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     paths = storage.corpus_semantic_remediation_run_asset_paths("gooaye")
 
-    assert paths.json_path == (
-        tmp_path / "corpus" / "gooaye" / "corpus-semantic-remediation-run.json"
-    )
-    assert paths.markdown_path == (
-        tmp_path / "corpus" / "gooaye" / "corpus-semantic-remediation-run.md"
-    )
+    assert paths.json_path == (tmp_path / "corpus" / "gooaye" / "corpus-semantic-remediation-run.json")
+    assert paths.markdown_path == (tmp_path / "corpus" / "gooaye" / "corpus-semantic-remediation-run.md")
     assert not (tmp_path / "corpus").exists()
     assert _tree_manifest(tmp_path) == {}
 
@@ -328,9 +314,7 @@ def test_semantic_preview_from_snapshot_reuses_supplied_payload(monkeypatch):
     def unexpected_builder(*args, **kwargs):
         pytest.fail("snapshot preview called a corpus builder")
 
-    monkeypatch.setattr(
-        runner, "_build_corpus_index_snapshot", unexpected_builder, raising=False
-    )
+    monkeypatch.setattr(runner, "_build_corpus_index_snapshot", unexpected_builder, raising=False)
     monkeypatch.setattr(
         runner,
         "_build_corpus_remediation_plan_snapshot",
@@ -426,9 +410,7 @@ def _write_transcript(
             "segment_count": 1,
             "last_segment_end_seconds": 5.5,
             "completed": True,
-            "segments": [
-                {"id": 1, "start": 0.0, "end": 5.5, "text": text}
-            ],
+            "segments": [{"id": 1, "start": 0.0, "end": 5.5, "text": text}],
         },
     )
     paths.text_path.write_text(text, encoding="utf-8")
@@ -467,9 +449,7 @@ def _write_semantic_review(
     raw_bytes: bytes | None = None,
 ) -> Path:
     review_dir = _use_tmp_data_dirs(monkeypatch, tmp_path)
-    path = review_dir / (
-        f"{timestamp}__gooaye__{episode_ref}.semantic-review.json"
-    )
+    path = review_dir / (f"{timestamp}__gooaye__{episode_ref}.semantic-review.json")
     path.parent.mkdir(parents=True, exist_ok=True)
     if raw_bytes is not None:
         path.write_bytes(raw_bytes)
@@ -480,9 +460,7 @@ def _write_semantic_review(
         review_semantic_summary_smoke,
     )
 
-    summary_path = storage.semantic_summary_asset_path(
-        "gooaye", episode_ref, f"{episode_ref} Alpha"
-    )
+    summary_path = storage.semantic_summary_asset_path("gooaye", episode_ref, f"{episode_ref} Alpha")
     if review_status == "failed":
         summary_path.write_text("Buy ACME now", encoding="utf-8")
     elif review_status == "blocked":
@@ -527,9 +505,7 @@ def _setup_preview_state(monkeypatch, tmp_path: Path, state: str) -> None:
             raw_bytes=b"{not-json private review sentinel",
         )
     elif state in {"stale_review", "forged_review"}:
-        review_path = _write_semantic_review(
-            monkeypatch, tmp_path, review_status="passed"
-        )
+        review_path = _write_semantic_review(monkeypatch, tmp_path, review_status="passed")
         review_payload = json.loads(review_path.read_text(encoding="utf-8"))
         if state == "stale_review":
             review_payload["semantic_summary_sha256"] = "0" * 64
@@ -584,9 +560,7 @@ def test_semantic_preview_state_table_is_strict_zero_file(
     assert not list(tmp_path.rglob("*.part"))
 
 
-def test_semantic_summary_preview_exposes_only_bounded_risk_metadata(
-    monkeypatch, tmp_path: Path
-):
+def test_semantic_summary_preview_exposes_only_bounded_risk_metadata(monkeypatch, tmp_path: Path):
     from corpus_ingest_core import run_corpus_semantic_remediation
     from corpus_ingest_core.corpus_semantic_remediation_runner import result_to_dict
 
@@ -608,9 +582,7 @@ def test_semantic_summary_preview_exposes_only_bounded_risk_metadata(
     assert "generated_at" not in payload
 
 
-def test_semantic_review_preview_has_no_llm_risk(
-    monkeypatch, tmp_path: Path
-):
+def test_semantic_review_preview_has_no_llm_risk(monkeypatch, tmp_path: Path):
     from corpus_ingest_core import run_corpus_semantic_remediation
 
     _write_seed(monkeypatch, tmp_path)
@@ -625,20 +597,24 @@ def test_semantic_review_preview_has_no_llm_risk(
     assert row.transcript_transfer_risk is False
     assert row.may_incur_api_cost is False
     assert str(summary) in row.planned_reads
-    assert row.planned_writes == [
-        "timestamped semantic review JSON/Markdown reports"
-    ]
+    assert row.planned_writes == ["timestamped semantic review JSON/Markdown reports"]
     assert row.provider is None
     assert row.model is None
 
 
 @pytest.mark.parametrize(
     "episode_ref",
-    ["", "latest", "../EP700", "https://example.invalid/EP700", "\\\\server\\EP700", "EP700?token=secret", "EP700\nsecret"],
+    [
+        "",
+        "latest",
+        "../EP700",
+        "https://example.invalid/EP700",
+        "\\\\server\\EP700",
+        "EP700?token=secret",
+        "EP700\nsecret",
+    ],
 )
-def test_invalid_episode_ref_rejected_before_snapshot(
-    monkeypatch, episode_ref: str
-):
+def test_invalid_episode_ref_rejected_before_snapshot(monkeypatch, episode_ref: str):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     from corpus_ingest_core import CorpusSemanticRemediationRunnerFailedError
 
@@ -653,14 +629,10 @@ def test_invalid_episode_ref_rejected_before_snapshot(
         raise AssertionError("snapshot must not run")
 
     monkeypatch.setattr(runner, "_build_corpus_index_snapshot", fail_index, raising=False)
-    monkeypatch.setattr(
-        runner, "_build_corpus_remediation_plan_snapshot", fail_plan, raising=False
-    )
+    monkeypatch.setattr(runner, "_build_corpus_remediation_plan_snapshot", fail_plan, raising=False)
 
     with pytest.raises(CorpusSemanticRemediationRunnerFailedError):
-        runner.run_corpus_semantic_remediation(
-            "gooaye", episode_ref=episode_ref
-        )
+        runner.run_corpus_semantic_remediation("gooaye", episode_ref=episode_ref)
 
     assert calls == {"index": 0, "plan": 0}
 
@@ -679,36 +651,24 @@ def test_invalid_action_and_chunk_settings_rejected_before_snapshot(monkeypatch)
     monkeypatch.setattr(runner, "_build_corpus_index_snapshot", fail_index, raising=False)
 
     with pytest.raises(CorpusSemanticRemediationRunnerFailedError):
-        runner.run_corpus_semantic_remediation(
-            "gooaye", episode_ref="EP700", action="batch"
-        )
+        runner.run_corpus_semantic_remediation("gooaye", episode_ref="EP700", action="batch")
     with pytest.raises(CorpusSemanticRemediationRunnerFailedError):
-        runner.run_corpus_semantic_remediation(
-            "gooaye", episode_ref="EP700", chunk_seconds=0
-        )
+        runner.run_corpus_semantic_remediation("gooaye", episode_ref="EP700", chunk_seconds=0)
     with pytest.raises(CorpusSemanticRemediationRunnerFailedError):
-        runner.run_corpus_semantic_remediation(
-            "gooaye", episode_ref="EP700", max_segments_per_chunk=0
-        )
+        runner.run_corpus_semantic_remediation("gooaye", episode_ref="EP700", max_segments_per_chunk=0)
 
     assert calls == 0
 
 
-def test_explicit_preview_action_mismatch_is_rejected_without_execution(
-    monkeypatch, tmp_path: Path
-):
+def test_explicit_preview_action_mismatch_is_rejected_without_execution(monkeypatch, tmp_path: Path):
     from corpus_ingest_core import run_corpus_semantic_remediation
 
     _write_seed(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
     before = _tree_manifest(tmp_path)
 
-    matching = run_corpus_semantic_remediation(
-        "gooaye", episode_ref="EP700", action="semantic_summary"
-    )
-    mismatch = run_corpus_semantic_remediation(
-        "gooaye", episode_ref="EP700", action="semantic_review"
-    )
+    matching = run_corpus_semantic_remediation("gooaye", episode_ref="EP700", action="semantic_summary")
+    mismatch = run_corpus_semantic_remediation("gooaye", episode_ref="EP700", action="semantic_review")
 
     assert matching.selected_action == "semantic_summary"
     assert matching.rows[0].status == "selected"
@@ -718,9 +678,7 @@ def test_explicit_preview_action_mismatch_is_rejected_without_execution(
     assert _tree_manifest(tmp_path) == before
 
 
-def test_requested_episode_is_isolated_before_state_reduction(
-    monkeypatch, tmp_path: Path
-):
+def test_requested_episode_is_isolated_before_state_reduction(monkeypatch, tmp_path: Path):
     from corpus_ingest_core import run_corpus_semantic_remediation
 
     _write_seed(monkeypatch, tmp_path, "EP700")
@@ -728,9 +686,7 @@ def test_requested_episode_is_isolated_before_state_reduction(
     _write_seed(monkeypatch, tmp_path, "EP701")
     _write_transcript(monkeypatch, tmp_path, "EP701")
     _write_semantic_summary(monkeypatch, tmp_path, "EP701")
-    _write_semantic_review(
-        monkeypatch, tmp_path, "EP701", review_status="failed"
-    )
+    _write_semantic_review(monkeypatch, tmp_path, "EP701", review_status="failed")
 
     result = run_corpus_semantic_remediation("gooaye", episode_ref="EP700")
     absent = run_corpus_semantic_remediation("gooaye", episode_ref="EP999")
@@ -742,9 +698,7 @@ def test_requested_episode_is_isolated_before_state_reduction(
     assert absent.rows[0].manual_only is True
 
 
-def test_preview_uses_one_shared_index_plan_snapshot_and_no_side_effect_surface(
-    monkeypatch, tmp_path: Path
-):
+def test_preview_uses_one_shared_index_plan_snapshot_and_no_side_effect_surface(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_index as corpus_index
     import corpus_ingest_core.corpus_remediation_plan as remediation_plan
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
@@ -773,17 +727,11 @@ def test_preview_uses_one_shared_index_plan_snapshot_and_no_side_effect_surface(
         raise AssertionError("dry-run side-effect surface was called")
 
     monkeypatch.setattr(runner, "_build_corpus_index_snapshot", build_index)
-    monkeypatch.setattr(
-        runner, "_build_corpus_remediation_plan_snapshot", build_plan
-    )
+    monkeypatch.setattr(runner, "_build_corpus_remediation_plan_snapshot", build_plan)
     monkeypatch.setattr(corpus_index, "_persist_corpus_index_snapshot", forbidden)
-    monkeypatch.setattr(
-        remediation_plan, "_persist_corpus_remediation_plan_snapshot", forbidden
-    )
+    monkeypatch.setattr(remediation_plan, "_persist_corpus_remediation_plan_snapshot", forbidden)
     monkeypatch.setattr(runner, "semantic_summarize_episode", forbidden, raising=False)
-    monkeypatch.setattr(
-        runner, "review_semantic_summary_smoke", forbidden, raising=False
-    )
+    monkeypatch.setattr(runner, "review_semantic_summary_smoke", forbidden, raising=False)
 
     progress_calls = []
     result = runner.run_corpus_semantic_remediation(
@@ -800,9 +748,7 @@ def test_preview_uses_one_shared_index_plan_snapshot_and_no_side_effect_surface(
     assert progress_calls == []
 
 
-def test_stale_persisted_index_plan_and_report_are_not_stage_truth_or_overwritten(
-    monkeypatch, tmp_path: Path
-):
+def test_stale_persisted_index_plan_and_report_are_not_stage_truth_or_overwritten(monkeypatch, tmp_path: Path):
     from corpus_ingest_core import run_corpus_semantic_remediation, storage
 
     _write_seed(monkeypatch, tmp_path)
@@ -828,9 +774,7 @@ def test_stale_persisted_index_plan_and_report_are_not_stage_truth_or_overwritte
         assert path.read_text(encoding="utf-8") == "stale sentinel says completed"
 
 
-def test_snapshot_exception_is_category_only_blocked_failed_zero_write(
-    monkeypatch, tmp_path: Path
-):
+def test_snapshot_exception_is_category_only_blocked_failed_zero_write(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     from corpus_ingest_core.corpus_semantic_remediation_runner import result_to_dict
 
@@ -838,14 +782,10 @@ def test_snapshot_exception_is_category_only_blocked_failed_zero_write(
     before = _tree_manifest(tmp_path)
 
     def explode(*args, **kwargs):
-        raise RuntimeError(
-            "private transcript https://secret.invalid/?token=super-secret Traceback"
-        )
+        raise RuntimeError("private transcript https://secret.invalid/?token=super-secret Traceback")
 
     monkeypatch.setattr(runner, "_build_corpus_index_snapshot", explode)
-    result = runner.run_corpus_semantic_remediation(
-        "gooaye", episode_ref="EP700"
-    )
+    result = runner.run_corpus_semantic_remediation("gooaye", episode_ref="EP700")
     serialized = json.dumps(result_to_dict(result), ensure_ascii=False)
 
     assert result.selected_action == "blocked"
@@ -860,6 +800,7 @@ def test_snapshot_exception_is_category_only_blocked_failed_zero_write(
     assert "private transcript" not in serialized
     assert "Traceback" not in serialized
     assert _tree_manifest(tmp_path) == before
+
 
 def test_confirmed_summary_requires_exact_ack_before_snapshot(monkeypatch):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
@@ -912,16 +853,12 @@ def test_confirmed_next_is_rejected_before_snapshot(monkeypatch):
     monkeypatch.setattr(runner, "_build_corpus_index_snapshot", index)
 
     with pytest.raises(CorpusSemanticRemediationRunnerFailedError):
-        runner.run_corpus_semantic_remediation(
-            "gooaye", episode_ref="EP700", action="next", confirm=True
-        )
+        runner.run_corpus_semantic_remediation("gooaye", episode_ref="EP700", action="next", confirm=True)
 
     assert calls == 0
 
 
-def test_confirmed_summary_action_drift_writes_rejected_report_without_fallback(
-    monkeypatch, tmp_path: Path
-):
+def test_confirmed_summary_action_drift_writes_rejected_report_without_fallback(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
@@ -959,9 +896,7 @@ def test_confirmed_summary_action_drift_writes_rejected_report_without_fallback(
     assert result.report_markdown_path.exists()
 
 
-def test_confirmed_summary_uses_real_semantic_core_with_mock_provider_once(
-    monkeypatch, tmp_path: Path
-):
+def test_confirmed_summary_uses_real_semantic_core_with_mock_provider_once(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     import corpus_ingest_core.semantic_summarizer as semantic_summarizer
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
@@ -979,9 +914,7 @@ def test_confirmed_summary_uses_real_semantic_core_with_mock_provider_once(
         def summarize_chunk(self, chunk):
             return "chunk fact [00:00:00 - 00:00:05]"
 
-        def summarize_final(
-            self, *, podcast_display_name, episode_ref, title, chunk_summaries
-        ):
+        def summarize_final(self, *, podcast_display_name, episode_ref, title, chunk_summaries):
             return "final fact [00:00:00 - 00:00:05]"
 
     def create_provider(
@@ -1026,9 +959,7 @@ def test_confirmed_summary_uses_real_semantic_core_with_mock_provider_once(
         api_key_env="OPENAI_API_KEY",
         chunk_seconds=600,
         max_segments_per_chunk=120,
-        progress_callback=lambda event, **payload: progress_events.append(
-            (event, payload)
-        ),
+        progress_callback=lambda event, **payload: progress_events.append((event, payload)),
     )
 
     assert result.executed_action == "semantic_summary"
@@ -1052,9 +983,7 @@ def test_confirmed_summary_uses_real_semantic_core_with_mock_provider_once(
     assert "private transcript sentinel" not in serialized
 
 
-def test_confirmed_summary_race_reuses_existing_artifact_and_stops(
-    monkeypatch, tmp_path: Path
-):
+def test_confirmed_summary_race_reuses_existing_artifact_and_stops(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
@@ -1131,9 +1060,7 @@ def test_confirmed_summary_failure_is_category_only_and_reported(
     assert "Traceback" not in serialized
 
 
-def test_confirmed_report_is_metadata_only_timestamp_free_and_atomic(
-    monkeypatch, tmp_path: Path
-):
+def test_confirmed_report_is_metadata_only_timestamp_free_and_atomic(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     from corpus_ingest_core.models import SummaryAsset
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
@@ -1185,9 +1112,7 @@ def test_confirmed_report_is_metadata_only_timestamp_free_and_atomic(
     assert not list(tmp_path.rglob("*.part"))
 
 
-def test_confirmed_markdown_report_renders_full_bounded_result_metadata(
-    monkeypatch, tmp_path: Path
-):
+def test_confirmed_markdown_report_renders_full_bounded_result_metadata(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     from corpus_ingest_core.models import SummaryAsset
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
@@ -1260,9 +1185,7 @@ def test_confirmed_markdown_report_renders_full_bounded_result_metadata(
     assert "bounded semantic body" not in markdown
 
 
-def test_runner_report_writer_failure_is_safe_nontransactional_and_no_cleanup_retry(
-    monkeypatch, tmp_path: Path
-):
+def test_runner_report_writer_failure_is_safe_nontransactional_and_no_cleanup_retry(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     from corpus_ingest_core import CorpusSemanticRemediationRunnerFailedError
     from corpus_ingest_core.models import SummaryAsset
@@ -1321,17 +1244,13 @@ def test_runner_report_writer_failure_is_safe_nontransactional_and_no_cleanup_re
     assert summary_path.exists()
     assert not report_paths.json_path.exists()
     assert report_paths.markdown_path.exists()
-    assert not is_complete_audit_report_pair(
-        report_paths.json_path, report_paths.markdown_path
-    )
+    assert not is_complete_audit_report_pair(report_paths.json_path, report_paths.markdown_path)
     assert not list(tmp_path.rglob("*.part"))
     assert "secret.invalid" not in str(exc_info.value)
     assert "token=" not in str(exc_info.value)
 
 
-def test_confirmed_summary_warns_manual_index_plan_and_cache_refresh(
-    monkeypatch, tmp_path: Path
-):
+def test_confirmed_summary_warns_manual_index_plan_and_cache_refresh(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     from corpus_ingest_core.models import SummaryAsset
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
@@ -1375,9 +1294,7 @@ def test_confirmed_summary_warns_manual_index_plan_and_cache_refresh(
     assert not (tmp_path / "cache").exists()
 
 
-def test_confirmed_snapshot_exception_writes_bounded_failed_report_and_stops(
-    monkeypatch, tmp_path: Path
-):
+def test_confirmed_snapshot_exception_writes_bounded_failed_report_and_stops(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
@@ -1413,6 +1330,7 @@ def test_confirmed_snapshot_exception_writes_bounded_failed_report_and_stops(
     assert "secret.invalid" not in report_text
     assert "token=secret" not in report_text
 
+
 def _passing_semantic_review_body() -> str:
     return "\n".join(
         [
@@ -1428,9 +1346,7 @@ def _passing_semantic_review_body() -> str:
     )
 
 
-def test_confirmed_review_uses_real_deterministic_core_without_llm(
-    monkeypatch, tmp_path: Path
-):
+def test_confirmed_review_uses_real_deterministic_core_without_llm(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     import corpus_ingest_core.llm_profiles as llm_profiles
     import corpus_ingest_core.local_env as local_env
@@ -1438,9 +1354,7 @@ def test_confirmed_review_uses_real_deterministic_core_without_llm(
 
     _write_seed(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
-    summary_path = _write_semantic_summary(
-        monkeypatch, tmp_path, body=_passing_semantic_review_body()
-    )
+    summary_path = _write_semantic_summary(monkeypatch, tmp_path, body=_passing_semantic_review_body())
     calls = {"summary": 0, "profile": 0, "env": 0, "provider": 0}
 
     def forbidden(name):
@@ -1482,9 +1396,7 @@ def test_confirmed_review_uses_real_deterministic_core_without_llm(
     assert "ignored secret model" not in serialized
 
 
-def test_confirmed_review_action_drift_and_terminal_state_do_not_fallback(
-    monkeypatch, tmp_path: Path
-):
+def test_confirmed_review_action_drift_and_terminal_state_do_not_fallback(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
 
     _write_seed(monkeypatch, tmp_path)
@@ -1510,9 +1422,7 @@ def test_confirmed_review_action_drift_and_terminal_state_do_not_fallback(
     assert drift.executed_action is None
     assert calls == {"summary": 0, "review": 0}
 
-    _write_semantic_summary(
-        monkeypatch, tmp_path, body=_passing_semantic_review_body()
-    )
+    _write_semantic_summary(monkeypatch, tmp_path, body=_passing_semantic_review_body())
     _write_semantic_review(monkeypatch, tmp_path, review_status="passed")
     terminal = runner.run_corpus_semantic_remediation(
         "gooaye", episode_ref="EP700", action="semantic_review", confirm=True
@@ -1523,9 +1433,7 @@ def test_confirmed_review_action_drift_and_terminal_state_do_not_fallback(
     assert calls == {"summary": 0, "review": 0}
 
 
-def test_confirmed_review_real_core_failed_result_is_terminal_manual_only(
-    monkeypatch, tmp_path: Path
-):
+def test_confirmed_review_real_core_failed_result_is_terminal_manual_only(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
 
     _write_seed(monkeypatch, tmp_path)
@@ -1549,16 +1457,12 @@ def test_confirmed_review_real_core_failed_result_is_terminal_manual_only(
     assert review_payload["review_status"] == "failed"
 
 
-def test_confirmed_review_race_to_missing_summary_maps_real_blocked_result(
-    monkeypatch, tmp_path: Path
-):
+def test_confirmed_review_race_to_missing_summary_maps_real_blocked_result(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
 
     _write_seed(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
-    summary_path = _write_semantic_summary(
-        monkeypatch, tmp_path, body=_passing_semantic_review_body()
-    )
+    summary_path = _write_semantic_summary(monkeypatch, tmp_path, body=_passing_semantic_review_body())
     real_preview = runner._preview_selection
 
     def preview_then_remove_summary(podcast_id: str, episode_ref: str):
@@ -1580,16 +1484,12 @@ def test_confirmed_review_race_to_missing_summary_maps_real_blocked_result(
     assert review_payload["review_status"] == "blocked"
 
 
-def test_duplicate_timestamped_review_uses_latest_state_without_execution(
-    monkeypatch, tmp_path: Path
-):
+def test_duplicate_timestamped_review_uses_latest_state_without_execution(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
 
     _write_seed(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
-    _write_semantic_summary(
-        monkeypatch, tmp_path, body=_passing_semantic_review_body()
-    )
+    _write_semantic_summary(monkeypatch, tmp_path, body=_passing_semantic_review_body())
     older = _write_semantic_review(
         monkeypatch,
         tmp_path,
@@ -1621,20 +1521,14 @@ def test_duplicate_timestamped_review_uses_latest_state_without_execution(
     assert calls == 0
 
 
-def test_review_partial_pair_failure_is_category_only_without_rescan_or_cleanup(
-    monkeypatch, tmp_path: Path
-):
+def test_review_partial_pair_failure_is_category_only_without_rescan_or_cleanup(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
 
     _write_seed(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
-    _write_semantic_summary(
-        monkeypatch, tmp_path, body=_passing_semantic_review_body()
-    )
+    _write_semantic_summary(monkeypatch, tmp_path, body=_passing_semantic_review_body())
     review_dir = _use_tmp_data_dirs(monkeypatch, tmp_path)
-    partial_path = review_dir / (
-        "20260712-030303__gooaye__EP700.semantic-review.json"
-    )
+    partial_path = review_dir / ("20260712-030303__gooaye__EP700.semantic-review.json")
     review_calls = 0
 
     def partial_review(*args, **kwargs):
@@ -1642,9 +1536,7 @@ def test_review_partial_pair_failure_is_category_only_without_rescan_or_cleanup(
         review_calls += 1
         partial_path.parent.mkdir(parents=True, exist_ok=True)
         partial_path.write_text("partial review artifact", encoding="utf-8")
-        raise OSError(
-            "private semantic body https://secret.invalid/?token=secret Traceback"
-        )
+        raise OSError("private semantic body https://secret.invalid/?token=secret Traceback")
 
     monkeypatch.setattr(runner, "review_semantic_summary_smoke", partial_review)
     result = runner.run_corpus_semantic_remediation(
@@ -1665,16 +1557,12 @@ def test_review_partial_pair_failure_is_category_only_without_rescan_or_cleanup(
     assert "Traceback" not in serialized
 
 
-def test_confirmed_review_report_is_timestamp_free_and_warns_manual_refresh(
-    monkeypatch, tmp_path: Path
-):
+def test_confirmed_review_report_is_timestamp_free_and_warns_manual_refresh(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
 
     _write_seed(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
-    _write_semantic_summary(
-        monkeypatch, tmp_path, body=_passing_semantic_review_body()
-    )
+    _write_semantic_summary(monkeypatch, tmp_path, body=_passing_semantic_review_body())
 
     result = runner.run_corpus_semantic_remediation(
         "gooaye", episode_ref="EP700", action="semantic_review", confirm=True
@@ -1689,9 +1577,8 @@ def test_confirmed_review_report_is_timestamp_free_and_warns_manual_refresh(
     assert any("cache" in message for message in messages)
     assert not (tmp_path / "cache").exists()
 
-def test_semantic_remediation_cli_dry_run_bypasses_profile_env_and_writes(
-    monkeypatch, tmp_path: Path, capsys
-):
+
+def test_semantic_remediation_cli_dry_run_bypasses_profile_env_and_writes(monkeypatch, tmp_path: Path, capsys):
     from scripts import run_corpus_semantic_remediation as cli
 
     _write_seed(monkeypatch, tmp_path)
@@ -1730,9 +1617,7 @@ def test_semantic_remediation_cli_dry_run_bypasses_profile_env_and_writes(
 
 
 @pytest.mark.parametrize("action", ["semantic_summary", " semantic_summary "])
-def test_semantic_remediation_cli_ack_precedes_profile_env_and_core(
-    monkeypatch, capsys, action
-):
+def test_semantic_remediation_cli_ack_precedes_profile_env_and_core(monkeypatch, capsys, action):
     from scripts import run_corpus_semantic_remediation as cli
 
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
@@ -1777,9 +1662,7 @@ def test_semantic_remediation_cli_ack_precedes_profile_env_and_core(
     assert calls == {"profile": 0, "env": 0, "core": 0}
 
 
-def test_semantic_remediation_cli_normalizes_action_before_configuration_and_dispatch(
-    monkeypatch, capsys
-):
+def test_semantic_remediation_cli_normalizes_action_before_configuration_and_dispatch(monkeypatch, capsys):
     from scripts import run_corpus_semantic_remediation as cli
 
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
@@ -1795,10 +1678,7 @@ def test_semantic_remediation_cli_normalizes_action_before_configuration_and_dis
     monkeypatch.setattr(
         cli,
         "_resolve_llm_options",
-        lambda args: (
-            calls.append("profile")
-            or ("openai-compatible", "safe-model", None, "OPENAI_API_KEY")
-        ),
+        lambda args: calls.append("profile") or ("openai-compatible", "safe-model", None, "OPENAI_API_KEY"),
     )
 
     def fake_core(podcast_id, **kwargs):
@@ -1916,18 +1796,14 @@ def test_semantic_remediation_cli_confirmed_summary_resolves_controlled_options_
     assert "private.invalid" not in json.dumps(payload)
 
 
-def test_semantic_remediation_cli_confirmed_review_bypasses_all_llm_resolution(
-    monkeypatch, tmp_path: Path, capsys
-):
+def test_semantic_remediation_cli_confirmed_review_bypasses_all_llm_resolution(monkeypatch, tmp_path: Path, capsys):
     from scripts import run_corpus_semantic_remediation as cli
 
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
 
     _write_seed(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
-    _write_semantic_summary(
-        monkeypatch, tmp_path, body=_passing_semantic_review_body()
-    )
+    _write_semantic_summary(monkeypatch, tmp_path, body=_passing_semantic_review_body())
     captured_kwargs = {}
 
     def forbidden(*args, **kwargs):
@@ -1979,9 +1855,7 @@ def test_semantic_remediation_cli_confirmed_review_bypasses_all_llm_resolution(
     assert captured_kwargs["action"] == "semantic_review"
 
 
-def test_015_stale_review_remains_manual_only_without_a_collision_rereview(
-    monkeypatch, tmp_path: Path
-):
+def test_015_stale_review_remains_manual_only_without_a_collision_rereview(monkeypatch, tmp_path: Path):
     """Only 018 owns automatic authenticity rereview; 015 remains terminal."""
     from datetime import datetime as real_datetime
 
@@ -1990,9 +1864,7 @@ def test_015_stale_review_remains_manual_only_without_a_collision_rereview(
 
     _write_seed(monkeypatch, tmp_path)
     _write_transcript(monkeypatch, tmp_path)
-    summary_path = _write_semantic_summary(
-        monkeypatch, tmp_path, body=_passing_semantic_review_body()
-    )
+    summary_path = _write_semantic_summary(monkeypatch, tmp_path, body=_passing_semantic_review_body())
 
     class FixedDateTime:
         @classmethod
@@ -2019,19 +1891,14 @@ def test_015_stale_review_remains_manual_only_without_a_collision_rereview(
     assert second.selected_action == "blocked"
     assert second.executed_action is None
     assert second.rows[0].status == "blocked"
-    review_names = sorted(
-        path.name
-        for path in (tmp_path / "evals" / "research-llm-smoke" / "reports").glob("*.json")
-    )
+    review_names = sorted(path.name for path in (tmp_path / "evals" / "research-llm-smoke" / "reports").glob("*.json"))
     assert review_names == [
         "20260722-120000__gooaye__EP700.semantic-review.json",
     ]
     assert final_preview.selected_action == "blocked"
 
 
-def test_semantic_remediation_cli_exit_and_error_no_leak_contract(
-    monkeypatch, capsys
-):
+def test_semantic_remediation_cli_exit_and_error_no_leak_contract(monkeypatch, capsys):
     from scripts import run_corpus_semantic_remediation as cli
 
     from corpus_ingest_core import CorpusSemanticRemediationRunnerFailedError
@@ -2042,9 +1909,7 @@ def test_semantic_remediation_cli_exit_and_error_no_leak_contract(
             "invalid episode_ref",
         ),
         (
-            RuntimeError(
-                "private transcript https://secret.invalid/?token=secret Traceback"
-            ),
+            RuntimeError("private transcript https://secret.invalid/?token=secret Traceback"),
             "RuntimeError",
         ),
     ]
@@ -2080,11 +1945,7 @@ def test_semantic_remediation_cli_exit_and_error_no_leak_contract(
 def test_semantic_remediation_cli_has_no_force_partial_or_automation_surface():
     from scripts import run_corpus_semantic_remediation as cli
 
-    option_strings = {
-        option
-        for action in cli.build_parser()._actions
-        for option in action.option_strings
-    }
+    option_strings = {option for action in cli.build_parser()._actions for option in action.option_strings}
 
     assert "--force" not in option_strings
     assert "--allow-partial" not in option_strings
@@ -2094,9 +1955,7 @@ def test_semantic_remediation_cli_has_no_force_partial_or_automation_surface():
     assert "--automatic-review" not in option_strings
 
 
-def test_unsafe_provider_and_model_are_rejected_without_leaking_values(
-    monkeypatch, tmp_path: Path
-):
+def test_unsafe_provider_and_model_are_rejected_without_leaking_values(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner
     from corpus_ingest_core import CorpusSemanticRemediationRunnerFailedError
 
@@ -2109,9 +1968,7 @@ def test_unsafe_provider_and_model_are_rejected_without_leaking_values(
         {"model": "buy-recommendation"},
     ):
         with pytest.raises(CorpusSemanticRemediationRunnerFailedError) as exc_info:
-            runner.run_corpus_semantic_remediation(
-                "gooaye", episode_ref="EP700", **kwargs
-            )
+            runner.run_corpus_semantic_remediation("gooaye", episode_ref="EP700", **kwargs)
         message = str(exc_info.value)
         assert "secret.invalid" not in message
         assert "token=" not in message
@@ -2124,9 +1981,7 @@ def test_safe_cjk_local_paths_are_preserved_in_preview(monkeypatch, tmp_path: Pa
     cjk_root = tmp_path / "測試資料"
     _use_tmp_data_dirs(monkeypatch, cjk_root)
     _write_seed(monkeypatch, cjk_root, title="中文標題")
-    transcript_json = _write_transcript(
-        monkeypatch, cjk_root, title="中文標題"
-    )
+    transcript_json = _write_transcript(monkeypatch, cjk_root, title="中文標題")
 
     result = run_corpus_semantic_remediation("gooaye", episode_ref="EP700")
 
@@ -2134,9 +1989,7 @@ def test_safe_cjk_local_paths_are_preserved_in_preview(monkeypatch, tmp_path: Pa
     assert any("中文標題" in path for path in result.rows[0].planned_writes)
 
 
-def test_015_never_calls_cache_rebuild_or_010_014_runners(
-    monkeypatch, tmp_path: Path
-):
+def test_015_never_calls_cache_rebuild_or_010_014_runners(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.cache as cache
     import corpus_ingest_core.corpus_episode_workflow_runner as workflow_runner
     import corpus_ingest_core.corpus_remediation_runner as remediation_runner
@@ -2187,9 +2040,8 @@ def test_015_never_calls_cache_rebuild_or_010_014_runners(
     assert result.rows[0].status == "executed"
     assert not (tmp_path / "cache").exists()
 
-def test_cli_runner_contained_failed_outcome_uses_exit_zero(
-    monkeypatch, tmp_path: Path, capsys
-):
+
+def test_cli_runner_contained_failed_outcome_uses_exit_zero(monkeypatch, tmp_path: Path, capsys):
     from scripts import run_corpus_semantic_remediation as cli
 
     import corpus_ingest_core.corpus_semantic_remediation_runner as runner

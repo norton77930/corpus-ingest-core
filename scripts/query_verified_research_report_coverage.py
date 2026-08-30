@@ -22,9 +22,7 @@ class _ArgumentParser(argparse.ArgumentParser):
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = _ArgumentParser(
-        description="List episode coverage of local verified research report bundles."
-    )
+    parser = _ArgumentParser(description="List episode coverage of local verified research report bundles.")
     parser.add_argument("podcast_id")
     parser.add_argument(
         "--has-bundle",

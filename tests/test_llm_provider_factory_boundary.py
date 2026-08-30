@@ -56,16 +56,13 @@ def _app_python_files():
 
 
 def test_provider_constructed_only_in_factory_module():
-    completion_core = (
-        ROOT / "src" / "corpus_ingest_core" / "corpus_episode_completion_workflow_runner.py"
-    )
+    completion_core = ROOT / "src" / "corpus_ingest_core" / "corpus_episode_completion_workflow_runner.py"
     assert completion_core in _app_python_files()
 
     offenders = sorted(
         path.relative_to(ROOT).as_posix()
         for path in _app_python_files()
-        if PROVIDER_CONSTRUCTOR in path.read_text(encoding="utf-8")
-        and path.name != FACTORY_MODULE
+        if PROVIDER_CONSTRUCTOR in path.read_text(encoding="utf-8") and path.name != FACTORY_MODULE
     )
     assert not offenders, (
         "OpenAICompatibleProvider(...) constructed outside the factory module; "

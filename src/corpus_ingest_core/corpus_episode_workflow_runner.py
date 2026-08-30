@@ -64,16 +64,16 @@ _EXECUTABLE_STAGES = {
     STAGE_DETERMINISTIC_REMEDIATION,
 }
 
-_SAFE_STAGE_NAME_PATTERN = re.compile(r'^[a-z][a-z0-9_]{0,63}$')
+_SAFE_STAGE_NAME_PATTERN = re.compile(r"^[a-z][a-z0-9_]{0,63}$")
 _WORKFLOW_ROW_REASONS = frozenset(
     {
-        'episode selector could not be resolved',
-        'episode seed metadata is missing',
-        'audio download is the next ready action',
-        'local transcription is the next ready action',
-        'deterministic remediation is the next ready action',
-        'next workflow stage is blocked',
-        'no executable safe workflow stage remains',
+        "episode selector could not be resolved",
+        "episode seed metadata is missing",
+        "audio download is the next ready action",
+        "local transcription is the next ready action",
+        "deterministic remediation is the next ready action",
+        "next workflow stage is blocked",
+        "no executable safe workflow stage remains",
     }
 )
 _FORBIDDEN_OUTPUT_FRAGMENTS = (
@@ -441,16 +441,10 @@ def _preview_corpus_episode_workflow_from_snapshot(
         return terminal_selection
 
     blocked_rows = [
-        row
-        for row in getattr(remediation_result, "rows", [])
-        if getattr(row, "outcome_status", None) == "blocked"
+        row for row in getattr(remediation_result, "rows", []) if getattr(row, "outcome_status", None) == "blocked"
     ]
     if allow_semantic_handoff:
-        blocked_rows = [
-            row
-            for row in blocked_rows
-            if getattr(row, "artifact_family", None) not in semantic_families
-        ]
+        blocked_rows = [row for row in blocked_rows if getattr(row, "artifact_family", None) not in semantic_families]
     if blocked_rows:
         return {
             "selected_stage": STAGE_BLOCKED,
@@ -477,10 +471,7 @@ def _preview_corpus_episode_workflow_from_snapshot(
         )
         for row in getattr(remediation_result, "rows", [])
         if getattr(row, "outcome_status", None) == "excluded"
-        and (
-            not allow_semantic_handoff
-            or getattr(row, "artifact_family", None) not in semantic_families
-        )
+        and (not allow_semantic_handoff or getattr(row, "artifact_family", None) not in semantic_families)
     ]
     warnings = _manual_follow_up_warnings(episode_ref) if manual_rows else []
     completed_row = CorpusEpisodeWorkflowRunRow(
@@ -527,11 +518,7 @@ def _semantic_handoff_result_is_invalid(
         family = getattr(row, "artifact_family", None)
         status = getattr(row, "outcome_status", None)
         row_episode_ref = getattr(row, "episode_ref", None)
-        if (
-            not isinstance(family, str)
-            or status not in known_statuses
-            or not isinstance(row_episode_ref, str)
-        ):
+        if not isinstance(family, str) or status not in known_statuses or not isinstance(row_episode_ref, str):
             return True
         if row_episode_ref != episode_ref:
             if status != "skipped":
@@ -665,28 +652,25 @@ def _returned_terminal_selection(
     *,
     ignored_artifact_families: set[str] | None = None,
 ) -> dict[str, Any] | None:
-    for row in getattr(result, 'rows', []):
-        if (
-            ignored_artifact_families is not None
-            and getattr(row, 'artifact_family', None) in ignored_artifact_families
-        ):
+    for row in getattr(result, "rows", []):
+        if ignored_artifact_families is not None and getattr(row, "artifact_family", None) in ignored_artifact_families:
             continue
-        status = getattr(row, 'outcome_status', None)
-        if status not in {'failed', 'rejected', 'blocked'}:
+        status = getattr(row, "outcome_status", None)
+        if status not in {"failed", "rejected", "blocked"}:
             continue
         return {
-            'selected_stage': STAGE_BLOCKED,
-            'episode_ref': episode_ref,
-            'rows': [
+            "selected_stage": STAGE_BLOCKED,
+            "episode_ref": episode_ref,
+            "rows": [
                 _stage_row(
                     stage=stage,
                     status=status,
-                    reason=getattr(row, 'reason', 'stage probe returned terminal outcome'),
+                    reason=getattr(row, "reason", "stage probe returned terminal outcome"),
                     source_result=result,
                     source_row=row,
                 )
             ],
-            'warnings': [],
+            "warnings": [],
         }
     return None
 
@@ -828,16 +812,16 @@ def _stage_row(
 
 
 def _workflow_owned_reason(stage: str, status: str, reason: Any) -> str:
-    if status == 'manual_only':
-        return 'manual follow-up is required'
+    if status == "manual_only":
+        return "manual follow-up is required"
     if isinstance(reason, str) and reason in _WORKFLOW_ROW_REASONS:
         return reason
-    expected_stage_reason = f'{stage} {status}'
+    expected_stage_reason = f"{stage} {status}"
     if stage in _EXECUTABLE_STAGES and reason == expected_stage_reason:
         return expected_stage_reason
-    if stage in _EXECUTABLE_STAGES and status in {'failed', 'rejected', 'blocked'}:
-        return f'{stage} probe returned {status}'
-    return 'dependency metadata omitted by safety boundary'
+    if stage in _EXECUTABLE_STAGES and status in {"failed", "rejected", "blocked"}:
+        return f"{stage} probe returned {status}"
+    return "dependency metadata omitted by safety boundary"
 
 
 def _first_status_row(result: Any, status: str) -> Any | None:
@@ -1048,11 +1032,7 @@ def _stage_counts(result: Any) -> dict[str, int]:
     counts = getattr(result, "counts", None)
     if counts is None:
         return {}
-    return {
-        key: value
-        for key, value in asdict(counts).items()
-        if isinstance(value, int)
-    }
+    return {key: value for key, value in asdict(counts).items() if isinstance(value, int)}
 
 
 def _normalize_selector(value: str | None) -> str:
@@ -1071,7 +1051,7 @@ def _normalize_stage(value: str | None) -> str:
 
 def _safe_stage_name(value: Any) -> str:
     if not isinstance(value, str) or not _SAFE_STAGE_NAME_PATTERN.fullmatch(value):
-        return 'manual'
+        return "manual"
     text = str(value).strip() if value is not None else "manual"
     return text or "manual"
 
@@ -1096,15 +1076,8 @@ def _safe_list(
     if not isinstance(values, list):
         return []
     labels = allowed_labels or frozenset()
-    values = [
-        value
-        for value in values
-        if value in labels or _is_safe_local_path(value)
-    ]
-    return [
-        _safe_message(str(value), "metadata omitted by safety boundary")
-        for value in values
-    ]
+    values = [value for value in values if value in labels or _is_safe_local_path(value)]
+    return [_safe_message(str(value), "metadata omitted by safety boundary") for value in values]
 
 
 def _is_safe_local_path(value: Any) -> bool:
@@ -1112,7 +1085,7 @@ def _is_safe_local_path(value: Any) -> bool:
         return False
     if not is_safe_local_path_structure(value, allow_absolute=True):
         return False
-    return _safe_message(value, '') == value
+    return _safe_message(value, "") == value
 
 
 def _safe_message(value: str, replacement: str) -> str:

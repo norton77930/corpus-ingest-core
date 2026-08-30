@@ -18,9 +18,7 @@ from corpus_ingest_core.local_env import (
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Dry-run or execute the local deterministic research workflow."
-    )
+    parser = argparse.ArgumentParser(description="Dry-run or execute the local deterministic research workflow.")
     parser.add_argument("podcast_id", nargs="?")
     parser.add_argument("episode_ref", nargs="?")
     parser.add_argument("--podcast", dest="podcast_option")

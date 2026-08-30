@@ -17,9 +17,7 @@ from .errors import PodcastIngestCoreError
 from .mcp_runtime import mcp, tool_action_plan, tool_error
 
 X_VIDEO_CACHE_STALE_WARNING = x_video_ingest.CACHE_STALE_WARNING
-NOT_INVESTMENT_ADVICE = (
-    "Research framework only: no buy/sell/hold, target price, or guaranteed return."
-)
+NOT_INVESTMENT_ADVICE = "Research framework only: no buy/sell/hold, target price, or guaranteed return."
 PREVIEW_NETWORK_SCOPE = "public_metadata_only"
 
 
@@ -54,8 +52,7 @@ def ingest_x_video(
         response = tool_action_plan(
             tool_name="ingest_x_video",
             action=(
-                "Resolve public X video metadata and plan corpus writes. "
-                "Preview is zero-write but not zero-network."
+                "Resolve public X video metadata and plan corpus writes. Preview is zero-write but not zero-network."
             ),
             inputs=inputs,
             writes=result.planned_writes,

@@ -20,9 +20,7 @@ from .storage import external_data_boundary_asset_paths
 VERIFICATION_MODE = "fixture-external-data-v1"
 SUPPORTED_BOUNDARY_MODE = "external-data-boundary-v1"
 SUPPORTED_PROVIDER = "fixture"
-DEFAULT_EXTERNAL_MARKET_DATA_FIXTURE_PATH = Path(
-    "config/external_market_data_fixtures.yaml"
-)
+DEFAULT_EXTERNAL_MARKET_DATA_FIXTURE_PATH = Path("config/external_market_data_fixtures.yaml")
 PREVERIFICATION_BOUNDARIES_DIR = storage.CORPUS_DIR
 
 
@@ -47,38 +45,26 @@ def verify_external_data_boundary(
     paths = (
         None
         if transcript_identity is None
-        else external_data_boundary_asset_paths(
-            podcast_id, episode_ref, transcript_identity.title
-        )
+        else external_data_boundary_asset_paths(podcast_id, episode_ref, transcript_identity.title)
     )
     if paths is None or not paths.json_path.exists():
-        raise ExternalDataVerificationInputError(
-            f"找不到 external boundary：{podcast_id}/{episode_ref}"
-        )
+        raise ExternalDataVerificationInputError(f"找不到 external boundary：{podcast_id}/{episode_ref}")
 
     try:
         boundary_input_raw = paths.json_path.read_bytes()
     except OSError as exc:
-        raise ExternalDataVerificationInputError(
-            "external boundary is unreadable"
-        ) from exc
+        raise ExternalDataVerificationInputError("external boundary is unreadable") from exc
     payload = _load_boundary_payload(paths.json_path)
     _validate_boundary_identity(payload, podcast_id, episode_ref)
     boundary_mode = _required_text(payload, "boundary_mode")
     if boundary_mode != SUPPORTED_BOUNDARY_MODE:
-        raise ExternalDataVerificationInputError(
-            f"external boundary mode 不支援：{boundary_mode}"
-        )
+        raise ExternalDataVerificationInputError(f"external boundary mode 不支援：{boundary_mode}")
 
     boundary_status = _required_text(payload, "boundary_status")
     if boundary_status == "partial-draft" and not allow_partial:
-        raise ExternalDataVerificationInputError(
-            "external boundary status is partial-draft；請使用 --allow-partial。"
-        )
+        raise ExternalDataVerificationInputError("external boundary status is partial-draft；請使用 --allow-partial。")
     if boundary_status not in {"final", "partial-draft"}:
-        raise ExternalDataVerificationInputError(
-            f"external boundary status 不支援：{boundary_status}"
-        )
+        raise ExternalDataVerificationInputError(f"external boundary status 不支援：{boundary_status}")
 
     title = _required_text(payload, "title")
     candidates = _candidate_boundaries(payload)
@@ -139,16 +125,12 @@ def verify_external_data_boundary(
         updated = dict(candidate)
         fixture = _match_fixture(candidate, fixture_index)
         if fixture is None:
-            warnings.append(
-                f"no fixture match for {str(candidate.get('company_name', '')).strip()}"
-            )
+            warnings.append(f"no fixture match for {str(candidate.get('company_name', '')).strip()}")
         else:
             updated.update(
                 {
                     "external_verification_status": "verified",
-                    "source_status": str(
-                        fixture.get("source_status", "fixture_available")
-                    ),
+                    "source_status": str(fixture.get("source_status", "fixture_available")),
                     "data_date": fixture.get("data_date"),
                     "external_data": fixture.get("external_data", {}),
                     "external_data_source": {
@@ -163,9 +145,7 @@ def verify_external_data_boundary(
             verified_count += 1
         updated_candidates.append(updated)
 
-    snapshot_path = _write_preverification_boundary_snapshot(
-        podcast_id, episode_ref, boundary_input_raw
-    )
+    snapshot_path = _write_preverification_boundary_snapshot(podcast_id, episode_ref, boundary_input_raw)
     payload["candidate_boundaries"] = updated_candidates
     payload["warnings"] = _unique(warnings)
     payload["external_data_verification"] = {
@@ -211,33 +191,23 @@ def _load_boundary_payload(json_path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(json_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        raise ExternalDataVerificationInputError(
-            f"external boundary JSON 格式錯誤：{json_path}"
-        ) from exc
+        raise ExternalDataVerificationInputError(f"external boundary JSON 格式錯誤：{json_path}") from exc
     except OSError as exc:
-        raise ExternalDataVerificationInputError(
-            f"無法讀取 external boundary：{exc}"
-        ) from exc
+        raise ExternalDataVerificationInputError(f"無法讀取 external boundary：{exc}") from exc
     if not isinstance(payload, dict):
         raise ExternalDataVerificationInputError("external boundary JSON 必須是 object。")
     return payload
 
 
-def _validate_boundary_identity(
-    payload: dict[str, Any], podcast_id: str, episode_ref: str
-) -> None:
+def _validate_boundary_identity(payload: dict[str, Any], podcast_id: str, episode_ref: str) -> None:
     if payload.get("podcast_id") != podcast_id or payload.get("episode_ref") != episode_ref:
-        raise ExternalDataVerificationInputError(
-            "external boundary 的 podcast_id 或 episode_ref 不符合請求。"
-        )
+        raise ExternalDataVerificationInputError("external boundary 的 podcast_id 或 episode_ref 不符合請求。")
 
 
 def _required_text(payload: dict[str, Any], key: str) -> str:
     value = payload.get(key)
     if not isinstance(value, str) or not value.strip():
-        raise ExternalDataVerificationInputError(
-            f"external boundary 缺少有效欄位：{key}"
-        )
+        raise ExternalDataVerificationInputError(f"external boundary 缺少有效欄位：{key}")
     return value
 
 
@@ -285,9 +255,7 @@ def _fixture_index(candidates: list[dict[str, Any]]) -> dict[str, dict[str, Any]
     return index
 
 
-def _match_fixture(
-    candidate: dict[str, Any], fixture_index: dict[str, dict[str, Any]]
-) -> dict[str, Any] | None:
+def _match_fixture(candidate: dict[str, Any], fixture_index: dict[str, dict[str, Any]]) -> dict[str, Any] | None:
     keys = [
         _normalize_key(str(candidate.get("company_name", ""))),
         *[_normalize_key(ticker) for ticker in _string_list(candidate.get("tickers"))],
@@ -324,11 +292,7 @@ def _fixture_sha256(path: Path) -> str | None:
 
 
 def _verified_candidate_count(candidates: list[dict[str, Any]]) -> int:
-    return sum(
-        1
-        for candidate in candidates
-        if candidate.get("external_verification_status") == "verified"
-    )
+    return sum(1 for candidate in candidates if candidate.get("external_verification_status") == "verified")
 
 
 def _string_list(value: Any) -> list[str]:
@@ -405,27 +369,18 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     return "\n".join(lines)
 
 
-def _write_preverification_boundary_snapshot(
-    podcast_id: str, episode_ref: str, boundary_raw: bytes
-) -> Path:
+def _write_preverification_boundary_snapshot(podcast_id: str, episode_ref: str, boundary_raw: bytes) -> Path:
     """Preserve the exact boundary bytes before fixture verification mutates it."""
 
     digest = hashlib.sha256(boundary_raw).hexdigest()
-    directory = (
-        PREVERIFICATION_BOUNDARIES_DIR
-        / podcast_id
-        / "verified-research"
-        / "preverification-boundaries"
-    )
+    directory = PREVERIFICATION_BOUNDARIES_DIR / podcast_id / "verified-research" / "preverification-boundaries"
     path = directory / f"{storage.title_slug(episode_ref, 'episode')}-{digest}.json"
     stage_path = path.with_name(f".{path.name}.part")
     try:
         directory.mkdir(parents=True, exist_ok=True)
         if path.exists():
             if path.read_bytes() != boundary_raw:
-                raise ExternalDataVerificationFailedError(
-                    "preverification boundary snapshot identity collision"
-                )
+                raise ExternalDataVerificationFailedError("preverification boundary snapshot identity collision")
             return path
         stage_path.write_bytes(boundary_raw)
         stage_path.replace(path)
@@ -433,9 +388,7 @@ def _write_preverification_boundary_snapshot(
     except ExternalDataVerificationFailedError:
         raise
     except OSError as exc:
-        raise ExternalDataVerificationFailedError(
-            f"寫入 preverification boundary snapshot 失敗：{exc}"
-        ) from exc
+        raise ExternalDataVerificationFailedError(f"寫入 preverification boundary snapshot 失敗：{exc}") from exc
     finally:
         try:
             stage_path.unlink(missing_ok=True)
@@ -463,6 +416,4 @@ def _write_boundary(json_path: Path, markdown_path: Path, payload: dict[str, Any
                 part_path.unlink(missing_ok=True)
             except OSError:
                 pass
-        raise ExternalDataVerificationFailedError(
-            f"寫入 external data verification 失敗：{exc}"
-        ) from exc
+        raise ExternalDataVerificationFailedError(f"寫入 external data verification 失敗：{exc}") from exc

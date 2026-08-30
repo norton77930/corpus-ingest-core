@@ -59,9 +59,7 @@ def _write_transcript(
     paths = transcript_asset_paths(podcast_id, episode_ref, title)
     paths.text_path.parent.mkdir(parents=True, exist_ok=True)
     if write_text:
-        paths.text_path.write_text(
-            "\n".join(segment["text"] for segment in segments), encoding="utf-8"
-        )
+        paths.text_path.write_text("\n".join(segment["text"] for segment in segments), encoding="utf-8")
     if write_srt:
         paths.srt_path.write_text(
             "1\n00:01:23,000 --> 00:01:30,000\n字幕\n" if segments else "",
@@ -83,9 +81,7 @@ def _write_transcript(
                 "source_audio_size_bytes": 123,
                 "segments": segments,
             }
-            paths.json_path.write_text(
-                json.dumps(payload, ensure_ascii=False), encoding="utf-8"
-            )
+            paths.json_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
     return paths
 
 
@@ -165,9 +161,7 @@ def _write_mentions(
     return paths
 
 
-def test_generate_episode_intelligence_report_writes_json_and_markdown(
-    monkeypatch, tmp_path
-):
+def test_generate_episode_intelligence_report_writes_json_and_markdown(monkeypatch, tmp_path):
     from corpus_ingest_core.episode_intelligence import (
         generate_episode_intelligence_report,
     )
@@ -196,9 +190,7 @@ def test_generate_episode_intelligence_report_writes_json_and_markdown(
     assert "本報告不構成投資建議" in markdown
 
 
-def test_generate_episode_intelligence_report_warns_when_mentions_missing(
-    monkeypatch, tmp_path
-):
+def test_generate_episode_intelligence_report_warns_when_mentions_missing(monkeypatch, tmp_path):
     from corpus_ingest_core.episode_intelligence import (
         generate_episode_intelligence_report,
     )
@@ -213,9 +205,7 @@ def test_generate_episode_intelligence_report_warns_when_mentions_missing(
     assert payload["mentions_by_type"] == {}
 
 
-def test_generate_episode_intelligence_report_rejects_invalid_transcripts(
-    monkeypatch, tmp_path
-):
+def test_generate_episode_intelligence_report_rejects_invalid_transcripts(monkeypatch, tmp_path):
     from corpus_ingest_core.episode_intelligence import (
         generate_episode_intelligence_report,
     )
@@ -234,9 +224,7 @@ def test_generate_episode_intelligence_report_rejects_invalid_transcripts(
         generate_episode_intelligence_report("gooaye", "EP673")
 
 
-def test_generate_episode_intelligence_report_handles_partial_transcript(
-    monkeypatch, tmp_path
-):
+def test_generate_episode_intelligence_report_handles_partial_transcript(monkeypatch, tmp_path):
     from corpus_ingest_core.episode_intelligence import (
         generate_episode_intelligence_report,
     )
@@ -247,9 +235,7 @@ def test_generate_episode_intelligence_report_handles_partial_transcript(
     with pytest.raises(TranscriptParseError, match="partial"):
         generate_episode_intelligence_report("gooaye", "EP672")
 
-    asset = generate_episode_intelligence_report(
-        "gooaye", "EP672", allow_partial=True
-    )
+    asset = generate_episode_intelligence_report("gooaye", "EP672", allow_partial=True)
     payload = json.loads(asset.report_json_path.read_text(encoding="utf-8"))
 
     assert asset.transcript_status == "partial"
@@ -257,9 +243,7 @@ def test_generate_episode_intelligence_report_handles_partial_transcript(
     assert "partial transcript" in payload["risks_and_uncertainties"][0]
 
 
-def test_generate_episode_intelligence_report_reuses_existing_without_force(
-    monkeypatch, tmp_path
-):
+def test_generate_episode_intelligence_report_reuses_existing_without_force(monkeypatch, tmp_path):
     from corpus_ingest_core.episode_intelligence import (
         generate_episode_intelligence_report,
     )
@@ -285,9 +269,7 @@ def test_generate_episode_intelligence_report_reuses_existing_without_force(
 def test_episode_intelligence_report_path_removes_illegal_characters_and_emoji():
     from corpus_ingest_core.storage import episode_intelligence_report_asset_paths
 
-    paths = episode_intelligence_report_asset_paths(
-        "gooaye", "EP672", ' bad <title> 🐣 : / \\ | ? * ok '
-    )
+    paths = episode_intelligence_report_asset_paths("gooaye", "EP672", " bad <title> 🐣 : / \\ | ? * ok ")
 
     assert not any(character in paths.json_path.name for character in '<>:"/\\|?*')
     assert "🐣" not in paths.json_path.name
@@ -295,9 +277,7 @@ def test_episode_intelligence_report_path_removes_illegal_characters_and_emoji()
     assert paths.markdown_path.name == "EP672__bad_title_ok.intelligence.md"
 
 
-def test_episode_intelligence_cli_parses_options_and_outputs_json(
-    monkeypatch, capsys, tmp_path
-):
+def test_episode_intelligence_cli_parses_options_and_outputs_json(monkeypatch, capsys, tmp_path):
     from scripts import generate_episode_intelligence_report
 
     from corpus_ingest_core.models import EpisodeIntelligenceReportAsset

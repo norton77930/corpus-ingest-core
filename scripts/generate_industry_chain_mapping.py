@@ -11,9 +11,7 @@ from corpus_ingest_core import PodcastIngestCoreError, generate_industry_chain_m
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="產生單一 podcast episode 的 deterministic industry chain mapping。"
-    )
+    parser = argparse.ArgumentParser(description="產生單一 podcast episode 的 deterministic industry chain mapping。")
     parser.add_argument("podcast_id", nargs="?")
     parser.add_argument("episode_ref", nargs="?")
     parser.add_argument("--podcast", dest="podcast_option")

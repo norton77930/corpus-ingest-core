@@ -86,15 +86,11 @@ class CorpusEpisodeCompletionWorkflowRunnerFailedError(PodcastIngestCoreError):
     """Corpus episode completion workflow validation or execution failed."""
 
 
-class CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError(
-    PodcastIngestCoreError
-):
+class CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError(PodcastIngestCoreError):
     """Latest deterministic episode workflow validation or execution failed."""
 
 
-class LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
-    PodcastIngestCoreError
-):
+class LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(PodcastIngestCoreError):
     """Latest verified research report workflow validation or execution failed."""
 
 

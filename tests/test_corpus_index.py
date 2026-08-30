@@ -181,21 +181,19 @@ def _write_episode_intelligence(
     paths = episode_intelligence_report_asset_paths(podcast_id, episode_ref, title)
     _write_json(
         paths.json_path,
-            {
-                "podcast_id": podcast_id,
-                "episode_ref": episode_ref,
-                "title": title,
-                "report_status": "final",
-                "transcript_validation": {"status": "valid", "segment_count": 2},
-                "sections": [
-                    {
-                        "heading": "body",
-                        "evidence": [
-                            {"text": "episode intelligence evidence must not leak"}
-                        ],
-                    }
-                ],
-            },
+        {
+            "podcast_id": podcast_id,
+            "episode_ref": episode_ref,
+            "title": title,
+            "report_status": "final",
+            "transcript_validation": {"status": "valid", "segment_count": 2},
+            "sections": [
+                {
+                    "heading": "body",
+                    "evidence": [{"text": "episode intelligence evidence must not leak"}],
+                }
+            ],
+        },
     )
     paths.markdown_path.write_text("# report body must not leak", encoding="utf-8")
     return paths.json_path
@@ -215,25 +213,25 @@ def _write_industry_mapping(
     paths = industry_chain_mapping_asset_paths(podcast_id, episode_ref, title)
     _write_json(
         paths.json_path,
-            {
-                "podcast_id": podcast_id,
-                "episode_ref": episode_ref,
-                "title": title,
-                "mapping_status": "final",
-                "industry_chain_nodes": [
-                    {
-                        "node_id": "semiconductor",
-                        "evidence": [{"text": "mapping node evidence must not leak"}],
-                    }
-                ],
-                "stock_candidates": [
-                    {
-                        "company_name": "TSMC",
-                        "evidence": [{"text": "mapping candidate evidence must not leak"}],
-                    }
-                ],
-                "warnings": ["mapping warning body must not leak"],
-            },
+        {
+            "podcast_id": podcast_id,
+            "episode_ref": episode_ref,
+            "title": title,
+            "mapping_status": "final",
+            "industry_chain_nodes": [
+                {
+                    "node_id": "semiconductor",
+                    "evidence": [{"text": "mapping node evidence must not leak"}],
+                }
+            ],
+            "stock_candidates": [
+                {
+                    "company_name": "TSMC",
+                    "evidence": [{"text": "mapping candidate evidence must not leak"}],
+                }
+            ],
+            "warnings": ["mapping warning body must not leak"],
+        },
     )
     paths.markdown_path.write_text("# mapping body must not leak", encoding="utf-8")
     return paths.json_path
@@ -253,19 +251,19 @@ def _write_external_boundary(
     paths = external_data_boundary_asset_paths(podcast_id, episode_ref, title)
     _write_json(
         paths.json_path,
-            {
-                "podcast_id": podcast_id,
-                "episode_ref": episode_ref,
-                "title": title,
-                "boundary_status": "final",
-                "candidate_boundaries": [
-                    {
-                        "company_name": "TSMC",
-                        "notes": "external boundary candidate body must not leak",
-                    }
-                ],
-                "warnings": [],
-            },
+        {
+            "podcast_id": podcast_id,
+            "episode_ref": episode_ref,
+            "title": title,
+            "boundary_status": "final",
+            "candidate_boundaries": [
+                {
+                    "company_name": "TSMC",
+                    "notes": "external boundary candidate body must not leak",
+                }
+            ],
+            "warnings": [],
+        },
     )
     paths.markdown_path.write_text("# boundary body must not leak", encoding="utf-8")
     return paths.json_path
@@ -353,9 +351,7 @@ def test_corpus_index_public_result_contract_exports(tmp_path):
     assert callable(generate_corpus_index)
 
 
-def test_corpus_index_snapshot_builds_without_writes_until_persisted(
-    monkeypatch, tmp_path
-):
+def test_corpus_index_snapshot_builds_without_writes_until_persisted(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_index as corpus_index
     from corpus_ingest_core import storage
 
@@ -378,7 +374,6 @@ def test_corpus_index_snapshot_builds_without_writes_until_persisted(
     assert paths.json_path.exists()
     assert paths.markdown_path.exists()
     assert not list(paths.json_path.parent.glob("*.part"))
-
 
 
 def test_generate_corpus_index_writes_empty_index(monkeypatch, tmp_path):
@@ -415,9 +410,7 @@ def test_generate_corpus_index_discovers_seeded_episode_metadata(monkeypatch, tm
     assert row["source_metadata"]["episode_seed"]["seed_source"] == "rss"
 
 
-def test_generate_corpus_index_discovers_supported_episode_artifacts(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_index_discovers_supported_episode_artifacts(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_index import generate_corpus_index
 
     review_dir = _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -471,9 +464,7 @@ def test_generate_corpus_index_discovers_supported_episode_artifacts(
     )
 
 
-def test_generate_corpus_index_is_deterministic_and_has_no_timestamp(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_index_is_deterministic_and_has_no_timestamp(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_index import generate_corpus_index
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -515,9 +506,7 @@ def test_generate_corpus_index_reports_missing_artifact_families(monkeypatch, tm
     ]
 
 
-def test_generate_corpus_index_contains_unreadable_json_to_affected_family(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_index_contains_unreadable_json_to_affected_family(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_index import generate_corpus_index
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -533,9 +522,7 @@ def test_generate_corpus_index_contains_unreadable_json_to_affected_family(
     assert result.warning_count == 1
 
 
-def test_generate_corpus_index_selects_duplicate_candidates_deterministically(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_index_selects_duplicate_candidates_deterministically(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_index import generate_corpus_index
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -590,9 +577,7 @@ def test_generate_corpus_index_selects_latest_semantic_review(monkeypatch, tmp_p
     assert semantic_review["failed_check_count"] == 1
     assert semantic_review["warning_count"] == 2
     assert semantic_review["candidate_count"] == 2
-    assert semantic_review["warnings"] == [
-        f"ignored non-timestamped semantic review candidate: {ignored}"
-    ]
+    assert semantic_review["warnings"] == [f"ignored non-timestamped semantic review candidate: {ignored}"]
 
 
 def test_generate_corpus_index_excludes_semantic_summary_body(monkeypatch, tmp_path):
@@ -616,9 +601,7 @@ def test_generate_corpus_index_excludes_semantic_summary_body(monkeypatch, tmp_p
     assert "raw transcript dump" not in markdown
 
 
-def test_generate_corpus_index_excludes_body_text_from_json_metadata_artifacts(
-    monkeypatch, tmp_path
-):
+def test_generate_corpus_index_excludes_body_text_from_json_metadata_artifacts(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_index import generate_corpus_index
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -673,9 +656,7 @@ def test_generate_corpus_index_reports_missing_semantic_review(monkeypatch, tmp_
     assert row["artifact_status"]["semantic_review"]["review_json_path"] is None
 
 
-def test_generate_corpus_index_cli_prints_output_paths_and_counts(
-    monkeypatch, capsys, tmp_path
-):
+def test_generate_corpus_index_cli_prints_output_paths_and_counts(monkeypatch, capsys, tmp_path):
     from scripts import generate_corpus_index as cli
 
     from corpus_ingest_core.models import CorpusArtifactFamilyCounts, CorpusIndexResult
@@ -686,11 +667,7 @@ def test_generate_corpus_index_cli_prints_output_paths_and_counts(
         index_markdown_path=tmp_path / "corpus-index.md",
         episode_count=2,
         warning_count=1,
-        artifact_family_counts={
-            "transcript": CorpusArtifactFamilyCounts(
-                available=1, missing=1, unreadable=0
-            )
-        },
+        artifact_family_counts={"transcript": CorpusArtifactFamilyCounts(available=1, missing=1, unreadable=0)},
     )
     captured = {}
 
@@ -732,6 +709,7 @@ def test_generate_corpus_index_cli_reports_invalid_podcast(capsys, monkeypatch):
     assert captured.out == ""
     assert "podcast_id" in captured.err
 
+
 def test_semantic_summary_readability_metadata_is_additive_and_legacy_status_stays_available(
     monkeypatch, tmp_path: Path
 ):
@@ -749,9 +727,7 @@ def test_semantic_summary_readability_metadata_is_additive_and_legacy_status_sta
     )
 
     snapshot = corpus_index._build_corpus_index_snapshot("gooaye")
-    episode = next(
-        row for row in snapshot.payload["episodes"] if row["episode_ref"] == "EP700"
-    )
+    episode = next(row for row in snapshot.payload["episodes"] if row["episode_ref"] == "EP700")
     status = episode["artifact_status"]["semantic_summary"]
 
     assert status["status"] == "available"
@@ -779,9 +755,7 @@ def test_semantic_summary_invalid_utf8_is_metadata_unreadable_without_changing_l
     summary_path.write_bytes(b"\xffsecret semantic sentinel")
 
     snapshot = corpus_index._build_corpus_index_snapshot("gooaye")
-    episode = next(
-        row for row in snapshot.payload["episodes"] if row["episode_ref"] == "EP701"
-    )
+    episode = next(row for row in snapshot.payload["episodes"] if row["episode_ref"] == "EP701")
     status = episode["artifact_status"]["semantic_summary"]
 
     assert status["status"] == "available"
@@ -791,9 +765,8 @@ def test_semantic_summary_invalid_utf8_is_metadata_unreadable_without_changing_l
     assert status["warning_count"] >= 1
     assert "secret semantic sentinel" not in repr(status)
 
-def test_semantic_summary_oversize_is_fail_closed_with_bounded_read(
-    monkeypatch, tmp_path: Path
-):
+
+def test_semantic_summary_oversize_is_fail_closed_with_bounded_read(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_index as corpus_index
 
     _write_episode_seed(monkeypatch, tmp_path, episode_ref="EP702", title="Alpha")
@@ -805,14 +778,10 @@ def test_semantic_summary_oversize_is_fail_closed_with_bounded_read(
         title="Alpha",
         semantic=True,
     )
-    summary_path.write_bytes(
-        b"x" * (corpus_index._SEMANTIC_SUMMARY_MAX_READ_BYTES + 1)
-    )
+    summary_path.write_bytes(b"x" * (corpus_index._SEMANTIC_SUMMARY_MAX_READ_BYTES + 1))
 
     snapshot = corpus_index._build_corpus_index_snapshot("gooaye")
-    episode = next(
-        row for row in snapshot.payload["episodes"] if row["episode_ref"] == "EP702"
-    )
+    episode = next(row for row in snapshot.payload["episodes"] if row["episode_ref"] == "EP702")
     status = episode["artifact_status"]["semantic_summary"]
 
     assert status["status"] == "available"

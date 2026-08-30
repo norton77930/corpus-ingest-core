@@ -83,9 +83,7 @@ def _loopback_semantic_routing(value: str | None) -> tuple[str | None, str]:
 def main(argv: list[str] | None = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        semantic_base_url, semantic_api_key_env = _loopback_semantic_routing(
-            args.semantic_base_url
-        )
+        semantic_base_url, semantic_api_key_env = _loopback_semantic_routing(args.semantic_base_url)
     except ValueError:
         print(
             "LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError: invalid semantic base URL",

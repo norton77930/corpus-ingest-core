@@ -14,9 +14,7 @@ DEFAULT_PORT = 8767
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(
-        description="以 loopback Streamable HTTP 啟動 corpus-ingest-core MCP server。"
-    )
+    parser = argparse.ArgumentParser(description="以 loopback Streamable HTTP 啟動 corpus-ingest-core MCP server。")
     parser.add_argument(
         "--port",
         type=int,

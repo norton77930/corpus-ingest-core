@@ -34,9 +34,7 @@ def _write_transcript(
 
     paths = transcript_asset_paths(podcast_id, episode_ref, title)
     paths.text_path.parent.mkdir(parents=True, exist_ok=True)
-    paths.text_path.write_text(
-        "\n".join(segment["text"] for segment in segments), encoding="utf-8"
-    )
+    paths.text_path.write_text("\n".join(segment["text"] for segment in segments), encoding="utf-8")
     paths.srt_path.write_text(
         "1\n00:00:00,000 --> 00:00:12,000\n第一段文字\n" if segments else "",
         encoding="utf-8",
@@ -125,9 +123,7 @@ def test_summarize_episode_generates_timeline_and_quotes(monkeypatch, tmp_path):
 
     _write_transcript(monkeypatch, tmp_path)
 
-    asset = summarizer.summarize_episode(
-        "gooaye", "EP672", max_quotes=2, window_seconds=300
-    )
+    asset = summarizer.summarize_episode("gooaye", "EP672", max_quotes=2, window_seconds=300)
 
     content = asset.summary_path.read_text(encoding="utf-8")
     assert "## 時間軸摘要" in content
@@ -195,7 +191,7 @@ def test_summarize_episode_allows_partial_when_requested(monkeypatch, tmp_path):
 def test_summary_path_removes_illegal_characters_and_emoji():
     from corpus_ingest_core.storage import summary_asset_path
 
-    path = summary_asset_path("gooaye", "EP672", ' bad <title> 🐣 : / \\ | ? * ok ')
+    path = summary_asset_path("gooaye", "EP672", " bad <title> 🐣 : / \\ | ? * ok ")
 
     assert not any(character in path.name for character in '<>:"/\\|?*')
     assert "🐣" not in path.name
@@ -330,9 +326,7 @@ def test_extractive_finance_prompt_block_is_byte_identical(monkeypatch, tmp_path
     assert _FINANCE_EXTRACTIVE_BLOCK in content
 
 
-def test_extractive_learning_notes_prompt_block_drops_the_market_sections(
-    monkeypatch, tmp_path
-):
+def test_extractive_learning_notes_prompt_block_drops_the_market_sections(monkeypatch, tmp_path):
     import corpus_ingest_core.summarizer as summarizer
 
     _write_transcript(monkeypatch, tmp_path)

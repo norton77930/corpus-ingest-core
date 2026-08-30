@@ -157,9 +157,7 @@ company_aliases: {}
     return config_path
 
 
-def test_generate_industry_chain_mapping_writes_json_and_markdown(
-    monkeypatch, tmp_path
-):
+def test_generate_industry_chain_mapping_writes_json_and_markdown(monkeypatch, tmp_path):
     import corpus_ingest_core.industry_mapping as industry_mapping
 
     config_path = _write_mapping_config(tmp_path)
@@ -171,9 +169,7 @@ def test_generate_industry_chain_mapping_writes_json_and_markdown(
     payload = json.loads(asset.mapping_json_path.read_text(encoding="utf-8"))
     markdown = asset.mapping_markdown_path.read_text(encoding="utf-8")
     explicit = [
-        candidate
-        for candidate in payload["stock_candidates"]
-        if candidate["evidence_status"] == "podcast_explicit"
+        candidate for candidate in payload["stock_candidates"] if candidate["evidence_status"] == "podcast_explicit"
     ]
     inferred = [
         candidate
@@ -191,23 +187,17 @@ def test_generate_industry_chain_mapping_writes_json_and_markdown(
     assert explicit[0]["verification_status"] == "podcast_evidence"
     assert explicit[0]["evidence"][0]["timestamp"] == "[00:01:23 - 00:01:30]"
     assert any(candidate["company_name"] == "NVIDIA" for candidate in inferred)
-    assert {candidate["verification_status"] for candidate in inferred} == {
-        "needs_verification"
-    }
+    assert {candidate["verification_status"] for candidate in inferred} == {"needs_verification"}
     assert "# Gooaye 股癌 - EP672 Industry Chain Mapping" in markdown
     assert "podcast_explicit" in markdown
     assert "inferred_from_industry" in markdown
     assert "本檔案不構成投資建議" in markdown
 
 
-def test_generate_industry_chain_mapping_warns_without_fabricating_candidates(
-    monkeypatch, tmp_path
-):
+def test_generate_industry_chain_mapping_warns_without_fabricating_candidates(monkeypatch, tmp_path):
     import corpus_ingest_core.industry_mapping as industry_mapping
 
-    monkeypatch.setattr(
-        industry_mapping, "DEFAULT_MAPPING_CONFIG_PATH", tmp_path / "missing.yaml"
-    )
+    monkeypatch.setattr(industry_mapping, "DEFAULT_MAPPING_CONFIG_PATH", tmp_path / "missing.yaml")
     _write_episode_report(monkeypatch, tmp_path, include_company=False)
 
     asset = industry_mapping.generate_industry_chain_mapping("gooaye", "EP672")
@@ -234,9 +224,7 @@ def test_generate_industry_chain_mapping_warns_without_fabricating_candidates(
     assert "unmatched industry clue: 未知產業" in unmatched_payload["warnings"]
 
 
-def test_generate_industry_chain_mapping_handles_partial_report(
-    monkeypatch, tmp_path
-):
+def test_generate_industry_chain_mapping_handles_partial_report(monkeypatch, tmp_path):
     import corpus_ingest_core.industry_mapping as industry_mapping
     from corpus_ingest_core.errors import IndustryMappingInputError
 
@@ -247,18 +235,14 @@ def test_generate_industry_chain_mapping_handles_partial_report(
     with pytest.raises(IndustryMappingInputError, match="partial-draft"):
         industry_mapping.generate_industry_chain_mapping("gooaye", "EP672")
 
-    asset = industry_mapping.generate_industry_chain_mapping(
-        "gooaye", "EP672", allow_partial=True
-    )
+    asset = industry_mapping.generate_industry_chain_mapping("gooaye", "EP672", allow_partial=True)
     payload = json.loads(asset.mapping_json_path.read_text(encoding="utf-8"))
 
     assert asset.mapping_status == "partial-draft"
     assert payload["mapping_status"] == "partial-draft"
 
 
-def test_generate_industry_chain_mapping_reuses_existing_without_force(
-    monkeypatch, tmp_path
-):
+def test_generate_industry_chain_mapping_reuses_existing_without_force(monkeypatch, tmp_path):
     import corpus_ingest_core.industry_mapping as industry_mapping
     from corpus_ingest_core.storage import industry_chain_mapping_asset_paths
 
@@ -276,9 +260,7 @@ def test_generate_industry_chain_mapping_reuses_existing_without_force(
     assert asset.already_exists is True
     assert paths.json_path.read_text(encoding="utf-8") == "existing json"
 
-    regenerated = industry_mapping.generate_industry_chain_mapping(
-        "gooaye", "EP672", force=True
-    )
+    regenerated = industry_mapping.generate_industry_chain_mapping("gooaye", "EP672", force=True)
     assert regenerated.generated is True
     assert "existing json" not in paths.json_path.read_text(encoding="utf-8")
 
@@ -286,9 +268,7 @@ def test_generate_industry_chain_mapping_reuses_existing_without_force(
 def test_industry_chain_mapping_path_removes_illegal_characters_and_emoji():
     from corpus_ingest_core.storage import industry_chain_mapping_asset_paths
 
-    paths = industry_chain_mapping_asset_paths(
-        "gooaye", "EP672", ' bad <title> 🐣 : / \\ | ? * ok '
-    )
+    paths = industry_chain_mapping_asset_paths("gooaye", "EP672", " bad <title> 🐣 : / \\ | ? * ok ")
 
     assert not any(character in paths.json_path.name for character in '<>:"/\\|?*')
     assert "🐣" not in paths.json_path.name
@@ -296,9 +276,7 @@ def test_industry_chain_mapping_path_removes_illegal_characters_and_emoji():
     assert paths.markdown_path.name == "EP672__bad_title_ok.industry-map.md"
 
 
-def test_industry_chain_mapping_cli_parses_options_and_outputs_json(
-    monkeypatch, capsys, tmp_path
-):
+def test_industry_chain_mapping_cli_parses_options_and_outputs_json(monkeypatch, capsys, tmp_path):
     from scripts import generate_industry_chain_mapping
 
     from corpus_ingest_core.models import IndustryChainMappingAsset

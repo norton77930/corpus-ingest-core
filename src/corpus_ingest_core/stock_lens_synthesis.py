@@ -29,9 +29,7 @@ from .summary_profiles import FINANCE
 SYNTHESIS_MODE = "llm-stock-lens-synthesis-v1"
 SOURCE_REPORT_MODE = "deterministic-stock-lens-v1"
 INPUT_BOUNDARY = "phase-6f-stock-lens-json-only"
-REVIEWED_SEMANTIC_INPUT_BOUNDARY = (
-    "phase-6f-stock-lens-json-plus-reviewed-semantic-summary"
-)
+REVIEWED_SEMANTIC_INPUT_BOUNDARY = "phase-6f-stock-lens-json-plus-reviewed-semantic-summary"
 
 SEMANTIC_CONTEXT_TRUNCATION_MARKER = "\n[semantic context truncated]"
 _SECRET_LIKE_PATTERN = re.compile(r"\bsk-[A-Za-z0-9_-]{8,}\b")
@@ -50,9 +48,7 @@ def require_finance_summary_profile(podcast_id: str) -> None:
     try:
         profile = load_podcast_profile(podcast_id)
     except KeyError as exc:
-        raise StockLensSynthesisInputError(
-            f"podcast profile not found: {podcast_id}"
-        ) from exc
+        raise StockLensSynthesisInputError(f"podcast profile not found: {podcast_id}") from exc
     if profile.summary_profile != FINANCE:
         raise StockLensSynthesisInputError(
             f"{podcast_id} summary_profile is {profile.summary_profile}, not {FINANCE}. "
@@ -115,11 +111,7 @@ def generate_stock_lens_synthesis_report(
     if include_semantic_context:
         planned_reads.extend(
             [
-                str(
-                    storage.SUMMARIES_DIR
-                    / storage.title_slug(podcast_id, "podcast")
-                    / "*.semantic.md"
-                ),
+                str(storage.SUMMARIES_DIR / storage.title_slug(podcast_id, "podcast") / "*.semantic.md"),
                 str(
                     SEMANTIC_REVIEW_REPORTS_DIR
                     / f"*__{storage.title_slug(podcast_id, 'podcast')}__*.semantic-review.json"
@@ -160,11 +152,7 @@ def generate_stock_lens_synthesis_report(
     source_report_status = _required_text(source_payload, "report_status")
     synthesis_status = _synthesis_status(source_report_status)
 
-    if (
-        synthesis_paths.json_path.exists()
-        and synthesis_paths.markdown_path.exists()
-        and not force
-    ):
+    if synthesis_paths.json_path.exists() and synthesis_paths.markdown_path.exists() and not force:
         existing = _load_existing_synthesis(synthesis_paths.json_path)
         return _result(
             podcast_id=podcast_id,
@@ -228,9 +216,7 @@ def generate_stock_lens_synthesis_report(
         "source_report_mode": SOURCE_REPORT_MODE,
         "source_report_status": source_report_status,
         "source_stock_lens_json_path": str(source_paths.json_path),
-        "llm_input_boundary": (
-            REVIEWED_SEMANTIC_INPUT_BOUNDARY if semantic_context else INPUT_BOUNDARY
-        ),
+        "llm_input_boundary": (REVIEWED_SEMANTIC_INPUT_BOUNDARY if semantic_context else INPUT_BOUNDARY),
         "provider": getattr(llm_provider, "provider_name", provider),
         "model": getattr(llm_provider, "model", model),
         "prompt_char_count": prompt_char_count,
@@ -292,9 +278,7 @@ def _build_provider(
 
 def _raise_for_missing_ack(api_cost_ack: str) -> None:
     if api_cost_ack != SEMANTIC_API_COST_ACK:
-        raise StockLensSynthesisInputError(
-            f"stock lens synthesis requires exact api_cost_ack: {SEMANTIC_API_COST_ACK}"
-        )
+        raise StockLensSynthesisInputError(f"stock lens synthesis requires exact api_cost_ack: {SEMANTIC_API_COST_ACK}")
 
 
 def _load_source_payload(json_path: Path, *, required: bool) -> dict[str, Any] | None:
@@ -326,9 +310,7 @@ def _validate_source_payload(payload: dict[str, Any], *, allow_partial: bool) ->
     status = _required_text(payload, "report_status")
     if status == "partial-draft":
         if not allow_partial:
-            raise StockLensSynthesisInputError(
-                "stock lens report status is partial-draft；請使用 --allow-partial。"
-            )
+            raise StockLensSynthesisInputError("stock lens report status is partial-draft；請使用 --allow-partial。")
     elif status not in {"final", "no-direct-podcast-evidence"}:
         raise StockLensSynthesisInputError(f"stock lens report_status 不支援：{status}")
     _required_text(payload, "podcast_id")
@@ -378,9 +360,7 @@ def _compact_source_payload(
             "dimensions": _list_of_dicts(lens.get("dimensions")),
             "safety_rules": _string_list(lens.get("safety_rules")),
         },
-        "external_verification_needs": _list_of_dicts(
-            payload.get("external_verification_needs")
-        ),
+        "external_verification_needs": _list_of_dicts(payload.get("external_verification_needs")),
         "reviewed_semantic_context": semantic_context or [],
         "warnings": _string_list(payload.get("warnings")),
         "not_investment_advice": payload.get("not_investment_advice") is True,
@@ -428,10 +408,7 @@ def _semantic_context_for_source(
                 continue
 
         content, extraction_warnings = _extract_semantic_context(summary_path)
-        warnings.extend(
-            f"semantic context {episode_ref}: {warning}"
-            for warning in extraction_warnings
-        )
+        warnings.extend(f"semantic context {episode_ref}: {warning}" for warning in extraction_warnings)
         if not content:
             warnings.append(f"semantic context empty: {episode_ref}")
             continue
@@ -491,11 +468,7 @@ def _latest_semantic_review(
 ) -> tuple[dict[str, Any], Path | None, str | None]:
     safe_podcast = storage.title_slug(podcast_id, "podcast")
     safe_episode = storage.title_slug(episode_ref, "episode")
-    matches = sorted(
-        SEMANTIC_REVIEW_REPORTS_DIR.glob(
-            f"*__{safe_podcast}__{safe_episode}.semantic-review.json"
-        )
-    )
+    matches = sorted(SEMANTIC_REVIEW_REPORTS_DIR.glob(f"*__{safe_podcast}__{safe_episode}.semantic-review.json"))
     if not matches:
         return {}, None, f"semantic review missing: {episode_ref}"
     review_path = matches[-1]
@@ -512,9 +485,7 @@ def _extract_semantic_context(summary_path: Path) -> tuple[str, list[str]]:
     try:
         text = summary_path.read_text(encoding="utf-8")
     except OSError as exc:
-        raise StockLensSynthesisInputError(
-            f"無法讀取 semantic summary context：{summary_path}"
-        ) from exc
+        raise StockLensSynthesisInputError(f"無法讀取 semantic summary context：{summary_path}") from exc
 
     before_chunks = re.split(r"(?im)^##\s+Chunk Summaries\s*$", text, maxsplit=1)[0]
     before_chunks = _SECRET_LIKE_PATTERN.sub("[redacted-secret]", before_chunks)
@@ -584,8 +555,7 @@ def _raise_for_prohibited_output(text: str) -> None:
     matched_guard = _matched_prohibited_guard(review_text)
     if matched_guard is not None:
         raise StockLensSynthesisInputError(
-            "LLM output appears to contain prohibited investment advice. "
-            f"matched_guard={matched_guard}"
+            f"LLM output appears to contain prohibited investment advice. matched_guard={matched_guard}"
         )
 
 
@@ -594,7 +564,6 @@ def _matched_prohibited_guard(text: str) -> str | None:
         if pattern.search(text):
             return name
     return None
-
 
 
 def _write_debug_output_if_requested(text: str) -> None:
@@ -606,9 +575,7 @@ def _write_debug_output_if_requested(text: str) -> None:
         output_path.parent.mkdir(parents=True, exist_ok=True)
         output_path.write_text(text, encoding="utf-8")
     except OSError as exc:
-        raise StockLensSynthesisFailedError(
-            f"failed to write debug LLM output: {output_path}"
-        ) from exc
+        raise StockLensSynthesisFailedError(f"failed to write debug LLM output: {output_path}") from exc
 
 
 def _warnings_for_source(
@@ -668,8 +635,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
             "本報告不構成投資建議。",
             "No buy/sell/hold advice. No target price. No guaranteed returns.",
             (
-                "This artifact is LLM-assisted synthesis over Phase 6F JSON and "
-                "reviewed semantic summary context."
+                "This artifact is LLM-assisted synthesis over Phase 6F JSON and reviewed semantic summary context."
                 if payload["source_semantic_context"]
                 else "This artifact is LLM-assisted synthesis over Phase 6F JSON only."
             ),
@@ -704,9 +670,7 @@ def _write_synthesis(
                 part_path.unlink(missing_ok=True)
             except OSError:
                 pass
-        raise StockLensSynthesisFailedError(
-            f"寫入 stock lens synthesis 失敗：{exc}"
-        ) from exc
+        raise StockLensSynthesisFailedError(f"寫入 stock lens synthesis 失敗：{exc}") from exc
 
 
 def _load_existing_synthesis(json_path: Path) -> dict[str, Any]:

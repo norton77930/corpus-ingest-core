@@ -12,9 +12,7 @@ from corpus_ingest_core import PodcastIngestCoreError, run_x_video_ingest
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="把一支 X 影片取得成 corpus 音訊與逐字稿；預設為 dry-run。"
-    )
+    parser = argparse.ArgumentParser(description="把一支 X 影片取得成 corpus 音訊與逐字稿；預設為 dry-run。")
     parser.add_argument("--url", required=True, help="X 貼文網址")
     parser.add_argument("--confirm", action="store_true", help="實際下載並轉錄")
     parser.add_argument("--title", help="覆寫來源 metadata 的標題")

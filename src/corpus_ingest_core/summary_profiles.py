@@ -49,8 +49,7 @@ _FINANCE = SummaryProfile(
         "所有重點盡量附 timestamp evidence，不要產生投資建議。"
     ),
     chunk_sections=(
-        "請包含：主要內容、提到的人物 / 公司 / 股票 / 產業 / 地點 / 書籍 / 電影 / 餐廳、"
-        "可引用片段、不確定事項。"
+        "請包含：主要內容、提到的人物 / 公司 / 股票 / 產業 / 地點 / 書籍 / 電影 / 餐廳、可引用片段、不確定事項。"
     ),
     chunk_constraints="限制：不要產生投資建議；所有判斷都要能回到逐字稿 timestamp。",
     final_system=(
@@ -94,13 +93,8 @@ _LEARNING_NOTES = SummaryProfile(
         "你是教學影片逐字稿摘要器。只根據使用者提供的逐字稿片段摘要，"
         "所有重點盡量附 timestamp evidence，不要補充逐字稿沒有的內容。"
     ),
-    chunk_sections=(
-        "請包含：主要內容、提到的觀念 / 方法 / 工具 / 名詞 / 人物 / 產品 / 書籍、"
-        "可引用片段、不確定事項。"
-    ),
-    chunk_constraints=(
-        "限制：不要補充逐字稿沒有的內容；所有判斷都要能回到逐字稿 timestamp。"
-    ),
+    chunk_sections=("請包含：主要內容、提到的觀念 / 方法 / 工具 / 名詞 / 人物 / 產品 / 書籍、可引用片段、不確定事項。"),
+    chunk_constraints=("限制：不要補充逐字稿沒有的內容；所有判斷都要能回到逐字稿 timestamp。"),
     final_system=(
         "你是教學影片語意摘要器。根據 chunk summaries 整理成一份可自學的學習筆記，"
         "所有觀念、步驟與範例都要盡量附 timestamp evidence，"
@@ -157,13 +151,9 @@ def resolve_summary_profile(name: object = UNSET) -> SummaryProfile:
 
     known = "、".join(sorted(SUMMARY_PROFILES))
     if not isinstance(name, str) or not name.strip():
-        raise UnknownSummaryProfileError(
-            f"summary_profile 必須是非空字串，收到 {name!r}。已知的值：{known}。"
-        )
+        raise UnknownSummaryProfileError(f"summary_profile 必須是非空字串，收到 {name!r}。已知的值：{known}。")
 
     try:
         return SUMMARY_PROFILES[name.strip()]
     except KeyError as exc:
-        raise UnknownSummaryProfileError(
-            f"未知的 summary_profile：{name!r}。已知的值：{known}。"
-        ) from exc
+        raise UnknownSummaryProfileError(f"未知的 summary_profile：{name!r}。已知的值：{known}。") from exc

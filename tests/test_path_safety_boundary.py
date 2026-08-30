@@ -54,21 +54,15 @@ def test_is_safe_local_path_definitions_are_thin_wrappers():
             continue
         tree = ast.parse(text)
         for node in ast.walk(tree):
-            if (
-                isinstance(node, ast.FunctionDef)
-                and node.name == "_is_safe_local_path"
-            ):
+            if isinstance(node, ast.FunctionDef) and node.name == "_is_safe_local_path":
                 segment = ast.get_source_segment(text, node) or ""
                 assert "is_safe_local_path_structure(" in segment, (
-                    f"{path.name}: _is_safe_local_path must delegate to "
-                    "path_safety.is_safe_local_path_structure"
+                    f"{path.name}: _is_safe_local_path must delegate to path_safety.is_safe_local_path_structure"
                 )
                 assert "re.split(" not in segment, (
-                    f"{path.name}: _is_safe_local_path must not reimplement "
-                    "the structural skeleton"
+                    f"{path.name}: _is_safe_local_path must not reimplement the structural skeleton"
                 )
                 wrapper_modules.add(path.name)
     assert wrapper_modules == EXPECTED_WRAPPER_MODULES, (
-        "wrapper module set changed — update deliberately: "
-        f"{sorted(wrapper_modules)}"
+        f"wrapper module set changed — update deliberately: {sorted(wrapper_modules)}"
     )

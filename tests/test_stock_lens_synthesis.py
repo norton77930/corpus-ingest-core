@@ -6,10 +6,7 @@ import sys
 
 import pytest
 
-ACK = (
-    "I understand this may call an external LLM API, send transcript text outside this machine, "
-    "and incur costs."
-)
+ACK = "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
 
 
 class FakeSynthesisProvider:
@@ -61,13 +58,13 @@ def _write_stock_lens(
         "query_match_summary": {
             "stock_query": stock_query,
             "matched_candidate_count": 2,
-            "direct_podcast_evidence_count": 0
-            if report_status == "no-direct-podcast-evidence"
-            else 1,
+            "direct_podcast_evidence_count": 0 if report_status == "no-direct-podcast-evidence" else 1,
             "inferred_research_lead_count": 1,
             "no_direct_podcast_evidence": report_status == "no-direct-podcast-evidence",
         },
-        "direct_podcast_evidence": [] if report_status == "no-direct-podcast-evidence" else [
+        "direct_podcast_evidence": []
+        if report_status == "no-direct-podcast-evidence"
+        else [
             {
                 "episode_ref": "EP672",
                 "title": "EP672 title",
@@ -227,9 +224,7 @@ def _write_semantic_context(
     return summary_path, review_path
 
 
-def test_stock_lens_synthesis_dry_run_requires_ack_and_writes_nothing(
-    monkeypatch, tmp_path
-):
+def test_stock_lens_synthesis_dry_run_requires_ack_and_writes_nothing(monkeypatch, tmp_path):
     import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     _write_stock_lens(monkeypatch, tmp_path)
@@ -290,9 +285,7 @@ def test_stock_lens_synthesis_refuses_unknown_podcast_before_provider(monkeypatc
         synthesis.generate_stock_lens_synthesis_report("no-such-podcast", "台積電")
 
 
-def test_stock_lens_synthesis_confirm_requires_exact_ack_before_writes(
-    monkeypatch, tmp_path
-):
+def test_stock_lens_synthesis_confirm_requires_exact_ack_before_writes(monkeypatch, tmp_path):
     import corpus_ingest_core.stock_lens_synthesis as synthesis
     from corpus_ingest_core.errors import StockLensSynthesisInputError
 
@@ -351,9 +344,7 @@ def test_stock_lens_synthesis_confirm_writes_json_and_markdown(monkeypatch, tmp_
     assert not raw_path.exists()
 
 
-def test_stock_lens_synthesis_can_include_reviewed_semantic_context(
-    monkeypatch, tmp_path
-):
+def test_stock_lens_synthesis_can_include_reviewed_semantic_context(monkeypatch, tmp_path):
     import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     _write_stock_lens(monkeypatch, tmp_path)
@@ -372,9 +363,7 @@ def test_stock_lens_synthesis_can_include_reviewed_semantic_context(
 
     payload = json.loads(result.synthesis_json_path.read_text(encoding="utf-8"))
     prompt_text = provider.messages[0][1]["content"]
-    assert payload["llm_input_boundary"] == (
-        "phase-6f-stock-lens-json-plus-reviewed-semantic-summary"
-    )
+    assert payload["llm_input_boundary"] == ("phase-6f-stock-lens-json-plus-reviewed-semantic-summary")
     assert payload["source_semantic_context"][0]["episode_ref"] == "EP672"
     assert payload["source_semantic_context"][0]["review_status"] == "passed"
     assert "Reviewed semantic summary says 台積電產能限制延長 AI cycle" in prompt_text
@@ -384,9 +373,7 @@ def test_stock_lens_synthesis_can_include_reviewed_semantic_context(
     assert "sk-test-secret" not in prompt_text
 
 
-def test_stock_lens_synthesis_semantic_context_requires_passed_review(
-    monkeypatch, tmp_path
-):
+def test_stock_lens_synthesis_semantic_context_requires_passed_review(monkeypatch, tmp_path):
     import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     _write_stock_lens(monkeypatch, tmp_path)
@@ -411,9 +398,7 @@ def test_stock_lens_synthesis_semantic_context_requires_passed_review(
     assert "Reviewed semantic summary says" not in prompt_text
 
 
-def test_stock_lens_synthesis_semantic_context_truncates_with_warning(
-    monkeypatch, tmp_path
-):
+def test_stock_lens_synthesis_semantic_context_truncates_with_warning(monkeypatch, tmp_path):
     import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     _write_stock_lens(monkeypatch, tmp_path)
@@ -438,9 +423,7 @@ def test_stock_lens_synthesis_semantic_context_truncates_with_warning(
     assert any("semantic context truncated" in warning for warning in payload["warnings"])
 
 
-def test_stock_lens_synthesis_debug_output_writes_success_response(
-    monkeypatch, tmp_path
-):
+def test_stock_lens_synthesis_debug_output_writes_success_response(monkeypatch, tmp_path):
     import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     response = "debug raw synthesis text"
@@ -463,9 +446,7 @@ def test_stock_lens_synthesis_debug_output_writes_success_response(
     assert raw_path.read_text(encoding="utf-8") == response
 
 
-def test_stock_lens_synthesis_debug_output_writes_before_guard_failure(
-    monkeypatch, tmp_path
-):
+def test_stock_lens_synthesis_debug_output_writes_before_guard_failure(monkeypatch, tmp_path):
     import corpus_ingest_core.stock_lens_synthesis as synthesis
     from corpus_ingest_core.errors import StockLensSynthesisInputError
 
@@ -493,9 +474,7 @@ def test_stock_lens_synthesis_debug_output_writes_before_guard_failure(
     assert raw_path.read_text(encoding="utf-8") == response
 
 
-def test_stock_lens_synthesis_debug_output_invalid_path_fails_cleanly(
-    monkeypatch, tmp_path
-):
+def test_stock_lens_synthesis_debug_output_invalid_path_fails_cleanly(monkeypatch, tmp_path):
     import corpus_ingest_core.stock_lens_synthesis as synthesis
     from corpus_ingest_core.errors import StockLensSynthesisFailedError
 
@@ -514,9 +493,7 @@ def test_stock_lens_synthesis_debug_output_invalid_path_fails_cleanly(
         )
 
 
-def test_stock_lens_synthesis_preserves_no_evidence_inference_and_external_status(
-    monkeypatch, tmp_path
-):
+def test_stock_lens_synthesis_preserves_no_evidence_inference_and_external_status(monkeypatch, tmp_path):
     import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     _write_stock_lens(
@@ -695,9 +672,7 @@ def test_stock_lens_synthesis_provider_failures_and_output_guard(monkeypatch, tm
         ),
     ],
 )
-def test_stock_lens_synthesis_allows_safety_disclaimers(
-    monkeypatch, tmp_path, response
-):
+def test_stock_lens_synthesis_allows_safety_disclaimers(monkeypatch, tmp_path, response):
     import corpus_ingest_core.stock_lens_synthesis as synthesis
 
     _write_stock_lens(monkeypatch, tmp_path)
@@ -733,9 +708,7 @@ def test_stock_lens_synthesis_allows_safety_disclaimers(
         "This has a guaranteed return of 20%.",
     ],
 )
-def test_stock_lens_synthesis_rejects_trade_advice_patterns(
-    monkeypatch, tmp_path, response
-):
+def test_stock_lens_synthesis_rejects_trade_advice_patterns(monkeypatch, tmp_path, response):
     import corpus_ingest_core.stock_lens_synthesis as synthesis
     from corpus_ingest_core.errors import StockLensSynthesisInputError
 
@@ -779,7 +752,7 @@ def test_stock_lens_synthesis_rejects_prompt_over_limit(monkeypatch, tmp_path):
 def test_stock_lens_synthesis_path_removes_illegal_characters_and_emoji():
     from corpus_ingest_core.storage import stock_lens_synthesis_asset_paths
 
-    paths = stock_lens_synthesis_asset_paths("gooaye", ' bad <stock> 🐣 : / \\ | ? * ok ')
+    paths = stock_lens_synthesis_asset_paths("gooaye", " bad <stock> 🐣 : / \\ | ? * ok ")
 
     assert not any(character in paths.json_path.name for character in '<>:"/\\|?*')
     assert "🐣" not in paths.json_path.name
@@ -787,9 +760,7 @@ def test_stock_lens_synthesis_path_removes_illegal_characters_and_emoji():
     assert paths.markdown_path.name == "bad_stock_ok.stock-lens-synthesis.md"
 
 
-def test_stock_lens_synthesis_cli_parses_options_and_outputs_json(
-    monkeypatch, tmp_path, capsys
-):
+def test_stock_lens_synthesis_cli_parses_options_and_outputs_json(monkeypatch, tmp_path, capsys):
     from scripts import generate_stock_lens_synthesis_report
 
     import corpus_ingest_core.stock_lens_synthesis as synthesis

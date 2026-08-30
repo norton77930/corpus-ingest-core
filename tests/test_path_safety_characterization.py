@@ -116,15 +116,11 @@ def test_known_divergences_stay_documented():
     """The four columns are intentionally NOT identical; lock the deltas."""
     diverging_rows = [row for row in TRUTH_TABLE if len(set(row[1:])) > 1]
     assert diverging_rows, "divergence disappeared — update spec 025 known-debt"
-    only_c_accepts = {
-        row[0] for row in TRUTH_TABLE if row[3] and not (row[1] or row[2] or row[4])
-    }
+    only_c_accepts = {row[0] for row in TRUTH_TABLE if row[3] and not (row[1] or row[2] or row[4])}
     assert only_c_accepts == {
         "data/secret/x.json",
         "data/api_key.json",
         "data/traceback/x.json",
     }
-    only_d_accepts = {
-        row[0] for row in TRUTH_TABLE if row[4] and not (row[1] or row[2] or row[3])
-    }
+    only_d_accepts = {row[0] for row in TRUTH_TABLE if row[4] and not (row[1] or row[2] or row[3])}
     assert only_d_accepts == {"corpus-index.json"}

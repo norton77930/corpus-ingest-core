@@ -14,13 +14,9 @@ _CREDENTIAL_ASSIGNMENT_PATTERN = re.compile(
     r"private[_-]?key|cookie)(?:['\"])?\s*[:=]\s*(?:['\"])?\S+",
     re.IGNORECASE,
 )
-_BEARER_TOKEN_PATTERN = re.compile(
-    r"\bbearer[ \t]+[A-Za-z0-9._~+/-]{8,}={0,2}\b", re.IGNORECASE
-)
+_BEARER_TOKEN_PATTERN = re.compile(r"\bbearer[ \t]+[A-Za-z0-9._~+/-]{8,}={0,2}\b", re.IGNORECASE)
 _URI_PATTERN = re.compile(r"\b[A-Za-z][A-Za-z0-9+.-]*://[^\s]*")
-_URI_QUERY_OR_FRAGMENT_PATTERN = re.compile(
-    r"\b[A-Za-z][A-Za-z0-9+.-]*:[^\s?#]*[?#]\S*"
-)
+_URI_QUERY_OR_FRAGMENT_PATTERN = re.compile(r"\b[A-Za-z][A-Za-z0-9+.-]*:[^\s?#]*[?#]\S*")
 _FORBIDDEN_TEXT_FRAGMENTS = (
     "traceback",
     "raw transcript",
@@ -43,9 +39,7 @@ _PERSONALIZED_INVESTMENT_ADVICE_PATTERNS = (
     # Direct commands remain advice at the start of a sentence, bullet, or line.
     (
         "trade_action",
-        re.compile(
-            r"(?im)(?:^|(?<=[.!?。！？:：;；]))[ \t]*(?:[-*•]\s*)?(?:buy|sell|hold)\b"
-        ),
+        re.compile(r"(?im)(?:^|(?<=[.!?。！？:：;；]))[ \t]*(?:[-*•]\s*)?(?:buy|sell|hold)\b"),
     ),
     (
         "trade_action",
@@ -78,7 +72,7 @@ _DIRECT_QUOTE_ATTRIBUTION_PATTERN = re.compile(
     """,
     re.IGNORECASE | re.VERBOSE,
 )
-_QUOTE_OPEN_TO_CLOSE = {"\"": "\"", "“": "”", "「": "」"}
+_QUOTE_OPEN_TO_CLOSE = {'"': '"', "“": "”", "「": "」"}
 _QUOTE_CLOSERS = frozenset(_QUOTE_OPEN_TO_CLOSE.values())
 _SAFETY_DISCLAIMER_PATTERNS = (
     re.compile(r"不構成投資建議"),
@@ -131,9 +125,7 @@ def matched_investment_advice_guard(text: str) -> str | None:
     """
 
     review_text = strip_safety_disclaimers(text)
-    review_text = "\n".join(
-        _without_attributed_quoted_content(line) for line in review_text.splitlines()
-    )
+    review_text = "\n".join(_without_attributed_quoted_content(line) for line in review_text.splitlines())
     for name, pattern in _PERSONALIZED_INVESTMENT_ADVICE_PATTERNS:
         if pattern.search(review_text):
             return name
@@ -150,9 +142,7 @@ def _without_attributed_quoted_content(line: str) -> str:
     if not _has_direct_quote_attribution(line, opening_index):
         return line
     characters = list(line)
-    characters[opening_index + 1 : closing_index] = " " * (
-        closing_index - opening_index - 1
-    )
+    characters[opening_index + 1 : closing_index] = " " * (closing_index - opening_index - 1)
     return "".join(characters)
 
 
@@ -162,9 +152,7 @@ def _has_direct_quote_attribution(line: str, opening_index: int) -> bool:
     clause_start = 0
     for boundary in re.finditer(r"[.!?。！？;\n]", line[:opening_index]):
         clause_start = boundary.end()
-    return _DIRECT_QUOTE_ATTRIBUTION_PATTERN.fullmatch(
-        line[clause_start:opening_index]
-    ) is not None
+    return _DIRECT_QUOTE_ATTRIBUTION_PATTERN.fullmatch(line[clause_start:opening_index]) is not None
 
 
 def _matched_quote_pairs(line: str) -> list[tuple[int, int]] | None:
@@ -209,8 +197,7 @@ def contains_sensitive_text(value: object, *, reject_any_uri: bool = False) -> b
         or (reject_any_uri and _URI_PATTERN.search(value))
         or any(fragment in lowered for fragment in _FORBIDDEN_TEXT_FRAGMENTS)
         or any(
-            (ord(character) < 32 and character not in {"\n", "\r", "\t"})
-            or ord(character) == 127
+            (ord(character) < 32 and character not in {"\n", "\r", "\t"}) or ord(character) == 127
             for character in value
         )
     )
@@ -227,9 +214,7 @@ def safe_text(value: object, *, maximum_length: int = 4000) -> str:
 
     if not isinstance(value, str):
         return OMITTED_VALUE
-    text = (
-        value.replace("\x00", " ").replace("\r", " ").replace("\n", " ").replace("\t", " ").strip()[:maximum_length]
-    )
+    text = value.replace("\x00", " ").replace("\r", " ").replace("\n", " ").replace("\t", " ").strip()[:maximum_length]
     safety_text = strip_safety_disclaimers(text)
     if (
         not text

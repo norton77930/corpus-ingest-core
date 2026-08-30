@@ -129,9 +129,7 @@ external_data_checks:
     return config_path
 
 
-def test_generate_external_data_boundary_writes_json_and_markdown(
-    monkeypatch, tmp_path
-):
+def test_generate_external_data_boundary_writes_json_and_markdown(monkeypatch, tmp_path):
     import corpus_ingest_core.external_data_boundary as external_data_boundary
 
     config_path = _write_boundary_config(tmp_path)
@@ -143,9 +141,7 @@ def test_generate_external_data_boundary_writes_json_and_markdown(
     payload = json.loads(asset.boundary_json_path.read_text(encoding="utf-8"))
     markdown = asset.boundary_markdown_path.read_text(encoding="utf-8")
     explicit = [
-        candidate
-        for candidate in payload["candidate_boundaries"]
-        if candidate["evidence_status"] == "podcast_explicit"
+        candidate for candidate in payload["candidate_boundaries"] if candidate["evidence_status"] == "podcast_explicit"
     ][0]
     inferred = [
         candidate
@@ -187,9 +183,7 @@ def test_generate_external_data_boundary_writes_json_and_markdown(
     assert "本檔案不構成投資建議" in markdown
 
 
-def test_generate_external_data_boundary_warns_when_config_missing(
-    monkeypatch, tmp_path
-):
+def test_generate_external_data_boundary_warns_when_config_missing(monkeypatch, tmp_path):
     import corpus_ingest_core.external_data_boundary as external_data_boundary
 
     monkeypatch.setattr(
@@ -210,9 +204,7 @@ def test_generate_external_data_boundary_warns_when_config_missing(
     assert asset.warning_count == 1
 
 
-def test_generate_external_data_boundary_rejects_missing_and_corrupt_mapping(
-    monkeypatch, tmp_path
-):
+def test_generate_external_data_boundary_rejects_missing_and_corrupt_mapping(monkeypatch, tmp_path):
     import corpus_ingest_core.external_data_boundary as external_data_boundary
     from corpus_ingest_core.errors import ExternalDataBoundaryInputError
 
@@ -225,9 +217,7 @@ def test_generate_external_data_boundary_rejects_missing_and_corrupt_mapping(
         external_data_boundary.generate_external_data_boundary("gooaye", "EP672")
 
 
-def test_generate_external_data_boundary_handles_partial_mapping(
-    monkeypatch, tmp_path
-):
+def test_generate_external_data_boundary_handles_partial_mapping(monkeypatch, tmp_path):
     import corpus_ingest_core.external_data_boundary as external_data_boundary
     from corpus_ingest_core.errors import ExternalDataBoundaryInputError
 
@@ -238,18 +228,14 @@ def test_generate_external_data_boundary_handles_partial_mapping(
     with pytest.raises(ExternalDataBoundaryInputError, match="partial-draft"):
         external_data_boundary.generate_external_data_boundary("gooaye", "EP672")
 
-    asset = external_data_boundary.generate_external_data_boundary(
-        "gooaye", "EP672", allow_partial=True
-    )
+    asset = external_data_boundary.generate_external_data_boundary("gooaye", "EP672", allow_partial=True)
     payload = json.loads(asset.boundary_json_path.read_text(encoding="utf-8"))
 
     assert asset.boundary_status == "partial-draft"
     assert payload["boundary_status"] == "partial-draft"
 
 
-def test_generate_external_data_boundary_reuses_existing_without_force(
-    monkeypatch, tmp_path
-):
+def test_generate_external_data_boundary_reuses_existing_without_force(monkeypatch, tmp_path):
     import corpus_ingest_core.external_data_boundary as external_data_boundary
     from corpus_ingest_core.storage import external_data_boundary_asset_paths
 
@@ -267,9 +253,7 @@ def test_generate_external_data_boundary_reuses_existing_without_force(
     assert asset.already_exists is True
     assert paths.json_path.read_text(encoding="utf-8") == "existing json"
 
-    regenerated = external_data_boundary.generate_external_data_boundary(
-        "gooaye", "EP672", force=True
-    )
+    regenerated = external_data_boundary.generate_external_data_boundary("gooaye", "EP672", force=True)
     assert regenerated.generated is True
     assert "existing json" not in paths.json_path.read_text(encoding="utf-8")
 
@@ -277,9 +261,7 @@ def test_generate_external_data_boundary_reuses_existing_without_force(
 def test_external_data_boundary_path_removes_illegal_characters_and_emoji():
     from corpus_ingest_core.storage import external_data_boundary_asset_paths
 
-    paths = external_data_boundary_asset_paths(
-        "gooaye", "EP672", ' bad <title> 🐣 : / \\ | ? * ok '
-    )
+    paths = external_data_boundary_asset_paths("gooaye", "EP672", " bad <title> 🐣 : / \\ | ? * ok ")
 
     assert not any(character in paths.json_path.name for character in '<>:"/\\|?*')
     assert "🐣" not in paths.json_path.name
@@ -287,9 +269,7 @@ def test_external_data_boundary_path_removes_illegal_characters_and_emoji():
     assert paths.markdown_path.name == "EP672__bad_title_ok.external-boundary.md"
 
 
-def test_external_data_boundary_cli_parses_options_and_outputs_json(
-    monkeypatch, capsys, tmp_path
-):
+def test_external_data_boundary_cli_parses_options_and_outputs_json(monkeypatch, capsys, tmp_path):
     from scripts import generate_external_data_boundary
 
     from corpus_ingest_core.models import ExternalDataBoundaryAsset

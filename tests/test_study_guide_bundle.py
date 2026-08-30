@@ -130,11 +130,7 @@ def _ready_episode(tmp_data_dirs: Path, *, finance_body: bool = False) -> None:
 
 
 def _tree(root: Path) -> list[str]:
-    return sorted(
-        str(path.relative_to(root)).replace("\\", "/")
-        for path in root.rglob("*")
-        if path.is_file()
-    )
+    return sorted(str(path.relative_to(root)).replace("\\", "/") for path in root.rglob("*") if path.is_file())
 
 
 def _valid_payload() -> dict[str, str]:
@@ -213,9 +209,7 @@ class _FakeProvider:
         return json.dumps(self._payload, ensure_ascii=False)
 
 
-def test_dry_run_writes_nothing_and_does_not_construct_provider(
-    tmp_data_dirs, monkeypatch
-):
+def test_dry_run_writes_nothing_and_does_not_construct_provider(tmp_data_dirs, monkeypatch):
     from corpus_ingest_core import study_guide_bundle as bundle
 
     _ready_episode(tmp_data_dirs)
@@ -254,9 +248,7 @@ def test_dry_run_reuse_says_reuse(tmp_data_dirs, monkeypatch):
         "create_provider",
         lambda *args, **kwargs: _FakeProvider(_valid_payload(), captured),
     )
-    run_study_guide_bundle(
-        PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK
-    )
+    run_study_guide_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK)
     captured.clear()
     before = _tree(tmp_data_dirs)
 
@@ -275,9 +267,7 @@ def test_dry_run_reuse_says_reuse(tmp_data_dirs, monkeypatch):
 def test_finance_profile_is_refused(tmp_data_dirs):
     with pytest.raises(StudyGuideBundleError, match="learning-notes"):
         run_study_guide_bundle("gooaye", "EP678")
-    assert not (tmp_data_dirs / "study-guides").exists() or not any(
-        (tmp_data_dirs / "study-guides").rglob("*.md")
-    )
+    assert not (tmp_data_dirs / "study-guides").exists() or not any((tmp_data_dirs / "study-guides").rglob("*.md"))
 
 
 def test_missing_summary_is_refused(tmp_data_dirs):
@@ -319,9 +309,7 @@ def test_confirm_writes_four_files_and_keeps_uncertainty(tmp_data_dirs, monkeypa
         lambda *args, **kwargs: _FakeProvider(_valid_payload(), captured),
     )
 
-    result = run_study_guide_bundle(
-        PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK
-    )
+    result = run_study_guide_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK)
 
     assert result.confirm is True
     assert result.reused is False
@@ -365,9 +353,7 @@ def test_advice_shaped_body_is_rejected(tmp_data_dirs, monkeypatch):
         lambda *args, **kwargs: _FakeProvider(payload, captured),
     )
     with pytest.raises(StudyGuideBundleError, match="prohibited_advice"):
-        run_study_guide_bundle(
-            PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK
-        )
+        run_study_guide_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK)
 
 
 def test_partial_bundle_is_refused_unless_force(tmp_data_dirs, monkeypatch):
@@ -381,9 +367,7 @@ def test_partial_bundle_is_refused_unless_force(tmp_data_dirs, monkeypatch):
         "create_provider",
         lambda *args, **kwargs: _FakeProvider(_valid_payload(), captured),
     )
-    run_study_guide_bundle(
-        PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK
-    )
+    run_study_guide_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK)
     paths = storage.study_guide_bundle_paths(PODCAST, EPISODE, TITLE)
     paths.notes_path.unlink()
     with pytest.raises(StudyGuideBundleError, match="incomplete"):
@@ -391,9 +375,7 @@ def test_partial_bundle_is_refused_unless_force(tmp_data_dirs, monkeypatch):
     assert captured  # first confirm only
     first_calls = len(captured)
     with pytest.raises(StudyGuideBundleError, match="incomplete"):
-        run_study_guide_bundle(
-            PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK
-        )
+        run_study_guide_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK)
     assert len(captured) == first_calls
 
 
@@ -408,26 +390,20 @@ def test_missing_cover_only_does_not_call_llm(tmp_data_dirs, monkeypatch):
         "create_provider",
         lambda *args, **kwargs: _FakeProvider(_valid_payload(), captured),
     )
-    run_study_guide_bundle(
-        PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK
-    )
+    run_study_guide_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK)
     paths = storage.study_guide_bundle_paths(PODCAST, EPISODE, TITLE)
     paths.cover_path.unlink()
     captured.clear()
     planned = run_study_guide_bundle(PODCAST, EPISODE)
     assert planned.planned_writes == [str(paths.cover_path)]
     assert captured == []
-    result = run_study_guide_bundle(
-        PODCAST, EPISODE, confirm=True, api_cost_ack="wrong"
-    )
+    result = run_study_guide_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack="wrong")
     assert captured == []
     assert paths.cover_path.is_file()
     assert result.reused is False
 
 
-def test_required_phrases_may_appear_in_body_not_only_headings(
-    tmp_data_dirs, monkeypatch
-):
+def test_required_phrases_may_appear_in_body_not_only_headings(tmp_data_dirs, monkeypatch):
     from corpus_ingest_core import storage
     from corpus_ingest_core import study_guide_bundle as bundle
 
@@ -452,9 +428,7 @@ def test_required_phrases_may_appear_in_body_not_only_headings(
         "create_provider",
         lambda *args, **kwargs: _FakeProvider(payload, captured),
     )
-    result = run_study_guide_bundle(
-        PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK
-    )
+    result = run_study_guide_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK)
     notes = storage.study_guide_bundle_paths(PODCAST, EPISODE, TITLE).notes_path
     assert "這個觀念是什麼" in notes.read_text(encoding="utf-8")
     assert result.confirm is True
@@ -472,9 +446,7 @@ def test_merged_source_clocks_are_accepted(tmp_data_dirs, monkeypatch):
         "create_provider",
         lambda *args, **kwargs: _FakeProvider(payload, captured),
     )
-    result = run_study_guide_bundle(
-        PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK
-    )
+    result = run_study_guide_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK)
     assert result.confirm is True
 
 
@@ -491,9 +463,7 @@ def test_invented_timestamp_is_rejected(tmp_data_dirs, monkeypatch):
         lambda *args, **kwargs: _FakeProvider(payload, captured),
     )
     with pytest.raises(StudyGuideBundleError, match="timestamp"):
-        run_study_guide_bundle(
-            PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK
-        )
+        run_study_guide_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK)
 
 
 def test_force_rewrites_existing_bundle(tmp_data_dirs, monkeypatch):
@@ -507,13 +477,9 @@ def test_force_rewrites_existing_bundle(tmp_data_dirs, monkeypatch):
         "create_provider",
         lambda *args, **kwargs: _FakeProvider(_valid_payload(), captured),
     )
-    first = run_study_guide_bundle(
-        PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK
-    )
+    first = run_study_guide_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK)
     assert first.reused is False
-    reused = run_study_guide_bundle(
-        PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK
-    )
+    reused = run_study_guide_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK)
     assert reused.reused is True
     assert len(captured) == 1
     forced = run_study_guide_bundle(
@@ -542,9 +508,7 @@ def test_workflow_markers_not_in_source_are_rejected(tmp_data_dirs, monkeypatch)
         lambda *args, **kwargs: _FakeProvider(payload, captured),
     )
     with pytest.raises(StudyGuideBundleError, match="Claude Code"):
-        run_study_guide_bundle(
-            PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK
-        )
+        run_study_guide_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK)
 
 
 def test_artifact_ladder_does_not_include_study_guide():
@@ -565,9 +529,7 @@ def test_index_reports_available_and_partial(tmp_data_dirs, monkeypatch):
         "create_provider",
         lambda *args, **kwargs: _FakeProvider(_valid_payload(), captured),
     )
-    bundle.run_study_guide_bundle(
-        PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK
-    )
+    bundle.run_study_guide_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK)
     result = generate_corpus_index(PODCAST)
     payload = json.loads(result.index_json_path.read_text(encoding="utf-8"))
     row = payload["episodes"][0]

@@ -37,9 +37,7 @@ def _write_transcript(
 
     paths = transcript_asset_paths(podcast_id, episode_ref, title)
     paths.text_path.parent.mkdir(parents=True, exist_ok=True)
-    paths.text_path.write_text(
-        "".join(f"{segment['text']}\n" for segment in segments), encoding="utf-8"
-    )
+    paths.text_path.write_text("".join(f"{segment['text']}\n" for segment in segments), encoding="utf-8")
     paths.srt_path.write_text(
         "1\n00:00:00,000 --> 00:00:01,250\n第一段\n" if segments else "",
         encoding="utf-8",
@@ -170,9 +168,7 @@ def test_validate_transcript_warns_when_part_file_exists(monkeypatch, tmp_path):
     from corpus_ingest_core.validator import validate_transcript
 
     paths = _write_transcript(monkeypatch, tmp_path)
-    paths.json_path.with_name(f"{paths.json_path.name}.part").write_text(
-        "partial", encoding="utf-8"
-    )
+    paths.json_path.with_name(f"{paths.json_path.name}.part").write_text("partial", encoding="utf-8")
 
     result = validate_transcript("gooaye", "EP672")
 
@@ -181,9 +177,7 @@ def test_validate_transcript_warns_when_part_file_exists(monkeypatch, tmp_path):
     assert any(".part" in warning for warning in result.warnings)
 
 
-def test_validate_transcript_partial_when_segment_count_mismatch(
-    monkeypatch, tmp_path
-):
+def test_validate_transcript_partial_when_segment_count_mismatch(monkeypatch, tmp_path):
     from corpus_ingest_core.validator import validate_transcript
 
     _write_transcript(monkeypatch, tmp_path, segment_count=99)
@@ -195,9 +189,7 @@ def test_validate_transcript_partial_when_segment_count_mismatch(
     assert any("segment_count" in problem for problem in result.problems)
 
 
-def test_validate_transcript_legacy_metadata_warns_but_stays_valid(
-    monkeypatch, tmp_path
-):
+def test_validate_transcript_legacy_metadata_warns_but_stays_valid(monkeypatch, tmp_path):
     from corpus_ingest_core.validator import validate_transcript
 
     _write_transcript(monkeypatch, tmp_path, include_legacy_metadata=True)

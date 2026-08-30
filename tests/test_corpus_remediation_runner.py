@@ -335,9 +335,7 @@ def test_preview_corpus_remediation_from_in_memory_plan(monkeypatch, tmp_path):
     assert not paths.markdown_path.exists()
 
 
-def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(
-    monkeypatch, tmp_path
-):
+def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_remediation_runner as runner
     from corpus_ingest_core import storage
 
@@ -381,7 +379,6 @@ def test_standalone_dry_run_still_refreshes_index_and_plan_without_stage_report(
     assert result.report_markdown_path is None
     assert not report_paths.json_path.exists()
     assert not report_paths.markdown_path.exists()
-
 
 
 def test_corpus_remediation_run_asset_paths_contract():
@@ -467,9 +464,7 @@ def test_corpus_remediation_runner_error_contract():
     assert issubclass(CorpusRemediationRunnerFailedError, PodcastIngestCoreError)
 
 
-def test_run_corpus_remediation_empty_corpus_dry_run_writes_no_report(
-    monkeypatch, tmp_path
-):
+def test_run_corpus_remediation_empty_corpus_dry_run_writes_no_report(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
     from corpus_ingest_core.storage import corpus_remediation_run_asset_paths
 
@@ -514,9 +509,7 @@ def test_run_corpus_remediation_refreshes_plan_before_selection(monkeypatch, tmp
     assert result.rows[0].action_id == "EP001:mentions"
 
 
-def test_dry_run_selects_deterministic_and_excludes_non_deterministic(
-    monkeypatch, tmp_path
-):
+def test_dry_run_selects_deterministic_and_excludes_non_deterministic(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     _fake_plan_refresh(
@@ -722,9 +715,7 @@ def test_confirmed_execution_rejects_missing_filter(monkeypatch, tmp_path):
     assert calls == []
 
 
-def test_confirmed_action_family_filter_and_max_actions_ordering(
-    monkeypatch, tmp_path
-):
+def test_confirmed_action_family_filter_and_max_actions_ordering(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     calls: list[tuple[str, str, dict]] = []
@@ -748,9 +739,7 @@ def test_confirmed_action_family_filter_and_max_actions_ordering(
         max_actions=1,
     )
 
-    assert [(family, episode_ref) for family, episode_ref, _ in calls] == [
-        ("mentions", "EP001")
-    ]
+    assert [(family, episode_ref) for family, episode_ref, _ in calls] == [("mentions", "EP001")]
     assert result.counts.selected_count == 1
     assert result.counts.executed_count == 1
     assert result.counts.skipped_count == 2
@@ -758,9 +747,7 @@ def test_confirmed_action_family_filter_and_max_actions_ordering(
     assert result.report_json_path.exists()
 
 
-def test_confirmed_episode_filter_executes_only_matching_ready_actions(
-    monkeypatch, tmp_path
-):
+def test_confirmed_episode_filter_executes_only_matching_ready_actions(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     calls: list[tuple[str, str, dict]] = []
@@ -778,9 +765,7 @@ def test_confirmed_episode_filter_executes_only_matching_ready_actions(
 
     result = run_corpus_remediation("gooaye", confirm=True, episode_ref="EP002")
 
-    assert [(family, episode_ref) for family, episode_ref, _ in calls] == [
-        ("mentions", "EP002")
-    ]
+    assert [(family, episode_ref) for family, episode_ref, _ in calls] == [("mentions", "EP002")]
     assert result.counts.selected_count == 1
     assert result.counts.executed_count == 1
     assert _rows_by_family(result)["mentions"][0].outcome_status == "skipped"
@@ -811,9 +796,7 @@ def test_confirmed_run_report_json_and_markdown_are_written(monkeypatch, tmp_pat
     assert "not investment advice" in markdown.lower()
 
 
-def test_confirmed_execution_calls_core_functions_directly_without_shelling_out(
-    monkeypatch, tmp_path
-):
+def test_confirmed_execution_calls_core_functions_directly_without_shelling_out(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     calls: list[tuple[str, str, dict]] = []
@@ -836,17 +819,13 @@ def test_confirmed_execution_calls_core_functions_directly_without_shelling_out(
         action_family="extractive_summary",
     )
 
-    source = Path("src/corpus_ingest_core/corpus_remediation_runner.py").read_text(
-        encoding="utf-8"
-    )
+    source = Path("src/corpus_ingest_core/corpus_remediation_runner.py").read_text(encoding="utf-8")
     assert "subprocess" not in source
     assert calls[0][0] == "extractive_summary"
     assert result.counts.executed_count == 1
 
 
-def test_confirmed_execution_propagates_force_and_allow_partial(
-    monkeypatch, tmp_path
-):
+def test_confirmed_execution_propagates_force_and_allow_partial(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     calls: list[tuple[str, str, dict]] = []
@@ -885,9 +864,7 @@ def test_confirmed_execution_propagates_force_and_allow_partial(
     assert all(kwargs["allow_partial"] is True for _family, _episode_ref, kwargs in calls)
 
 
-def test_run_corpus_remediation_cli_confirmed_stdout_and_error_contract(
-    monkeypatch, capsys, tmp_path
-):
+def test_run_corpus_remediation_cli_confirmed_stdout_and_error_contract(monkeypatch, capsys, tmp_path):
     from scripts import run_corpus_remediation as cli
 
     from corpus_ingest_core import CorpusRemediationRunnerFailedError
@@ -961,9 +938,7 @@ def test_run_corpus_remediation_cli_confirmed_stdout_and_error_contract(
     assert "confirm requires episode or action_family" in captured.err
 
 
-def test_single_action_failure_records_failure_and_continues_unrelated(
-    monkeypatch, tmp_path
-):
+def test_single_action_failure_records_failure_and_continues_unrelated(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_remediation_runner as runner
     from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
@@ -1038,15 +1013,9 @@ def test_outputs_do_not_leak_raw_or_secret_text(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     payload = _plan_payload([{"episode_ref": "EP001", "artifact_family": "mentions"}])
-    payload["episodes"][0]["artifact_status"]["transcript"]["body"] = (
-        "raw transcript sentinel must not leak"
-    )
-    payload["episodes"][0]["artifact_status"]["mentions"]["evidence"] = [
-        "evidence sentinel must not leak"
-    ]
-    payload["episodes"][0]["artifact_status"]["semantic_summary"]["body"] = (
-        "semantic body sentinel must not leak"
-    )
+    payload["episodes"][0]["artifact_status"]["transcript"]["body"] = "raw transcript sentinel must not leak"
+    payload["episodes"][0]["artifact_status"]["mentions"]["evidence"] = ["evidence sentinel must not leak"]
+    payload["episodes"][0]["artifact_status"]["semantic_summary"]["body"] = "semantic body sentinel must not leak"
     payload["episodes"][0]["warnings"] = [
         {
             "scope": "episode",
@@ -1081,9 +1050,7 @@ def test_outputs_do_not_leak_raw_or_secret_text(monkeypatch, tmp_path):
         assert text not in combined
 
 
-def test_boundary_guard_excludes_forbidden_families_without_execution(
-    monkeypatch, tmp_path
-):
+def test_boundary_guard_excludes_forbidden_families_without_execution(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_remediation_runner import run_corpus_remediation
 
     _fake_plan_refresh(
@@ -1111,9 +1078,7 @@ def test_boundary_guard_excludes_forbidden_families_without_execution(
     assert result.counts.selected_count == 0
     assert result.counts.executed_count == 0
     assert result.counts.excluded_count == 5
-    source = Path("src/corpus_ingest_core/corpus_remediation_runner.py").read_text(
-        encoding="utf-8"
-    )
+    source = Path("src/corpus_ingest_core/corpus_remediation_runner.py").read_text(encoding="utf-8")
     forbidden_fragments = [
         "from .cache import",
         "from .downloader import",

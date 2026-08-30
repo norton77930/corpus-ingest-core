@@ -14,8 +14,7 @@ from .summary_profiles import (
 
 DEFAULT_OPENAI_COMPATIBLE_BASE_URL = "https://api.openai.com/v1"
 SEMANTIC_API_COST_ACK = (
-    "I understand this may call an external LLM API, send transcript text outside this machine, "
-    "and incur costs."
+    "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
 )
 
 
@@ -23,9 +22,7 @@ def require_exact_api_cost_ack(api_cost_ack: str) -> None:
     """在 provider construction 前強制 exact acknowledgement（audit F-03）。"""
 
     if api_cost_ack != SEMANTIC_API_COST_ACK:
-        raise LLMProviderConfigError(
-            f"LLM provider requires exact api_cost_ack: {SEMANTIC_API_COST_ACK}"
-        )
+        raise LLMProviderConfigError(f"LLM provider requires exact api_cost_ack: {SEMANTIC_API_COST_ACK}")
 
 
 class SemanticSummaryProvider(Protocol):
@@ -85,9 +82,7 @@ class OpenAICompatibleProvider:
             )
 
         api_key = os.environ.get(api_key_env, "").strip()
-        resolved_model = (
-            model or os.environ.get("MODEL") or os.environ.get("OPENAI_MODEL", "")
-        ).strip()
+        resolved_model = (model or os.environ.get("MODEL") or os.environ.get("OPENAI_MODEL", "")).strip()
         resolved_base_url = (
             base_url
             or os.environ.get("BASE_URL")

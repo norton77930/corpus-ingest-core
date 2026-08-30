@@ -76,9 +76,7 @@ def test_sample_corpus_is_present_and_ships_no_audio():
     assert SAMPLE_DATA.is_dir(), "the committed sample corpus is missing"
 
     media = sorted(
-        path.name
-        for path in SAMPLE_DATA.rglob("*")
-        if path.suffix.lower() in {".mp3", ".m4a", ".wav", ".aac", ".flac"}
+        path.name for path in SAMPLE_DATA.rglob("*") if path.suffix.lower() in {".mp3", ".m4a", ".wav", ".aac", ".flac"}
     )
     assert not media, f"audio must not be committed: {media}"
 
@@ -105,9 +103,7 @@ def test_committed_transcript_still_validates(episode_ref: str, sample_storage):
 
 
 @pytest.mark.parametrize("episode_ref,title", sorted(EPISODES.items()))
-def test_committed_files_sit_where_storage_looks_for_them(
-    episode_ref: str, title: str, sample_storage
-):
+def test_committed_files_sit_where_storage_looks_for_them(episode_ref: str, title: str, sample_storage):
     """A slug-rule change would orphan these files: present, but unreachable."""
 
     storage = sample_storage
@@ -125,9 +121,7 @@ def test_committed_index_answers_a_transcript_search():
 
     from corpus_ingest_core.search import search_transcripts
 
-    results = search_transcripts(
-        "harbour", podcast_id=PODCAST_ID, limit=5, db_path=SAMPLE_DB
-    )
+    results = search_transcripts("harbour", podcast_id=PODCAST_ID, limit=5, db_path=SAMPLE_DB)
 
     assert results, (
         "the committed index returned nothing for a term the sample transcripts "
@@ -158,12 +152,7 @@ def test_committed_index_carries_the_tables_the_readers_query():
 
     connection = sqlite3.connect(f"file:{SAMPLE_DB}?mode=ro", uri=True)
     try:
-        committed = {
-            row[0]
-            for row in connection.execute(
-                "SELECT name FROM sqlite_master WHERE type='table'"
-            )
-        }
+        committed = {row[0] for row in connection.execute("SELECT name FROM sqlite_master WHERE type='table'")}
     finally:
         connection.close()
 

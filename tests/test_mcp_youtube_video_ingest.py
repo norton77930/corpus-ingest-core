@@ -34,9 +34,7 @@ def _stub_preview(monkeypatch) -> None:
     def refuse(*_args, **_kwargs):
         raise AssertionError("preview must not download or extract")
 
-    monkeypatch.setattr(
-        youtube_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO)
-    )
+    monkeypatch.setattr(youtube_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO))
     monkeypatch.setattr(youtube_video_ingest, "_download_video", refuse)
     monkeypatch.setattr(youtube_video_ingest, "_extract_audio", refuse)
     monkeypatch.setattr(
@@ -71,9 +69,7 @@ def test_preview_returns_network_read_plan_and_writes_nothing(monkeypatch, tmp_d
 def test_confirm_writes_storage_paths_and_warns_cache_stale(monkeypatch, tmp_data_dirs: Path):
     from corpus_ingest_core import mcp_server, storage, youtube_video_ingest
 
-    monkeypatch.setattr(
-        youtube_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO)
-    )
+    monkeypatch.setattr(youtube_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO))
     monkeypatch.setattr(
         youtube_video_ingest,
         "_download_video",
@@ -92,9 +88,7 @@ def test_confirm_writes_storage_paths_and_warns_cache_stale(monkeypatch, tmp_dat
     monkeypatch.setattr(
         youtube_video_ingest,
         "transcribe_episode",
-        lambda *args, **kwargs: SimpleNamespace(
-            json_path=tmp_data_dirs / "transcripts" / "fake.json"
-        ),
+        lambda *args, **kwargs: SimpleNamespace(json_path=tmp_data_dirs / "transcripts" / "fake.json"),
     )
 
     response = mcp_server.ingest_youtube_video(url=_WATCH_URL, confirm=True)
@@ -109,18 +103,14 @@ def test_confirm_writes_storage_paths_and_warns_cache_stale(monkeypatch, tmp_dat
     assert Path(data["report_markdown_path"]).is_file()
     assert not list((tmp_data_dirs / "audio").rglob("*.mp4"))
     assert any("rebuild cache" in warning.lower() for warning in response["warnings"])
-    expected_audio = storage.audio_asset_path(
-        "yt-raytar", _VIDEO_ID, data["title"], ".wav"
-    )
+    expected_audio = storage.audio_asset_path("yt-raytar", _VIDEO_ID, data["title"], ".wav")
     assert Path(data["audio_path"]) == expected_audio
 
 
 def test_invalid_url_preview_returns_error_envelope():
     from corpus_ingest_core import mcp_server
 
-    response = mcp_server.ingest_youtube_video(
-        url="https://example.com/not-youtube", confirm=False
-    )
+    response = mcp_server.ingest_youtube_video(url="https://example.com/not-youtube", confirm=False)
 
     assert response["ok"] is False
     assert response["error_type"] in {"ValueError", "YoutubeVideoIngestFailedError"}
@@ -130,9 +120,7 @@ def test_invalid_url_preview_returns_error_envelope():
 def test_wrong_source_type_confirm_returns_error_envelope(monkeypatch, tmp_data_dirs: Path):
     from corpus_ingest_core import mcp_server, youtube_video_ingest
 
-    monkeypatch.setattr(
-        youtube_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO)
-    )
+    monkeypatch.setattr(youtube_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO))
     monkeypatch.setattr(
         youtube_video_ingest,
         "load_podcast_profile",

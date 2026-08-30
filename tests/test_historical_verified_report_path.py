@@ -7,9 +7,7 @@ from pathlib import Path
 import pytest
 
 
-def test_suggest_is_zero_write_on_tmp_tree(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_suggest_is_zero_write_on_tmp_tree(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """FR-006: suggest must not create/modify/delete files under the data root."""
     from corpus_ingest_core import storage, suggest_historical_verified_report_next_step
 
@@ -59,9 +57,7 @@ def test_suggest_rejects_reserved_selectors() -> None:
         suggest_historical_verified_report_next_step("gooaye", "NEXT")
 
 
-def test_suggest_report_present_when_eligible_bundle_exists(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_suggest_report_present_when_eligible_bundle_exists(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from corpus_ingest_core import (
         suggest_historical_verified_report_next_step,
     )

@@ -143,9 +143,7 @@ def _write_deterministic_artifacts() -> None:
     )
     mentions.markdown_path.write_text("# mentions", encoding="utf-8")
 
-    intelligence = storage.episode_intelligence_report_asset_paths(
-        "gooaye", "EP677", title
-    )
+    intelligence = storage.episode_intelligence_report_asset_paths("gooaye", "EP677", title)
     intelligence.json_path.parent.mkdir(parents=True, exist_ok=True)
     intelligence.json_path.write_text(
         json.dumps(
@@ -346,9 +344,7 @@ def test_completion_workflow_model_field_contracts():
         CorpusEpisodeCompletionWorkflowRunWarning,
     )
 
-    assert [
-        field.name for field in fields(CorpusEpisodeCompletionWorkflowRunFilter)
-    ] == [
+    assert [field.name for field in fields(CorpusEpisodeCompletionWorkflowRunFilter)] == [
         "episode_ref",
         "action",
         "transcription_model",
@@ -360,9 +356,7 @@ def test_completion_workflow_model_field_contracts():
         "semantic_chunk_seconds",
         "semantic_max_segments_per_chunk",
     ]
-    assert [
-        field.name for field in fields(CorpusEpisodeCompletionWorkflowRunCounts)
-    ] == [
+    assert [field.name for field in fields(CorpusEpisodeCompletionWorkflowRunCounts)] == [
         "row_count",
         "selected_count",
         "executed_count",
@@ -374,12 +368,12 @@ def test_completion_workflow_model_field_contracts():
         "manual_only_count",
         "warning_count",
     ]
-    assert [
-        field.name for field in fields(CorpusEpisodeCompletionWorkflowRunWarning)
-    ] == ["scope", "episode_ref", "message"]
-    assert [
-        field.name for field in fields(CorpusEpisodeCompletionWorkflowRunRow)
-    ] == [
+    assert [field.name for field in fields(CorpusEpisodeCompletionWorkflowRunWarning)] == [
+        "scope",
+        "episode_ref",
+        "message",
+    ]
+    assert [field.name for field in fields(CorpusEpisodeCompletionWorkflowRunRow)] == [
         "episode_ref",
         "action",
         "status",
@@ -401,9 +395,7 @@ def test_completion_workflow_model_field_contracts():
         "failure_category",
         "warnings",
     ]
-    assert [
-        field.name for field in fields(CorpusEpisodeCompletionWorkflowRunResult)
-    ] == [
+    assert [field.name for field in fields(CorpusEpisodeCompletionWorkflowRunResult)] == [
         "podcast_id",
         "run_mode",
         "confirm",
@@ -422,33 +414,19 @@ def test_completion_workflow_model_field_contracts():
     ]
 
 
-def test_completion_workflow_storage_paths_do_not_create_directories(
-    monkeypatch, tmp_path: Path
-):
+def test_completion_workflow_storage_paths_do_not_create_directories(monkeypatch, tmp_path: Path):
     from corpus_ingest_core import storage
 
     monkeypatch.setattr(storage, "CORPUS_DIR", tmp_path / "corpus", raising=False)
 
     paths = storage.corpus_episode_completion_workflow_run_asset_paths("gooaye")
 
-    assert paths.json_path == (
-        tmp_path
-        / "corpus"
-        / "gooaye"
-        / "corpus-episode-completion-workflow-run.json"
-    )
-    assert paths.markdown_path == (
-        tmp_path
-        / "corpus"
-        / "gooaye"
-        / "corpus-episode-completion-workflow-run.md"
-    )
+    assert paths.json_path == (tmp_path / "corpus" / "gooaye" / "corpus-episode-completion-workflow-run.json")
+    assert paths.markdown_path == (tmp_path / "corpus" / "gooaye" / "corpus-episode-completion-workflow-run.md")
     assert not (tmp_path / "corpus").exists()
 
 
-def test_dry_run_unseeded_latest_selects_intake_without_writes(
-    monkeypatch, tmp_path: Path
-):
+def test_dry_run_unseeded_latest_selects_intake_without_writes(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_episode_intake as intake
     from corpus_ingest_core.corpus_episode_completion_workflow_runner import (
         run_corpus_episode_completion_workflow,
@@ -563,9 +541,7 @@ def test_contract_inauthentic_review_is_manual_only_for_dry_run_and_confirmation
     _write_deterministic_artifacts()
     _write_semantic_summary()
     _write_passing_semantic_review(tmp_path)
-    review_path = next(
-        (tmp_path / "evals" / "research-llm-smoke" / "reports").glob("*.json")
-    )
+    review_path = next((tmp_path / "evals" / "research-llm-smoke" / "reports").glob("*.json"))
     if defect == "unreadable":
         review_path.write_bytes(b"{not-json")
     elif defect == "unknown":
@@ -579,9 +555,7 @@ def test_contract_inauthentic_review_is_manual_only_for_dry_run_and_confirmation
         review_path.write_text(json.dumps(review_payload), encoding="utf-8")
     before = _tree_manifest(tmp_path)
 
-    preview = run_corpus_episode_completion_workflow(
-        "gooaye", episode_ref="EP677"
-    )
+    preview = run_corpus_episode_completion_workflow("gooaye", episode_ref="EP677")
     confirmed = run_corpus_episode_completion_workflow(
         "gooaye",
         episode_ref="EP677",
@@ -631,6 +605,7 @@ def test_dry_run_ignores_stale_sentinels_and_reaches_no_side_effect_surface(
         ("014", workflow_runner, "_write_run_report"),
         ("015", semantic_runner, "_write_run_report"),
     ):
+
         def forbidden_writer(*args, _label=label, **kwargs):
             writer_calls.append(_label)
             pytest.fail(f"dry-run reached writer {_label}")
@@ -651,9 +626,7 @@ def test_dry_run_ignores_stale_sentinels_and_reaches_no_side_effect_surface(
     ):
         monkeypatch.setattr(remediation_runner, name, forbidden_execution)
     monkeypatch.setattr(semantic_runner, "semantic_summarize_episode", forbidden_execution)
-    monkeypatch.setattr(
-        semantic_runner, "review_semantic_summary_smoke", forbidden_execution
-    )
+    monkeypatch.setattr(semantic_runner, "review_semantic_summary_smoke", forbidden_execution)
     before = _tree_manifest(tmp_path)
 
     result = run_corpus_episode_completion_workflow(
@@ -823,9 +796,7 @@ def test_invalid_transcript_blocks_before_semantic_preview(
     _write_seed()
     _write_local_audio()
     _write_transcript()
-    transcript_path = storage.transcript_asset_paths(
-        "gooaye", "EP677", "EP677 Alpha"
-    ).json_path
+    transcript_path = storage.transcript_asset_paths("gooaye", "EP677", "EP677 Alpha").json_path
     payload = json.loads(transcript_path.read_text(encoding="utf-8"))
     if transcript_state == "partial":
         payload["segment_count"] = 2
@@ -950,9 +921,7 @@ def test_preview_probe_failure_fails_closed_without_later_dispatch(
         monkeypatch.setattr(
             runner,
             "_preview_corpus_semantic_remediation_from_snapshot",
-            lambda *args, **kwargs: pytest.fail(
-                "semantic preview must not run after deterministic probe failure"
-            ),
+            lambda *args, **kwargs: pytest.fail("semantic preview must not run after deterministic probe failure"),
         )
     else:
         monkeypatch.setattr(
@@ -1225,11 +1194,9 @@ def test_confirmed_matching_action_dispatches_exactly_one_runner_then_reports(
         monkeypatch.setattr(
             runner,
             name,
-            fake_runner(name) if name == expected_runner else (
-                lambda *args, _name=name, **kwargs: pytest.fail(
-                    f"unexpected runner {_name}"
-                )
-            ),
+            fake_runner(name)
+            if name == expected_runner
+            else (lambda *args, _name=name, **kwargs: pytest.fail(f"unexpected runner {_name}")),
             raising=False,
         )
     monkeypatch.setattr(
@@ -1328,9 +1295,7 @@ def test_confirmed_stage_exception_is_contained_and_stops_after_one_attempt(monk
     monkeypatch.setattr(
         runner,
         "run_corpus_audio_download",
-        lambda *args, **kwargs: (_ for _ in ()).throw(
-            RuntimeError("https://invalid.example/?token=leak-token")
-        ),
+        lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("https://invalid.example/?token=leak-token")),
     )
     monkeypatch.setattr(runner, "_write_run_report", lambda result: reports.append(result))
 
@@ -1491,9 +1456,7 @@ def test_confirmed_report_write_failure_is_safe_and_does_not_compensate(
     monkeypatch.setattr(
         runner,
         "_render_markdown",
-        lambda *args, **kwargs: (_ for _ in ()).throw(
-            OSError("https://invalid.example/?token=leak-token")
-        ),
+        lambda *args, **kwargs: (_ for _ in ()).throw(OSError("https://invalid.example/?token=leak-token")),
     )
 
     with pytest.raises(CorpusEpisodeCompletionWorkflowRunnerFailedError) as exc_info:
@@ -1569,9 +1532,7 @@ def test_confirmed_semantic_review_ignores_all_llm_only_options(monkeypatch):
     assert result.filters.semantic_max_segments_per_chunk == 120
 
 
-def test_completion_workflow_outputs_filter_untrusted_paths_and_advice_text(
-    monkeypatch, tmp_path: Path
-):
+def test_completion_workflow_outputs_filter_untrusted_paths_and_advice_text(monkeypatch, tmp_path: Path):
     import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
@@ -1651,10 +1612,7 @@ def test_completion_cli_forwards_defaults_without_loading_local_env(
     monkeypatch.setattr(
         cli,
         "run_corpus_episode_completion_workflow",
-        lambda podcast_id, **kwargs: (
-            captured.update({"podcast_id": podcast_id, **kwargs})
-            or SimpleNamespace()
-        ),
+        lambda podcast_id, **kwargs: captured.update({"podcast_id": podcast_id, **kwargs}) or SimpleNamespace(),
     )
     monkeypatch.setattr(cli, "result_to_dict", lambda result: {"ok": True})
     monkeypatch.setattr(cli, "load_local_env", lambda *args: env_calls.append(args))
@@ -1741,9 +1699,7 @@ def test_completion_cli_uses_category_only_error_output(monkeypatch, capsys):
     monkeypatch.setattr(
         cli,
         "run_corpus_episode_completion_workflow",
-        lambda *args, **kwargs: (_ for _ in ()).throw(
-            RuntimeError("https://invalid.example/?token=leak-token")
-        ),
+        lambda *args, **kwargs: (_ for _ in ()).throw(RuntimeError("https://invalid.example/?token=leak-token")),
     )
 
     status = cli.main(["--podcast", "gooaye"])
@@ -1823,9 +1779,7 @@ def test_red_next_preview_validates_actual_semantic_summary_settings_after_fresh
     )
 
     with pytest.raises(CorpusEpisodeCompletionWorkflowRunnerFailedError, match=message):
-        runner.run_corpus_episode_completion_workflow(
-            "gooaye", episode_ref="EP677", action="next", **options
-        )
+        runner.run_corpus_episode_completion_workflow("gooaye", episode_ref="EP677", action="next", **options)
 
 
 @pytest.mark.parametrize(
@@ -1835,9 +1789,7 @@ def test_red_next_preview_validates_actual_semantic_summary_settings_after_fresh
         ({"semantic_model": "model?bad"}, "semantic_model"),
     ),
 )
-def test_red_confirmed_semantic_summary_validates_provider_model_before_child_dispatch(
-    monkeypatch, options, message
-):
+def test_red_confirmed_semantic_summary_validates_provider_model_before_child_dispatch(monkeypatch, options, message):
     """Selected-action validation must complete before a provider-capable child runs."""
 
     import corpus_ingest_core.corpus_episode_completion_workflow_runner as runner

@@ -15,9 +15,7 @@ from corpus_ingest_core import (
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Generate a deterministic local corpus remediation plan."
-    )
+    parser = argparse.ArgumentParser(description="Generate a deterministic local corpus remediation plan.")
     parser.add_argument("--podcast", required=True, dest="podcast_id")
     args = parser.parse_args(argv)
 
@@ -37,9 +35,7 @@ def _result_to_dict(result):
         "plan_json_path": str(result.plan_json_path),
         "plan_markdown_path": str(result.plan_markdown_path),
         "source_corpus_index_json_path": str(result.source_corpus_index_json_path),
-        "source_corpus_index_markdown_path": str(
-            result.source_corpus_index_markdown_path
-        ),
+        "source_corpus_index_markdown_path": str(result.source_corpus_index_markdown_path),
         "episode_count": result.episode_count,
         "warning_count": result.warning_count,
         **asdict(result.action_counts),

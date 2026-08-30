@@ -54,9 +54,7 @@ def load_podcast_profiles(path: str | Path = DEFAULT_CONFIG_PATH) -> dict[str, P
     return profiles
 
 
-def load_podcast_profile(
-    podcast_id: str, path: str | Path = DEFAULT_CONFIG_PATH
-) -> PodcastProfile:
+def load_podcast_profile(podcast_id: str, path: str | Path = DEFAULT_CONFIG_PATH) -> PodcastProfile:
     """載入單一 podcast profile。"""
 
     profiles = load_podcast_profiles(path)
@@ -66,9 +64,7 @@ def load_podcast_profile(
         raise KeyError(f"找不到 podcast_id：{podcast_id}") from exc
 
 
-def require_rss_profile(
-    podcast_id: str, path: str | Path = DEFAULT_CONFIG_PATH
-) -> PodcastProfile:
+def require_rss_profile(podcast_id: str, path: str | Path = DEFAULT_CONFIG_PATH) -> PodcastProfile:
     """載入 profile，並確認它確實是 RSS 來源。
 
     RSS 專用入口（``list_episodes`` / ``get_episode`` / ``download_audio``）對
@@ -105,9 +101,7 @@ def _parse_profile(item: Any) -> PodcastProfile:
     # 刻意不走 _optional_text：它會把 `summary_profile: 123` 靜默變成 None。
     # 也刻意用哨兵而非 None 當預設，因為 YAML 的 `summary_profile:` 是操作者
     # 寫了 key 卻留空，和完全沒寫這個 key 是兩件事；後者才該回退到預設。
-    summary_profile = resolve_summary_profile(
-        item.get("summary_profile", _SUMMARY_PROFILE_UNSET)
-    ).name
+    summary_profile = resolve_summary_profile(item.get("summary_profile", _SUMMARY_PROFILE_UNSET)).name
 
     return PodcastProfile(
         podcast_id=podcast_id,
@@ -115,9 +109,7 @@ def _parse_profile(item: Any) -> PodcastProfile:
         rss_url=_required_text(item, "rss_url") if is_rss else _optional_text(item, "rss_url"),
         language=_required_text(item, "language"),
         default_episode_prefix=(
-            _required_text(item, "default_episode_prefix")
-            if is_rss
-            else _optional_text(item, "default_episode_prefix")
+            _required_text(item, "default_episode_prefix") if is_rss else _optional_text(item, "default_episode_prefix")
         ),
         source_type=source_type,
         summary_profile=summary_profile,

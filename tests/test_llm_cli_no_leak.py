@@ -21,10 +21,7 @@ import pytest
 
 from tests.test_research_workflow import _use_tmp_data_dirs
 
-ACK = (
-    "I understand this may call an external LLM API, send transcript text outside this machine, "
-    "and incur costs."
-)
+ACK = "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
 TRANSCRIPT_MARKER = "UNIQUE-TRANSCRIPT-MARKER-93117"
 FAKE_KEY_VALUE = "fake-key-value-71249"
 
@@ -40,9 +37,7 @@ def _write_marker_transcript(monkeypatch, tmp_path, *, podcast_id="gooaye", epis
     ]
     paths = transcript_asset_paths(podcast_id, episode_ref, title)
     paths.text_path.parent.mkdir(parents=True, exist_ok=True)
-    paths.text_path.write_text(
-        "\n".join(segment["text"] for segment in segments), encoding="utf-8"
-    )
+    paths.text_path.write_text("\n".join(segment["text"] for segment in segments), encoding="utf-8")
     paths.srt_path.write_text("1\n00:00:10,000 --> 00:00:20,000\n字幕\n", encoding="utf-8")
     paths.json_path.write_text(
         json.dumps(
@@ -71,9 +66,7 @@ def test_summarize_cli_semantic_stdout_is_metadata_only(monkeypatch, tmp_path, c
     from tests.test_semantic_summary_smoke import _summary_asset
 
     monkeypatch.setenv("API_KEY", FAKE_KEY_VALUE)
-    monkeypatch.setattr(
-        cli, "semantic_summarize_episode", lambda *args, **kwargs: _summary_asset(tmp_path)
-    )
+    monkeypatch.setattr(cli, "semantic_summarize_episode", lambda *args, **kwargs: _summary_asset(tmp_path))
     monkeypatch.setattr(
         sys,
         "argv",
@@ -120,9 +113,7 @@ def test_summarize_cli_semantic_stdout_is_metadata_only(monkeypatch, tmp_path, c
     assert TRANSCRIPT_MARKER not in combined_output
 
 
-def test_semantic_smoke_dry_run_does_not_leak_transcript_text(
-    monkeypatch, tmp_path, capsys
-):
+def test_semantic_smoke_dry_run_does_not_leak_transcript_text(monkeypatch, tmp_path, capsys):
     from scripts import run_semantic_summary_smoke as smoke
 
     _write_marker_transcript(monkeypatch, tmp_path)
@@ -160,9 +151,7 @@ def test_semantic_smoke_dry_run_does_not_leak_transcript_text(
     assert FAKE_KEY_VALUE not in combined_output
 
 
-def test_research_smoke_dry_run_does_not_leak_transcript_text(
-    monkeypatch, tmp_path, capsys
-):
+def test_research_smoke_dry_run_does_not_leak_transcript_text(monkeypatch, tmp_path, capsys):
     from scripts import run_research_llm_smoke as smoke
 
     _write_marker_transcript(monkeypatch, tmp_path)
@@ -192,6 +181,7 @@ def test_research_smoke_dry_run_does_not_leak_transcript_text(
     combined_output = captured.out + captured.err
     assert TRANSCRIPT_MARKER not in combined_output
     assert FAKE_KEY_VALUE not in combined_output
+
 
 def test_corpus_semantic_cli_uncontained_error_is_category_only(monkeypatch, capsys):
     from scripts import run_corpus_semantic_remediation as cli

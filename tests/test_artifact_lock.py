@@ -32,9 +32,7 @@ def _hold_artifact_claim(lock_path: str, acquired: Event, release: Event) -> Non
         release.wait(timeout=WORKER_STARTUP_TIMEOUT_SECONDS)
 
 
-def _hold_episode_writer_claim(
-    corpus_dir: str, acquired: Event, release: Event
-) -> None:
+def _hold_episode_writer_claim(corpus_dir: str, acquired: Event, release: Event) -> None:
     """Spawn-safe worker for the podcast-and-episode shared claim key."""
 
     from corpus_ingest_core import storage
@@ -46,9 +44,7 @@ def _hold_episode_writer_claim(
         release.wait(timeout=WORKER_STARTUP_TIMEOUT_SECONDS)
 
 
-def test_spawned_process_blocks_same_episode_writer_claim(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_spawned_process_blocks_same_episode_writer_claim(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     """Same episode blocks cross-process despite disparate fixed output paths."""
 
     from corpus_ingest_core import storage

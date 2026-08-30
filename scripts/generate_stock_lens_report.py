@@ -11,9 +11,7 @@ from corpus_ingest_core import PodcastIngestCoreError, generate_stock_lens_repor
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="產生 podcast-wide deterministic stock lens report。"
-    )
+    parser = argparse.ArgumentParser(description="產生 podcast-wide deterministic stock lens report。")
     parser.add_argument("podcast_id", nargs="?")
     parser.add_argument("stock_query", nargs="?")
     parser.add_argument("--podcast", dest="podcast_option")

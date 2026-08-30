@@ -125,9 +125,7 @@ def test_coverage_joins_inventory_and_bundles_with_filters_and_zero_writes(
     assert after == before
 
 
-def test_coverage_missing_sides_and_input_validation(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_coverage_missing_sides_and_input_validation(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from corpus_ingest_core import (
         VerifiedResearchReportCoverageInputError,
         list_verified_research_report_coverage,

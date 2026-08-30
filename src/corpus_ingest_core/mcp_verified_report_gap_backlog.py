@@ -26,11 +26,7 @@ def dispatch(
     if type(limit) is not int or not (1 <= limit <= _MAX_LIMIT):
         return tool_error_payload()
     try:
-        return success(
-            core.result_to_dict(
-                core.list_verified_report_gap_backlog(podcast_id, limit=limit)
-            )
-        )
+        return success(core.result_to_dict(core.list_verified_report_gap_backlog(podcast_id, limit=limit)))
     except Exception:
         return tool_error_payload()
 

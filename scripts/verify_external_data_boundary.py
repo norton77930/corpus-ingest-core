@@ -11,9 +11,7 @@ from corpus_ingest_core import PodcastIngestCoreError, verify_external_data_boun
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="用本機 fixture provider 驗證 external data boundary artifact。"
-    )
+    parser = argparse.ArgumentParser(description="用本機 fixture provider 驗證 external data boundary artifact。")
     parser.add_argument("podcast_id", nargs="?")
     parser.add_argument("episode_ref", nargs="?")
     parser.add_argument("--podcast", dest="podcast_option")

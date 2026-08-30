@@ -139,9 +139,7 @@ def _load_index_payload(index_json_path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(index_json_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        raise CorpusRemediationPlanFailedError(
-            f"讀取 corpus artifact index 失敗：{exc}"
-        ) from exc
+        raise CorpusRemediationPlanFailedError(f"讀取 corpus artifact index 失敗：{exc}") from exc
     if not isinstance(payload, dict):
         raise CorpusRemediationPlanFailedError("corpus artifact index root 必須是 object。")
     return payload
@@ -178,16 +176,8 @@ def _build_remediation_row(
             )
         ]
     ]
-    blockers = [
-        blocker
-        for action in actions
-        for blocker in _blockers_for_action(action, artifact_status)
-    ]
-    missing_artifacts = [
-        family
-        for family in row_payload.get("missing_artifacts", [])
-        if isinstance(family, str)
-    ]
+    blockers = [blocker for action in actions for blocker in _blockers_for_action(action, artifact_status)]
+    missing_artifacts = [family for family in row_payload.get("missing_artifacts", []) if isinstance(family, str)]
     return CorpusRemediationEpisodeRow(
         podcast_id=podcast_id,
         episode_ref=episode_ref,
@@ -236,9 +226,7 @@ def _build_action(
         order=ARTIFACT_LADDER.index(family) + 1,
         reason=_action_reason(family, source_status, source_metadata),
         blocking_artifacts=blockers,
-        suggested_command=_suggested_command(
-            podcast_id, episode_ref, family, source_metadata
-        ),
+        suggested_command=_suggested_command(podcast_id, episode_ref, family, source_metadata),
         manual_only=True,
         optional=family in _OPTIONAL_FAMILIES,
         gated=family in _GATED_FAMILIES,
@@ -323,34 +311,18 @@ def _suggested_command(
     if video_source == "x-video":
         return f"python scripts/run_x_video_ingest.py --url {_seed_selector(metadata)}"
     if video_source == "yt-video":
-        return (
-            "python scripts/run_youtube_video_ingest.py "
-            f"--url {_seed_selector(metadata)}"
-        )
+        return f"python scripts/run_youtube_video_ingest.py --url {_seed_selector(metadata)}"
     base = f"--podcast {podcast_id} --episode {episode_ref}"
     commands = {
         "audio": f"python scripts/download_episode.py {base}",
         "transcript": f"python scripts/transcribe_episode.py {base}",
-        "extractive_summary": (
-            f"python scripts/summarize_episode.py {base} --mode extractive"
-        ),
+        "extractive_summary": (f"python scripts/summarize_episode.py {base} --mode extractive"),
         "mentions": f"python scripts/extract_mentions.py {base}",
-        "semantic_summary": (
-            f"python scripts/summarize_episode.py {base} "
-            "--mode semantic --api-cost-ack REQUIRED"
-        ),
-        "semantic_review": (
-            f"python scripts/review_semantic_summary_smoke.py {base}"
-        ),
-        "episode_intelligence": (
-            f"python scripts/generate_episode_intelligence_report.py {base}"
-        ),
-        "industry_mapping": (
-            f"python scripts/generate_industry_chain_mapping.py {base}"
-        ),
-        "external_boundary": (
-            f"python scripts/generate_external_data_boundary.py {base}"
-        ),
+        "semantic_summary": (f"python scripts/summarize_episode.py {base} --mode semantic --api-cost-ack REQUIRED"),
+        "semantic_review": (f"python scripts/review_semantic_summary_smoke.py {base}"),
+        "episode_intelligence": (f"python scripts/generate_episode_intelligence_report.py {base}"),
+        "industry_mapping": (f"python scripts/generate_industry_chain_mapping.py {base}"),
+        "external_boundary": (f"python scripts/generate_external_data_boundary.py {base}"),
     }
     return commands[family]
 
@@ -364,10 +336,7 @@ def _blockers_for_action(
             blocked_artifact=action.artifact_family,
             blocking_artifact=blocking_artifact,
             blocking_status=_status_text(artifact_status.get(blocking_artifact, {})),
-            message=(
-                f"{blocking_artifact} is "
-                f"{_status_text(artifact_status.get(blocking_artifact, {}))}"
-            ),
+            message=(f"{blocking_artifact} is {_status_text(artifact_status.get(blocking_artifact, {}))}"),
         )
         for blocking_artifact in action.blocking_artifacts
     ]
@@ -439,10 +408,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
     ]
     for row in payload["episodes"]:
         actions = row["actions"]
-        next_actions = "; ".join(
-            f"{action['artifact_family']}:{action['status']}"
-            for action in actions
-        )
+        next_actions = "; ".join(f"{action['artifact_family']}:{action['status']}" for action in actions)
         lines.append(
             "| "
             + " | ".join(
@@ -450,9 +416,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
                     _markdown_cell(row["episode_ref"]),
                     _markdown_cell(row["title"]),
                     _markdown_cell(len(actions)),
-                    _markdown_cell(
-                        sum(action["status"] == "blocked" for action in actions)
-                    ),
+                    _markdown_cell(sum(action["status"] == "blocked" for action in actions)),
                     _markdown_cell(sum(action["optional"] for action in actions)),
                     _markdown_cell(sum(action["gated"] for action in actions)),
                     _markdown_cell(len(row["warnings"])),
@@ -484,9 +448,7 @@ def _render_markdown(payload: dict[str, Any]) -> str:
         for row in payload["episodes"]:
             for warning in row["warnings"]:
                 family = warning["artifact_family"] or "episode"
-                lines.append(
-                    f"- {row['episode_ref']} {family}: {warning['message']}"
-                )
+                lines.append(f"- {row['episode_ref']} {family}: {warning['message']}")
         lines.append("")
 
     lines.extend(
@@ -528,9 +490,7 @@ def _write_plan(
                 part_path.unlink(missing_ok=True)
             except OSError:
                 pass
-        raise CorpusRemediationPlanFailedError(
-            f"寫入 corpus remediation plan 失敗：{exc}"
-        ) from exc
+        raise CorpusRemediationPlanFailedError(f"寫入 corpus remediation plan 失敗：{exc}") from exc
 
 
 def _safe_text(value: Any, default: str) -> str:

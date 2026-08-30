@@ -83,9 +83,7 @@ def list_verified_research_report_coverage(
         )
 
     filtered = (
-        rows
-        if normalized_has_bundle is None
-        else [row for row in rows if row.has_bundle is normalized_has_bundle]
+        rows if normalized_has_bundle is None else [row for row in rows if row.has_bundle is normalized_has_bundle]
     )
     page_items = filtered[:normalized_limit]
     return VerifiedResearchReportCoveragePage(

@@ -35,9 +35,7 @@ def test_spec_021_package_locks_exact_source_revalidation_boundaries() -> None:
     contract = _read("contracts/verified-research-report-source-revalidation.md")
     requirements = _read("checklists/requirements.md")
     safety = _read("checklists/safety.md")
-    package = "\n".join(
-        (spec, plan, research, data_model, quickstart, tasks, contract, requirements, safety)
-    )
+    package = "\n".join((spec, plan, research, data_model, quickstart, tasks, contract, requirements, safety))
 
     for seam in (
         "revalidate_verified_research_report_sources",
@@ -88,4 +86,7 @@ def test_spec_021_package_locks_exact_source_revalidation_boundaries() -> None:
     assert "TDD" in tasks
     assert "specify → clarify → plan → checklist → tasks → analyze → implement → converge" in tasks
     assert tasks.count("## Final Verification (run exactly once)") == 1
-    assert "python -m pytest; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; python -m compileall src scripts; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git diff --check; exit $LASTEXITCODE" in tasks
+    assert (
+        "python -m pytest; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; python -m compileall src scripts; if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }; git diff --check; exit $LASTEXITCODE"
+        in tasks
+    )

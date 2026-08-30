@@ -36,13 +36,8 @@ from .workflow_derivation_profiles import (
     WORKFLOW_DERIVATION_PROFILE,
 )
 
-CACHE_STALE_WARNING = (
-    "SQLite cache may be stale; rebuild cache manually. "
-    "本流程不會自動重建。"
-)
-DEFAULT_CONTEXT_PATH = (
-    Path(__file__).resolve().parents[2] / "config" / "operator_workflow.yaml"
-)
+CACHE_STALE_WARNING = "SQLite cache may be stale; rebuild cache manually. 本流程不會自動重建。"
+DEFAULT_CONTEXT_PATH = Path(__file__).resolve().parents[2] / "config" / "operator_workflow.yaml"
 _JSON_FENCE = re.compile(r"```(?:json)?\s*(\{.*\})\s*```", re.DOTALL)
 _MAX_SOURCE_BYTES = 2 * 1024 * 1024
 REQUIRED_PROFILE = LEARNING_NOTES
@@ -68,8 +63,7 @@ def run_workflow_derivation(
     profile = load_podcast_profile(podcast_id)
     if profile.summary_profile != REQUIRED_PROFILE:
         raise WorkflowDerivationError(
-            f"workflow derivation requires summary_profile={REQUIRED_PROFILE}; "
-            f"got {profile.summary_profile!r}"
+            f"workflow derivation requires summary_profile={REQUIRED_PROFILE}; got {profile.summary_profile!r}"
         )
 
     context_path = Path(workflow_context) if workflow_context else DEFAULT_CONTEXT_PATH
@@ -77,24 +71,16 @@ def run_workflow_derivation(
 
     source_path = canonical_semantic_summary_path(podcast_id, episode_ref)
     if source_path is None or not source_path.is_file():
-        raise WorkflowDerivationError(
-            "canonical learning-notes semantic summary is missing"
-        )
+        raise WorkflowDerivationError("canonical learning-notes semantic summary is missing")
     stem = source_path.name.removesuffix(".semantic.md")
     lecture = storage.study_guide_bundle_paths_from_stem(podcast_id, stem)
     _require_lecture(lecture)
 
     paths = storage.workflow_derivation_paths_from_stem(podcast_id, stem)
-    existing = [
-        path
-        for path in (paths.prompt_examples_path, paths.apply_path)
-        if path.is_file()
-    ]
+    existing = [path for path in (paths.prompt_examples_path, paths.apply_path) if path.is_file()]
     complete = len(existing) == 2
     if existing and not complete and not force:
-        raise WorkflowDerivationError(
-            "incomplete workflow derivation pair; pass force=true to replace"
-        )
+        raise WorkflowDerivationError("incomplete workflow derivation pair; pass force=true to replace")
     reuse_all = complete and not force
 
     planned_reads = [
@@ -194,24 +180,16 @@ def _result(**kwargs: Any) -> WorkflowDerivationResult:
 
 def _load_context(path: Path) -> list[str]:
     if not path.is_file():
-        raise WorkflowDerivationError(
-            f"operator workflow context is missing: {path}"
-        )
+        raise WorkflowDerivationError(f"operator workflow context is missing: {path}")
     try:
         raw = yaml.safe_load(path.read_text(encoding="utf-8")) or {}
     except (OSError, UnicodeError, yaml.YAMLError) as exc:
-        raise WorkflowDerivationError(
-            f"operator workflow context is unreadable: {path}"
-        ) from exc
+        raise WorkflowDerivationError(f"operator workflow context is unreadable: {path}") from exc
     if not isinstance(raw, dict):
         raise WorkflowDerivationError("operator workflow context must be a mapping")
     tools = raw.get("allowed_tools")
-    if not isinstance(tools, list) or not tools or not all(
-        isinstance(item, str) and item.strip() for item in tools
-    ):
-        raise WorkflowDerivationError(
-            "operator workflow context requires a non-empty allowed_tools list"
-        )
+    if not isinstance(tools, list) or not tools or not all(isinstance(item, str) and item.strip() for item in tools):
+        raise WorkflowDerivationError("operator workflow context requires a non-empty allowed_tools list")
     return [item.strip() for item in tools]
 
 
@@ -224,9 +202,7 @@ def _require_lecture(lecture: storage.StudyGuideBundlePaths) -> None:
     )
     existing = [path for path in files if path.is_file()]
     if len(existing) < 4:
-        raise WorkflowDerivationError(
-            "study-guide lecture is missing or partial; generate Spec 038 first"
-        )
+        raise WorkflowDerivationError("study-guide lecture is missing or partial; generate Spec 038 first")
     for path in files:
         _read_capped(path)
 
@@ -244,9 +220,7 @@ def _read_capped(path: Path) -> str:
         raise WorkflowDerivationError(f"not UTF-8: {path}") from exc
 
 
-def _build_messages(
-    lecture_text: dict[str, str], allowed_tools: list[str]
-) -> list[dict[str, str]]:
+def _build_messages(lecture_text: dict[str, str], allowed_tools: list[str]) -> list[dict[str, str]]:
     tools = ", ".join(allowed_tools)
     user = (
         f"{WORKFLOW_DERIVATION_PROFILE.user_instructions}\n\n"
@@ -301,14 +275,10 @@ def _validate_generated(bodies: dict[str, str], allowed_tools: list[str]) -> Non
             if marker in text and marker not in allowed_tools:
                 forbidden_tools.append(marker)
         if forbidden_tools:
-            raise WorkflowDerivationError(
-                f"{key} advises tools absent from context: {forbidden_tools}"
-            )
+            raise WorkflowDerivationError(f"{key} advises tools absent from context: {forbidden_tools}")
 
 
-def _atomic_write_pair(
-    paths: storage.WorkflowDerivationPaths, bodies: dict[str, str]
-) -> None:
+def _atomic_write_pair(paths: storage.WorkflowDerivationPaths, bodies: dict[str, str]) -> None:
     dest = paths.bundle_dir
     dest.mkdir(parents=True, exist_ok=True)
     part = dest / ".derivation.part"

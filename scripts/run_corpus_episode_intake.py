@@ -12,9 +12,7 @@ from corpus_ingest_core.corpus_episode_intake import result_to_dict
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Preview or run one bounded corpus episode intake bootstrap."
-    )
+    parser = argparse.ArgumentParser(description="Preview or run one bounded corpus episode intake bootstrap.")
     parser.add_argument("--podcast", required=True, dest="podcast_id")
     parser.add_argument("--episode", default="latest", dest="episode_ref")
     parser.add_argument("--confirm", action="store_true")

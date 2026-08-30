@@ -29,9 +29,7 @@ LLM_RUNTIME = "openai-compatible /chat/completions"
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Run a dry-run-first semantic summary LLM smoke."
-    )
+    parser = argparse.ArgumentParser(description="Run a dry-run-first semantic summary LLM smoke.")
     parser.add_argument("podcast_id", nargs="?")
     parser.add_argument("episode_ref", nargs="?")
     parser.add_argument("--podcast", dest="podcast_option")
@@ -112,9 +110,7 @@ def main() -> None:
             validation.paths.get("json", ""),
             validation.paths.get("text", ""),
         ],
-        "planned_writes": [
-            f"data/summaries/{podcast_id}/{episode_ref}__{{safe_title_slug}}.semantic.md"
-        ],
+        "planned_writes": [f"data/summaries/{podcast_id}/{episode_ref}__{{safe_title_slug}}.semantic.md"],
         "risks": [
             "Calls an external LLM API when confirmed.",
             "Sends transcript text outside this machine when confirmed.",
@@ -139,11 +135,7 @@ def main() -> None:
 
 
 def _resolve_llm_options(args: argparse.Namespace) -> tuple[str, str | None, str | None, str]:
-    profile = (
-        load_llm_profile(args.llm_profile, args.llm_profile_path)
-        if args.llm_profile
-        else None
-    )
+    profile = load_llm_profile(args.llm_profile, args.llm_profile_path) if args.llm_profile else None
     provider = args.provider or (profile.provider if profile else "openai-compatible")
     model = args.model or (profile.model if profile else None)
     base_url = args.base_url or (profile.base_url if profile else None)
@@ -160,15 +152,13 @@ def _load_local_env_from_args(args: argparse.Namespace):
 def _print_progress(event: str, **payload) -> None:
     if event == "chunk_count":
         print(
-            "semantic_summary_progress: "
-            f"chunk_count={payload['chunk_count']} llm_requests={payload['llm_requests']}",
+            f"semantic_summary_progress: chunk_count={payload['chunk_count']} llm_requests={payload['llm_requests']}",
             file=sys.stderr,
         )
     elif event in {"chunk_start", "chunk_done"}:
         status = "start" if event == "chunk_start" else "done"
         print(
-            "semantic_summary_progress: "
-            f"chunk {payload['index']}/{payload['total']} {status}",
+            f"semantic_summary_progress: chunk {payload['index']}/{payload['total']} {status}",
             file=sys.stderr,
         )
     elif event == "final_start":

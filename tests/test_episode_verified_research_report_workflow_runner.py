@@ -24,9 +24,7 @@ def test_preview_is_strict_zero_write(monkeypatch, tmp_path):
     t018._record_current_018_lineage()
     before = t018._manifest(tmp_path)
 
-    result = run_episode_verified_research_report_workflow(
-        "gooaye", "EP700", confirm=False
-    )
+    result = run_episode_verified_research_report_workflow("gooaye", "EP700", confirm=False)
 
     assert result.confirm is False
     assert result.ready is True
@@ -55,12 +53,8 @@ def test_blocked_when_lineage_missing(monkeypatch, tmp_path):
     t018._write_completed_artifacts(monkeypatch, tmp_path, with_lineage=False)
     before = t018._manifest(tmp_path)
 
-    preview = run_episode_verified_research_report_workflow(
-        "gooaye", "EP700", confirm=False
-    )
-    confirmed = run_episode_verified_research_report_workflow(
-        "gooaye", "EP700", confirm=True
-    )
+    preview = run_episode_verified_research_report_workflow("gooaye", "EP700", confirm=False)
+    confirmed = run_episode_verified_research_report_workflow("gooaye", "EP700", confirm=True)
 
     assert preview.ready is False
     assert preview.outcome == "blocked"
@@ -83,12 +77,8 @@ def test_confirm_publishes_and_reuses_without_provider(monkeypatch, tmp_path):
         lambda *a, **k: (_ for _ in ()).throw(AssertionError("no provider")),
     )
 
-    first = run_episode_verified_research_report_workflow(
-        "gooaye", "EP700", confirm=True
-    )
-    second = run_episode_verified_research_report_workflow(
-        "gooaye", "EP700", confirm=True
-    )
+    first = run_episode_verified_research_report_workflow("gooaye", "EP700", confirm=True)
+    second = run_episode_verified_research_report_workflow("gooaye", "EP700", confirm=True)
 
     assert first.outcome == "completed"
     assert first.bundle_dir is not None and first.bundle_dir.is_dir()
@@ -127,14 +117,10 @@ def test_owned_lineage_error_maps_to_structured_roles():
         issues_from_verified_report_message,
     )
 
-    issues = issues_from_verified_report_message(
-        "verified report semantic summary lineage is stale or invalid"
-    )
+    issues = issues_from_verified_report_message("verified report semantic summary lineage is stale or invalid")
     assert [(i.role, i.kind) for i in issues] == [("semantic_summary", "stale")]
 
-    missing = issues_from_verified_report_message(
-        "verified report lineage is missing or untrusted"
-    )
+    missing = issues_from_verified_report_message("verified report lineage is missing or untrusted")
     assert [(i.role, i.kind) for i in missing] == [("lineage", "missing")]
 
     # Must not freestyle-match unrelated words like bare "review" without owned shape.
@@ -150,9 +136,7 @@ def test_post_publish_source_mutation_blocks_stale_reuse(monkeypatch, tmp_path):
     t018._write_completed_artifacts(monkeypatch, tmp_path)
     t018._record_current_018_lineage()
 
-    first = run_episode_verified_research_report_workflow(
-        "gooaye", "EP700", confirm=True
-    )
+    first = run_episode_verified_research_report_workflow("gooaye", "EP700", confirm=True)
     assert first.outcome == "completed"
     assert first.bundle_dir is not None
     first_digest = first.source_digest
@@ -161,9 +145,7 @@ def test_post_publish_source_mutation_blocks_stale_reuse(monkeypatch, tmp_path):
     summary = storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha")
     summary.write_bytes(summary.read_bytes() + b"\n# mutated after publish\n")
 
-    second = run_episode_verified_research_report_workflow(
-        "gooaye", "EP700", confirm=True
-    )
+    second = run_episode_verified_research_report_workflow("gooaye", "EP700", confirm=True)
 
     assert second.outcome == "blocked"
     assert second.bundle_dir is None
@@ -197,9 +179,7 @@ def test_result_to_dict_is_metadata_only(monkeypatch, tmp_path):
 
     t018._write_completed_artifacts(monkeypatch, tmp_path)
     t018._record_current_018_lineage()
-    result = run_episode_verified_research_report_workflow(
-        "gooaye", "EP700", confirm=True
-    )
+    result = run_episode_verified_research_report_workflow("gooaye", "EP700", confirm=True)
     payload = result_to_dict(result)
     serialized = json.dumps(payload, ensure_ascii=False)
 
@@ -258,18 +238,12 @@ def test_all_terminal_paths_do_not_dispatch_upstream_workflows(
     monkeypatch.setattr(remediation, "run_corpus_remediation", fail_if_called)
     monkeypatch.setattr(episode_workflow, "run_corpus_episode_workflow", fail_if_called)
     monkeypatch.setattr(completion, "run_corpus_episode_completion_workflow", fail_if_called)
-    monkeypatch.setattr(
-        latest_deterministic, "run_corpus_latest_episode_deterministic_workflow", fail_if_called
-    )
-    monkeypatch.setattr(
-        latest_verified, "run_latest_episode_verified_research_report_workflow", fail_if_called
-    )
+    monkeypatch.setattr(latest_deterministic, "run_corpus_latest_episode_deterministic_workflow", fail_if_called)
+    monkeypatch.setattr(latest_verified, "run_latest_episode_verified_research_report_workflow", fail_if_called)
     monkeypatch.setattr(research_workflow, "run_research_workflow", fail_if_called)
     monkeypatch.setattr(cache, "rebuild_cache", fail_if_called)
 
-    result = run_episode_verified_research_report_workflow(
-        "gooaye", "EP700", confirm=confirm
-    )
+    result = run_episode_verified_research_report_workflow("gooaye", "EP700", confirm=confirm)
 
     assert result.outcome == expected_outcome
     assert result.confirm is confirm

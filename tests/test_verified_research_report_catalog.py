@@ -36,9 +36,7 @@ def _manifest(podcast_id: str, episode_ref: str, digest: str, **overrides: objec
     return payload
 
 
-def _write_manifest_bundle(
-    root: Path, podcast_id: str, episode_ref: str, digest: str, **overrides: object
-) -> Path:
+def _write_manifest_bundle(root: Path, podcast_id: str, episode_ref: str, digest: str, **overrides: object) -> Path:
     bundle = root / podcast_id / episode_ref / f"v1-{digest}"
     bundle.mkdir(parents=True)
     (bundle / "manifest.json").write_text(
@@ -124,9 +122,7 @@ def test_list_discovers_only_safe_canonical_manifest_summaries_without_body_read
     assert [(item.podcast_id, item.episode_ref) for item in filtered.items] == [("alpha", "EP3")]
 
 
-def test_list_missing_root_is_empty_and_input_is_bounded(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_list_missing_root_is_empty_and_input_is_bounded(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from corpus_ingest_core import (
         VerifiedResearchReportCatalogInputError,
         list_verified_research_reports,
@@ -156,9 +152,7 @@ def test_list_missing_root_is_empty_and_input_is_bounded(
     assert not root.exists()
 
 
-def test_list_skips_unsafe_locator_directory_names(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_list_skips_unsafe_locator_directory_names(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from corpus_ingest_core import list_verified_research_reports
 
     root = _use_catalog_root(monkeypatch, tmp_path)
@@ -170,9 +164,7 @@ def test_list_skips_unsafe_locator_directory_names(
     assert [(item.podcast_id, item.episode_ref) for item in page.items] == [("safe-show", "EP1")]
 
 
-def test_list_fails_closed_at_the_per_level_entry_cap(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_list_fails_closed_at_the_per_level_entry_cap(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from corpus_ingest_core import list_verified_research_reports
 
     root = _use_catalog_root(monkeypatch, tmp_path)
@@ -187,9 +179,7 @@ def test_list_fails_closed_at_the_per_level_entry_cap(
     assert page.traversal_status == "incomplete_entry_cap"
 
 
-def test_list_never_reads_report_or_source_bodies(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_list_never_reads_report_or_source_bodies(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from corpus_ingest_core import list_verified_research_reports
 
     root = _use_catalog_root(monkeypatch, tmp_path)
@@ -232,9 +222,7 @@ def test_list_skips_symlinked_or_junctioned_podcast_directories(
     assert [(item.podcast_id, item.episode_ref) for item in page.items] == [("safe-show", "EP1")]
 
 
-def test_list_skips_windows_junctioned_podcast_directory(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_list_skips_windows_junctioned_podcast_directory(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     import os
     import subprocess
 
@@ -296,9 +284,7 @@ def test_search_matches_only_normalized_safe_locator_fields_without_body_reads(
     assert body_match.items == []
 
 
-def test_search_rejects_blank_control_and_oversize_queries(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_search_rejects_blank_control_and_oversize_queries(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from corpus_ingest_core import (
         VerifiedResearchReportCatalogInputError,
         search_verified_research_reports,
@@ -311,9 +297,7 @@ def test_search_rejects_blank_control_and_oversize_queries(
             search_verified_research_reports(query)
 
 
-def test_inspect_verifies_exact_bundle_self_consistency_only(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_inspect_verifies_exact_bundle_self_consistency_only(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from corpus_ingest_core import (
         inspect_verified_research_report,
         verified_research_report_catalog_result_to_dict,
@@ -400,9 +384,7 @@ def test_inspect_fail_closes_on_structural_and_integrity_tampering(
     assert inspection.safe_metadata is None or "source_artifacts" not in repr(inspection.safe_metadata)
 
 
-def test_inspect_never_opens_source_or_lineage_artifacts(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_inspect_never_opens_source_or_lineage_artifacts(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from corpus_ingest_core import inspect_verified_research_report
 
     root = _use_catalog_root(monkeypatch, tmp_path)
@@ -576,9 +558,7 @@ def test_catalog_requires_storage_canonical_lowercase_podcast_slug(
         inspect_verified_research_report("Upper-Show", "EP1", _DIGEST_A)
 
 
-def test_list_and_search_fail_closed_for_unsafe_catalog_root(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_list_and_search_fail_closed_for_unsafe_catalog_root(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from corpus_ingest_core import (
         list_verified_research_reports,
         search_verified_research_reports,
@@ -597,9 +577,7 @@ def test_list_and_search_fail_closed_for_unsafe_catalog_root(
         assert str(root) not in repr(page)
 
 
-def test_list_rejects_symlinked_catalog_root(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_list_rejects_symlinked_catalog_root(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from corpus_ingest_core import list_verified_research_reports
 
     root = _use_catalog_root(monkeypatch, tmp_path)
@@ -680,9 +658,7 @@ def test_inspect_fails_closed_when_verified_bundle_directory_is_replaced(
     assert inspection.checks["containment"] is False
 
 
-def test_list_fails_closed_when_catalog_root_cannot_be_lstatd(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_list_fails_closed_when_catalog_root_cannot_be_lstatd(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from corpus_ingest_core import list_verified_research_reports
 
     root = _use_catalog_root(monkeypatch, tmp_path)

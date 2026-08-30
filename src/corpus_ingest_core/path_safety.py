@@ -58,25 +58,18 @@ def is_safe_local_path_structure(
     if any(ord(character) < 32 or ord(character) == 127 for character in value):
         return False
     if allow_absolute:
-        path_without_drive = (
-            value[2:] if _DRIVE_PREFIX_PATTERN.match(value) else value
-        )
+        path_without_drive = value[2:] if _DRIVE_PREFIX_PATTERN.match(value) else value
         if ":" in path_without_drive:
             return False
     elif ":" in value:
         return False
     parts = _SEPARATOR_SPLIT_PATTERN.split(value)
-    if allow_absolute and (
-        _DRIVE_PREFIX_PATTERN.match(value) or value.startswith("/")
-    ):
+    if allow_absolute and (_DRIVE_PREFIX_PATTERN.match(value) or value.startswith("/")):
         path_parts = parts[1:]
     else:
         path_parts = parts
     if not path_parts or any(
-        not part
-        or part in {".", ".."}
-        or not SAFE_PATH_COMPONENT_PATTERN.fullmatch(part)
-        for part in path_parts
+        not part or part in {".", ".."} or not SAFE_PATH_COMPONENT_PATTERN.fullmatch(part) for part in path_parts
     ):
         return False
     return bool(SAFE_FILENAME_PATTERN.fullmatch(path_parts[-1]))

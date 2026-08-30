@@ -22,9 +22,7 @@ class _ArgumentParser(argparse.ArgumentParser):
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = _ArgumentParser(
-        description="List inventory episodes missing a verified research report bundle."
-    )
+    parser = _ArgumentParser(description="List inventory episodes missing a verified research report bundle.")
     parser.add_argument("podcast_id")
     parser.add_argument("--limit", type=int, default=50)
     return parser

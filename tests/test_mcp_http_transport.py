@@ -57,9 +57,7 @@ def test_streamable_http_sets_public_settings_and_runs_the_existing_server(monke
 
     monkeypatch.setattr(mcp_runtime.mcp, "run", fake_run)
 
-    mcp_runtime.run_streamable_http(
-        mcp_runtime.StreamableHttpConfig(port=8767)
-    )
+    mcp_runtime.run_streamable_http(mcp_runtime.StreamableHttpConfig(port=8767))
 
     assert calls == [("streamable-http", "127.0.0.1", 8767, "/mcp")]
     assert mcp_runtime.mcp.settings.transport_security is security

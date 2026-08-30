@@ -121,9 +121,7 @@ def test_valid_bundle_requires_matching_current_lineage_sources_and_shared_diges
 
     digest, evidence, snapshot = _valid_evidence_and_snapshot(tmp_path)
     monkeypatch.setattr(revalidation, "_exact_bundle_evidence", lambda locator: evidence)
-    monkeypatch.setattr(
-        revalidation, "_current_verified_research_source_snapshot", lambda *args, **kwargs: snapshot
-    )
+    monkeypatch.setattr(revalidation, "_current_verified_research_source_snapshot", lambda *args, **kwargs: snapshot)
 
     result = revalidation.revalidate_verified_research_report_sources("show", "EP1", digest)
 
@@ -131,8 +129,12 @@ def test_valid_bundle_requires_matching_current_lineage_sources_and_shared_diges
     assert result.lineage_revalidation_status == "current"
     assert result.source_currentness_status == "current"
     assert set(result.checks) == {
-        "bundle_self_consistency", "assembly_options", "current_lineage",
-        "published_lineage_match", "source_artifact_metadata_match", "source_digest_match",
+        "bundle_self_consistency",
+        "assembly_options",
+        "current_lineage",
+        "published_lineage_match",
+        "source_artifact_metadata_match",
+        "source_digest_match",
     }
     assert all(value in {"valid", "current", "match"} for value in result.checks.values())
     assert result.failed_roles == []
@@ -155,9 +157,7 @@ def test_published_hostile_source_path_is_comparison_only_not_a_read_authority(
 
     monkeypatch.setattr(Path, "read_bytes", guarded_read_bytes)
     monkeypatch.setattr(revalidation, "_exact_bundle_evidence", lambda locator: evidence)
-    monkeypatch.setattr(
-        revalidation, "_current_verified_research_source_snapshot", lambda *args, **kwargs: snapshot
-    )
+    monkeypatch.setattr(revalidation, "_current_verified_research_source_snapshot", lambda *args, **kwargs: snapshot)
 
     result = revalidation.revalidate_verified_research_report_sources("show", "EP1", digest)
 
@@ -184,8 +184,16 @@ def test_stock_lens_input_set_requires_core_derived_paths_before_any_read(
     hostile.write_bytes(b"hostile")
     stock = {
         "input_set_lineage": [
-            {"role": "industry_mapping", "path": hostile.resolve().as_posix(), "sha256": hashlib.sha256(b"hostile").hexdigest()},
-            {"role": "external_boundary", "path": expected_boundary.resolve().as_posix(), "sha256": hashlib.sha256(b"boundary").hexdigest()},
+            {
+                "role": "industry_mapping",
+                "path": hostile.resolve().as_posix(),
+                "sha256": hashlib.sha256(b"hostile").hexdigest(),
+            },
+            {
+                "role": "external_boundary",
+                "path": expected_boundary.resolve().as_posix(),
+                "sha256": hashlib.sha256(b"boundary").hexdigest(),
+            },
         ]
     }
     expected_inputs = {
@@ -226,14 +234,23 @@ def test_safe_serializer_omits_tainted_values_and_keeps_only_bounded_contract() 
     serialized = revalidation.result_to_dict(result)
 
     assert set(serialized) == {
-        "locator", "bundle_self_consistency_status", "lineage_revalidation_status",
-        "source_currentness_status", "checks", "failed_roles", "safe_metadata",
+        "locator",
+        "bundle_self_consistency_status",
+        "lineage_revalidation_status",
+        "source_currentness_status",
+        "checks",
+        "failed_roles",
+        "safe_metadata",
         "not_investment_advice",
     }
     assert serialized["failed_roles"] == ["transcript"]
     assert set(serialized["checks"]) == {
-        "bundle_self_consistency", "assembly_options", "current_lineage",
-        "published_lineage_match", "source_artifact_metadata_match", "source_digest_match",
+        "bundle_self_consistency",
+        "assembly_options",
+        "current_lineage",
+        "published_lineage_match",
+        "source_artifact_metadata_match",
+        "source_digest_match",
     }
     assert "HOSTILE" not in repr(serialized)
     assert "SECRET-STOCK" not in repr(serialized)
@@ -249,8 +266,11 @@ def test_publisher_manifest_preserves_legacy_safe_source_path_representation() -
 
     relative_path = Path("relative-source-artifact.json")
     source = SimpleNamespace(
-        role="semantic_summary", path=relative_path, sha256="c" * 64,
-        size_bytes=1, identity_valid=True,
+        role="semantic_summary",
+        path=relative_path,
+        sha256="c" * 64,
+        size_bytes=1,
+        identity_valid=True,
     )
     assembly = SimpleNamespace(
         report_version="v1-" + "d" * 64,
@@ -280,8 +300,13 @@ def test_current_source_snapshot_uses_fresh_evidence_not_persisted_lineage_paths
     import corpus_ingest_core.verified_research_report as report
 
     roles = (
-        "transcript", "semantic_summary", "semantic_review", "mentions",
-        "intelligence", "industry_mapping", "external_boundary",
+        "transcript",
+        "semantic_summary",
+        "semantic_review",
+        "mentions",
+        "intelligence",
+        "industry_mapping",
+        "external_boundary",
     )
     current_paths = {role: tmp_path / f"current-{role}.json" for role in roles}
     evidence = SimpleNamespace(
@@ -297,8 +322,7 @@ def test_current_source_snapshot_uses_fresh_evidence_not_persisted_lineage_paths
             },
         },
         current_artifacts={
-            role: {"path": path.resolve().as_posix(), "sha256": "a" * 64}
-            for role, path in current_paths.items()
+            role: {"path": path.resolve().as_posix(), "sha256": "a" * 64} for role, path in current_paths.items()
         },
     )
     selected: list[Path] = []
@@ -306,8 +330,12 @@ def test_current_source_snapshot_uses_fresh_evidence_not_persisted_lineage_paths
     def source_from_fresh_path(role: str, path: Path, identity_valid: bool):
         selected.append(path)
         return SimpleNamespace(
-            role=role, path=path, sha256="a" * 64, size_bytes=0,
-            identity_valid=identity_valid, raw_bytes=b"",
+            role=role,
+            path=path,
+            sha256="a" * 64,
+            size_bytes=0,
+            identity_valid=identity_valid,
+            raw_bytes=b"",
         )
 
     monkeypatch.setattr(report, "_current_verified_research_lineage_evidence", lambda *args, **kwargs: evidence)
@@ -333,10 +361,7 @@ def test_publisher_lineage_manifest_keeps_sidecar_and_generation_proofs(
 
     lineage = assembly.lineage_manifest
     assert lineage["sidecar_path"].endswith("EP700.lineage.json")
-    assert all(
-        isinstance(entry.get("generation_proof"), dict)
-        for entry in lineage["artifacts"].values()
-    )
+    assert all(isinstance(entry.get("generation_proof"), dict) for entry in lineage["artifacts"].values())
 
 
 def test_external_default_fixture_path_supports_public_assembly_and_revalidation(
@@ -358,9 +383,7 @@ def test_external_default_fixture_path_supports_public_assembly_and_revalidation
     assert fixture.parent != tmp_path / "corpus"
     _record_current_018_lineage(include_fixture_verification=True)
     bundle = publish_verified_research_report_bundle(
-        assemble_verified_research_report(
-            "gooaye", "EP700", stock_query=None, include_fixture_verification=True
-        )
+        assemble_verified_research_report("gooaye", "EP700", stock_query=None, include_fixture_verification=True)
     )
 
     result = revalidate_verified_research_report_sources("gooaye", "EP700", bundle.source_digest)
@@ -392,9 +415,7 @@ def test_external_default_fixture_symlink_is_rejected_by_public_assembly(
         pytest.skip(f"fixture symlink creation is unavailable: {exc.__class__.__name__}")
 
     with pytest.raises(VerifiedResearchReportInputError):
-        assemble_verified_research_report(
-            "gooaye", "EP700", stock_query=None, include_fixture_verification=True
-        )
+        assemble_verified_research_report("gooaye", "EP700", stock_query=None, include_fixture_verification=True)
 
 
 def test_public_revalidation_accepts_an_unchanged_publisher_bundle_without_writes(
@@ -416,9 +437,7 @@ def test_public_revalidation_accepts_an_unchanged_publisher_bundle_without_write
     )
     before = _manifest(tmp_path)
 
-    result = revalidate_verified_research_report_sources(
-        "gooaye", "EP700", bundle.source_digest
-    )
+    result = revalidate_verified_research_report_sources("gooaye", "EP700", bundle.source_digest)
 
     assert result.bundle_self_consistency_status == "valid"
     assert result.lineage_revalidation_status == "current"
@@ -439,9 +458,16 @@ def test_fixture_marker_paths_are_rejected_before_any_fixture_or_snapshot_read(
     corpus = tmp_path / "corpus"
     boundary_path = (tmp_path / "canonical-boundary.json").resolve().as_posix()
     snapshot = (
-        corpus / "show" / "verified-research" / "preverification-boundaries"
-        / f"{storage.title_slug('EP1', 'episode')}-{'a' * 64}.json"
-    ).resolve().as_posix()
+        (
+            corpus
+            / "show"
+            / "verified-research"
+            / "preverification-boundaries"
+            / f"{storage.title_slug('EP1', 'episode')}-{'a' * 64}.json"
+        )
+        .resolve()
+        .as_posix()
+    )
     marker = {
         "verification_mode": lineage.VERIFICATION_MODE,
         "fixture_path": fixture.resolve().as_posix(),
@@ -451,16 +477,22 @@ def test_fixture_marker_paths_are_rejected_before_any_fixture_or_snapshot_read(
         "preverification_snapshot_path": snapshot,
         "preverification_snapshot_sha256": "a" * 64,
     }
-    marker[{"fixture_path": "fixture_path", "snapshot_path": "preverification_snapshot_path", "boundary_input_path": "boundary_input_path"}[hostile_field]] = "HOSTILE-LINEAGE-PATH-SENTINEL"
+    marker[
+        {
+            "fixture_path": "fixture_path",
+            "snapshot_path": "preverification_snapshot_path",
+            "boundary_input_path": "boundary_input_path",
+        }[hostile_field]
+    ] = "HOSTILE-LINEAGE-PATH-SENTINEL"
     boundary = {
-        "podcast_id": "show", "episode_ref": "EP1", "title": "Episode 1",
+        "podcast_id": "show",
+        "episode_ref": "EP1",
+        "title": "Episode 1",
         "external_data_verification": marker,
     }
     monkeypatch.setattr(storage, "CORPUS_DIR", corpus)
     monkeypatch.setattr(lineage, "_default_fixture_path", lambda: fixture)
-    monkeypatch.setattr(
-        lineage, "_read_bytes", lambda path, role: pytest.fail(f"hostile marker triggered {role} read")
-    )
+    monkeypatch.setattr(lineage, "_read_bytes", lambda path, role: pytest.fail(f"hostile marker triggered {role} read"))
     monkeypatch.setattr(
         lineage, "secure_read_bytes", lambda *args, **kwargs: pytest.fail("hostile marker triggered secure read")
     )
@@ -481,7 +513,10 @@ def test_fixture_marker_rejects_non_sha_boundary_digest_before_any_read(
     boundary_path = (tmp_path / "canonical-boundary.json").resolve().as_posix()
     hostile_digest = "../HOSTILE-SNAPSHOT-SELECTOR"
     expected_snapshot = (
-        corpus / "show" / "verified-research" / "preverification-boundaries"
+        corpus
+        / "show"
+        / "verified-research"
+        / "preverification-boundaries"
         / f"{storage.title_slug('EP1', 'episode')}-{hostile_digest}.json"
     )
     marker = {
@@ -501,9 +536,7 @@ def test_fixture_marker_rejects_non_sha_boundary_digest_before_any_read(
     }
     monkeypatch.setattr(storage, "CORPUS_DIR", corpus)
     monkeypatch.setattr(lineage, "_default_fixture_path", lambda: fixture)
-    monkeypatch.setattr(
-        lineage, "_read_bytes", lambda path, role: pytest.fail("invalid digest triggered a read")
-    )
+    monkeypatch.setattr(lineage, "_read_bytes", lambda path, role: pytest.fail("invalid digest triggered a read"))
 
     with pytest.raises(VerifiedResearchReportInputError):
         lineage._fixture_entry({"path": boundary_path}, boundary)
@@ -543,9 +576,7 @@ def test_invalid_bundle_stops_before_any_current_source_or_lineage_read(
         ("show", "EP1", _DIGEST.upper()),
     ],
 )
-def test_public_seam_rejects_invalid_or_reserved_exact_locator(
-    podcast_id: str, episode_ref: str, digest: str
-) -> None:
+def test_public_seam_rejects_invalid_or_reserved_exact_locator(podcast_id: str, episode_ref: str, digest: str) -> None:
     from corpus_ingest_core import (
         VerifiedResearchReportSourceRevalidationInputError,
         revalidate_verified_research_report_sources,
@@ -607,9 +638,7 @@ def test_current_lineage_failure_is_bounded_and_classified(
     assert message not in repr(result)
 
 
-def test_malformed_empty_current_snapshot_cannot_be_reported_current(
-    monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_malformed_empty_current_snapshot_cannot_be_reported_current(monkeypatch: pytest.MonkeyPatch) -> None:
     from types import SimpleNamespace
 
     import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
@@ -617,8 +646,11 @@ def test_malformed_empty_current_snapshot_cannot_be_reported_current(
 
     lineage = {"schema_version": "lineage-v2", "artifacts": {}}
     digest = _source_digest(
-        podcast_id="show", episode_ref="EP1", stock_query=None,
-        include_fixture_verification=False, sources=[],
+        podcast_id="show",
+        episode_ref="EP1",
+        stock_query=None,
+        include_fixture_verification=False,
+        sources=[],
     )
     evidence = SimpleNamespace(
         status="valid",
@@ -635,9 +667,7 @@ def test_malformed_empty_current_snapshot_cannot_be_reported_current(
     )
     snapshot = SimpleNamespace(lineage_manifest=lineage, source_artifacts=[])
     monkeypatch.setattr(revalidation, "_exact_bundle_evidence", lambda locator: evidence)
-    monkeypatch.setattr(
-        revalidation, "_current_verified_research_source_snapshot", lambda *args, **kwargs: snapshot
-    )
+    monkeypatch.setattr(revalidation, "_current_verified_research_source_snapshot", lambda *args, **kwargs: snapshot)
 
     result = revalidation.revalidate_verified_research_report_sources("show", "EP1", digest)
 
@@ -654,9 +684,7 @@ def test_published_lineage_and_digest_mismatches_have_closed_failed_roles(
     digest, evidence, snapshot = _valid_evidence_and_snapshot(tmp_path)
     evidence.manifest["lineage"] = {"hostile": "published-lineage"}
     monkeypatch.setattr(revalidation, "_exact_bundle_evidence", lambda locator: evidence)
-    monkeypatch.setattr(
-        revalidation, "_current_verified_research_source_snapshot", lambda *args, **kwargs: snapshot
-    )
+    monkeypatch.setattr(revalidation, "_current_verified_research_source_snapshot", lambda *args, **kwargs: snapshot)
 
     result = revalidation.revalidate_verified_research_report_sources("show", "EP1", "f" * 64)
 
@@ -672,9 +700,7 @@ def test_malformed_or_tampered_source_metadata_never_becomes_current(
 ) -> None:
     import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
-    digest, evidence, snapshot = _valid_evidence_and_snapshot(
-        tmp_path, roles=("transcript", "mentions")
-    )
+    digest, evidence, snapshot = _valid_evidence_and_snapshot(tmp_path, roles=("transcript", "mentions"))
     metadata = evidence.manifest["source_artifacts"]
     if mutation == "missing":
         metadata.pop()
@@ -689,9 +715,7 @@ def test_malformed_or_tampered_source_metadata_never_becomes_current(
     else:
         metadata[0]["path"] = "HOSTILE-MANIFEST-PATH-SENTINEL"
     monkeypatch.setattr(revalidation, "_exact_bundle_evidence", lambda locator: evidence)
-    monkeypatch.setattr(
-        revalidation, "_current_verified_research_source_snapshot", lambda *args, **kwargs: snapshot
-    )
+    monkeypatch.setattr(revalidation, "_current_verified_research_source_snapshot", lambda *args, **kwargs: snapshot)
 
     result = revalidation.revalidate_verified_research_report_sources("show", "EP1", digest)
 
@@ -699,7 +723,10 @@ def test_malformed_or_tampered_source_metadata_never_becomes_current(
     assert result.source_currentness_status == "stale_or_invalid"
     assert result.failed_roles
     assert set(result.failed_roles) <= {
-        "transcript", "mentions", "lineage", "source_digest",
+        "transcript",
+        "mentions",
+        "lineage",
+        "source_digest",
     }
     assert "HOSTILE-MANIFEST-PATH-SENTINEL" not in repr(result)
 
@@ -714,8 +741,12 @@ def test_second_snapshot_replacement_race_fails_closed_with_source_role(
     digest, evidence, first = _valid_evidence_and_snapshot(tmp_path)
     original = first.source_artifacts[0]
     replacement = SimpleNamespace(
-        role=original.role, path=original.path, sha256="f" * 64,
-        size_bytes=original.size_bytes + 1, identity_valid=True, raw_bytes=b"replacement",
+        role=original.role,
+        path=original.path,
+        sha256="f" * 64,
+        size_bytes=original.size_bytes + 1,
+        identity_valid=True,
+        raw_bytes=b"replacement",
     )
     second = SimpleNamespace(lineage_manifest=first.lineage_manifest, source_artifacts=[replacement])
     snapshots = iter((first, second))
@@ -755,9 +786,7 @@ def test_second_snapshot_lineage_replacement_downgrades_lineage_verdict(
     assert result.failed_roles == ["lineage"]
 
 
-def test_second_snapshot_exception_downgrades_lineage_verdict(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_second_snapshot_exception_downgrades_lineage_verdict(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     digest, evidence, first = _valid_evidence_and_snapshot(tmp_path)
@@ -787,9 +816,7 @@ def test_public_seam_accepts_legacy_safe_and_canonical_published_paths(
 
     digest, evidence, snapshot = _valid_evidence_and_snapshot(tmp_path, legacy_safe_paths=True)
     monkeypatch.setattr(revalidation, "_exact_bundle_evidence", lambda locator: evidence)
-    monkeypatch.setattr(
-        revalidation, "_current_verified_research_source_snapshot", lambda *args, **kwargs: snapshot
-    )
+    monkeypatch.setattr(revalidation, "_current_verified_research_source_snapshot", lambda *args, **kwargs: snapshot)
 
     legacy = revalidation.revalidate_verified_research_report_sources("show", "EP1", digest)
     evidence.manifest["source_artifacts"][0]["path"] = snapshot.source_artifacts[0].path.resolve().as_posix()
@@ -807,15 +834,18 @@ def test_safe_metadata_discloses_stock_presence_without_stock_query_value(
 
     digest, evidence, snapshot = _valid_evidence_and_snapshot(tmp_path, stock_query="SECRET-STOCK")
     evidence.safe_metadata = VerifiedResearchReportCatalogItem(
-        podcast_id="show", episode_ref="EP1", report_version=f"v1-{digest}",
-        source_digest=digest, schema_version="latest-episode-verified-research-report-v1",
-        include_fixture_verification=False, stock_query_present=True,
-        semantic_review_status="passed", not_investment_advice=True,
+        podcast_id="show",
+        episode_ref="EP1",
+        report_version=f"v1-{digest}",
+        source_digest=digest,
+        schema_version="latest-episode-verified-research-report-v1",
+        include_fixture_verification=False,
+        stock_query_present=True,
+        semantic_review_status="passed",
+        not_investment_advice=True,
     )
     monkeypatch.setattr(revalidation, "_exact_bundle_evidence", lambda locator: evidence)
-    monkeypatch.setattr(
-        revalidation, "_current_verified_research_source_snapshot", lambda *args, **kwargs: snapshot
-    )
+    monkeypatch.setattr(revalidation, "_current_verified_research_source_snapshot", lambda *args, **kwargs: snapshot)
 
     result = revalidation.revalidate_verified_research_report_sources("show", "EP1", digest)
     serialized = revalidation.result_to_dict(result)

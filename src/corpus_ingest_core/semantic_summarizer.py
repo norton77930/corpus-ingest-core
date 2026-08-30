@@ -148,9 +148,7 @@ def semantic_summarize_episode(
     )
     try:
         if progress_callback is not None:
-            progress_callback(
-                "chunk_count", chunk_count=len(chunks), llm_requests=len(chunks) + 1
-            )
+            progress_callback("chunk_count", chunk_count=len(chunks), llm_requests=len(chunks) + 1)
         chunk_summaries = []
         for index, chunk in enumerate(chunks, start=1):
             if progress_callback is not None:
@@ -230,9 +228,7 @@ def _build_provider(
     )
 
 
-def _raise_for_invalid_transcript(
-    status: str, problems: list[str], allow_partial: bool
-) -> None:
+def _raise_for_invalid_transcript(status: str, problems: list[str], allow_partial: bool) -> None:
     details = "; ".join(problems)
     if status == "missing":
         raise TranscriptMissingError(f"找不到逐字稿：{details}")
@@ -341,12 +337,8 @@ def _chunk_segments(
 
     for segment in segments:
         segment_window_start = int(segment["start"] // chunk_seconds) * chunk_seconds
-        should_start_new = (
-            current
-            and (
-                segment["start"] >= (current_window_start or 0) + chunk_seconds
-                or len(current) >= max_segments_per_chunk
-            )
+        should_start_new = current and (
+            segment["start"] >= (current_window_start or 0) + chunk_seconds or len(current) >= max_segments_per_chunk
         )
         if should_start_new:
             chunks.append(_build_chunk(len(chunks) + 1, current))

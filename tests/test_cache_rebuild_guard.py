@@ -97,9 +97,7 @@ def test_mcp_confirmed_side_effect_tools_never_auto_rebuild_cache(monkeypatch):
             generated=True,
         ),
     )
-    summary_response = mcp_server.summarize_episode_extractive(
-        podcast_id="gooaye", episode_ref="EP672", confirm=True
-    )
+    summary_response = mcp_server.summarize_episode_extractive(podcast_id="gooaye", episode_ref="EP672", confirm=True)
     assert summary_response["ok"] is True
     assert any("Cache may be stale" in warning for warning in summary_response["warnings"])
 
@@ -120,9 +118,7 @@ def test_mcp_confirmed_side_effect_tools_never_auto_rebuild_cache(monkeypatch):
             already_exists=False,
         ),
     )
-    mentions_response = mcp_server.extract_mentions(
-        podcast_id="gooaye", episode_ref="EP672", confirm=True
-    )
+    mentions_response = mcp_server.extract_mentions(podcast_id="gooaye", episode_ref="EP672", confirm=True)
     assert mentions_response["ok"] is True
     assert any("Cache may be stale" in warning for warning in mentions_response["warnings"])
 
@@ -161,10 +157,7 @@ def test_rebuild_cache_references_stay_in_reviewed_modules():
 
 def test_completion_workflow_has_no_automatic_cache_rebuild_path():
     completion_source = (
-        ROOT
-        / "src"
-        / "corpus_ingest_core"
-        / "corpus_episode_completion_workflow_runner.py"
+        ROOT / "src" / "corpus_ingest_core" / "corpus_episode_completion_workflow_runner.py"
     ).read_text(encoding="utf-8")
 
     assert "rebuild_cache" not in completion_source

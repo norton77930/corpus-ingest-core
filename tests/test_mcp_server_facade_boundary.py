@@ -92,9 +92,7 @@ def test_all_tool_decorations_live_in_group_modules():
             continue
         if path.name not in GROUP_MODULES:
             offenders.append(path.name)
-    assert not offenders, (
-        f"@mcp.tool() registrations belong in the mcp_tools_* groups: {offenders}"
-    )
+    assert not offenders, f"@mcp.tool() registrations belong in the mcp_tools_* groups: {offenders}"
 
 
 def test_group_modules_never_import_the_facade():
@@ -134,16 +132,12 @@ def test_group_modules_are_imported_only_via_the_facade():
     order; a direct group import in a fresh process (or earlier in the pytest
     session) would register its tools first. Ban direct imports everywhere
     except the facade itself."""
-    import_pattern = re.compile(
-        r"(?:from|import)\s+(?:corpus_ingest_core\.|\.)?\s*mcp_tools_"
-    )
+    import_pattern = re.compile(r"(?:from|import)\s+(?:corpus_ingest_core\.|\.)?\s*mcp_tools_")
     self_name = Path(__file__).name
     offenders = []
     for root in (SRC_DIR, SCRIPTS_DIR, Path(__file__).resolve().parent):
         for path in sorted(root.glob("*.py")):
-            if path.name == self_name or (
-                root == SRC_DIR and path.name == "mcp_server.py"
-            ):
+            if path.name == self_name or (root == SRC_DIR and path.name == "mcp_server.py"):
                 continue
             if import_pattern.search(path.read_text(encoding="utf-8")):
                 offenders.append(f"{root.name}/{path.name}")
@@ -157,10 +151,7 @@ def test_facade_exposes_every_contracted_alias():
     from corpus_ingest_core import mcp_server
 
     missing = [name for name in FACADE_EXPORTS if not hasattr(mcp_server, name)]
-    assert not missing, (
-        "facade re-export list drifted — monkeypatching would silently miss: "
-        f"{missing}"
-    )
+    assert not missing, f"facade re-export list drifted — monkeypatching would silently miss: {missing}"
 
 
 def test_registered_tools_are_reexported_by_the_facade():
@@ -180,12 +171,9 @@ def test_completion_rejection_messages_have_one_defining_module():
         if any(f'"{message}"' in text for message in REJECTION_MESSAGES):
             defining.add(path.name)
     assert defining == {"corpus_episode_completion_workflow_runner.py"}, (
-        "completion rejection messages must be defined once in Core: "
-        f"{sorted(defining)}"
+        f"completion rejection messages must be defined once in Core: {sorted(defining)}"
     )
-    cli_text = (SCRIPTS_DIR / "run_corpus_episode_completion_workflow.py").read_text(
-        encoding="utf-8"
-    )
+    cli_text = (SCRIPTS_DIR / "run_corpus_episode_completion_workflow.py").read_text(encoding="utf-8")
     assert not any(f'"{message}"' in cli_text for message in REJECTION_MESSAGES), (
         "the CLI must import the canonical message constants, not re-type them"
     )

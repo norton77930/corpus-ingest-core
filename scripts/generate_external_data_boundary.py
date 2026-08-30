@@ -11,9 +11,7 @@ from corpus_ingest_core import PodcastIngestCoreError, generate_external_data_bo
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="產生單一 podcast episode 的 external market data boundary scaffold。"
-    )
+    parser = argparse.ArgumentParser(description="產生單一 podcast episode 的 external market data boundary scaffold。")
     parser.add_argument("podcast_id", nargs="?")
     parser.add_argument("episode_ref", nargs="?")
     parser.add_argument("--podcast", dest="podcast_option")

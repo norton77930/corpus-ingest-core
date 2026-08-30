@@ -203,9 +203,7 @@ def extract_mentions(
     )
 
 
-def _raise_for_invalid_transcript(
-    status: str, problems: list[str], allow_partial: bool
-) -> None:
+def _raise_for_invalid_transcript(status: str, problems: list[str], allow_partial: bool) -> None:
     details = "; ".join(problems)
     if status == "missing":
         raise TranscriptMissingError(f"找不到逐字稿：{details}")
@@ -268,9 +266,7 @@ def _normalize_segments(raw_segments: Any) -> list[dict[str, Any]]:
     return segments
 
 
-def _extract_from_segments(
-    segments: list[dict[str, Any]], max_evidence_per_mention: int
-) -> list[Mention]:
+def _extract_from_segments(segments: list[dict[str, Any]], max_evidence_per_mention: int) -> list[Mention]:
     found: dict[tuple[str, str], dict[str, Any]] = {}
     for segment in segments:
         if not segment["text"]:
@@ -441,9 +437,7 @@ def _mention_table(title: str, mentions: list[Mention]) -> list[str]:
         lines.append("|  | 0 |  |")
     else:
         for mention in mentions:
-            evidence = "<br>".join(
-                f"{item.timestamp} {item.text}" for item in mention.evidence
-            )
+            evidence = "<br>".join(f"{item.timestamp} {item.text}" for item in mention.evidence)
             lines.append(f"| {mention.text} | {mention.count} | {evidence} |")
     lines.append("")
     return lines

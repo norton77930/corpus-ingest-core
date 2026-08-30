@@ -42,18 +42,14 @@ def test_semantic_core_signature_requires_ack_no_confirm_f03_resolved():
 
 
 @pytest.mark.parametrize("bad_ack", ["", "wrong ack text"])
-def test_create_provider_requires_exact_ack_before_provider_construction(
-    monkeypatch, bad_ack
-):
+def test_create_provider_requires_exact_ack_before_provider_construction(monkeypatch, bad_ack):
     from corpus_ingest_core import llm_provider
     from corpus_ingest_core.errors import LLMProviderConfigError
 
     monkeypatch.setattr(
         llm_provider,
         "OpenAICompatibleProvider",
-        lambda **kwargs: pytest.fail(
-            "provider must not be constructed without the exact api_cost_ack"
-        ),
+        lambda **kwargs: pytest.fail("provider must not be constructed without the exact api_cost_ack"),
     )
 
     with pytest.raises(LLMProviderConfigError, match="api_cost_ack"):
@@ -64,9 +60,7 @@ def test_create_provider_with_exact_ack_constructs_provider(monkeypatch):
     from corpus_ingest_core import llm_provider
 
     sentinel = object()
-    monkeypatch.setattr(
-        llm_provider, "OpenAICompatibleProvider", lambda **kwargs: sentinel
-    )
+    monkeypatch.setattr(llm_provider, "OpenAICompatibleProvider", lambda **kwargs: sentinel)
 
     provider = llm_provider.create_provider(
         "openai-compatible",
@@ -77,9 +71,7 @@ def test_create_provider_with_exact_ack_constructs_provider(monkeypatch):
 
 
 @pytest.mark.parametrize("bad_ack_kwargs", [{}, {"api_cost_ack": "wrong ack text"}])
-def test_semantic_core_rejects_wrong_ack_before_any_work(
-    monkeypatch, bad_ack_kwargs
-):
+def test_semantic_core_rejects_wrong_ack_before_any_work(monkeypatch, bad_ack_kwargs):
     from corpus_ingest_core import semantic_summarizer
     from corpus_ingest_core.errors import LLMProviderConfigError
 
@@ -89,22 +81,16 @@ def test_semantic_core_rejects_wrong_ack_before_any_work(
     monkeypatch.setattr(
         semantic_summarizer,
         "load_podcast_profile",
-        lambda *args, **kwargs: pytest.fail(
-            "profile must not load without the exact api_cost_ack"
-        ),
+        lambda *args, **kwargs: pytest.fail("profile must not load without the exact api_cost_ack"),
     )
     monkeypatch.setattr(
         semantic_summarizer,
         "_build_provider",
-        lambda **kwargs: pytest.fail(
-            "provider must not be built without the exact api_cost_ack"
-        ),
+        lambda **kwargs: pytest.fail("provider must not be built without the exact api_cost_ack"),
     )
 
     with pytest.raises(LLMProviderConfigError, match="api_cost_ack"):
-        semantic_summarizer.semantic_summarize_episode(
-            "gooaye", "EP672", **bad_ack_kwargs
-        )
+        semantic_summarizer.semantic_summarize_episode("gooaye", "EP672", **bad_ack_kwargs)
 
 
 def test_synthesis_core_signature_keeps_ack_guard():
@@ -145,18 +131,14 @@ def test_ack_constant_has_single_source_of_truth():
 
 
 @pytest.mark.parametrize("bad_ack_argv", [[], ["--api-cost-ack", "wrong ack text"]])
-def test_summarize_cli_semantic_requires_exact_ack_before_core(
-    monkeypatch, capsys, bad_ack_argv
-):
+def test_summarize_cli_semantic_requires_exact_ack_before_core(monkeypatch, capsys, bad_ack_argv):
     from scripts import summarize_episode as cli
 
     monkeypatch.setenv("API_KEY", "fake-key-value")
     monkeypatch.setattr(
         cli,
         "semantic_summarize_episode",
-        lambda *args, **kwargs: pytest.fail(
-            "semantic core must not run without the exact api_cost_ack"
-        ),
+        lambda *args, **kwargs: pytest.fail("semantic core must not run without the exact api_cost_ack"),
     )
     monkeypatch.setattr(
         sys,
@@ -218,6 +200,7 @@ def test_mcp_semantic_dry_run_reports_env_name_only_never_value(monkeypatch):
     assert response["inputs"]["api_key_env_configured"] is True
     serialized = json.dumps(response, ensure_ascii=False, default=str)
     assert "fake-key-value" not in serialized
+
 
 def test_corpus_semantic_cli_reuses_canonical_ack_constant():
     from scripts import run_corpus_semantic_remediation as corpus_semantic_cli

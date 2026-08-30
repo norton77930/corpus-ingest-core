@@ -138,9 +138,7 @@ def _validate_episode_ref(value: str) -> str:
         raise HistoricalVerifiedReportPathInputError("episode_ref is required")
     normalized = value.strip()
     if normalized.casefold() in _RESERVED:
-        raise HistoricalVerifiedReportPathInputError(
-            "episode_ref rejects reserved selectors"
-        )
+        raise HistoricalVerifiedReportPathInputError("episode_ref rejects reserved selectors")
     # Same episode_ref character class as catalog safe episode refs (no latest/next).
     if not storage.is_safe_episode_ref(normalized):
         raise HistoricalVerifiedReportPathInputError("episode_ref is invalid")

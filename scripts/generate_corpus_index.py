@@ -12,9 +12,7 @@ from corpus_ingest_core import PodcastIngestCoreError, generate_corpus_index
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Generate a deterministic local corpus artifact index."
-    )
+    parser = argparse.ArgumentParser(description="Generate a deterministic local corpus artifact index.")
     parser.add_argument("--podcast", required=True, dest="podcast_id")
     args = parser.parse_args(argv)
 
@@ -35,10 +33,7 @@ def _result_to_dict(result):
         "index_markdown_path": str(result.index_markdown_path),
         "episode_count": result.episode_count,
         "warning_count": result.warning_count,
-        "artifact_family_counts": {
-            family: asdict(counts)
-            for family, counts in result.artifact_family_counts.items()
-        },
+        "artifact_family_counts": {family: asdict(counts) for family, counts in result.artifact_family_counts.items()},
     }
 
 

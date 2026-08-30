@@ -122,9 +122,7 @@ def _preview_corpus_audio_download_from_plan(
     episode_ref: str | None,
     source_persisted: bool,
 ) -> CorpusAudioDownloadRunResult:
-    filters = CorpusAudioDownloadRunFilter(
-        episode_ref=_normalize_episode_ref(episode_ref)
-    )
+    filters = CorpusAudioDownloadRunFilter(episode_ref=_normalize_episode_ref(episode_ref))
     source_plan_reads = (
         [
             str(plan_result.plan_json_path),
@@ -164,13 +162,9 @@ def result_to_dict(result: CorpusAudioDownloadRunResult) -> dict[str, Any]:
         "run_mode": result.run_mode,
         "confirm": result.confirm,
         "source_remediation_plan_json_path": str(result.source_remediation_plan_json_path),
-        "source_remediation_plan_markdown_path": str(
-            result.source_remediation_plan_markdown_path
-        ),
+        "source_remediation_plan_markdown_path": str(result.source_remediation_plan_markdown_path),
         "report_json_path": str(result.report_json_path) if result.report_json_path else None,
-        "report_markdown_path": (
-            str(result.report_markdown_path) if result.report_markdown_path else None
-        ),
+        "report_markdown_path": (str(result.report_markdown_path) if result.report_markdown_path else None),
         "filters": asdict(result.filters),
         **asdict(result.counts),
         "rows": [asdict(row) for row in result.rows],
@@ -187,9 +181,7 @@ def _load_plan_payload(plan_json_path: Path) -> dict[str, Any]:
             f"failed to read corpus remediation plan: {type(exc).__name__}"
         ) from exc
     if not isinstance(payload, dict):
-        raise CorpusAudioDownloadRunnerFailedError(
-            "corpus remediation plan root must be an object"
-        )
+        raise CorpusAudioDownloadRunnerFailedError("corpus remediation plan root must be an object")
     return payload
 
 
@@ -365,9 +357,7 @@ def _audio_outcome(
     if filters.episode_ref is not None and filters.episode_ref != episode_ref:
         return "skipped", "episode filter does not match"
     unsafe_status = "rejected" if confirmed else "skipped"
-    video_source = (
-        _video_seed_source(episode_payload) if episode_payload is not None else None
-    )
+    video_source = _video_seed_source(episode_payload) if episode_payload is not None else None
     if video_source == "x-video":
         return unsafe_status, "audio is recovered through scripts/run_x_video_ingest.py"
     if video_source == "yt-video":
@@ -382,10 +372,7 @@ def _audio_outcome(
     source_status = _safe_text(action_payload.get("status"), "unknown")
     if source_status != "ready":
         return unsafe_status, f"source action status is {source_status}"
-    if any(
-        bool(action_payload.get(field))
-        for field in ("optional", "gated", "requires_api_cost_ack")
-    ):
+    if any(bool(action_payload.get(field)) for field in ("optional", "gated", "requires_api_cost_ack")):
         return unsafe_status, "source action requires optional or gated workflow"
     return "selected", _safe_message(
         _safe_text(action_payload.get("reason"), "audio missing and download action ready"),
@@ -416,9 +403,7 @@ def _execute_confirmed_rows(
             continue
         outcome = "reused" if getattr(asset, "already_exists", False) else "downloaded"
         local_path = getattr(asset, "local_path", None)
-        local_audio_path = (
-            _safe_path_text(str(local_path)) if isinstance(local_path, Path) else None
-        )
+        local_audio_path = _safe_path_text(str(local_path)) if isinstance(local_path, Path) else None
         updated_rows.append(
             replace(
                 row,
@@ -458,10 +443,7 @@ def _counts(
     warning_count = len(warnings) + sum(len(row.warnings) for row in rows)
     return CorpusAudioDownloadOutcomeCounts(
         row_count=len(rows),
-        selected_count=sum(
-            row.outcome_status in {"selected", "downloaded", "reused", "failed"}
-            for row in rows
-        ),
+        selected_count=sum(row.outcome_status in {"selected", "downloaded", "reused", "failed"} for row in rows),
         downloaded_count=sum(row.outcome_status == "downloaded" for row in rows),
         reused_count=sum(row.outcome_status == "reused" for row in rows),
         failed_count=sum(row.outcome_status == "failed" for row in rows),
@@ -609,13 +591,9 @@ def _source_warnings(episode_payload: dict[str, Any], family: str) -> list[str]:
             warning_family = warning.get("artifact_family")
             message = warning.get("message")
             if warning_family in {family, None} and isinstance(message, str):
-                warnings.append(
-                    _safe_message(message, f"source {family} warning omitted by safety boundary")
-                )
+                warnings.append(_safe_message(message, f"source {family} warning omitted by safety boundary"))
         elif isinstance(warning, str):
-            warnings.append(
-                _safe_message(warning, "source warning omitted by safety boundary")
-            )
+            warnings.append(_safe_message(warning, "source warning omitted by safety boundary"))
     return warnings
 
 

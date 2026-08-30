@@ -189,10 +189,7 @@ def _counts(
     warning_count = len(warnings) + sum(len(row.warnings) for row in rows)
     return CorpusEpisodeIntakeOutcomeCounts(
         row_count=len(rows),
-        selected_count=sum(
-            row.outcome_status in {"selected", "seeded", "reused", "failed"}
-            for row in rows
-        ),
+        selected_count=sum(row.outcome_status in {"selected", "seeded", "reused", "failed"} for row in rows),
         seeded_count=sum(row.outcome_status == "seeded" for row in rows),
         reused_count=sum(row.outcome_status == "reused" for row in rows),
         failed_count=sum(row.outcome_status == "failed" for row in rows),

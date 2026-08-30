@@ -84,11 +84,7 @@ def _asset_to_dict(asset):
 
 
 def _print_progress(segment_count: int, last_segment_end_seconds: float | None) -> None:
-    last_end = (
-        "unknown"
-        if last_segment_end_seconds is None
-        else f"{last_segment_end_seconds:.2f}s"
-    )
+    last_end = "unknown" if last_segment_end_seconds is None else f"{last_segment_end_seconds:.2f}s"
     print(
         f"Transcribed segments: {segment_count}, last_end={last_end}",
         file=sys.stderr,

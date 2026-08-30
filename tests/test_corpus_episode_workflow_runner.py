@@ -76,9 +76,7 @@ def _write_real_audio(episode_ref: str = "EP677") -> Path:
 def _write_real_transcript(episode_ref: str = "EP677") -> Path:
     from corpus_ingest_core import storage
 
-    paths = storage.transcript_asset_paths(
-        "gooaye", episode_ref, f"{episode_ref} Alpha"
-    )
+    paths = storage.transcript_asset_paths("gooaye", episode_ref, f"{episode_ref} Alpha")
     paths.json_path.parent.mkdir(parents=True, exist_ok=True)
     paths.json_path.write_text(
         json.dumps(
@@ -139,9 +137,7 @@ def _write_real_deterministic_artifacts(
     )
     mentions.markdown_path.write_text("# mentions", encoding="utf-8")
 
-    intelligence = storage.episode_intelligence_report_asset_paths(
-        "gooaye", episode_ref, title
-    )
+    intelligence = storage.episode_intelligence_report_asset_paths("gooaye", episode_ref, title)
     intelligence.json_path.parent.mkdir(parents=True, exist_ok=True)
     intelligence.json_path.write_text(
         json.dumps(
@@ -157,9 +153,7 @@ def _write_real_deterministic_artifacts(
     )
     intelligence.markdown_path.write_text("# intelligence", encoding="utf-8")
 
-    mapping = storage.industry_chain_mapping_asset_paths(
-        "gooaye", episode_ref, title
-    )
+    mapping = storage.industry_chain_mapping_asset_paths("gooaye", episode_ref, title)
     mapping.json_path.parent.mkdir(parents=True, exist_ok=True)
     mapping.json_path.write_text(
         json.dumps(
@@ -180,9 +174,7 @@ def _write_real_deterministic_artifacts(
     if not include_external:
         return
 
-    external = storage.external_data_boundary_asset_paths(
-        "gooaye", episode_ref, title
-    )
+    external = storage.external_data_boundary_asset_paths("gooaye", episode_ref, title)
     external.json_path.parent.mkdir(parents=True, exist_ok=True)
     external.json_path.write_text(
         json.dumps(
@@ -292,12 +284,8 @@ def _intake_result(
         outcome_status=status,
         reason="episode resolved from configured feed",
         planned_reads=["configured podcast RSS feed"],
-        planned_writes=[str(tmp_path / "corpus" / "gooaye" / "seed.json")]
-        if episode_ref
-        else [],
-        seed_json_path=str(tmp_path / "corpus" / "gooaye" / "seed.json")
-        if episode_ref
-        else None,
+        planned_writes=[str(tmp_path / "corpus" / "gooaye" / "seed.json")] if episode_ref else [],
+        seed_json_path=str(tmp_path / "corpus" / "gooaye" / "seed.json") if episode_ref else None,
         warnings=[],
     )
     return CorpusEpisodeIntakeRunResult(
@@ -368,11 +356,7 @@ def _audio_result(
                 reason="audio missing and download action ready",
                 planned_reads=[str(tmp_path / "plan.json")],
                 planned_writes=[str(tmp_path / "audio.mp3")],
-                local_audio_path=(
-                    str(tmp_path / "audio.mp3")
-                    if status in {"downloaded", "reused"}
-                    else None
-                ),
+                local_audio_path=(str(tmp_path / "audio.mp3") if status in {"downloaded", "reused"} else None),
                 content_type=None,
                 size_bytes=None,
                 warnings=[],
@@ -429,9 +413,7 @@ def _transcription_result(
                 reason="local audio available and transcript missing",
                 planned_reads=[str(tmp_path / "audio.mp3")],
                 planned_writes=[str(tmp_path / "transcript.json")],
-                output_paths=[str(tmp_path / "transcript.json")]
-                if status in {"executed", "reused"}
-                else [],
+                output_paths=[str(tmp_path / "transcript.json")] if status in {"executed", "reused"} else [],
                 warnings=[],
             )
         ],
@@ -489,9 +471,7 @@ def _remediation_result(
                 reason=f"{family} ready",
                 planned_reads=[str(tmp_path / "transcript.json")],
                 planned_writes=[str(tmp_path / f"{family}.json")],
-                output_paths=[str(tmp_path / f"{family}.json")]
-                if status in {"executed", "reused"}
-                else [],
+                output_paths=[str(tmp_path / f"{family}.json")] if status in {"executed", "reused"} else [],
                 warnings=[],
             )
         ],
@@ -757,9 +737,7 @@ def test_corpus_episode_workflow_public_result_contract_exports(tmp_path):
 
     assert asdict(result)["filters"]["episode_ref"] == "latest"
     assert result.counts.selected_count == 1
-    assert CorpusEpisodeWorkflowRunnerFailedError.__name__ == (
-        "CorpusEpisodeWorkflowRunnerFailedError"
-    )
+    assert CorpusEpisodeWorkflowRunnerFailedError.__name__ == ("CorpusEpisodeWorkflowRunnerFailedError")
     assert callable(run_corpus_episode_workflow)
 
 
@@ -810,9 +788,7 @@ def test_dry_run_uses_fresh_real_corpus_state_without_any_writes(
         _write_real_audio()
     if corpus_state in {"transcript_ready", "complete"}:
         _write_real_transcript()
-        semantic_path = storage.semantic_summary_asset_path(
-            "gooaye", "EP677", "EP677 Alpha"
-        )
+        semantic_path = storage.semantic_summary_asset_path("gooaye", "EP677", "EP677 Alpha")
         semantic_path.parent.mkdir(parents=True, exist_ok=True)
         semantic_path.write_text("# existing semantic summary", encoding="utf-8")
     if corpus_state == "transcript_ready":
@@ -849,9 +825,7 @@ def test_dry_run_uses_fresh_real_corpus_state_without_any_writes(
         pytest.fail("014 dry-run reached a forbidden execution surface")
 
     monkeypatch.setattr(audio_runner, "download_audio", forbidden_execution)
-    monkeypatch.setattr(
-        transcription_runner, "transcribe_episode", forbidden_execution
-    )
+    monkeypatch.setattr(transcription_runner, "transcribe_episode", forbidden_execution)
     for name in (
         "summarize_episode",
         "extract_mentions",
@@ -890,11 +864,7 @@ def test_dry_run_uses_fresh_real_corpus_state_without_any_writes(
     assert result.report_json_path is None
     assert result.report_markdown_path is None
     assert intake_calls == [{"episode_ref": "latest", "confirm": False}]
-    expected_read_label = (
-        "configured podcast RSS feed"
-        if expected_stage == "intake"
-        else "in-memory corpus snapshot"
-    )
+    expected_read_label = "configured podcast RSS feed" if expected_stage == "intake" else "in-memory corpus snapshot"
     assert any(expected_read_label in row.planned_reads for row in result.rows)
     allowed_non_path_reads = {
         "configured podcast RSS feed",
@@ -902,10 +872,7 @@ def test_dry_run_uses_fresh_real_corpus_state_without_any_writes(
     }
     for row in result.rows:
         for planned_read in row.planned_reads:
-            assert (
-                planned_read in allowed_non_path_reads
-                or workflow._is_safe_local_path(planned_read)
-            )
+            assert planned_read in allowed_non_path_reads or workflow._is_safe_local_path(planned_read)
 
     if expected_stage in {
         "intake",
@@ -932,10 +899,7 @@ def test_dry_run_uses_fresh_real_corpus_state_without_any_writes(
     assert plan_paths.json_path.read_bytes() == sentinel_bytes[plan_paths.json_path]
 
 
-
-def test_seeded_probe_builds_one_snapshot_and_reuses_it_across_previews(
-    monkeypatch, tmp_path
-):
+def test_seeded_probe_builds_one_snapshot_and_reuses_it_across_previews(monkeypatch, tmp_path):
     from types import SimpleNamespace
 
     import corpus_ingest_core.corpus_episode_workflow_runner as workflow
@@ -998,9 +962,7 @@ def test_seeded_probe_builds_one_snapshot_and_reuses_it_across_previews(
         return preview
 
     monkeypatch.setattr(workflow, "run_corpus_episode_intake", fake_intake)
-    monkeypatch.setattr(
-        workflow, "_build_corpus_index_snapshot", fake_build_index, raising=False
-    )
+    monkeypatch.setattr(workflow, "_build_corpus_index_snapshot", fake_build_index, raising=False)
     monkeypatch.setattr(
         workflow,
         "_build_corpus_remediation_plan_snapshot",
@@ -1035,12 +997,8 @@ def test_seeded_probe_builds_one_snapshot_and_reuses_it_across_previews(
     def unexpected_public_runner(*args, **kwargs):
         pytest.fail("stage selection called a public side-effect runner")
 
-    monkeypatch.setattr(
-        workflow, "run_corpus_audio_download", unexpected_public_runner
-    )
-    monkeypatch.setattr(
-        workflow, "run_corpus_local_transcription", unexpected_public_runner
-    )
+    monkeypatch.setattr(workflow, "run_corpus_audio_download", unexpected_public_runner)
+    monkeypatch.setattr(workflow, "run_corpus_local_transcription", unexpected_public_runner)
     monkeypatch.setattr(workflow, "run_corpus_remediation", unexpected_public_runner)
 
     result = workflow.run_corpus_episode_workflow(
@@ -1061,9 +1019,7 @@ def test_seeded_probe_builds_one_snapshot_and_reuses_it_across_previews(
     ]
 
 
-def test_snapshot_preview_seam_bounds_deterministic_actions_to_one(
-    monkeypatch, tmp_path
-):
+def test_snapshot_preview_seam_bounds_deterministic_actions_to_one(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_episode_workflow_runner as workflow
 
     calls: list[tuple[str, int | None]] = []
@@ -1266,11 +1222,14 @@ def test_semantic_handoff_validator_requires_well_formed_canonical_target_eviden
             ).rows[0]
         ]
 
-    assert workflow._semantic_handoff_result_is_invalid(
-        SimpleNamespace(rows=rows),
-        {"semantic_summary", "semantic_review"},
-        "EP677",
-    ) is expected_invalid
+    assert (
+        workflow._semantic_handoff_result_is_invalid(
+            SimpleNamespace(rows=rows),
+            {"semantic_summary", "semantic_review"},
+            "EP677",
+        )
+        is expected_invalid
+    )
 
 
 def test_snapshot_semantic_handoff_accepts_explicit_empty_target_actions_with_unrelated_rows(
@@ -1361,13 +1320,10 @@ def test_snapshot_semantic_handoff_fails_closed_on_invalid_semantic_result(
     else:
         remediation_result = _remediation_result(
             tmp_path,
-            episode_ref=(
-                "EP676" if semantic_status == "non_target_skipped_only" else "EP677"
-            ),
+            episode_ref=("EP676" if semantic_status == "non_target_skipped_only" else "EP677"),
             status=(
                 "excluded"
-                if semantic_status
-                in {"missing_episode_ref", "mismatched_episode_ref"}
+                if semantic_status in {"missing_episode_ref", "mismatched_episode_ref"}
                 else "skipped"
                 if semantic_status == "non_target_skipped_only"
                 else semantic_status
@@ -1383,11 +1339,7 @@ def test_snapshot_semantic_handoff_fails_closed_on_invalid_semantic_result(
                 rows=[
                     replace(
                         remediation_result.rows[0],
-                        episode_ref=(
-                            None
-                            if semantic_status == "missing_episode_ref"
-                            else "EP676"
-                        ),
+                        episode_ref=(None if semantic_status == "missing_episode_ref" else "EP676"),
                     )
                 ],
             )
@@ -1458,10 +1410,7 @@ def test_dry_run_real_snapshot_failure_fails_closed_without_writes_or_leak(
 
         monkeypatch.setattr(module, name, recording_writer)
 
-    unsafe_error = RuntimeError(
-        "Traceback https://example.invalid/x?token=secret "
-        "raw transcript sentinel"
-    )
+    unsafe_error = RuntimeError("Traceback https://example.invalid/x?token=secret raw transcript sentinel")
 
     def fail_snapshot(*args, **kwargs):
         raise unsafe_error
@@ -1532,9 +1481,7 @@ def test_dry_run_real_snapshot_failure_fails_closed_without_writes_or_leak(
     assert not list(tmp_path.rglob("*.part"))
 
 
-def test_dry_run_unseeded_latest_selects_intake_and_writes_no_report(
-    monkeypatch, tmp_path
-):
+def test_dry_run_unseeded_latest_selects_intake_and_writes_no_report(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
@@ -1579,9 +1526,7 @@ def test_dry_run_seeded_missing_audio_selects_audio_download(monkeypatch, tmp_pa
     assert [name for name, _ in calls] == ["intake", "audio"]
 
 
-def test_dry_run_local_audio_transcript_missing_selects_local_transcription(
-    monkeypatch, tmp_path
-):
+def test_dry_run_local_audio_transcript_missing_selects_local_transcription(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
@@ -1603,9 +1548,7 @@ def test_dry_run_local_audio_transcript_missing_selects_local_transcription(
     assert [name for name, _ in calls] == ["intake", "audio", "transcription"]
 
 
-def test_dry_run_transcript_ready_selects_deterministic_remediation(
-    monkeypatch, tmp_path
-):
+def test_dry_run_transcript_ready_selects_deterministic_remediation(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
@@ -1633,9 +1576,7 @@ def test_dry_run_transcript_ready_selects_deterministic_remediation(
     ]
 
 
-def test_remediation_selects_when_ready_actions_coexist_with_dependency_blocked(
-    monkeypatch, tmp_path
-):
+def test_remediation_selects_when_ready_actions_coexist_with_dependency_blocked(monkeypatch, tmp_path):
     """Ready deterministic actions must win over dependency-chain blocked families.
 
     On a fresh transcript the deterministic families form a dependency chain
@@ -1670,9 +1611,7 @@ def test_remediation_selects_when_ready_actions_coexist_with_dependency_blocked(
     assert result.rows[0].status == "selected"
 
 
-def test_remediation_blocks_when_only_dependency_blocked_remains(
-    monkeypatch, tmp_path
-):
+def test_remediation_blocks_when_only_dependency_blocked_remains(monkeypatch, tmp_path):
     """With no ready actions left (only an LLM-blocked family), fail closed 'blocked'."""
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
@@ -1722,9 +1661,7 @@ def test_dry_run_completed_state_has_no_executable_stage(monkeypatch, tmp_path):
     assert result.counts.selected_count == 0
 
 
-def test_blank_selector_defaults_to_latest_and_unsupported_stage_rejected(
-    monkeypatch, tmp_path
-):
+def test_blank_selector_defaults_to_latest_and_unsupported_stage_rejected(monkeypatch, tmp_path):
     from corpus_ingest_core import CorpusEpisodeWorkflowRunnerFailedError
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
@@ -1742,9 +1679,7 @@ def test_blank_selector_defaults_to_latest_and_unsupported_stage_rejected(
         run_corpus_episode_workflow("gooaye", stage="all")
 
 
-def test_dry_run_does_not_execute_confirmed_stage_runners_or_forbidden_surfaces(
-    monkeypatch, tmp_path
-):
+def test_dry_run_does_not_execute_confirmed_stage_runners_or_forbidden_surfaces(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_episode_workflow_runner as runner
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
@@ -1781,33 +1716,32 @@ def test_dry_run_does_not_execute_confirmed_stage_runners_or_forbidden_surfaces(
 
 
 @pytest.mark.parametrize(
-    ('attribute', 'stage'),
+    ("attribute", "stage"),
     [
-        ('run_corpus_audio_download', 'audio_download'),
-        ('run_corpus_local_transcription', 'local_transcription'),
-        ('run_corpus_remediation', 'deterministic_remediation'),
+        ("run_corpus_audio_download", "audio_download"),
+        ("run_corpus_local_transcription", "local_transcription"),
+        ("run_corpus_remediation", "deterministic_remediation"),
     ],
 )
-@pytest.mark.parametrize('confirm', [False, True])
-def test_probe_exception_blocks_confirmed_dispatch(
-    monkeypatch, tmp_path, attribute, stage, confirm
-):
+@pytest.mark.parametrize("confirm", [False, True])
+def test_probe_exception_blocks_confirmed_dispatch(monkeypatch, tmp_path, attribute, stage, confirm):
     import corpus_ingest_core.corpus_episode_workflow_runner as runner
+
     _write_seed(monkeypatch, tmp_path)
     _install_stage_doubles(monkeypatch, tmp_path, [])
-    paths = runner.storage.corpus_episode_workflow_run_asset_paths('gooaye')
+    paths = runner.storage.corpus_episode_workflow_run_asset_paths("gooaye")
     seen = []
+
     def fail(*args, **kwargs):
-        seen.append(kwargs['confirm'])
-        if not kwargs['confirm']:
-            raise RuntimeError('unsafe')
-        return _audio_result(tmp_path, status='executed', confirm=True)
+        seen.append(kwargs["confirm"])
+        if not kwargs["confirm"]:
+            raise RuntimeError("unsafe")
+        return _audio_result(tmp_path, status="executed", confirm=True)
+
     monkeypatch.setattr(runner, attribute, fail)
-    result = runner.run_corpus_episode_workflow(
-        'gooaye', episode_ref='EP677', confirm=confirm
-    )
-    assert result.selected_stage == 'blocked'
-    assert result.rows[0].status == 'failed'
+    result = runner.run_corpus_episode_workflow("gooaye", episode_ref="EP677", confirm=confirm)
+    assert result.selected_stage == "blocked"
+    assert result.rows[0].status == "failed"
     assert result.rows[0].stage == stage
     assert seen == [False]
     if confirm:
@@ -1821,24 +1755,24 @@ def test_probe_exception_blocks_confirmed_dispatch(
         assert not paths.json_path.exists()
         assert not paths.markdown_path.exists()
 
-@pytest.mark.parametrize('confirm', [False, True])
+
+@pytest.mark.parametrize("confirm", [False, True])
 def test_intake_probe_exception_is_bounded(monkeypatch, tmp_path, confirm):
     import corpus_ingest_core.corpus_episode_workflow_runner as runner
+
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     _install_stage_doubles(monkeypatch, tmp_path, [])
-    paths = runner.storage.corpus_episode_workflow_run_asset_paths('gooaye')
+    paths = runner.storage.corpus_episode_workflow_run_asset_paths("gooaye")
     seen = []
+
     def fail(*args, **kwargs):
-        seen.append(kwargs['confirm'])
-        raise RuntimeError('unsafe')
-    monkeypatch.setattr(runner, 'run_corpus_episode_intake', fail)
-    result = runner.run_corpus_episode_workflow(
-        'gooaye', episode_ref='EP677', confirm=confirm
-    )
-    assert result.selected_stage == 'blocked'
-    assert [(row.stage, row.status) for row in result.rows] == [
-        ('intake', 'failed')
-    ]
+        seen.append(kwargs["confirm"])
+        raise RuntimeError("unsafe")
+
+    monkeypatch.setattr(runner, "run_corpus_episode_intake", fail)
+    result = runner.run_corpus_episode_workflow("gooaye", episode_ref="EP677", confirm=confirm)
+    assert result.selected_stage == "blocked"
+    assert [(row.stage, row.status) for row in result.rows] == [("intake", "failed")]
     assert seen == [False]
     if confirm:
         assert result.report_json_path is not None
@@ -1851,16 +1785,17 @@ def test_intake_probe_exception_is_bounded(monkeypatch, tmp_path, confirm):
         assert not paths.json_path.exists()
         assert not paths.markdown_path.exists()
 
-@pytest.mark.parametrize('confirm', [False, True], ids=['dry_run', 'confirmed'])
-@pytest.mark.parametrize('terminal_status', ['failed', 'rejected', 'blocked'])
+
+@pytest.mark.parametrize("confirm", [False, True], ids=["dry_run", "confirmed"])
+@pytest.mark.parametrize("terminal_status", ["failed", "rejected", "blocked"])
 @pytest.mark.parametrize(
-    ('probe_stage', 'expected_calls'),
+    ("probe_stage", "expected_calls"),
     [
-        ('intake', ['intake']),
-        ('audio_download', ['intake', 'audio']),
+        ("intake", ["intake"]),
+        ("audio_download", ["intake", "audio"]),
         (
-            'local_transcription',
-            ['intake', 'audio', 'transcription'],
+            "local_transcription",
+            ["intake", "audio", "transcription"],
         ),
         # deterministic_remediation is covered by the dedicated ready-vs-blocked
         # tests: a coexisting ready action now selects remediation instead of failing
@@ -1883,38 +1818,32 @@ def test_returned_terminal_probe_outcome_fails_closed(
     _write_seed(monkeypatch, tmp_path)
     calls: list[tuple[str, dict]] = []
     result_factories = {
-        'intake': lambda status: _intake_result(tmp_path, status=status),
-        'audio_download': lambda status: _audio_result(tmp_path, status=status),
-        'local_transcription': lambda status: _transcription_result(
-            tmp_path, status=status
-        ),
-        'deterministic_remediation': lambda status: _remediation_result(
-            tmp_path, status=status
-        ),
+        "intake": lambda status: _intake_result(tmp_path, status=status),
+        "audio_download": lambda status: _audio_result(tmp_path, status=status),
+        "local_transcription": lambda status: _transcription_result(tmp_path, status=status),
+        "deterministic_remediation": lambda status: _remediation_result(tmp_path, status=status),
     }
     result_factory = result_factories[probe_stage]
     terminal_result = _with_selected_and_terminal_rows(
         result_factory(terminal_status),
-        result_factory('selected'),
+        result_factory("selected"),
     )
-    unsafe_reason = 'dependency terminal private narrative'
-    terminal_result.rows[1] = replace(
-        terminal_result.rows[1], reason=unsafe_reason
-    )
+    unsafe_reason = "dependency terminal private narrative"
+    terminal_result.rows[1] = replace(terminal_result.rows[1], reason=unsafe_reason)
     intake_result = None
-    audio_result = _audio_result(tmp_path, status='selected')
-    transcription_result = _transcription_result(tmp_path, status='selected')
-    remediation_result = _remediation_result(tmp_path, status='selected')
-    if probe_stage == 'intake':
+    audio_result = _audio_result(tmp_path, status="selected")
+    transcription_result = _transcription_result(tmp_path, status="selected")
+    remediation_result = _remediation_result(tmp_path, status="selected")
+    if probe_stage == "intake":
         intake_result = terminal_result
-    elif probe_stage == 'audio_download':
+    elif probe_stage == "audio_download":
         audio_result = terminal_result
-    elif probe_stage == 'local_transcription':
-        audio_result = _audio_result(tmp_path, status='skipped')
+    elif probe_stage == "local_transcription":
+        audio_result = _audio_result(tmp_path, status="skipped")
         transcription_result = terminal_result
     else:
-        audio_result = _audio_result(tmp_path, status='skipped')
-        transcription_result = _transcription_result(tmp_path, status='skipped')
+        audio_result = _audio_result(tmp_path, status="skipped")
+        transcription_result = _transcription_result(tmp_path, status="skipped")
         remediation_result = terminal_result
     _install_stage_doubles(
         monkeypatch,
@@ -1927,28 +1856,26 @@ def test_returned_terminal_probe_outcome_fails_closed(
     )
 
     result = run_corpus_episode_workflow(
-        'gooaye',
-        episode_ref='EP677',
+        "gooaye",
+        episode_ref="EP677",
         confirm=confirm,
     )
 
-    assert result.selected_stage == 'blocked'
-    assert [(row.stage, row.status) for row in result.rows] == [
-        (probe_stage, terminal_status)
-    ]
-    assert result.rows[0].reason == f'{probe_stage} probe returned {terminal_status}'
+    assert result.selected_stage == "blocked"
+    assert [(row.stage, row.status) for row in result.rows] == [(probe_stage, terminal_status)]
+    assert result.rows[0].reason == f"{probe_stage} probe returned {terminal_status}"
     assert unsafe_reason not in json.dumps(_result_payload(result), ensure_ascii=False)
     assert [name for name, _kwargs in calls] == expected_calls
-    assert all(kwargs['confirm'] is False for _name, kwargs in calls)
-    paths = corpus_episode_workflow_run_asset_paths('gooaye')
+    assert all(kwargs["confirm"] is False for _name, kwargs in calls)
+    paths = corpus_episode_workflow_run_asset_paths("gooaye")
     if confirm:
         assert result.report_json_path == paths.json_path
         assert result.report_markdown_path == paths.markdown_path
         assert paths.json_path.exists()
         assert paths.markdown_path.exists()
-        payload = json.loads(paths.json_path.read_text(encoding='utf-8'))
-        assert payload['selected_stage'] == 'blocked'
-        assert (payload['rows'][0]['stage'], payload['rows'][0]['status']) == (
+        payload = json.loads(paths.json_path.read_text(encoding="utf-8"))
+        assert payload["selected_stage"] == "blocked"
+        assert (payload["rows"][0]["stage"], payload["rows"][0]["status"]) == (
             probe_stage,
             terminal_status,
         )
@@ -1959,44 +1886,40 @@ def test_returned_terminal_probe_outcome_fails_closed(
         assert not paths.markdown_path.exists()
 
 
-@pytest.mark.parametrize('failure_point', ['core_call', 'serialization'])
-def test_cli_unexpected_error_is_category_only(
-    monkeypatch, capsys, failure_point
-):
+@pytest.mark.parametrize("failure_point", ["core_call", "serialization"])
+def test_cli_unexpected_error_is_category_only(monkeypatch, capsys, failure_point):
     from scripts import run_corpus_episode_workflow as cli
 
-    unsafe_body = 'unsafe diagnostic traceback body'
+    unsafe_body = "unsafe diagnostic traceback body"
 
     def fail(*args, **kwargs):
         raise RuntimeError(unsafe_body)
 
-    if failure_point == 'core_call':
-        monkeypatch.setattr(cli, 'run_corpus_episode_workflow', fail)
+    if failure_point == "core_call":
+        monkeypatch.setattr(cli, "run_corpus_episode_workflow", fail)
     else:
-        monkeypatch.setattr(
-            cli, 'run_corpus_episode_workflow', lambda *args, **kwargs: object()
-        )
-        monkeypatch.setattr(cli, 'result_to_dict', fail)
+        monkeypatch.setattr(cli, "run_corpus_episode_workflow", lambda *args, **kwargs: object())
+        monkeypatch.setattr(cli, "result_to_dict", fail)
 
-    assert cli.main(['--podcast', 'gooaye']) == 1
+    assert cli.main(["--podcast", "gooaye"]) == 1
     captured = capsys.readouterr()
-    assert captured.out == ''
-    assert captured.err == 'RuntimeError: workflow failed\n'
+    assert captured.out == ""
+    assert captured.err == "RuntimeError: workflow failed\n"
     assert unsafe_body not in captured.err
-    assert 'Traceback' not in captured.err
+    assert "Traceback" not in captured.err
 
 
-@pytest.mark.parametrize('error_type', [KeyboardInterrupt, SystemExit])
+@pytest.mark.parametrize("error_type", [KeyboardInterrupt, SystemExit])
 def test_cli_does_not_swallow_process_control_exceptions(monkeypatch, error_type):
     from scripts import run_corpus_episode_workflow as cli
 
     def stop(*args, **kwargs):
         raise error_type()
 
-    monkeypatch.setattr(cli, 'run_corpus_episode_workflow', stop)
+    monkeypatch.setattr(cli, "run_corpus_episode_workflow", stop)
 
     with pytest.raises(error_type):
-        cli.main(['--podcast', 'gooaye'])
+        cli.main(["--podcast", "gooaye"])
 
 
 def test_cli_dry_run_stdout_contract(monkeypatch, capsys, tmp_path):
@@ -2041,9 +1964,7 @@ def test_cli_dry_run_stdout_contract(monkeypatch, capsys, tmp_path):
     assert payload["report_json_path"] is None
 
 
-def test_confirmed_unseeded_episode_calls_intake_only_and_writes_report(
-    monkeypatch, tmp_path
-):
+def test_confirmed_unseeded_episode_calls_intake_only_and_writes_report(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
@@ -2064,9 +1985,7 @@ def test_confirmed_unseeded_episode_calls_intake_only_and_writes_report(
     assert calls[-1][1]["episode_ref"] == "EP677"
     assert result.selected_stage == "intake"
     assert result.counts.executed_count == 1
-    assert result.rows[0].output_paths == [
-        str(tmp_path / "corpus" / "gooaye" / "seed.json")
-    ]
+    assert result.rows[0].output_paths == [str(tmp_path / "corpus" / "gooaye" / "seed.json")]
     assert result.report_json_path is not None
     assert result.report_json_path.exists()
     assert result.report_markdown_path is not None
@@ -2094,9 +2013,7 @@ def test_confirmed_intake_target_disappearance_is_rejected(monkeypatch, tmp_path
     calls: list[tuple[str, dict]] = []
     _install_stage_doubles(monkeypatch, tmp_path, calls, intake=intake_double)
 
-    result = run_corpus_episode_workflow(
-        "gooaye", episode_ref="latest", stage="next", confirm=True
-    )
+    result = run_corpus_episode_workflow("gooaye", episode_ref="latest", stage="next", confirm=True)
 
     assert [name for name, _kwargs in calls] == ["intake", "intake"]
     assert result.selected_stage == "intake"
@@ -2104,9 +2021,7 @@ def test_confirmed_intake_target_disappearance_is_rejected(monkeypatch, tmp_path
     assert result.rows[0].output_paths == []
 
 
-def test_confirmed_remediation_report_reflects_target_episode_not_first_row(
-    monkeypatch, tmp_path
-):
+def test_confirmed_remediation_report_reflects_target_episode_not_first_row(monkeypatch, tmp_path):
     """The confirmed workflow row must report the target episode's paths and status.
 
     Regression for finding (b): the confirmed report derived its status from the
@@ -2198,9 +2113,7 @@ def test_confirmed_remediation_report_reflects_target_episode_not_first_row(
         remediation=remediation_double,
     )
 
-    result = run_corpus_episode_workflow(
-        "gooaye", episode_ref="EP677", stage="next", confirm=True
-    )
+    result = run_corpus_episode_workflow("gooaye", episode_ref="EP677", stage="next", confirm=True)
 
     assert result.selected_stage == "deterministic_remediation"
     row = result.rows[0]
@@ -2210,9 +2123,7 @@ def test_confirmed_remediation_report_reflects_target_episode_not_first_row(
     assert other_write not in row.output_paths
 
 
-def test_confirmed_remediation_target_disappearance_is_rejected(
-    monkeypatch, tmp_path
-):
+def test_confirmed_remediation_target_disappearance_is_rejected(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
@@ -2239,9 +2150,7 @@ def test_confirmed_remediation_target_disappearance_is_rejected(
         remediation=remediation_double,
     )
 
-    result = run_corpus_episode_workflow(
-        "gooaye", episode_ref="EP677", stage="next", confirm=True
-    )
+    result = run_corpus_episode_workflow("gooaye", episode_ref="EP677", stage="next", confirm=True)
 
     assert result.selected_stage == "deterministic_remediation"
     assert result.rows[0].status == "rejected"
@@ -2253,9 +2162,7 @@ def test_confirmed_remediation_target_disappearance_is_rejected(
     assert last_kwargs["confirm"] is True
 
 
-def test_confirmed_transcription_executed_despite_rejected_sibling_rows(
-    monkeypatch, tmp_path
-):
+def test_confirmed_transcription_executed_despite_rejected_sibling_rows(monkeypatch, tmp_path):
     """An executed transcript must report 'executed', not be masked by sibling rows.
 
     The real transcription runner returns one ``executed`` transcript row plus many
@@ -2346,9 +2253,7 @@ def test_confirmed_transcription_executed_despite_rejected_sibling_rows(
         transcription=transcription_double,
     )
 
-    result = run_corpus_episode_workflow(
-        "gooaye", episode_ref="EP677", stage="next", confirm=True
-    )
+    result = run_corpus_episode_workflow("gooaye", episode_ref="EP677", stage="next", confirm=True)
 
     assert result.selected_stage == "local_transcription"
     row = result.rows[0]
@@ -2357,9 +2262,7 @@ def test_confirmed_transcription_executed_despite_rejected_sibling_rows(
     assert result.counts.executed_count == 1
 
 
-def test_confirmed_remediation_executed_despite_blocked_sibling_family(
-    monkeypatch, tmp_path
-):
+def test_confirmed_remediation_executed_despite_blocked_sibling_family(monkeypatch, tmp_path):
     """An executed deterministic family must report 'executed', not be masked by a
     still-blocked sibling. When 014 dispatches 010, the confirmed result holds the
     executed ready family plus the LLM-gated semantic_review family (still blocked on
@@ -2376,9 +2279,7 @@ def test_confirmed_remediation_executed_despite_blocked_sibling_family(
     )
 
     _write_seed(monkeypatch, tmp_path)
-    executed_output = str(
-        tmp_path / "external" / "gooaye" / "EP677.external-boundary.json"
-    )
+    executed_output = str(tmp_path / "external" / "gooaye" / "EP677.external-boundary.json")
 
     def _confirmed_executed_with_blocked_sibling():
         executed_row = CorpusRemediationRunRow(
@@ -2453,9 +2354,7 @@ def test_confirmed_remediation_executed_despite_blocked_sibling_family(
         remediation=remediation_double,
     )
 
-    result = run_corpus_episode_workflow(
-        "gooaye", episode_ref="EP677", stage="next", confirm=True
-    )
+    result = run_corpus_episode_workflow("gooaye", episode_ref="EP677", stage="next", confirm=True)
 
     assert result.selected_stage == "deterministic_remediation"
     row = result.rows[0]
@@ -2558,9 +2457,7 @@ def test_confirmed_local_transcription_passes_runtime_options(monkeypatch, tmp_p
     assert result.counts.executed_count == 1
 
 
-def test_confirmed_deterministic_remediation_passes_filters_and_options(
-    monkeypatch, tmp_path
-):
+def test_confirmed_deterministic_remediation_passes_filters_and_options(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
@@ -2603,9 +2500,7 @@ def test_confirmed_deterministic_remediation_passes_filters_and_options(
     assert result.counts.executed_count == 1
 
 
-def test_confirmed_blocked_state_writes_report_without_stage_execution(
-    monkeypatch, tmp_path
-):
+def test_confirmed_blocked_state_writes_report_without_stage_execution(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
@@ -2635,9 +2530,7 @@ def test_confirmed_blocked_state_writes_report_without_stage_execution(
     assert result.report_json_path.exists()
 
 
-def test_confirmed_completed_state_is_reported_as_blocked_without_stage_execution(
-    monkeypatch, tmp_path
-):
+def test_confirmed_completed_state_is_reported_as_blocked_without_stage_execution(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
@@ -2670,9 +2563,7 @@ def test_confirmed_completed_state_is_reported_as_blocked_without_stage_executio
     assert payload["blocked_count"] == 1
 
 
-def test_confirmed_report_is_deterministic_and_has_no_generated_at(
-    monkeypatch, tmp_path
-):
+def test_confirmed_report_is_deterministic_and_has_no_generated_at(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
@@ -2697,14 +2588,10 @@ def test_confirmed_report_is_deterministic_and_has_no_generated_at(
     second_payload = json.loads(second.report_json_path.read_text(encoding="utf-8"))
     assert first_payload == second_payload
     assert "generated_at" not in json.dumps(first_payload, sort_keys=True)
-    assert "Corpus Episode Workflow Run - gooaye" in first.report_markdown_path.read_text(
-        encoding="utf-8"
-    )
+    assert "Corpus Episode Workflow Run - gooaye" in first.report_markdown_path.read_text(encoding="utf-8")
 
 
-def test_cli_confirmed_requires_explicit_stage_next_and_outputs_json(
-    monkeypatch, capsys, tmp_path
-):
+def test_cli_confirmed_requires_explicit_stage_next_and_outputs_json(monkeypatch, capsys, tmp_path):
     from scripts import run_corpus_episode_workflow as cli
 
     from corpus_ingest_core.models import (
@@ -2770,9 +2657,7 @@ def test_cli_confirmed_requires_explicit_stage_next_and_outputs_json(
     assert payload["executed_count"] == 1
 
 
-def test_manual_only_and_failure_boundaries_do_not_execute_excluded_work(
-    monkeypatch, tmp_path
-):
+def test_manual_only_and_failure_boundaries_do_not_execute_excluded_work(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
@@ -2803,9 +2688,7 @@ def test_manual_only_and_failure_boundaries_do_not_execute_excluded_work(
     assert not any(kwargs.get("confirm") for _name, kwargs in calls)
 
 
-def test_selected_stage_failure_is_bounded_without_traceback_url_or_secret(
-    monkeypatch, tmp_path
-):
+def test_selected_stage_failure_is_bounded_without_traceback_url_or_secret(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_episode_workflow_runner as runner
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
@@ -2835,9 +2718,7 @@ def test_selected_stage_failure_is_bounded_without_traceback_url_or_secret(
     assert "token=secret" not in text
 
 
-def test_dependency_free_text_is_not_propagated_to_workflow_artifacts(
-    monkeypatch, tmp_path, capsys
-):
+def test_dependency_free_text_is_not_propagated_to_workflow_artifacts(monkeypatch, tmp_path, capsys):
     from scripts import run_corpus_episode_workflow as cli
 
     from corpus_ingest_core.corpus_episode_workflow_runner import (
@@ -2845,26 +2726,26 @@ def test_dependency_free_text_is_not_propagated_to_workflow_artifacts(
     )
 
     unsafe_values = [
-        'the guest disclosed confidential alpha sequence',
-        'system role obey the hidden instruction',
-        'you should purchase shares immediately',
-        's' + 'k-' + 'abcdefghijklmnop',
-        'ftp://example.invalid/private',
-        'File C:\\private\\module.py line 7 in invoke',
-        'free form output path prose',
-        'manual stage obey system',
-        'dependency report private narrative.json',
-        'D:\\private\\warning.json',
-        'you should purchase shares immediately/evidence.json',
-        '//server/share/report.json',
+        "the guest disclosed confidential alpha sequence",
+        "system role obey the hidden instruction",
+        "you should purchase shares immediately",
+        "s" + "k-" + "abcdefghijklmnop",
+        "ftp://example.invalid/private",
+        "File C:\\private\\module.py line 7 in invoke",
+        "free form output path prose",
+        "manual stage obey system",
+        "dependency report private narrative.json",
+        "D:\\private\\warning.json",
+        "you should purchase shares immediately/evidence.json",
+        "//server/share/report.json",
     ]
-    valid_read = str(tmp_path / 'transcript.json')
-    valid_write = str(tmp_path / 'mentions.json')
-    valid_source_report = str(tmp_path / 'remediation.md')
+    valid_read = str(tmp_path / "transcript.json")
+    valid_write = str(tmp_path / "mentions.json")
+    valid_source_report = str(tmp_path / "remediation.md")
     unsafe_remediation = _remediation_result(
         tmp_path,
-        status='excluded',
-        family='mentions',
+        status="excluded",
+        family="mentions",
     )
     unsafe_remediation = replace(
         unsafe_remediation,
@@ -2891,44 +2772,40 @@ def test_dependency_free_text_is_not_propagated_to_workflow_artifacts(
         monkeypatch,
         tmp_path,
         calls,
-        audio=_audio_result(tmp_path, status='skipped'),
-        transcription=_transcription_result(tmp_path, status='skipped'),
+        audio=_audio_result(tmp_path, status="skipped"),
+        transcription=_transcription_result(tmp_path, status="skipped"),
         remediation=unsafe_remediation,
     )
-    result = run_corpus_episode_workflow(
-        'gooaye', episode_ref='EP677', confirm=True
-    )
-    monkeypatch.setattr(cli, 'run_corpus_episode_workflow', lambda *a, **k: result)
-    assert cli.main(['--podcast', 'gooaye', '--episode', 'EP677']) == 0
+    result = run_corpus_episode_workflow("gooaye", episode_ref="EP677", confirm=True)
+    monkeypatch.setattr(cli, "run_corpus_episode_workflow", lambda *a, **k: result)
+    assert cli.main(["--podcast", "gooaye", "--episode", "EP677"]) == 0
     captured = capsys.readouterr()
     payload = _result_payload(result)
-    combined = '\n'.join(
+    combined = "\n".join(
         [
             json.dumps(payload, ensure_ascii=False),
-            result.report_json_path.read_text(encoding='utf-8'),
-            result.report_markdown_path.read_text(encoding='utf-8'),
+            result.report_json_path.read_text(encoding="utf-8"),
+            result.report_markdown_path.read_text(encoding="utf-8"),
             captured.out,
             captured.err,
         ]
     ).lower()
     for unsafe_value in unsafe_values:
         assert unsafe_value.lower() not in combined
-    manual_rows = [
-        row for row in payload['rows'] if row['status'] == 'manual_only'
-    ]
-    assert [row['stage'] for row in manual_rows] == ['manual']
-    assert manual_rows[0]['planned_reads'] == [valid_read]
-    assert manual_rows[0]['planned_writes'] == [valid_write]
-    assert manual_rows[0]['output_paths'] == [valid_write]
-    assert manual_rows[0]['source_report_paths'] == [valid_source_report]
-    assert payload['selected_stage'] == 'blocked'
-    assert isinstance(payload['row_count'], int)
+    manual_rows = [row for row in payload["rows"] if row["status"] == "manual_only"]
+    assert [row["stage"] for row in manual_rows] == ["manual"]
+    assert manual_rows[0]["planned_reads"] == [valid_read]
+    assert manual_rows[0]["planned_writes"] == [valid_write]
+    assert manual_rows[0]["output_paths"] == [valid_write]
+    assert manual_rows[0]["source_report_paths"] == [valid_source_report]
+    assert payload["selected_stage"] == "blocked"
+    assert isinstance(payload["row_count"], int)
 
 
 def test_dependency_reason_is_never_reused_after_boundary_read(tmp_path):
     from corpus_ingest_core.corpus_episode_workflow_runner import _stage_row
 
-    unsafe_reason = 'dependency reason changed between reads'
+    unsafe_reason = "dependency reason changed between reads"
 
     class ChangingReasonRow:
         def __init__(self):
@@ -2939,29 +2816,27 @@ def test_dependency_reason_is_never_reused_after_boundary_read(tmp_path):
             self.read_count += 1
             if self.read_count == 1:
                 return unsafe_reason
-            return 'different dependency reason'
+            return "different dependency reason"
 
     source_row = ChangingReasonRow()
     row = _stage_row(
-        stage='manual',
-        status='manual_only',
+        stage="manual",
+        status="manual_only",
         reason=source_row.reason,
         source_result=_remediation_result(tmp_path),
         source_row=source_row,
     )
 
-    assert row.reason == 'manual follow-up is required'
+    assert row.reason == "manual follow-up is required"
     assert unsafe_reason not in row.reason
 
 
-def test_dependency_episode_reference_requires_bounded_identifier(
-    monkeypatch, tmp_path
-):
+def test_dependency_episode_reference_requires_bounded_identifier(monkeypatch, tmp_path):
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
     )
 
-    unsafe_ref = 'episode reference with private narrative'
+    unsafe_ref = "episode reference with private narrative"
     calls: list[tuple[str, dict]] = []
     _install_stage_doubles(
         monkeypatch,
@@ -2969,24 +2844,22 @@ def test_dependency_episode_reference_requires_bounded_identifier(
         calls,
         intake=_intake_result(
             tmp_path,
-            selector='latest',
+            selector="latest",
             episode_ref=unsafe_ref,
-            status='selected',
+            status="selected",
         ),
     )
 
-    result = run_corpus_episode_workflow('gooaye')
+    result = run_corpus_episode_workflow("gooaye")
     payload = _result_payload(result)
 
-    assert result.selected_stage == 'blocked'
+    assert result.selected_stage == "blocked"
     assert result.episode_ref is None
     assert unsafe_ref not in json.dumps(payload, ensure_ascii=False)
-    assert calls == [('intake', {'episode_ref': 'latest', 'confirm': False})]
+    assert calls == [("intake", {"episode_ref": "latest", "confirm": False})]
 
 
-def test_outputs_do_not_leak_raw_secret_url_prompt_llm_or_investment_text(
-    monkeypatch, tmp_path, capsys
-):
+def test_outputs_do_not_leak_raw_secret_url_prompt_llm_or_investment_text(monkeypatch, tmp_path, capsys):
     from scripts import run_corpus_episode_workflow as cli
 
     from corpus_ingest_core.corpus_episode_workflow_runner import (
@@ -3044,9 +2917,7 @@ def test_outputs_do_not_leak_raw_secret_url_prompt_llm_or_investment_text(
 
 def test_no_mcp_registry_change_guard_coverage():
     source = Path("src/corpus_ingest_core/__init__.py").read_text(encoding="utf-8")
-    workflow_source = Path(
-        "src/corpus_ingest_core/corpus_episode_workflow_runner.py"
-    ).read_text(encoding="utf-8")
+    workflow_source = Path("src/corpus_ingest_core/corpus_episode_workflow_runner.py").read_text(encoding="utf-8")
 
     assert "mcp" not in workflow_source.lower()
     assert "tool_registry" not in workflow_source.lower()

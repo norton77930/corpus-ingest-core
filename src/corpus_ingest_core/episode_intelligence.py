@@ -65,11 +65,7 @@ def generate_episode_intelligence_report(
     )
     source_warnings.extend(validation.warnings)
 
-    if (
-        report_paths.json_path.exists()
-        and report_paths.markdown_path.exists()
-        and not force
-    ):
+    if report_paths.json_path.exists() and report_paths.markdown_path.exists() and not force:
         return EpisodeIntelligenceReportAsset(
             podcast_id=podcast_id,
             episode_ref=episode_ref,
@@ -143,9 +139,7 @@ def generate_episode_intelligence_report(
     )
 
 
-def _raise_for_invalid_transcript(
-    status: str, problems: list[str], allow_partial: bool
-) -> None:
+def _raise_for_invalid_transcript(status: str, problems: list[str], allow_partial: bool) -> None:
     details = "; ".join(problems)
     if status == "missing":
         raise TranscriptMissingError(f"找不到逐字稿：{details}")
@@ -227,9 +221,7 @@ def _load_mentions(
     return [mention for mention in mentions if isinstance(mention, dict)], "available", []
 
 
-def _mentions_by_type(
-    mentions: list[dict[str, Any]], max_evidence_per_section: int
-) -> dict[str, list[dict[str, Any]]]:
+def _mentions_by_type(mentions: list[dict[str, Any]], max_evidence_per_section: int) -> dict[str, list[dict[str, Any]]]:
     grouped: dict[str, list[dict[str, Any]]] = defaultdict(list)
     for mention in mentions:
         mention_type = str(mention.get("type", "unknown"))
@@ -237,9 +229,7 @@ def _mentions_by_type(
     return {key: grouped[key] for key in sorted(grouped)}
 
 
-def _trim_mention(
-    mention: dict[str, Any], max_evidence_per_section: int
-) -> dict[str, Any]:
+def _trim_mention(mention: dict[str, Any], max_evidence_per_section: int) -> dict[str, Any]:
     evidence = mention.get("evidence")
     return {
         "type": str(mention.get("type", "unknown")),
@@ -272,8 +262,7 @@ def _timeline(
                 "window_end_seconds": window_end,
                 "timestamp": f"[{_format_clock(window_start)} - {_format_clock(window_end)}]",
                 "evidence": [
-                    _segment_evidence(segment)
-                    for segment in grouped[window_start][:max_evidence_per_section]
+                    _segment_evidence(segment) for segment in grouped[window_start][:max_evidence_per_section]
                 ],
             }
         )
@@ -364,9 +353,7 @@ def _render_markdown(
         for mention_type, mentions in payload["mentions_by_type"].items():
             lines.extend([f"### {mention_type}", ""])
             for mention in mentions:
-                timestamps = ", ".join(
-                    str(item.get("timestamp", "")) for item in mention["evidence"]
-                )
+                timestamps = ", ".join(str(item.get("timestamp", "")) for item in mention["evidence"])
                 lines.append(f"- {mention['text']} ({mention['count']}): {timestamps}")
             lines.append("")
 
@@ -438,6 +425,4 @@ def _write_report(
                 part_path.unlink(missing_ok=True)
             except OSError:
                 pass
-        raise EpisodeIntelligenceReportFailedError(
-            f"寫入 episode intelligence report 失敗：{exc}"
-        ) from exc
+        raise EpisodeIntelligenceReportFailedError(f"寫入 episode intelligence report 失敗：{exc}") from exc

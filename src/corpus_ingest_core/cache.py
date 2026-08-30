@@ -199,8 +199,7 @@ def index_episode(
     return EpisodeIndexResult(
         podcast_id=podcast_id,
         episode_ref=episode_ref,
-        indexed=validation.status not in {"missing", "corrupt", "incomplete_outputs"}
-        and not problems,
+        indexed=validation.status not in {"missing", "corrupt", "incomplete_outputs"} and not problems,
         transcript_segment_count=transcript_segment_count,
         mention_count=mention_count,
         problems=problems,
@@ -305,9 +304,7 @@ def _find_summary_paths(podcast_id: str, episode_ref: str) -> dict[str, Path | N
     summary_dir = storage.SUMMARIES_DIR / podcast_id
     semantic_matches = sorted(summary_dir.glob(f"{episode_ref}__*.semantic.md"))
     extractive_matches = [
-        path
-        for path in sorted(summary_dir.glob(f"{episode_ref}__*.md"))
-        if not path.name.endswith(".semantic.md")
+        path for path in sorted(summary_dir.glob(f"{episode_ref}__*.md")) if not path.name.endswith(".semantic.md")
     ]
     return {
         "extractive_summary_path": extractive_matches[0] if extractive_matches else None,

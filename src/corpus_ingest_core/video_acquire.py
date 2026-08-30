@@ -50,9 +50,7 @@ DOWNLOAD_OPTION_KEYS: tuple[str, ...] = (
 # does publish no audio-only stream. Neither branch contains a +, so this can
 # never reintroduce the muxer requirement.
 AUDIO_ONLY_FORMAT = "bestaudio/best"
-_FORBIDDEN_CREDENTIAL_KEYS = frozenset(
-    {"cookiefile", "cookiesfrombrowser", "username", "password", "videopassword"}
-)
+_FORBIDDEN_CREDENTIAL_KEYS = frozenset({"cookiefile", "cookiesfrombrowser", "username", "password", "videopassword"})
 
 
 def guest_download_options(target_dir: Path) -> dict[str, Any]:
@@ -122,15 +120,11 @@ def extract_audio(
     av = _load_av(dependency_error)
     container = av.open(str(video_path))
     try:
-        audio_stream = next(
-            (stream for stream in container.streams if stream.type == "audio"), None
-        )
+        audio_stream = next((stream for stream in container.streams if stream.type == "audio"), None)
         if audio_stream is None:
             raise failed_error(f"影片沒有音軌：{video_path}")
 
-        resampler = av.audio.resampler.AudioResampler(
-            format="s16", layout="mono", rate=16000
-        )
+        resampler = av.audio.resampler.AudioResampler(format="s16", layout="mono", rate=16000)
         with wave.open(str(audio_path), "wb") as wav:
             wav.setnchannels(1)
             wav.setsampwidth(2)
@@ -163,9 +157,7 @@ def acquire_wav(
     work_prefix: str = "video-",
 ) -> None:
     owns_work_dir = work_dir is None
-    resolved_work_dir = (
-        Path(tempfile.mkdtemp(prefix=work_prefix)) if work_dir is None else Path(work_dir)
-    )
+    resolved_work_dir = Path(tempfile.mkdtemp(prefix=work_prefix)) if work_dir is None else Path(work_dir)
     part_path = audio_target.with_suffix(audio_target.suffix + ".part")
     try:
         video_path = download_video(
@@ -199,9 +191,7 @@ def acquire_wav(
 def _assert_guest_options(options: dict[str, Any]) -> None:
     forbidden = _FORBIDDEN_CREDENTIAL_KEYS.intersection(options)
     if forbidden:
-        raise VideoAcquireFailedError(
-            f"取得選項不得含憑證鍵：{', '.join(sorted(forbidden))}"
-        )
+        raise VideoAcquireFailedError(f"取得選項不得含憑證鍵：{', '.join(sorted(forbidden))}")
     if options.get("ignoreconfig") is not True:
         raise VideoAcquireFailedError("取得選項必須 ignoreconfig，以免讀到使用者 yt-dlp 設定")
 
@@ -210,9 +200,7 @@ def _load_yt_dlp(dependency_error: type[PodcastIngestCoreError]):
     try:
         import yt_dlp
     except ImportError as exc:  # pragma: no cover
-        raise dependency_error(
-            "需要 yt-dlp 才能取得影片，請先安裝：pip install yt-dlp"
-        ) from exc
+        raise dependency_error("需要 yt-dlp 才能取得影片，請先安裝：pip install yt-dlp") from exc
     return yt_dlp
 
 
@@ -220,7 +208,5 @@ def _load_av(dependency_error: type[PodcastIngestCoreError]):
     try:
         import av
     except ImportError as exc:  # pragma: no cover
-        raise dependency_error(
-            "需要 PyAV 才能抽出音軌，請先安裝：pip install av"
-        ) from exc
+        raise dependency_error("需要 PyAV 才能抽出音軌，請先安裝：pip install av") from exc
     return av

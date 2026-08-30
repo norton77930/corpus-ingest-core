@@ -115,9 +115,7 @@ def run_corpus_remediation(
         source_plan_reads=[],
     )
     if not (episode_ref or action_family):
-        raise CorpusRemediationRunnerFailedError(
-            "confirm requires episode or action_family"
-        )
+        raise CorpusRemediationRunnerFailedError("confirm requires episode or action_family")
 
     rows = _execute_selected_rows(
         rows=rows,
@@ -192,13 +190,9 @@ def result_to_dict(result: CorpusRemediationRunResult) -> dict[str, Any]:
         "run_mode": result.run_mode,
         "confirm": result.confirm,
         "source_remediation_plan_json_path": str(result.source_remediation_plan_json_path),
-        "source_remediation_plan_markdown_path": str(
-            result.source_remediation_plan_markdown_path
-        ),
+        "source_remediation_plan_markdown_path": str(result.source_remediation_plan_markdown_path),
         "report_json_path": str(result.report_json_path) if result.report_json_path else None,
-        "report_markdown_path": (
-            str(result.report_markdown_path) if result.report_markdown_path else None
-        ),
+        "report_markdown_path": (str(result.report_markdown_path) if result.report_markdown_path else None),
         "filters": asdict(result.filters),
         **asdict(result.counts),
         "rows": [asdict(row) for row in result.rows],
@@ -212,9 +206,7 @@ def _load_plan_payload(plan_json_path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(plan_json_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        raise CorpusRemediationRunnerFailedError(
-            f"failed to read corpus remediation plan: {exc}"
-        ) from exc
+        raise CorpusRemediationRunnerFailedError(f"failed to read corpus remediation plan: {exc}") from exc
     if not isinstance(payload, dict):
         raise CorpusRemediationRunnerFailedError("corpus remediation plan root must be an object")
     return payload
@@ -295,16 +287,13 @@ def _initial_outcome(
 ) -> tuple[str, str]:
     family = _safe_text(action_payload.get("artifact_family"), "unknown")
     source_status = _safe_text(action_payload.get("status"), "unknown")
-    if filters.episode_ref is not None and filters.episode_ref != _safe_text(
-        action_payload.get("action_id"), ""
-    ).split(":", 1)[0]:
+    if (
+        filters.episode_ref is not None
+        and filters.episode_ref != _safe_text(action_payload.get("action_id"), "").split(":", 1)[0]
+    ):
         return "skipped", "episode filter does not match"
     if source_status == "blocked":
-        blockers = ", ".join(
-            item
-            for item in action_payload.get("blocking_artifacts", [])
-            if isinstance(item, str)
-        )
+        blockers = ", ".join(item for item in action_payload.get("blocking_artifacts", []) if isinstance(item, str))
         return "blocked", f"blocked by {blockers or 'upstream artifact'}"
     if family not in DETERMINISTIC_ACTION_FAMILIES:
         return "excluded", _excluded_reason(family)
@@ -350,9 +339,7 @@ def _execute_selected_rows(
                 outcome_status="skipped",
                 reason=f"failed dependency: {failed_dependency}",
             )
-            unavailable_by_episode.setdefault(row.episode_ref, set()).add(
-                row.artifact_family
-            )
+            unavailable_by_episode.setdefault(row.episode_ref, set()).add(row.artifact_family)
             updated_rows.append(skipped)
             continue
         try:
@@ -369,9 +356,7 @@ def _execute_selected_rows(
                 reason=f"action failed: {type(exc).__name__}",
                 warnings=[*row.warnings, f"action failed: {type(exc).__name__}"],
             )
-            unavailable_by_episode.setdefault(row.episode_ref, set()).add(
-                row.artifact_family
-            )
+            unavailable_by_episode.setdefault(row.episode_ref, set()).add(row.artifact_family)
             updated_rows.append(failed)
             continue
         outcome = "reused" if getattr(asset, "already_exists", False) else "executed"
@@ -397,9 +382,7 @@ def _dispatch(family: str) -> Callable[..., Any]:
     try:
         return dispatchers[family]
     except KeyError as exc:
-        raise CorpusRemediationRunnerFailedError(
-            f"no deterministic dispatcher for {family}"
-        ) from exc
+        raise CorpusRemediationRunnerFailedError(f"no deterministic dispatcher for {family}") from exc
 
 
 def _failed_dependency(
@@ -493,19 +476,13 @@ def _planned_writes(
         mention_paths = storage.mention_asset_paths(podcast_id, episode_ref, title)
         return [str(mention_paths.json_path), str(mention_paths.markdown_path)]
     if family == "episode_intelligence":
-        report_paths = storage.episode_intelligence_report_asset_paths(
-            podcast_id, episode_ref, title
-        )
+        report_paths = storage.episode_intelligence_report_asset_paths(podcast_id, episode_ref, title)
         return [str(report_paths.json_path), str(report_paths.markdown_path)]
     if family == "industry_mapping":
-        mapping_paths = storage.industry_chain_mapping_asset_paths(
-            podcast_id, episode_ref, title
-        )
+        mapping_paths = storage.industry_chain_mapping_asset_paths(podcast_id, episode_ref, title)
         return [str(mapping_paths.json_path), str(mapping_paths.markdown_path)]
     if family == "external_boundary":
-        boundary_paths = storage.external_data_boundary_asset_paths(
-            podcast_id, episode_ref, title
-        )
+        boundary_paths = storage.external_data_boundary_asset_paths(podcast_id, episode_ref, title)
         return [str(boundary_paths.json_path), str(boundary_paths.markdown_path)]
     return []
 
@@ -536,9 +513,7 @@ def _write_run_report(result: CorpusRemediationRunResult) -> None:
             markdown,
         )
     except OSError as exc:
-        raise CorpusRemediationRunnerFailedError(
-            f"failed to write corpus remediation run report: {exc}"
-        ) from exc
+        raise CorpusRemediationRunnerFailedError(f"failed to write corpus remediation run report: {exc}") from exc
 
 
 def _render_markdown(payload: dict[str, Any]) -> str:

@@ -26,8 +26,7 @@ def test_breaks_at_a_sentence_boundary_once_the_minimum_duration_is_reached():
     assert groups[0]["start"] == 0.0
     assert groups[0]["end"] == 32.0
     assert groups[0]["text"] == (
-        "First sentence ends here. Second one too. Third as well. "
-        "Fourth crosses thirty seconds."
+        "First sentence ends here. Second one too. Third as well. Fourth crosses thirty seconds."
     )
     assert [segment["id"] for segment in groups[0]["segments"]] == [1, 2, 3, 4]
     assert [segment["id"] for segment in groups[1]["segments"]] == [5]
@@ -84,8 +83,7 @@ def test_breaks_at_the_maximum_duration_even_without_a_sentence_ending():
     """Speech that never punctuates must still be capped, not grow unbounded."""
 
     segments = [
-        _segment(index, float(index * 20), float((index + 1) * 20), "and then we keep going")
-        for index in range(6)
+        _segment(index, float(index * 20), float((index + 1) * 20), "and then we keep going") for index in range(6)
     ]
 
     groups = group_segments(segments)

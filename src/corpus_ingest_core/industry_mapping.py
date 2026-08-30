@@ -41,35 +41,23 @@ def generate_industry_chain_mapping(
     report_paths = (
         None
         if transcript_identity is None
-        else storage.episode_intelligence_report_asset_paths(
-            podcast_id, episode_ref, transcript_identity.title
-        )
+        else storage.episode_intelligence_report_asset_paths(podcast_id, episode_ref, transcript_identity.title)
     )
     if report_paths is None or not report_paths.json_path.exists():
-        raise IndustryMappingInputError(
-            f"找不到 episode intelligence report：{podcast_id}/{episode_ref}"
-        )
+        raise IndustryMappingInputError(f"找不到 episode intelligence report：{podcast_id}/{episode_ref}")
 
     report_payload = _load_report_payload(report_paths.json_path)
     _validate_report_identity(report_payload, podcast_id, episode_ref)
     report_status = _required_text(report_payload, "report_status")
     if report_status == "partial-draft" and not allow_partial:
-        raise IndustryMappingInputError(
-            "episode intelligence report status is partial-draft；請使用 --allow-partial。"
-        )
+        raise IndustryMappingInputError("episode intelligence report status is partial-draft；請使用 --allow-partial。")
     if report_status not in {"final", "partial-draft"}:
-        raise IndustryMappingInputError(
-            f"episode intelligence report status 不支援：{report_status}"
-        )
+        raise IndustryMappingInputError(f"episode intelligence report status 不支援：{report_status}")
 
     title = _required_text(report_payload, "title")
     mapping_paths = industry_chain_mapping_asset_paths(podcast_id, episode_ref, title)
     mapping_config, warnings = _load_mapping_config(DEFAULT_MAPPING_CONFIG_PATH)
-    if (
-        mapping_paths.json_path.exists()
-        and mapping_paths.markdown_path.exists()
-        and not force
-    ):
+    if mapping_paths.json_path.exists() and mapping_paths.markdown_path.exists() and not force:
         existing = _load_existing_mapping_counts(mapping_paths.json_path)
         return IndustryChainMappingAsset(
             podcast_id=podcast_id,
@@ -142,9 +130,7 @@ def _load_report_payload(json_path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(json_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        raise IndustryMappingInputError(
-            f"episode intelligence report JSON 格式錯誤：{json_path}"
-        ) from exc
+        raise IndustryMappingInputError(f"episode intelligence report JSON 格式錯誤：{json_path}") from exc
     except OSError as exc:
         raise IndustryMappingInputError(f"無法讀取 episode intelligence report：{exc}") from exc
     if not isinstance(payload, dict):
@@ -152,15 +138,11 @@ def _load_report_payload(json_path: Path) -> dict[str, Any]:
     return payload
 
 
-def _validate_report_identity(
-    payload: dict[str, Any], podcast_id: str, episode_ref: str
-) -> None:
+def _validate_report_identity(payload: dict[str, Any], podcast_id: str, episode_ref: str) -> None:
     payload_podcast_id = _required_text(payload, "podcast_id")
     payload_episode_ref = _required_text(payload, "episode_ref")
     if payload_podcast_id != podcast_id or payload_episode_ref != episode_ref:
-        raise IndustryMappingInputError(
-            "episode intelligence report 的 podcast_id 或 episode_ref 不符合請求。"
-        )
+        raise IndustryMappingInputError("episode intelligence report 的 podcast_id 或 episode_ref 不符合請求。")
 
 
 def _required_text(payload: dict[str, Any], key: str) -> str:
@@ -233,9 +215,7 @@ def _build_mapping(
     stock_candidates: dict[tuple[str, str], dict[str, Any]] = {}
     explicit_company_names: set[str] = set()
 
-    for mention in _mentions(report_payload, "company") + _mentions(
-        report_payload, "stock_or_ticker"
-    ):
+    for mention in _mentions(report_payload, "company") + _mentions(report_payload, "stock_or_ticker"):
         alias = _lookup_alias(company_aliases, str(mention.get("text", "")))
         company_name = str(alias.get("company_name") or mention.get("text", "")).strip()
         if not company_name:
@@ -349,9 +329,7 @@ def _matching_node_ids(industry_nodes_config: dict[str, Any], text: str) -> list
     return matched
 
 
-def _node_builder(
-    builders: dict[str, dict[str, Any]], node_id: str, node_config: dict[str, Any]
-) -> dict[str, Any]:
+def _node_builder(builders: dict[str, dict[str, Any]], node_id: str, node_config: dict[str, Any]) -> dict[str, Any]:
     if node_id not in builders:
         builders[node_id] = {
             "label": str(node_config.get("label", node_id)),
@@ -389,9 +367,7 @@ def _evidence(mention: dict[str, Any], max_evidence: int) -> list[dict[str, Any]
     return evidence
 
 
-def _extend_evidence(
-    target: list[dict[str, Any]], source: list[dict[str, Any]], limit: int
-) -> None:
+def _extend_evidence(target: list[dict[str, Any]], source: list[dict[str, Any]], limit: int) -> None:
     seen = {(item.get("segment_id"), item.get("timestamp")) for item in target}
     for item in source:
         key = (item.get("segment_id"), item.get("timestamp"))

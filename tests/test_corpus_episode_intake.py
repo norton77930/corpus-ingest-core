@@ -72,15 +72,9 @@ def test_corpus_episode_seed_storage_paths_contract():
     seed_path = corpus_episode_seed_asset_path("gooaye", "EP677")
     run_paths = corpus_episode_intake_run_asset_paths("gooaye")
 
-    assert seed_path == Path(
-        "data/corpus/gooaye/episode-seeds/EP677.episode-seed.json"
-    )
-    assert run_paths.json_path == Path(
-        "data/corpus/gooaye/corpus-episode-intake-run.json"
-    )
-    assert run_paths.markdown_path == Path(
-        "data/corpus/gooaye/corpus-episode-intake-run.md"
-    )
+    assert seed_path == Path("data/corpus/gooaye/episode-seeds/EP677.episode-seed.json")
+    assert run_paths.json_path == Path("data/corpus/gooaye/corpus-episode-intake-run.json")
+    assert run_paths.markdown_path == Path("data/corpus/gooaye/corpus-episode-intake-run.md")
 
 
 def test_corpus_episode_intake_public_result_contract_exports(tmp_path):
@@ -136,12 +130,8 @@ def test_corpus_episode_intake_public_result_contract_exports(tmp_path):
         outcome_status="selected",
         reason="episode resolved from configured feed",
         planned_reads=["configured podcast RSS feed"],
-        planned_writes=[
-            str(tmp_path / "corpus" / "gooaye" / "episode-seeds" / "EP677.episode-seed.json")
-        ],
-        seed_json_path=str(
-            tmp_path / "corpus" / "gooaye" / "episode-seeds" / "EP677.episode-seed.json"
-        ),
+        planned_writes=[str(tmp_path / "corpus" / "gooaye" / "episode-seeds" / "EP677.episode-seed.json")],
+        seed_json_path=str(tmp_path / "corpus" / "gooaye" / "episode-seeds" / "EP677.episode-seed.json"),
         warnings=[],
     )
     result = CorpusEpisodeIntakeRunResult(
@@ -260,9 +250,7 @@ def test_dry_run_unresolved_selector_is_rejected_without_writes(monkeypatch, tmp
     _use_tmp_data_dirs(monkeypatch, tmp_path)
 
     def fake_get_episode(podcast_id: str, episode_ref: str):
-        raise EpisodeNotFoundError(
-            "missing https://source.example.invalid/episode?token=secret"
-        )
+        raise EpisodeNotFoundError("missing https://source.example.invalid/episode?token=secret")
 
     monkeypatch.setattr(runner, "get_episode", fake_get_episode, raising=False)
 
@@ -338,9 +326,7 @@ def test_dry_run_is_deterministic_and_has_no_generated_at(monkeypatch, tmp_path)
     assert "raw description must not leak" not in text
 
 
-def test_run_corpus_episode_intake_cli_dry_run_outputs_json(
-    monkeypatch, capsys, tmp_path
-):
+def test_run_corpus_episode_intake_cli_dry_run_outputs_json(monkeypatch, capsys, tmp_path):
     from scripts import run_corpus_episode_intake as cli
 
     from corpus_ingest_core.models import (
@@ -392,9 +378,7 @@ def test_run_corpus_episode_intake_cli_dry_run_outputs_json(
     assert payload["selected_count"] == 1
 
 
-def test_confirmed_run_writes_deterministic_seed_metadata_and_report(
-    monkeypatch, tmp_path
-):
+def test_confirmed_run_writes_deterministic_seed_metadata_and_report(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_episode_intake as runner
     from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
     from corpus_ingest_core.storage import (
@@ -445,9 +429,7 @@ def test_confirmed_run_writes_deterministic_seed_metadata_and_report(
     assert "raw description must not leak" not in serialized
 
 
-def test_repeated_confirmed_run_records_reused_without_duplicate_seed(
-    monkeypatch, tmp_path
-):
+def test_repeated_confirmed_run_records_reused_without_duplicate_seed(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_episode_intake as runner
     from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
     from corpus_ingest_core.storage import corpus_episode_seed_asset_path
@@ -470,9 +452,7 @@ def test_repeated_confirmed_run_records_reused_without_duplicate_seed(
     assert list(seed_path.parent.glob("*.episode-seed.json")) == [seed_path]
 
 
-def test_confirmed_unresolved_selector_writes_rejected_report_without_seed(
-    monkeypatch, tmp_path
-):
+def test_confirmed_unresolved_selector_writes_rejected_report_without_seed(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_episode_intake as runner
     from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
     from corpus_ingest_core.errors import EpisodeNotFoundError
@@ -536,9 +516,7 @@ def test_confirmed_intake_does_not_call_downstream_side_effects(monkeypatch, tmp
     assert result.counts.seeded_count == 1
 
 
-def test_run_corpus_episode_intake_cli_confirmed_outputs_json(
-    monkeypatch, capsys, tmp_path
-):
+def test_run_corpus_episode_intake_cli_confirmed_outputs_json(monkeypatch, capsys, tmp_path):
     from scripts import run_corpus_episode_intake as cli
 
     from corpus_ingest_core.models import (
@@ -599,9 +577,7 @@ def test_run_corpus_episode_intake_cli_confirmed_outputs_json(
     assert payload["report_json_path"].endswith("corpus-episode-intake-run.json")
 
 
-def test_no_unsafe_feed_content_leaks(
-    monkeypatch, capsys, tmp_path
-):
+def test_no_unsafe_feed_content_leaks(monkeypatch, capsys, tmp_path):
     from scripts import run_corpus_episode_intake as cli
 
     import corpus_ingest_core.corpus_episode_intake as runner
@@ -611,10 +587,7 @@ def test_no_unsafe_feed_content_leaks(
     _use_tmp_data_dirs(monkeypatch, tmp_path)
     malicious_episode = _episode(
         "EP677",
-        title=(
-            "EP677 https://source.example.invalid/path?token=secret "
-            "prompt text raw LLM output Traceback secret"
-        ),
+        title=("EP677 https://source.example.invalid/path?token=secret prompt text raw LLM output Traceback secret"),
         source_url="https://source.example.invalid/episode?token=secret",
         audio_url="https://media.example.invalid/audio.mp3?token=secret",
         description="raw description must not leak prompt text raw LLM output",
@@ -654,9 +627,7 @@ def test_no_unsafe_feed_content_leaks(
         assert forbidden not in output_text
 
     def fake_run(*args, **kwargs):
-        raise CorpusEpisodeIntakeFailedError(
-            "failed https://source.example.invalid?token=secret"
-        )
+        raise CorpusEpisodeIntakeFailedError("failed https://source.example.invalid?token=secret")
 
     monkeypatch.setattr(cli, "run_corpus_episode_intake", fake_run)
     monkeypatch.setattr(sys, "argv", ["run_corpus_episode_intake.py", "--podcast", "gooaye"])
@@ -674,9 +645,7 @@ def test_feed_reader_dependency_failure_is_bounded(monkeypatch, tmp_path):
     _use_tmp_data_dirs(monkeypatch, tmp_path)
 
     def fake_get_episode(podcast_id: str, episode_ref: str):
-        raise RuntimeError(
-            "Traceback body https://source.example.invalid/path?token=secret prompt text"
-        )
+        raise RuntimeError("Traceback body https://source.example.invalid/path?token=secret prompt text")
 
     monkeypatch.setattr(runner, "get_episode", fake_get_episode, raising=False)
 
@@ -744,9 +713,7 @@ def test_no_investment_advice_or_market_claims(monkeypatch, tmp_path):
     assert "guaranteed return" not in text
 
 
-def test_confirmed_seed_adds_manual_follow_up_warning_without_running_chain(
-    monkeypatch, tmp_path
-):
+def test_confirmed_seed_adds_manual_follow_up_warning_without_running_chain(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_episode_intake as runner
     from corpus_ingest_core.corpus_episode_intake import run_corpus_episode_intake
 
