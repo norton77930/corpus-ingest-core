@@ -33,15 +33,32 @@ _CHECK_NAMES = (
     "source_artifact_metadata_match",
     "source_digest_match",
 )
-_ARTIFACT_ROLES = frozenset({
-    "transcript", "semantic_summary", "semantic_review", "mentions",
-    "intelligence", "industry_mapping", "external_boundary", "fixture", "stock_lens",
-})
+_ARTIFACT_ROLES = frozenset(
+    {
+        "transcript",
+        "semantic_summary",
+        "semantic_review",
+        "mentions",
+        "intelligence",
+        "industry_mapping",
+        "external_boundary",
+        "fixture",
+        "stock_lens",
+    }
+)
 _CLOSED_ROLES = _ARTIFACT_ROLES | frozenset({"lineage", "source_digest"})
 _FAILED_ROLE_ORDER = (
-    "transcript", "semantic_summary", "semantic_review", "mentions",
-    "intelligence", "industry_mapping", "external_boundary", "fixture", "stock_lens",
-    "lineage", "source_digest",
+    "transcript",
+    "semantic_summary",
+    "semantic_review",
+    "mentions",
+    "intelligence",
+    "industry_mapping",
+    "external_boundary",
+    "fixture",
+    "stock_lens",
+    "lineage",
+    "source_digest",
 )
 
 
@@ -71,41 +88,35 @@ def revalidate_verified_research_report_sources(
 
     try:
         snapshot = _current_verified_research_source_snapshot(
-            locator["podcast_id"], locator["episode_ref"], stock_query=stock_query,
+            locator["podcast_id"],
+            locator["episode_ref"],
+            stock_query=stock_query,
             include_fixture_verification=include_fixture_verification,
         )
     except VerifiedResearchReportInputError as exc:
         lineage_status = "missing" if "lineage is missing" in str(exc) else "stale_or_invalid"
         checks["current_lineage"] = lineage_status
-        return _result(
-            locator, "valid", lineage_status, "stale_or_invalid", checks, evidence, ["lineage"]
-        )
+        return _result(locator, "valid", lineage_status, "stale_or_invalid", checks, evidence, ["lineage"])
     except Exception:
         checks["current_lineage"] = "stale_or_invalid"
-        return _result(
-            locator, "valid", "stale_or_invalid", "stale_or_invalid", checks, evidence, ["lineage"]
-        )
+        return _result(locator, "valid", "stale_or_invalid", "stale_or_invalid", checks, evidence, ["lineage"])
 
     checks["current_lineage"] = "current"
     published_lineage_match = evidence.manifest.get("lineage") == snapshot.lineage_manifest
     checks["published_lineage_match"] = "match" if published_lineage_match else "mismatch"
-    metadata_failed_roles = _metadata_failed_roles(
-        evidence.manifest.get("source_artifacts"), snapshot.source_artifacts
-    )
-    checks["source_artifact_metadata_match"] = (
-        "match" if not metadata_failed_roles else "mismatch"
-    )
+    metadata_failed_roles = _metadata_failed_roles(evidence.manifest.get("source_artifacts"), snapshot.source_artifacts)
+    checks["source_artifact_metadata_match"] = "match" if not metadata_failed_roles else "mismatch"
     recomputed_digest = _source_digest(
-        podcast_id=locator["podcast_id"], episode_ref=locator["episode_ref"],
-        stock_query=stock_query, include_fixture_verification=include_fixture_verification,
+        podcast_id=locator["podcast_id"],
+        episode_ref=locator["episode_ref"],
+        stock_query=stock_query,
+        include_fixture_verification=include_fixture_verification,
         sources=snapshot.source_artifacts,
     )
     digest_match = recomputed_digest == locator["source_digest"]
     checks["source_digest_match"] = "match" if digest_match else "mismatch"
 
-    stable_roles, lineage_stable = _stable_snapshot_roles(
-        locator, stock_query, include_fixture_verification, snapshot
-    )
+    stable_roles, lineage_stable = _stable_snapshot_roles(locator, stock_query, include_fixture_verification, snapshot)
     failed_roles = set(metadata_failed_roles) | stable_roles
     if not published_lineage_match or not lineage_stable:
         failed_roles.add("lineage")
@@ -117,25 +128,30 @@ def revalidate_verified_research_report_sources(
     if not lineage_stable:
         checks["current_lineage"] = "stale_or_invalid"
     lineage_status = (
-        "current" if published_lineage_match and lineage_stable
-        else "mismatch" if not published_lineage_match
+        "current"
+        if published_lineage_match and lineage_stable
+        else "mismatch"
+        if not published_lineage_match
         else "stale_or_invalid"
     )
-    current = (
-        lineage_status == "current"
-        and not failed_roles
-        and checks["source_digest_match"] == "match"
-    )
+    current = lineage_status == "current" and not failed_roles and checks["source_digest_match"] == "match"
     return _result(
-        locator, "valid", lineage_status,
-        "current" if current else "stale_or_invalid", checks, evidence, failed_roles,
+        locator,
+        "valid",
+        lineage_status,
+        "current" if current else "stale_or_invalid",
+        checks,
+        evidence,
+        failed_roles,
     )
 
 
 def _supported_assembly_options(manifest: object) -> tuple[str | None, bool] | None:
     options = manifest.get("assembly_options") if isinstance(manifest, dict) else None
     if not isinstance(options, dict) or set(options) != {
-        "stock_query", "include_fixture_verification", "verification_scope",
+        "stock_query",
+        "include_fixture_verification",
+        "verification_scope",
     }:
         return None
     if (
@@ -188,17 +204,19 @@ def _ordered_failed_roles(roles: set[str]) -> list[str]:
 
 
 def _stable_snapshot_roles(
-    locator: dict[str, str], stock_query: str | None, include_fixture_verification: bool,
+    locator: dict[str, str],
+    stock_query: str | None,
+    include_fixture_verification: bool,
     first_snapshot: Any,
 ) -> tuple[set[str], bool]:
     """Return source race roles and whether the independently read lineage is stable."""
 
-    first_roles = {
-        source.role for source in first_snapshot.source_artifacts if source.role in _ARTIFACT_ROLES
-    }
+    first_roles = {source.role for source in first_snapshot.source_artifacts if source.role in _ARTIFACT_ROLES}
     try:
         second = _current_verified_research_source_snapshot(
-            locator["podcast_id"], locator["episode_ref"], stock_query=stock_query,
+            locator["podcast_id"],
+            locator["episode_ref"],
+            stock_query=stock_query,
             include_fixture_verification=include_fixture_verification,
         )
     except Exception:
@@ -217,8 +235,12 @@ def _stable_snapshot_roles(
 
 
 def _result(
-    locator: dict[str, str], bundle_status: str, lineage_status: str,
-    currentness_status: str, checks: dict[str, str], evidence: Any | None = None,
+    locator: dict[str, str],
+    bundle_status: str,
+    lineage_status: str,
+    currentness_status: str,
+    checks: dict[str, str],
+    evidence: Any | None = None,
     failed_roles: list[str] | None = None,
 ) -> VerifiedResearchReportSourceRevalidation:
     safe_metadata = evidence.safe_metadata if evidence is not None else None
@@ -230,9 +252,7 @@ def _result(
         checks=checks,
         failed_roles=failed_roles or [],
         safe_metadata=safe_metadata,
-        not_investment_advice=(
-            safe_metadata.not_investment_advice if safe_metadata is not None else None
-        ),
+        not_investment_advice=(safe_metadata.not_investment_advice if safe_metadata is not None else None),
     )
 
 
@@ -258,7 +278,8 @@ def result_to_dict(result: VerifiedResearchReportSourceRevalidation) -> dict[str
         ),
         "checks": _safe_serialized_checks(result.checks),
         "failed_roles": [
-            role for role in (result.failed_roles if isinstance(result.failed_roles, list) else [])
+            role
+            for role in (result.failed_roles if isinstance(result.failed_roles, list) else [])
             if isinstance(role, str) and role in _CLOSED_ROLES
         ],
         "safe_metadata": asdict(metadata) if metadata is not None else None,
@@ -269,9 +290,7 @@ def result_to_dict(result: VerifiedResearchReportSourceRevalidation) -> dict[str
 def _safe_serialized_locator(value: object) -> dict[str, str]:
     if isinstance(value, dict):
         try:
-            return _validate_locator(
-                value.get("podcast_id"), value.get("episode_ref"), value.get("source_digest")
-            )
+            return _validate_locator(value.get("podcast_id"), value.get("episode_ref"), value.get("source_digest"))
         except VerifiedResearchReportSourceRevalidationInputError:
             pass
     return {"podcast_id": "invalid", "episode_ref": "invalid", "source_digest": "0" * 64}
@@ -287,10 +306,7 @@ def _safe_serialized_checks(value: object) -> dict[str, str]:
         "source_artifact_metadata_match": {"match", "mismatch", "not_evaluated"},
         "source_digest_match": {"match", "mismatch", "not_evaluated"},
     }
-    return {
-        name: _bounded(raw.get(name), values, "not_evaluated")
-        for name, values in allowed.items()
-    }
+    return {name: _bounded(raw.get(name), values, "not_evaluated") for name, values in allowed.items()}
 
 
 def _safe_serialized_metadata(value: object) -> VerifiedResearchReportCatalogItem | None:

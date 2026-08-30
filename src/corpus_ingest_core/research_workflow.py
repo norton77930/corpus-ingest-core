@@ -35,8 +35,7 @@ from .validator import validate_transcript
 
 CACHE_STALE_WARNING = "Cache may be stale. Run rebuild_cache manually after workflow completion."
 SEMANTIC_STEP_WARNING = (
-    "semantic_summarize_episode is not executed unless include_semantic_summary=True "
-    "with exact api_cost_ack"
+    "semantic_summarize_episode is not executed unless include_semantic_summary=True with exact api_cost_ack"
 )
 DOWNSTREAM_REFRESH_WARNING = (
     "External boundary verification updated local external data, but an existing stock lens "
@@ -98,18 +97,14 @@ def run_research_workflow(
 
     normalized_stock_query = _normalize_stock_query(stock_query)
     if include_stock_lens_synthesis and normalized_stock_query is None:
-        raise ResearchWorkflowInputError(
-            "include_stock_lens_synthesis requires stock_query."
-        )
+        raise ResearchWorkflowInputError("include_stock_lens_synthesis requires stock_query.")
     if include_stock_lens_synthesis:
         try:
             require_finance_summary_profile(podcast_id)
         except StockLensSynthesisInputError as exc:
             raise ResearchWorkflowInputError(str(exc)) from exc
     if external_data_provider != SUPPORTED_EXTERNAL_DATA_PROVIDER:
-        raise ResearchWorkflowInputError(
-            f"unsupported external data provider: {external_data_provider}"
-        )
+        raise ResearchWorkflowInputError(f"unsupported external data provider: {external_data_provider}")
     validation = validate_transcript(podcast_id, episode_ref)
     transcript_paths = resolve_canonical_transcript_asset_paths(podcast_id, episode_ref)
     planned_reads = [str(transcript_paths.json_path)] if transcript_paths else []
@@ -162,10 +157,7 @@ def run_research_workflow(
             if include_semantic_summary or include_stock_lens_synthesis
             else None,
             transcript_status=validation.status,
-            steps=[
-                _planned_step(spec, "blocked" if blocked else "planned")
-                for spec in step_specs
-            ],
+            steps=[_planned_step(spec, "blocked" if blocked else "planned") for spec in step_specs],
             planned_reads=planned_reads,
             planned_writes=_unique(path for spec in step_specs for path in spec["planned_writes"]),
             written_artifacts=[],
@@ -225,7 +217,7 @@ def run_research_workflow(
 
 def _validate_positive(name: str, value: int) -> None:
     if value < 1:
-        raise ValueError(f"{name} 必須大於 0。")
+        raise ValueError(f"{name} must be greater than 0.")
 
 
 def _normalize_stock_query(stock_query: str | None) -> str | None:
@@ -241,22 +233,16 @@ def _is_blocked(status: str, allow_partial: bool) -> bool:
     return status == "partial" and not allow_partial
 
 
-def _raise_for_blocking_transcript(
-    status: str, problems: list[str], allow_partial: bool
-) -> None:
+def _raise_for_blocking_transcript(status: str, problems: list[str], allow_partial: bool) -> None:
     if not _is_blocked(status, allow_partial):
         return
     details = "; ".join(problems)
     raise ResearchWorkflowInputError(f"transcript validation status is {status}: {details}")
 
 
-def _raise_for_missing_api_cost_ack(
-    requires_api_cost_ack: bool, api_cost_ack: str
-) -> None:
+def _raise_for_missing_api_cost_ack(requires_api_cost_ack: bool, api_cost_ack: str) -> None:
     if requires_api_cost_ack and api_cost_ack != SEMANTIC_API_COST_ACK:
-        raise ResearchWorkflowInputError(
-            f"external LLM steps require exact api_cost_ack: {SEMANTIC_API_COST_ACK}"
-        )
+        raise ResearchWorkflowInputError(f"external LLM steps require exact api_cost_ack: {SEMANTIC_API_COST_ACK}")
 
 
 def _external_api_steps(include_stock_lens_synthesis: bool) -> list[str]:
@@ -538,7 +524,9 @@ def _base_step_specs(
                 "Requires exact api_cost_ack before confirmed execution",
             ]
             if include_semantic_context_in_synthesis:
-                risks.append("Reviewed semantic summary is an LLM intermediate artifact, not raw transcript or external market fact")
+                risks.append(
+                    "Reviewed semantic summary is an LLM intermediate artifact, not raw transcript or external market fact"
+                )
             specs.append(
                 {
                     "name": "generate_stock_lens_synthesis_report",
@@ -621,22 +609,14 @@ def _asset_paths(asset: Any) -> list[str]:
         "synthesis_json_path",
         "synthesis_markdown_path",
     )
-    return [
-        str(getattr(asset, field_name))
-        for field_name in output_fields
-        if hasattr(asset, field_name)
-    ]
+    return [str(getattr(asset, field_name)) for field_name in output_fields if hasattr(asset, field_name)]
 
 
 def _verification_updated_and_stock_reused(steps: list[ResearchWorkflowStep]) -> bool:
     verification_updated = any(
-        step.name == "verify_external_data_boundary" and step.status == "completed"
-        for step in steps
+        step.name == "verify_external_data_boundary" and step.status == "completed" for step in steps
     )
-    stock_reused = any(
-        step.name == "generate_stock_lens_report" and step.status == "reused"
-        for step in steps
-    )
+    stock_reused = any(step.name == "generate_stock_lens_report" and step.status == "reused" for step in steps)
     return verification_updated and stock_reused
 
 

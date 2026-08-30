@@ -59,9 +59,7 @@ def _parse_dimensions(raw_dimensions: Any) -> list[GooayeLensDimension]:
                 label=_required_text(item, "label"),
                 description=_required_text(item, "description"),
                 analysis_questions=_required_text_list(item, "analysis_questions"),
-                expected_evidence_sources=_required_text_list(
-                    item, "expected_evidence_sources"
-                ),
+                expected_evidence_sources=_required_text_list(item, "expected_evidence_sources"),
                 output_guidance=_required_text(item, "output_guidance"),
             )
         )
@@ -103,6 +101,4 @@ def _validate_safety_rules(safety_rules: list[str]) -> None:
     ]
     for fragment in required_fragments:
         if fragment not in safety_text:
-            raise GooayeLensConfigError(
-                f"gooaye lens config safety_rules missing required boundary: {fragment}"
-            )
+            raise GooayeLensConfigError(f"gooaye lens config safety_rules missing required boundary: {fragment}")

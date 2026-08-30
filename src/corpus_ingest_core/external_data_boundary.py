@@ -34,41 +34,29 @@ def generate_external_data_boundary(
     mapping_paths = (
         None
         if transcript_identity is None
-        else industry_chain_mapping_asset_paths(
-            podcast_id, episode_ref, transcript_identity.title
-        )
+        else industry_chain_mapping_asset_paths(podcast_id, episode_ref, transcript_identity.title)
     )
     if mapping_paths is None or not mapping_paths.json_path.exists():
-        raise ExternalDataBoundaryInputError(
-            f"找不到 industry chain mapping：{podcast_id}/{episode_ref}"
-        )
+        raise ExternalDataBoundaryInputError(f"Industry chain mapping not found: {podcast_id}/{episode_ref}")
 
     mapping_payload = _load_mapping_payload(mapping_paths.json_path)
     _validate_mapping_identity(mapping_payload, podcast_id, episode_ref)
     mapping_mode = _required_text(mapping_payload, "mapping_mode")
     if mapping_mode != SUPPORTED_MAPPING_MODE:
-        raise ExternalDataBoundaryInputError(
-            f"industry chain mapping mode 不支援：{mapping_mode}"
-        )
+        raise ExternalDataBoundaryInputError(f"Unsupported industry chain mapping mode: {mapping_mode}")
 
     mapping_status = _required_text(mapping_payload, "mapping_status")
     if mapping_status == "partial-draft" and not allow_partial:
         raise ExternalDataBoundaryInputError(
-            "industry chain mapping status is partial-draft；請使用 --allow-partial。"
+            "industry chain mapping status is partial-draft; pass --allow-partial to proceed."
         )
     if mapping_status not in {"final", "partial-draft"}:
-        raise ExternalDataBoundaryInputError(
-            f"industry chain mapping status 不支援：{mapping_status}"
-        )
+        raise ExternalDataBoundaryInputError(f"Unsupported industry chain mapping status: {mapping_status}")
 
     title = _required_text(mapping_payload, "title")
     boundary_paths = external_data_boundary_asset_paths(podcast_id, episode_ref, title)
     boundary_config, warnings = _load_boundary_config(DEFAULT_BOUNDARY_CONFIG_PATH)
-    if (
-        boundary_paths.json_path.exists()
-        and boundary_paths.markdown_path.exists()
-        and not force
-    ):
+    if boundary_paths.json_path.exists() and boundary_paths.markdown_path.exists() and not force:
         existing = _load_existing_boundary_counts(boundary_paths.json_path)
         return ExternalDataBoundaryAsset(
             podcast_id=podcast_id,
@@ -84,10 +72,7 @@ def generate_external_data_boundary(
         )
 
     checks = _external_checks(boundary_config)
-    candidates = [
-        _candidate_boundary(candidate, checks)
-        for candidate in _stock_candidates(mapping_payload)
-    ]
+    candidates = [_candidate_boundary(candidate, checks) for candidate in _stock_candidates(mapping_payload)]
     boundary_status = _boundary_status(mapping_status)
     payload = {
         "podcast_id": podcast_id,
@@ -131,33 +116,27 @@ def _load_mapping_payload(json_path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(json_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        raise ExternalDataBoundaryInputError(
-            f"industry chain mapping JSON 格式錯誤：{json_path}"
-        ) from exc
+        raise ExternalDataBoundaryInputError(f"Malformed industry chain mapping JSON: {json_path}") from exc
     except OSError as exc:
-        raise ExternalDataBoundaryInputError(
-            f"無法讀取 industry chain mapping：{exc}"
-        ) from exc
+        raise ExternalDataBoundaryInputError(f"Could not read the industry chain mapping: {exc}") from exc
     if not isinstance(payload, dict):
-        raise ExternalDataBoundaryInputError("industry chain mapping JSON 必須是 object。")
+        raise ExternalDataBoundaryInputError("The industry chain mapping JSON must be an object.")
     return payload
 
 
-def _validate_mapping_identity(
-    payload: dict[str, Any], podcast_id: str, episode_ref: str
-) -> None:
+def _validate_mapping_identity(payload: dict[str, Any], podcast_id: str, episode_ref: str) -> None:
     payload_podcast_id = _required_text(payload, "podcast_id")
     payload_episode_ref = _required_text(payload, "episode_ref")
     if payload_podcast_id != podcast_id or payload_episode_ref != episode_ref:
         raise ExternalDataBoundaryInputError(
-            "industry chain mapping 的 podcast_id 或 episode_ref 不符合請求。"
+            "The industry chain mapping podcast_id or episode_ref does not match the request."
         )
 
 
 def _required_text(payload: dict[str, Any], key: str) -> str:
     value = payload.get(key)
     if not isinstance(value, str) or not value.strip():
-        raise ExternalDataBoundaryInputError(f"industry chain mapping 缺少有效欄位：{key}")
+        raise ExternalDataBoundaryInputError(f"Industry chain mapping is missing a valid field: {key}")
     return value
 
 
@@ -209,9 +188,7 @@ def _stock_candidates(payload: dict[str, Any]) -> list[dict[str, Any]]:
     return [candidate for candidate in candidates if isinstance(candidate, dict)]
 
 
-def _candidate_boundary(
-    candidate: dict[str, Any], checks: list[dict[str, Any]]
-) -> dict[str, Any]:
+def _candidate_boundary(candidate: dict[str, Any], checks: list[dict[str, Any]]) -> dict[str, Any]:
     return {
         "company_name": str(candidate.get("company_name", "")),
         "tickers": _string_list(candidate.get("tickers")),
@@ -284,9 +261,7 @@ def _render_markdown(*, display_name: str, payload: dict[str, Any]) -> str:
         lines.extend(["No stock candidates found in the source mapping.", ""])
     for candidate in payload["candidate_boundaries"]:
         tickers = ", ".join(candidate["tickers"]) if candidate["tickers"] else "unverified"
-        checks = ", ".join(
-            check["data_type"] for check in candidate["required_external_checks"]
-        )
+        checks = ", ".join(check["data_type"] for check in candidate["required_external_checks"])
         if not checks:
             checks = "no configured external checks"
         lines.extend(
@@ -341,6 +316,4 @@ def _write_boundary(
                 part_path.unlink(missing_ok=True)
             except OSError:
                 pass
-        raise ExternalDataBoundaryFailedError(
-            f"寫入 external data boundary 失敗：{exc}"
-        ) from exc
+        raise ExternalDataBoundaryFailedError(f"Failed to write the external data boundary: {exc}") from exc

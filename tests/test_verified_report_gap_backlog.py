@@ -25,9 +25,7 @@ def _isolate(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     )
 
 
-def test_gap_backlog_reuses_coverage_gaps_and_is_zero_write(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_gap_backlog_reuses_coverage_gaps_and_is_zero_write(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     from corpus_ingest_core import list_verified_report_gap_backlog
     from corpus_ingest_core.models import (
         VerifiedResearchReportCoveragePage,

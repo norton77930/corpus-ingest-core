@@ -99,11 +99,7 @@ def _context(tmp_data_dirs: Path, tools: list[str]) -> Path:
 
 
 def _tree(root: Path) -> list[str]:
-    return sorted(
-        str(path.relative_to(root)).replace("\\", "/")
-        for path in root.rglob("*")
-        if path.is_file()
-    )
+    return sorted(str(path.relative_to(root)).replace("\\", "/") for path in root.rglob("*") if path.is_file())
 
 
 def _valid_payload(*, copilot: bool = False) -> dict[str, str]:
@@ -153,9 +149,7 @@ class _FakeProvider:
         return json.dumps(self._payload, ensure_ascii=False)
 
 
-def test_dry_run_writes_nothing_and_does_not_construct_provider(
-    tmp_data_dirs, monkeypatch
-):
+def test_dry_run_writes_nothing_and_does_not_construct_provider(tmp_data_dirs, monkeypatch):
     _ready_lecture(tmp_data_dirs)
     context = _context(tmp_data_dirs, ["Claude Code", "Codex"])
     before = _tree(tmp_data_dirs)
@@ -163,12 +157,8 @@ def test_dry_run_writes_nothing_and_does_not_construct_provider(
     def boom(*_args, **_kwargs):
         raise AssertionError("provider must not be constructed")
 
-    monkeypatch.setattr(
-        "corpus_ingest_core.workflow_derivation.create_provider", boom
-    )
-    result = run_workflow_derivation(
-        PODCAST, EPISODE, workflow_context=context
-    )
+    monkeypatch.setattr("corpus_ingest_core.workflow_derivation.create_provider", boom)
+    result = run_workflow_derivation(PODCAST, EPISODE, workflow_context=context)
 
     assert result.confirm is False
     assert result.run_mode == "preview"
@@ -192,9 +182,7 @@ def test_missing_lecture_is_refused(tmp_data_dirs):
     from corpus_ingest_core import storage
 
     _ready_lecture(tmp_data_dirs)
-    stem = storage.semantic_summary_asset_path(PODCAST, EPISODE, TITLE).name.removesuffix(
-        ".semantic.md"
-    )
+    stem = storage.semantic_summary_asset_path(PODCAST, EPISODE, TITLE).name.removesuffix(".semantic.md")
     bundle = storage.study_guide_bundle_paths_from_stem(PODCAST, stem).bundle_dir
     for name in LECTURE:
         (bundle / name).unlink()
@@ -210,9 +198,7 @@ def test_missing_context_is_refused(tmp_data_dirs):
         run_workflow_derivation(PODCAST, EPISODE, workflow_context=missing)
 
 
-def test_confirm_writes_pair_and_omits_tools_absent_from_context(
-    tmp_data_dirs, monkeypatch
-):
+def test_confirm_writes_pair_and_omits_tools_absent_from_context(tmp_data_dirs, monkeypatch):
     _ready_lecture(tmp_data_dirs)
     context = _context(tmp_data_dirs, ["Claude Code", "Codex"])
     captured: list = []
@@ -223,12 +209,13 @@ def test_confirm_writes_pair_and_omits_tools_absent_from_context(
     from corpus_ingest_core import storage
 
     lecture_before = {
-        name: (storage.study_guide_bundle_paths_from_stem(
-            PODCAST,
-            storage.semantic_summary_asset_path(PODCAST, EPISODE, TITLE).name.removesuffix(
-                ".semantic.md"
-            ),
-        ).bundle_dir / name).read_text(encoding="utf-8")
+        name: (
+            storage.study_guide_bundle_paths_from_stem(
+                PODCAST,
+                storage.semantic_summary_asset_path(PODCAST, EPISODE, TITLE).name.removesuffix(".semantic.md"),
+            ).bundle_dir
+            / name
+        ).read_text(encoding="utf-8")
         for name in LECTURE
     }
 
@@ -248,17 +235,13 @@ def test_confirm_writes_pair_and_omits_tools_absent_from_context(
     assert "Claude Code" in apply_text
     assert captured
     assert "transcript body must not leak" not in json.dumps(captured, ensure_ascii=False)
-    stem = storage.semantic_summary_asset_path(PODCAST, EPISODE, TITLE).name.removesuffix(
-        ".semantic.md"
-    )
+    stem = storage.semantic_summary_asset_path(PODCAST, EPISODE, TITLE).name.removesuffix(".semantic.md")
     bundle = storage.study_guide_bundle_paths_from_stem(PODCAST, stem).bundle_dir
     for name, body in lecture_before.items():
         assert (bundle / name).read_text(encoding="utf-8") == body
 
 
-def test_confirm_rejects_payload_that_advises_omitted_tool(
-    tmp_data_dirs, monkeypatch
-):
+def test_confirm_rejects_payload_that_advises_omitted_tool(tmp_data_dirs, monkeypatch):
     _ready_lecture(tmp_data_dirs)
     context = _context(tmp_data_dirs, ["Claude Code", "Codex"])
     monkeypatch.setattr(
@@ -291,9 +274,7 @@ def test_lecture_stays_available_without_derivation_files(tmp_data_dirs):
     row = payload["episodes"][0]
     assert row["artifact_status"]["study_guide"]["status"] == "available"
     assert row["artifact_status"]["workflow_derivation"]["status"] == "missing"
-    stem = storage.semantic_summary_asset_path(PODCAST, EPISODE, TITLE).name.removesuffix(
-        ".semantic.md"
-    )
+    stem = storage.semantic_summary_asset_path(PODCAST, EPISODE, TITLE).name.removesuffix(".semantic.md")
     lecture = storage.study_guide_bundle_paths_from_stem(PODCAST, stem)
     assert lecture.cover_path.is_file()
 
@@ -305,9 +286,7 @@ def test_wrong_ack_never_constructs_provider(tmp_data_dirs, monkeypatch):
     def boom(*_args, **_kwargs):
         raise AssertionError("provider must not be constructed")
 
-    monkeypatch.setattr(
-        "corpus_ingest_core.workflow_derivation.create_provider", boom
-    )
+    monkeypatch.setattr("corpus_ingest_core.workflow_derivation.create_provider", boom)
     with pytest.raises(LLMProviderConfigError):
         run_workflow_derivation(
             PODCAST,

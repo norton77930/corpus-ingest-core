@@ -40,9 +40,7 @@ ACTION_COMPLETED = "completed"
 ACTION_BLOCKED = "blocked"
 
 _IN_MEMORY_SNAPSHOT_LABEL = "in-memory corpus snapshot"
-_TIMESTAMPED_REVIEW_REPORT_LABEL = (
-    "timestamped semantic review JSON/Markdown reports"
-)
+_TIMESTAMPED_REVIEW_REPORT_LABEL = "timestamped semantic review JSON/Markdown reports"
 _ALLOWED_ACTIONS = {
     ACTION_NEXT,
     ACTION_SEMANTIC_SUMMARY,
@@ -58,6 +56,8 @@ _SAFE_MODEL_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._:/-]{0,127}$")
 _SAFE_API_KEY_ENV_PATTERN = re.compile(r"^[A-Z_][A-Z0-9_]{0,127}$")
 _SAFE_EXCEPTION_PATTERN = re.compile(r"^[A-Za-z][A-Za-z0-9_]{0,127}$")
 _QUERY_PATTERN = re.compile(r"\?[^\s|]+")
+
+
 @dataclass(frozen=True)
 class _ControlledSemanticSummaryRegenerationResult:
     """Parent-only child result for a single verified overwrite."""
@@ -115,17 +115,10 @@ def run_corpus_semantic_remediation(
     _require_positive_int(chunk_seconds, "chunk_seconds")
     _require_positive_int(max_segments_per_chunk, "max_segments_per_chunk")
     if confirm and requested_action == ACTION_NEXT:
+        raise CorpusSemanticRemediationRunnerFailedError("confirmed action must be semantic_summary or semantic_review")
+    if confirm and requested_action == ACTION_SEMANTIC_SUMMARY and api_cost_ack != SEMANTIC_API_COST_ACK:
         raise CorpusSemanticRemediationRunnerFailedError(
-            "confirmed action must be semantic_summary or semantic_review"
-        )
-    if (
-        confirm
-        and requested_action == ACTION_SEMANTIC_SUMMARY
-        and api_cost_ack != SEMANTIC_API_COST_ACK
-    ):
-        raise CorpusSemanticRemediationRunnerFailedError(
-            "semantic_summary requires exact api_cost_ack: "
-            f"{SEMANTIC_API_COST_ACK}"
+            f"semantic_summary requires exact api_cost_ack: {SEMANTIC_API_COST_ACK}"
         )
 
     requested_provider: str | None = None
@@ -220,9 +213,7 @@ def run_corpus_semantic_remediation(
         )
 
     warnings = [*warnings, *_confirmed_warnings(executed_action)]
-    report_paths = storage.corpus_semantic_remediation_run_asset_paths(
-        normalized_podcast_id
-    )
+    report_paths = storage.corpus_semantic_remediation_run_asset_paths(normalized_podcast_id)
     result = _build_result(
         podcast_id=normalized_podcast_id,
         episode_ref=normalized_episode_ref,
@@ -358,11 +349,7 @@ def _execute_semantic_summary(
             "summary_mode": getattr(summary, "summary_mode", None),
         },
     )
-    reason = (
-        "semantic summary already exists"
-        if status == "reused"
-        else "semantic summary generated"
-    )
+    reason = "semantic summary already exists" if status == "reused" else "semantic summary generated"
     output_paths = _safe_list([str(getattr(summary, "summary_path", ""))])
     return replace(
         row,
@@ -370,9 +357,7 @@ def _execute_semantic_summary(
         reason=reason,
         manual_only=False,
         output_paths=output_paths,
-        provider=_safe_dependency_identifier(
-            getattr(summary, "provider", None), provider
-        ),
+        provider=_safe_dependency_identifier(getattr(summary, "provider", None), provider),
         model=_safe_dependency_identifier(getattr(summary, "model", None), model),
         failure_category=None,
         warnings=[],
@@ -402,9 +387,7 @@ def _run_controlled_semantic_summary_regeneration(
     """
 
     try:
-        _consume_controlled_regeneration_capability(
-            authorization, podcast_id, episode_ref
-        )
+        _consume_controlled_regeneration_capability(authorization, podcast_id, episode_ref)
     except ValueError as exc:
         raise CorpusSemanticRemediationRunnerFailedError(
             "controlled semantic regeneration authorization is invalid"
@@ -432,9 +415,7 @@ def _run_controlled_semantic_summary_regeneration(
         or getattr(summary, "generated", None) is not True
         or getattr(summary, "already_exists", None) is not False
     ):
-        raise CorpusSemanticRemediationRunnerFailedError(
-            "controlled semantic regeneration child result is invalid"
-        )
+        raise CorpusSemanticRemediationRunnerFailedError("controlled semantic regeneration child result is invalid")
     notify_child_artifact_committed(
         "semantic_summary",
         expected_summary_path,
@@ -481,7 +462,9 @@ def _execute_semantic_review(
     review_path = getattr(review, "review_json_path", None)
     if passed and isinstance(review_path, Path):
         notify_child_artifact_committed(
-            "semantic_review", review_path, generated=True,
+            "semantic_review",
+            review_path,
+            generated=True,
             metadata={"review_status": review_status},
         )
     output_paths = _safe_list(
@@ -493,11 +476,7 @@ def _execute_semantic_review(
     return replace(
         row,
         status="executed" if passed else "blocked",
-        reason=(
-            "semantic review passed"
-            if passed
-            else "semantic review did not pass"
-        ),
+        reason=("semantic review passed" if passed else "semantic review did not pass"),
         manual_only=not passed,
         output_paths=output_paths,
         provider=None,
@@ -505,6 +484,7 @@ def _execute_semantic_review(
         failure_category=None,
         warnings=[],
     )
+
 
 def _confirmed_warnings(
     executed_action: str | None,
@@ -515,10 +495,7 @@ def _confirmed_warnings(
         CorpusSemanticRemediationRunWarning(
             scope="corpus",
             episode_ref=None,
-            message=(
-                "Persisted corpus index and remediation plan may be stale; "
-                "refresh them manually."
-            ),
+            message=("Persisted corpus index and remediation plan may be stale; refresh them manually."),
         ),
         CorpusSemanticRemediationRunWarning(
             scope="cache",
@@ -541,8 +518,7 @@ def _write_run_report(result: CorpusSemanticRemediationRunResult) -> None:
         )
     except OSError as exc:
         raise CorpusSemanticRemediationRunnerFailedError(
-            "failed to write corpus semantic remediation run report: "
-            f"{_safe_exception_category(exc)}"
+            f"failed to write corpus semantic remediation run report: {_safe_exception_category(exc)}"
         ) from exc
 
 
@@ -622,20 +598,17 @@ def _render_markdown(payload: dict[str, Any]) -> str:
                 f"- Action: {_markdown_cell(row['action'])}",
                 f"- Status: {_markdown_cell(row['status'])}",
                 f"- Reason: {_markdown_cell(row['reason'])}",
-                "- Requires API cost acknowledgement: "
-                f"{row['requires_api_cost_ack']}",
+                f"- Requires API cost acknowledgement: {row['requires_api_cost_ack']}",
                 f"- Transcript transfer risk: {row['transcript_transfer_risk']}",
                 f"- May incur API cost: {row['may_incur_api_cost']}",
                 f"- Manual only: {row['manual_only']}",
                 f"- Planned reads: {_markdown_values(row['planned_reads'])}",
                 f"- Planned writes: {_markdown_values(row['planned_writes'])}",
                 f"- Output paths: {_markdown_values(row['output_paths'])}",
-                "- Source report paths: "
-                f"{_markdown_values(row['source_report_paths'])}",
+                f"- Source report paths: {_markdown_values(row['source_report_paths'])}",
                 f"- Provider: {_markdown_cell(row['provider'] or 'none')}",
                 f"- Model: {_markdown_cell(row['model'] or 'none')}",
-                "- Failure category: "
-                f"{_markdown_cell(row['failure_category'] or 'none')}",
+                f"- Failure category: {_markdown_cell(row['failure_category'] or 'none')}",
                 f"- Row warnings: {_markdown_values(row['warnings'])}",
             ]
         )
@@ -838,10 +811,7 @@ def _reduce_episode_state(
             ACTION_SEMANTIC_SUMMARY,
         )
 
-    if not (
-        summary.get("readable") is True
-        and summary.get("readability_status") == "readable"
-    ):
+    if not (summary.get("readable") is True and summary.get("readability_status") == "readable"):
         return (
             _row(
                 episode_ref=episode_ref,
@@ -865,9 +835,7 @@ def _reduce_episode_state(
                 action=ACTION_SEMANTIC_REVIEW,
                 status="selected",
                 reason=(
-                    "semantic review is missing"
-                    if review_status == "missing"
-                    else "semantic review is not current"
+                    "semantic review is missing" if review_status == "missing" else "semantic review is not current"
                 ),
                 planned_reads=_safe_list(
                     [_IN_MEMORY_SNAPSHOT_LABEL, *summary_paths],
@@ -996,15 +964,8 @@ def _normalize_action(value: str) -> str:
     return normalized
 
 
-def _require_positive_int(
-    value: int, field_name: str, *, maximum: int | None = None
-) -> None:
-    if (
-        isinstance(value, bool)
-        or not isinstance(value, int)
-        or value < 1
-        or (maximum is not None and value > maximum)
-    ):
+def _require_positive_int(value: int, field_name: str, *, maximum: int | None = None) -> None:
+    if isinstance(value, bool) or not isinstance(value, int) or value < 1 or (maximum is not None and value > maximum):
         raise CorpusSemanticRemediationRunnerFailedError(f"invalid {field_name}")
 
 

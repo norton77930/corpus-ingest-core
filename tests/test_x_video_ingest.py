@@ -87,9 +87,7 @@ def test_the_uploader_prefix_and_yt_dlp_ellipsis_are_stripped_from_the_title():
         },
     )
 
-    assert seed.title == (
-        "My friend makes $1.2 million a year as an engineer. I aske"
-    )
+    assert seed.title == ("My friend makes $1.2 million a year as an engineer. I aske")
 
 
 def test_a_title_that_does_not_carry_the_uploader_prefix_is_left_alone():
@@ -195,9 +193,7 @@ def test_dry_run_returns_a_plan_and_touches_nothing(monkeypatch, tmp_data_dirs):
     assert not (tmp_data_dirs / "transcripts").exists()
 
 
-def test_unregistered_source_is_refused_before_anything_is_downloaded(
-    monkeypatch, tmp_data_dirs
-):
+def test_unregistered_source_is_refused_before_anything_is_downloaded(monkeypatch, tmp_data_dirs):
     """A 260 MB download must not happen only to fail on a missing profile.
 
     ``_stub_acquisition`` makes any download attempt an assertion failure, so
@@ -210,14 +206,10 @@ def test_unregistered_source_is_refused_before_anything_is_downloaded(
     _stub_acquisition(monkeypatch, x_video_ingest)
 
     with pytest.raises(XVideoIngestFailedError, match="podcasts.yaml"):
-        x_video_ingest.run_x_video_ingest(
-            "https://x.com/Nobody/status/123", confirm=True
-        )
+        x_video_ingest.run_x_video_ingest("https://x.com/Nobody/status/123", confirm=True)
 
 
-def test_a_profile_registered_as_rss_is_refused_by_the_x_surface(
-    monkeypatch, tmp_data_dirs
-):
+def test_a_profile_registered_as_rss_is_refused_by_the_x_surface(monkeypatch, tmp_data_dirs):
     """The X surface must enforce the discriminant it introduced.
 
     RSS entry points check ``source_type``; without the mirror check here the
@@ -248,9 +240,7 @@ def test_a_profile_registered_as_rss_is_refused_by_the_x_surface(
         x_video_ingest.run_x_video_ingest(_SAMPLE_URL, confirm=True)
 
 
-def test_unregistered_source_is_only_a_warning_during_a_dry_run(
-    monkeypatch, tmp_data_dirs
-):
+def test_unregistered_source_is_only_a_warning_during_a_dry_run(monkeypatch, tmp_data_dirs):
     from corpus_ingest_core import x_video_ingest
 
     _stub_acquisition(monkeypatch, x_video_ingest)
@@ -261,9 +251,7 @@ def test_unregistered_source_is_only_a_warning_during_a_dry_run(
     assert any("podcasts.yaml" in warning for warning in result.warnings)
 
 
-def test_confirmed_run_lands_audio_and_seed_then_transcribes_under_the_title(
-    monkeypatch, tmp_data_dirs
-):
+def test_confirmed_run_lands_audio_and_seed_then_transcribes_under_the_title(monkeypatch, tmp_data_dirs):
     """The confirmed path must produce real artifacts at the derived paths."""
 
     import json
@@ -271,9 +259,7 @@ def test_confirmed_run_lands_audio_and_seed_then_transcribes_under_the_title(
 
     from corpus_ingest_core import storage, x_video_ingest
 
-    monkeypatch.setattr(
-        x_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO)
-    )
+    monkeypatch.setattr(x_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO))
     monkeypatch.setattr(
         x_video_ingest,
         "_download_video",
@@ -306,17 +292,13 @@ def test_confirmed_run_lands_audio_and_seed_then_transcribes_under_the_title(
     assert report_payload["run_mode"] == "confirmed"
     assert report_payload["not_investment_advice"] is True
 
-    expected_audio = storage.audio_asset_path(
-        "x-raytar", "2071290493581840707", result.title, ".wav"
-    )
+    expected_audio = storage.audio_asset_path("x-raytar", "2071290493581840707", result.title, ".wav")
     assert expected_audio.exists()
     assert "Code_with_Claude_Prompt_Engineering_Breakout" in expected_audio.name
     # FR-003: the source video never becomes a corpus artifact.
     assert not list((tmp_data_dirs / "audio").rglob("*.mp4"))
 
-    seed_path = storage.corpus_episode_seed_asset_path(
-        "x-raytar", "2071290493581840707"
-    )
+    seed_path = storage.corpus_episode_seed_asset_path("x-raytar", "2071290493581840707")
     seed_payload = json.loads(seed_path.read_text(encoding="utf-8"))
     assert seed_payload["seed_source"] == "x-video"
     assert seed_payload["published_at"] == "2026-06-30"
@@ -327,9 +309,7 @@ def test_confirmed_run_lands_audio_and_seed_then_transcribes_under_the_title(
     assert captured["title"] == "Code with Claude Prompt Engineering Breakout"
 
 
-def test_download_uses_the_real_requested_filepath_not_the_predicted_name(
-    monkeypatch, tmp_path
-):
+def test_download_uses_the_real_requested_filepath_not_the_predicted_name(monkeypatch, tmp_path):
     """The selected download's path can differ from ``prepare_filename``.
 
     Trusting the prediction can hand audio extraction a path that does not exist.
@@ -402,9 +382,7 @@ def test_a_download_failure_is_wrapped_not_leaked_raw(monkeypatch, tmp_data_dirs
     class FakeDownloadError(Exception):
         pass
 
-    monkeypatch.setattr(
-        x_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO)
-    )
+    monkeypatch.setattr(x_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO))
 
     def explode(*_args, **_kwargs):
         raise FakeDownloadError("unable to extract video url")
@@ -425,21 +403,15 @@ def test_an_extraction_failure_leaves_no_part_file_behind(monkeypatch, tmp_data_
     from corpus_ingest_core import storage, x_video_ingest
     from corpus_ingest_core.errors import XVideoIngestFailedError
 
-    monkeypatch.setattr(
-        x_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO)
-    )
-    monkeypatch.setattr(
-        x_video_ingest, "_download_video", lambda _url, work_dir: _fake_video(work_dir)
-    )
+    monkeypatch.setattr(x_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO))
+    monkeypatch.setattr(x_video_ingest, "_download_video", lambda _url, work_dir: _fake_video(work_dir))
 
     def explode_after_creating_the_file(_video, audio_path):
         audio_path.parent.mkdir(parents=True, exist_ok=True)
         audio_path.write_bytes(b"partial")
         raise RuntimeError("codec not supported")
 
-    monkeypatch.setattr(
-        x_video_ingest, "_extract_audio", explode_after_creating_the_file
-    )
+    monkeypatch.setattr(x_video_ingest, "_extract_audio", explode_after_creating_the_file)
 
     with pytest.raises(XVideoIngestFailedError, match="codec not supported"):
         x_video_ingest.run_x_video_ingest(_SAMPLE_URL, confirm=True)
@@ -448,9 +420,7 @@ def test_an_extraction_failure_leaves_no_part_file_behind(monkeypatch, tmp_data_
     assert not list(audio_dir.glob("*.part")), "a stale .part was left in data/audio"
 
 
-def test_dry_run_plan_reflects_that_existing_audio_will_be_reused(
-    monkeypatch, tmp_data_dirs
-):
+def test_dry_run_plan_reflects_that_existing_audio_will_be_reused(monkeypatch, tmp_data_dirs):
     """A plan that promises a write it will not perform is a false plan.
 
     The confirmed path reuses an existing WAV instead of re-downloading, so the
@@ -489,9 +459,7 @@ def test_an_existing_audio_asset_is_not_downloaded_again(monkeypatch, tmp_data_d
 
     from corpus_ingest_core import storage, x_video_ingest
 
-    monkeypatch.setattr(
-        x_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO)
-    )
+    monkeypatch.setattr(x_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO))
 
     def refuse(*_args, **_kwargs):
         raise AssertionError("existing audio must not trigger another download")
@@ -529,12 +497,8 @@ def test_a_failed_seed_write_leaves_no_partial_seed(monkeypatch, tmp_data_dirs):
 
     from corpus_ingest_core import storage, x_video_ingest
 
-    monkeypatch.setattr(
-        x_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO)
-    )
-    monkeypatch.setattr(
-        x_video_ingest, "_download_video", lambda _url, work_dir: _fake_video(work_dir)
-    )
+    monkeypatch.setattr(x_video_ingest, "_resolve_metadata", lambda _url: dict(_SAMPLE_INFO))
+    monkeypatch.setattr(x_video_ingest, "_download_video", lambda _url, work_dir: _fake_video(work_dir))
     monkeypatch.setattr(
         x_video_ingest,
         "_extract_audio",
@@ -558,9 +522,7 @@ def test_a_failed_seed_write_leaves_no_partial_seed(monkeypatch, tmp_data_dirs):
     with pytest.raises(OSError):
         x_video_ingest.run_x_video_ingest(_SAMPLE_URL, confirm=True)
 
-    seed_path = storage.corpus_episode_seed_asset_path(
-        "x-raytar", "2071290493581840707"
-    )
+    seed_path = storage.corpus_episode_seed_asset_path("x-raytar", "2071290493581840707")
     assert not seed_path.exists(), "a partial seed was left at the canonical path"
 
 

@@ -30,12 +30,10 @@ from corpus_ingest_core.summary_profiles import (
 # --- Frozen copies of today's behaviour (pre-Spec-037 source) ----------------
 
 FINANCE_CHUNK_SYSTEM = (
-    "你是 podcast 逐字稿摘要器。只根據使用者提供的逐字稿片段摘要，"
-    "所有重點盡量附 timestamp evidence，不要產生投資建議。"
+    "你是 podcast 逐字稿摘要器。只根據使用者提供的逐字稿片段摘要，所有重點盡量附 timestamp evidence，不要產生投資建議。"
 )
 FINANCE_CHUNK_SECTIONS = (
-    "請包含：主要內容、提到的人物 / 公司 / 股票 / 產業 / 地點 / 書籍 / 電影 / 餐廳、"
-    "可引用片段、不確定事項。"
+    "請包含：主要內容、提到的人物 / 公司 / 股票 / 產業 / 地點 / 書籍 / 電影 / 餐廳、可引用片段、不確定事項。"
 )
 FINANCE_CHUNK_CONSTRAINTS = "限制：不要產生投資建議；所有判斷都要能回到逐字稿 timestamp。"
 FINANCE_FINAL_SYSTEM = (
@@ -221,9 +219,7 @@ def test_learning_notes_final_prompt_asks_for_the_study_sections_in_order():
     ]
 
     positions = [profile.final_sections.find(section) for section in expected_order]
-    assert all(position >= 0 for position in positions), dict(
-        zip(expected_order, positions, strict=True)
-    )
+    assert all(position >= 0 for position in positions), dict(zip(expected_order, positions, strict=True))
     assert positions == sorted(positions), "sections must appear in the FR-014 order"
 
 
@@ -320,9 +316,7 @@ def test_provider_sends_the_profile_prompts_for_learning_notes(monkeypatch):
     provider, captured = _provider_with_captured_messages(monkeypatch, LEARNING_NOTES)
     profile = resolve_summary_profile(LEARNING_NOTES)
 
-    provider.summarize_chunk(
-        {"index": 1, "start_time": "00:00:00", "end_time": "00:10:00", "text": "內容"}
-    )
+    provider.summarize_chunk({"index": 1, "start_time": "00:00:00", "end_time": "00:10:00", "text": "內容"})
     provider.summarize_final(
         podcast_display_name="@Raytar (X)",
         episode_ref="2071290493581840707",
@@ -343,9 +337,7 @@ def test_provider_defaults_to_the_finance_prompts(monkeypatch):
 
     provider, captured = _provider_with_captured_messages(monkeypatch, DEFAULT_SUMMARY_PROFILE)
 
-    provider.summarize_chunk(
-        {"index": 1, "start_time": "00:00:00", "end_time": "00:10:00", "text": "內容"}
-    )
+    provider.summarize_chunk({"index": 1, "start_time": "00:00:00", "end_time": "00:10:00", "text": "內容"})
 
     assert captured[0][0]["content"] == FINANCE_CHUNK_SYSTEM
     assert FINANCE_CHUNK_SECTIONS in captured[0][1]["content"]

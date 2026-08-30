@@ -23,9 +23,7 @@ def test_cli_delegates_to_exactly_one_public_core_seam(monkeypatch, capsys) -> N
     calls: list[dict[str, object]] = []
 
     def fake_coverage(podcast_id: str, *, has_bundle=None, limit=50):
-        calls.append(
-            {"podcast_id": podcast_id, "has_bundle": has_bundle, "limit": limit}
-        )
+        calls.append({"podcast_id": podcast_id, "has_bundle": has_bundle, "limit": limit})
         return object()
 
     monkeypatch.setattr(cli, "list_verified_research_report_coverage", fake_coverage)
@@ -44,9 +42,7 @@ def test_cli_delegates_to_exactly_one_public_core_seam(monkeypatch, capsys) -> N
     }
 
 
-def test_known_core_input_error_is_bounded_json_without_traceback_or_path(
-    monkeypatch, capsys
-) -> None:
+def test_known_core_input_error_is_bounded_json_without_traceback_or_path(monkeypatch, capsys) -> None:
     cli = _load_cli()
 
     def fail(podcast_id: str, *, has_bundle=None, limit=50):
@@ -70,9 +66,7 @@ def test_cli_rejects_bad_limit(monkeypatch, capsys) -> None:
     cli = _load_cli()
 
     def raise_limit(podcast_id, *, has_bundle=None, limit=50):
-        raise cli.VerifiedResearchReportCoverageInputError(
-            "limit must be an integer from 1 to 100"
-        )
+        raise cli.VerifiedResearchReportCoverageInputError("limit must be an integer from 1 to 100")
 
     monkeypatch.setattr(cli, "list_verified_research_report_coverage", raise_limit)
     assert cli.main(["gooaye", "--limit", "0"]) == 1

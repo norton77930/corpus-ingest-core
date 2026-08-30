@@ -95,8 +95,7 @@ def test_transcribe_episode_downloads_audio_asset(monkeypatch, tmp_path):
     monkeypatch.setattr(
         transcriber,
         "download_audio",
-        lambda podcast_id, episode_ref: requested.append((podcast_id, episode_ref))
-        or _audio_asset(tmp_path),
+        lambda podcast_id, episode_ref: requested.append((podcast_id, episode_ref)) or _audio_asset(tmp_path),
     )
     _install_fake_faster_whisper(monkeypatch)
 
@@ -116,18 +115,14 @@ def test_transcribe_episode_defaults_to_tiny_cpu_int8(monkeypatch, tmp_path):
 
     asset = transcriber.transcribe_episode("gooaye", "EP672")
 
-    assert FakeWhisperModel.constructors == [
-        {"model_name": "tiny", "device": "cpu", "compute_type": "int8"}
-    ]
+    assert FakeWhisperModel.constructors == [{"model_name": "tiny", "device": "cpu", "compute_type": "int8"}]
     assert asset.model == "tiny"
     assert asset.device == "cpu"
     assert asset.compute_type == "int8"
     assert asset.vad_filter is False
 
 
-def test_transcribe_episode_passes_runtime_options_to_whisper(
-    monkeypatch, tmp_path
-):
+def test_transcribe_episode_passes_runtime_options_to_whisper(monkeypatch, tmp_path):
     import corpus_ingest_core.transcriber as transcriber
 
     _use_tmp_transcripts_dir(monkeypatch, tmp_path)
@@ -143,9 +138,7 @@ def test_transcribe_episode_passes_runtime_options_to_whisper(
         vad_filter=True,
     )
 
-    assert FakeWhisperModel.constructors == [
-        {"model_name": "base", "device": "cuda", "compute_type": "float16"}
-    ]
+    assert FakeWhisperModel.constructors == [{"model_name": "base", "device": "cuda", "compute_type": "float16"}]
     assert FakeWhisperModel.calls[-1]["vad_filter"] is True
     assert asset.device == "cuda"
     assert asset.compute_type == "float16"
@@ -193,9 +186,7 @@ def test_transcribe_episode_writes_txt_srt_and_json(monkeypatch, tmp_path):
     asset = transcriber.transcribe_episode("gooaye", "EP672", model="small")
 
     assert asset.text_path.read_text(encoding="utf-8") == "第一段\n第二段\n"
-    assert "00:00:00,000 --> 00:00:01,250" in asset.srt_path.read_text(
-        encoding="utf-8"
-    )
+    assert "00:00:00,000 --> 00:00:01,250" in asset.srt_path.read_text(encoding="utf-8")
     payload = json.loads(asset.json_path.read_text(encoding="utf-8"))
     assert payload["podcast_id"] == "gooaye"
     assert payload["episode_ref"] == "EP672"
@@ -290,9 +281,7 @@ def test_transcribe_episode_force_retranscribes_existing_outputs(monkeypatch, tm
     assert not stale_part.exists()
 
 
-def test_transcribe_episode_rejects_bad_existing_outputs_without_force(
-    monkeypatch, tmp_path
-):
+def test_transcribe_episode_rejects_bad_existing_outputs_without_force(monkeypatch, tmp_path):
     import corpus_ingest_core.transcriber as transcriber
     from corpus_ingest_core.errors import TranscriptionFailedError
     from corpus_ingest_core.storage import transcript_asset_paths
@@ -326,9 +315,7 @@ def test_transcribe_episode_uses_audio_path_without_downloading(monkeypatch, tmp
     monkeypatch.setattr(transcriber, "download_audio", fail_download)
     _install_fake_faster_whisper(monkeypatch)
 
-    asset = transcriber.transcribe_episode(
-        "gooaye", "smoke-test", audio_path=sample_audio_path
-    )
+    asset = transcriber.transcribe_episode("gooaye", "smoke-test", audio_path=sample_audio_path)
 
     assert asset.episode_ref == "smoke-test"
     assert asset.title == "smoke-test"
@@ -366,17 +353,13 @@ def test_transcribe_episode_names_outputs_by_an_explicit_title(monkeypatch, tmp_
     )
 
     assert asset.title == "Code with Claude Prompt Engineering Breakout"
-    expected = transcript_asset_paths(
-        "gooaye", "smoke-test", "Code with Claude Prompt Engineering Breakout"
-    )
+    expected = transcript_asset_paths("gooaye", "smoke-test", "Code with Claude Prompt Engineering Breakout")
     assert asset.text_path == expected.text_path
     assert expected.json_path.exists()
     assert "Code_with_Claude_Prompt_Engineering_Breakout" in expected.json_path.name
 
 
-def test_transcribe_episode_removes_part_files_and_preserves_no_half_outputs(
-    monkeypatch, tmp_path
-):
+def test_transcribe_episode_removes_part_files_and_preserves_no_half_outputs(monkeypatch, tmp_path):
     import corpus_ingest_core.transcriber as transcriber
     from corpus_ingest_core.errors import TranscriptionFailedError
     from corpus_ingest_core.storage import transcript_asset_paths
@@ -407,7 +390,7 @@ def test_transcribe_episode_removes_part_files_and_preserves_no_half_outputs(
 def test_transcript_paths_remove_illegal_characters_and_emoji():
     from corpus_ingest_core.storage import transcript_asset_paths
 
-    paths = transcript_asset_paths("gooaye", "EP672", ' bad <title> 🐣 : / \\ | ? * ok ')
+    paths = transcript_asset_paths("gooaye", "EP672", " bad <title> 🐣 : / \\ | ? * ok ")
 
     assert not any(character in paths.text_path.name for character in '<>:"/\\|?*')
     assert "🐣" not in paths.text_path.name

@@ -3,9 +3,7 @@ from __future__ import annotations
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
-SKILL_PATH = (
-    ROOT / ".agents" / "skills" / "corpus-latest-episode-processing" / "SKILL.md"
-)
+SKILL_PATH = ROOT / ".agents" / "skills" / "corpus-latest-episode-processing" / "SKILL.md"
 EXPECTED_DESCRIPTION = (
     "Process one configured podcast's latest deterministic workflow once with "
     "confirmed MCP execution after an explicit request."

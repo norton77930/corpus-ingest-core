@@ -70,11 +70,7 @@ def _registry_entry(registry_text: str, name: str) -> str | None:
 def _leading_term(text: str) -> str | None:
     """The lifecycle term that appears first, or None if the text states none."""
     lowered = text.casefold()
-    hits = [
-        (found.start(), term)
-        for term, pattern in LIFECYCLE_TERMS.items()
-        if (found := pattern.search(lowered))
-    ]
+    hits = [(found.start(), term) for term, pattern in LIFECYCLE_TERMS.items() if (found := pattern.search(lowered))]
     return min(hits)[1] if hits else None
 
 
@@ -91,10 +87,7 @@ def test_every_spec_package_status_agrees_with_the_registry():
         if spec_term is None or registry_term is None:
             continue
         if spec_term != registry_term:
-            problems.append(
-                f"{package.name}: spec.md says {spec_term!r} but "
-                f"specs/README.md says {registry_term!r}"
-            )
+            problems.append(f"{package.name}: spec.md says {spec_term!r} but specs/README.md says {registry_term!r}")
     assert not problems, (
         "a spec package and the registry disagree about its lifecycle -- fix "
         "whichever one is stale, do not relax this check: " + "; ".join(problems)

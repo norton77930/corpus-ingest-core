@@ -283,8 +283,7 @@ def test_run_research_workflow_dry_run_does_not_write_artifacts(monkeypatch, tmp
     ]
     assert result.planned_reads == [str(transcript_paths.json_path)]
     assert (
-        "semantic_summarize_episode is not executed unless include_semantic_summary=True "
-        "with exact api_cost_ack"
+        "semantic_summarize_episode is not executed unless include_semantic_summary=True with exact api_cost_ack"
     ) in result.warnings
     assert any("Cache may be stale" in warning for warning in result.warnings)
     assert not (tmp_path / "mentions").exists()
@@ -294,9 +293,7 @@ def test_run_research_workflow_dry_run_does_not_write_artifacts(monkeypatch, tmp
     assert not (tmp_path / "stock-lens").exists()
 
 
-def test_run_research_workflow_external_verification_dry_run_includes_local_step(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_external_verification_dry_run_includes_local_step(monkeypatch, tmp_path):
     from corpus_ingest_core import research_workflow
 
     fixture_path = tmp_path / "external_market_data_fixtures.yaml"
@@ -347,9 +344,7 @@ def test_run_research_workflow_refuses_stock_lens_synthesis_for_non_finance_prof
         )
 
 
-def test_run_research_workflow_synthesis_dry_run_requires_ack_and_writes_nothing(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_synthesis_dry_run_requires_ack_and_writes_nothing(monkeypatch, tmp_path):
     from corpus_ingest_core import research_workflow
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
@@ -396,9 +391,7 @@ def test_run_research_workflow_synthesis_requires_stock_query(monkeypatch, tmp_p
         )
 
 
-def test_run_research_workflow_semantic_dry_run_requires_ack_and_writes_nothing(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_semantic_dry_run_requires_ack_and_writes_nothing(monkeypatch, tmp_path):
     from corpus_ingest_core import research_workflow
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
@@ -427,9 +420,7 @@ def test_run_research_workflow_semantic_dry_run_requires_ack_and_writes_nothing(
     assert not (tmp_path / "mentions").exists()
 
 
-def test_run_research_workflow_confirm_generates_local_research_artifacts(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_confirm_generates_local_research_artifacts(monkeypatch, tmp_path):
     from corpus_ingest_core.research_workflow import run_research_workflow
 
     _write_transcript(monkeypatch, tmp_path)
@@ -450,9 +441,7 @@ def test_run_research_workflow_confirm_generates_local_research_artifacts(
     assert any("Cache may be stale" in warning for warning in result.warnings)
 
 
-def test_run_research_workflow_synthesis_confirm_requires_ack_before_writes(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_synthesis_confirm_requires_ack_before_writes(monkeypatch, tmp_path):
     from corpus_ingest_core import research_workflow
     from corpus_ingest_core.errors import ResearchWorkflowInputError
 
@@ -480,9 +469,7 @@ def test_run_research_workflow_synthesis_confirm_requires_ack_before_writes(
     assert not (tmp_path / "stock-lens").exists()
 
 
-def test_run_research_workflow_semantic_confirm_requires_exact_ack_before_writes(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_semantic_confirm_requires_exact_ack_before_writes(monkeypatch, tmp_path):
     from corpus_ingest_core import research_workflow
     from corpus_ingest_core.errors import ResearchWorkflowInputError
 
@@ -508,9 +495,7 @@ def test_run_research_workflow_semantic_confirm_requires_exact_ack_before_writes
     assert not (tmp_path / "reports").exists()
 
 
-def test_run_research_workflow_confirm_external_verification_runs_before_stock_lens(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_confirm_external_verification_runs_before_stock_lens(monkeypatch, tmp_path):
     from corpus_ingest_core import research_workflow
 
     fixture_path = tmp_path / "external_market_data_fixtures.yaml"
@@ -565,9 +550,7 @@ def test_run_research_workflow_confirm_external_verification_runs_before_stock_l
     assert any(path.endswith(".stock-lens.json") for path in result.written_artifacts)
 
 
-def test_run_research_workflow_rejects_unsupported_external_provider(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_rejects_unsupported_external_provider(monkeypatch, tmp_path):
     from corpus_ingest_core.errors import ResearchWorkflowInputError
     from corpus_ingest_core.research_workflow import run_research_workflow
 
@@ -582,9 +565,7 @@ def test_run_research_workflow_rejects_unsupported_external_provider(
         )
 
 
-def test_run_research_workflow_external_verification_failure_stops_before_stock(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_external_verification_failure_stops_before_stock(monkeypatch, tmp_path):
     from corpus_ingest_core import research_workflow
     from corpus_ingest_core.errors import ExternalDataVerificationInputError
 
@@ -619,9 +600,7 @@ def test_run_research_workflow_external_verification_failure_stops_before_stock(
     assert not (tmp_path / "stock-lens").exists()
 
 
-def test_run_research_workflow_semantic_confirm_runs_semantic_first(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_semantic_confirm_runs_semantic_first(monkeypatch, tmp_path):
     from corpus_ingest_core import research_workflow
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
@@ -673,9 +652,7 @@ def test_run_research_workflow_semantic_confirm_runs_semantic_first(
     assert any(path.endswith(".mentions.json") for path in result.written_artifacts)
 
 
-def test_run_research_workflow_semantic_failure_fails_fast(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_semantic_failure_fails_fast(monkeypatch, tmp_path):
     from corpus_ingest_core import research_workflow
     from corpus_ingest_core.errors import LLMProviderConfigError
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
@@ -706,9 +683,7 @@ def test_run_research_workflow_semantic_failure_fails_fast(
     assert not (tmp_path / "reports").exists()
 
 
-def test_run_research_workflow_confirm_with_stock_generates_stock_lens(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_confirm_with_stock_generates_stock_lens(monkeypatch, tmp_path):
     from corpus_ingest_core.research_workflow import run_research_workflow
 
     _write_transcript(monkeypatch, tmp_path)
@@ -731,9 +706,7 @@ def test_run_research_workflow_confirm_with_stock_generates_stock_lens(
     assert stock_payload["not_investment_advice"] is True
 
 
-def test_run_research_workflow_confirm_with_stock_synthesis_runs_last(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_confirm_with_stock_synthesis_runs_last(monkeypatch, tmp_path):
     from corpus_ingest_core import research_workflow
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
@@ -791,9 +764,7 @@ def test_run_research_workflow_confirm_with_stock_synthesis_runs_last(
     assert any(path.endswith(".stock-lens-synthesis.md") for path in result.written_artifacts)
 
 
-def test_run_research_workflow_synthesis_failure_propagates_after_local_steps(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_synthesis_failure_propagates_after_local_steps(monkeypatch, tmp_path):
     from corpus_ingest_core import research_workflow
     from corpus_ingest_core.errors import LLMProviderConfigError
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
@@ -821,9 +792,7 @@ def test_run_research_workflow_synthesis_failure_propagates_after_local_steps(
         )
 
     assert (tmp_path / "stock-lens" / "gooaye" / "台積電.stock-lens.json").exists()
-    assert not (
-        tmp_path / "stock-lens" / "gooaye" / "台積電.stock-lens-synthesis.json"
-    ).exists()
+    assert not (tmp_path / "stock-lens" / "gooaye" / "台積電.stock-lens-synthesis.json").exists()
 
 
 def test_run_research_workflow_rejects_invalid_transcripts(monkeypatch, tmp_path):
@@ -866,9 +835,7 @@ def test_run_research_workflow_handles_partial_transcript(monkeypatch, tmp_path)
     assert _read_json(mapping_paths[0])["mapping_status"] == "partial-draft"
 
 
-def test_run_research_workflow_synthesis_allow_partial_passes_through(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_synthesis_allow_partial_passes_through(monkeypatch, tmp_path):
     from corpus_ingest_core import research_workflow
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
@@ -926,9 +893,7 @@ def test_run_research_workflow_tracks_reused_synthesis_artifacts(monkeypatch, tm
     monkeypatch.setattr(
         research_workflow,
         "generate_stock_lens_synthesis_report",
-        lambda *args, **kwargs: _synthesis_asset(
-            tmp_path, generated=False, already_exists=True
-        ),
+        lambda *args, **kwargs: _synthesis_asset(tmp_path, generated=False, already_exists=True),
     )
 
     result = research_workflow.run_research_workflow(
@@ -940,14 +905,10 @@ def test_run_research_workflow_tracks_reused_synthesis_artifacts(monkeypatch, tm
         api_cost_ack=SEMANTIC_API_COST_ACK,
     )
 
-    assert any(
-        path.endswith(".stock-lens-synthesis.json") for path in result.reused_artifacts
-    )
+    assert any(path.endswith(".stock-lens-synthesis.json") for path in result.reused_artifacts)
 
 
-def test_run_research_workflow_dry_run_does_not_call_external_or_cache(
-    monkeypatch, tmp_path
-):
+def test_run_research_workflow_dry_run_does_not_call_external_or_cache(monkeypatch, tmp_path):
     from corpus_ingest_core import cache, research_workflow
 
     _write_transcript(monkeypatch, tmp_path)

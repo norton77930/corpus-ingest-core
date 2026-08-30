@@ -53,9 +53,7 @@ def run_corpus_local_transcription(
     plan_payload = _load_plan_payload(source_result.plan_json_path)
     normalized_episode_ref = _normalize_episode_ref(episode_ref)
     if confirm and normalized_episode_ref is None:
-        raise CorpusLocalTranscriptionRunnerFailedError(
-            "confirm requires episode"
-        )
+        raise CorpusLocalTranscriptionRunnerFailedError("confirm requires episode")
     if not confirm:
         return _preview_corpus_local_transcription_from_plan(
             podcast_id,
@@ -113,9 +111,7 @@ def _preview_corpus_local_transcription_from_plan(
     episode_ref: str | None,
     source_persisted: bool,
 ) -> CorpusLocalTranscriptionRunResult:
-    filters = CorpusLocalTranscriptionRunFilter(
-        episode_ref=_normalize_episode_ref(episode_ref)
-    )
+    filters = CorpusLocalTranscriptionRunFilter(episode_ref=_normalize_episode_ref(episode_ref))
     source_plan_reads = [] if source_persisted else ["in-memory corpus snapshot"]
     rows = _select_rows(
         podcast_id=podcast_id,
@@ -148,13 +144,9 @@ def result_to_dict(result: CorpusLocalTranscriptionRunResult) -> dict[str, Any]:
         "run_mode": result.run_mode,
         "confirm": result.confirm,
         "source_remediation_plan_json_path": str(result.source_remediation_plan_json_path),
-        "source_remediation_plan_markdown_path": str(
-            result.source_remediation_plan_markdown_path
-        ),
+        "source_remediation_plan_markdown_path": str(result.source_remediation_plan_markdown_path),
         "report_json_path": str(result.report_json_path) if result.report_json_path else None,
-        "report_markdown_path": (
-            str(result.report_markdown_path) if result.report_markdown_path else None
-        ),
+        "report_markdown_path": (str(result.report_markdown_path) if result.report_markdown_path else None),
         "filters": asdict(result.filters),
         **asdict(result.counts),
         "rows": [asdict(row) for row in result.rows],
@@ -167,13 +159,9 @@ def _load_plan_payload(plan_json_path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(plan_json_path.read_text(encoding="utf-8"))
     except (OSError, json.JSONDecodeError) as exc:
-        raise CorpusLocalTranscriptionRunnerFailedError(
-            f"failed to read corpus remediation plan: {exc}"
-        ) from exc
+        raise CorpusLocalTranscriptionRunnerFailedError(f"failed to read corpus remediation plan: {exc}") from exc
     if not isinstance(payload, dict):
-        raise CorpusLocalTranscriptionRunnerFailedError(
-            "corpus remediation plan root must be an object"
-        )
+        raise CorpusLocalTranscriptionRunnerFailedError("corpus remediation plan root must be an object")
     return payload
 
 
@@ -597,9 +585,7 @@ def _planned_transcript_writes(
     episode_ref: str,
     title: str | None = None,
 ) -> list[str]:
-    paths = storage.transcript_asset_paths(
-        podcast_id, episode_ref, title or episode_ref
-    )
+    paths = storage.transcript_asset_paths(podcast_id, episode_ref, title or episode_ref)
     return [str(paths.json_path), str(paths.text_path), str(paths.srt_path)]
 
 

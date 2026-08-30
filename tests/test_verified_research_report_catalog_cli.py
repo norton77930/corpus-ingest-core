@@ -42,9 +42,7 @@ def _load_cli():
         ),
     ],
 )
-def test_subcommands_delegate_to_exactly_one_public_core_seam(
-    monkeypatch, capsys, argv, seam_name, expected
-):
+def test_subcommands_delegate_to_exactly_one_public_core_seam(monkeypatch, capsys, argv, seam_name, expected):
     cli = _load_cli()
     calls: list[dict[str, object]] = []
 
@@ -57,7 +55,9 @@ def test_subcommands_delegate_to_exactly_one_public_core_seam(
         "search_verified_research_reports",
         "inspect_verified_research_report",
     ):
-        monkeypatch.setattr(cli, candidate, fake_seam if candidate == seam_name else lambda: pytest.fail("wrong Core seam called"))
+        monkeypatch.setattr(
+            cli, candidate, fake_seam if candidate == seam_name else lambda: pytest.fail("wrong Core seam called")
+        )
     monkeypatch.setattr(cli, "verified_research_report_catalog_result_to_dict", lambda result: {"safe": True})
 
     assert cli.main(argv) == 0

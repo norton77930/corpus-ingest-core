@@ -122,9 +122,7 @@ def _install_semantic_only_residual_fixture(monkeypatch, tmp_path: Path) -> None
         encoding="utf-8",
     )
     mentions.markdown_path.write_text("# mentions", encoding="utf-8")
-    intelligence = storage.episode_intelligence_report_asset_paths(
-        "gooaye", "EP677", "EP677 Alpha"
-    )
+    intelligence = storage.episode_intelligence_report_asset_paths("gooaye", "EP677", "EP677 Alpha")
     intelligence.json_path.parent.mkdir(parents=True, exist_ok=True)
     intelligence.json_path.write_text(
         json.dumps(
@@ -154,9 +152,7 @@ def _install_semantic_only_residual_fixture(monkeypatch, tmp_path: Path) -> None
         encoding="utf-8",
     )
     mapping.markdown_path.write_text("# mapping", encoding="utf-8")
-    external = storage.external_data_boundary_asset_paths(
-        "gooaye", "EP677", "EP677 Alpha"
-    )
+    external = storage.external_data_boundary_asset_paths("gooaye", "EP677", "EP677 Alpha")
     external.json_path.parent.mkdir(parents=True, exist_ok=True)
     external.json_path.write_text(
         json.dumps(
@@ -173,9 +169,7 @@ def _install_semantic_only_residual_fixture(monkeypatch, tmp_path: Path) -> None
     external.markdown_path.write_text("# external boundary", encoding="utf-8")
 
 
-def test_semantic_only_residual_hands_off_without_confirmed_executor_calls(
-    monkeypatch, tmp_path
-):
+def test_semantic_only_residual_hands_off_without_confirmed_executor_calls(monkeypatch, tmp_path):
     import corpus_ingest_core.corpus_latest_episode_deterministic_workflow_runner as runner
     from corpus_ingest_core.corpus_episode_workflow_runner import (
         run_corpus_episode_workflow,
@@ -204,9 +198,7 @@ def test_semantic_only_residual_hands_off_without_confirmed_executor_calls(
         monkeypatch.setattr(
             runner,
             name,
-            lambda *args, _name=name, **kwargs: pytest.fail(
-                f"ready episode must not confirm {_name}"
-            ),
+            lambda *args, _name=name, **kwargs: pytest.fail(f"ready episode must not confirm {_name}"),
         )
 
     result = runner.run_corpus_latest_episode_deterministic_workflow(
@@ -333,9 +325,7 @@ def _source_execution_row(
         output_paths=list(output_paths or []),
         source_report_paths=list(source_report_paths or []),
         failure_category=(
-            failure_category
-            if failure_category is not None
-            else "FakeFailure" if status == "failed" else None
+            failure_category if failure_category is not None else "FakeFailure" if status == "failed" else None
         ),
         warnings=list(warnings or []),
     )
@@ -398,20 +388,23 @@ def test_confirmed_run_pins_latest_and_advances_every_deterministic_stage(monkey
     monkeypatch.setattr(
         runner,
         "run_corpus_audio_download",
-        lambda podcast_id, *, episode_ref, confirm: calls.append(
-            ("audio", episode_ref, confirm)
-        )
-        or _stage_result("downloaded"),
+        lambda podcast_id, *, episode_ref, confirm: (
+            calls.append(("audio", episode_ref, confirm)) or _stage_result("downloaded")
+        ),
     )
     monkeypatch.setattr(
         runner,
         "run_corpus_local_transcription",
-        lambda podcast_id, *, episode_ref, confirm, model, device, compute_type, vad_filter: calls.append(("transcription", episode_ref, confirm)) or _stage_result(),
+        lambda podcast_id, *, episode_ref, confirm, model, device, compute_type, vad_filter: (
+            calls.append(("transcription", episode_ref, confirm)) or _stage_result()
+        ),
     )
     monkeypatch.setattr(
         runner,
         "run_corpus_remediation",
-        lambda podcast_id, *, episode_ref, confirm, max_actions: calls.append(("remediation", episode_ref, confirm)) or _stage_result(action_id="ep100:extractive_summary"),
+        lambda podcast_id, *, episode_ref, confirm, max_actions: (
+            calls.append(("remediation", episode_ref, confirm)) or _stage_result(action_id="ep100:extractive_summary")
+        ),
     )
     monkeypatch.setattr(runner, "_write_run_report", lambda result: None)
 
@@ -813,9 +806,7 @@ def test_execution_composition_uses_target_episode_status_priority(
         "deterministic_remediation",
         _stage_probe("deterministic_remediation").rows[0],
     )
-    source_result = SimpleNamespace(
-        rows=[_source_execution_row("ep100", status) for status in statuses]
-    )
+    source_result = SimpleNamespace(rows=[_source_execution_row("ep100", status) for status in statuses])
 
     result_row = runner._row_from_execution(selected_row, source_result)
 
@@ -866,9 +857,7 @@ def test_dry_run_resolves_latest_once_without_dispatching_stage_executor(monkeyp
     monkeypatch.setattr(
         runner,
         "run_corpus_episode_intake",
-        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(
-            resolved_episode_ref="ep100", rows=[], warnings=[]
-        ),
+        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(resolved_episode_ref="ep100", rows=[], warnings=[]),
     )
     monkeypatch.setattr(
         runner,
@@ -896,9 +885,7 @@ def test_failed_stage_stops_before_later_transcription_or_remediation(monkeypatc
     monkeypatch.setattr(
         runner,
         "run_corpus_episode_intake",
-        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(
-            resolved_episode_ref="ep100", rows=[], warnings=[]
-        ),
+        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(resolved_episode_ref="ep100", rows=[], warnings=[]),
     )
     monkeypatch.setattr(
         runner,
@@ -940,9 +927,7 @@ def test_partial_episode_resumes_at_first_missing_stage(monkeypatch):
     monkeypatch.setattr(
         runner,
         "run_corpus_episode_intake",
-        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(
-            resolved_episode_ref="ep100", rows=[], warnings=[]
-        ),
+        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(resolved_episode_ref="ep100", rows=[], warnings=[]),
     )
     monkeypatch.setattr(
         runner,
@@ -980,9 +965,7 @@ def test_already_deterministic_ready_episode_runs_no_stage_executor(monkeypatch)
     monkeypatch.setattr(
         runner,
         "run_corpus_episode_intake",
-        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(
-            resolved_episode_ref="ep100", rows=[], warnings=[]
-        ),
+        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(resolved_episode_ref="ep100", rows=[], warnings=[]),
     )
     monkeypatch.setattr(
         runner,
@@ -1015,9 +998,7 @@ def test_failed_remediation_action_stops_without_second_remediation_probe(monkey
 
     probe_calls = 0
 
-    def probe(
-        *, podcast_id, selector, max_actions, allow_semantic_handoff
-    ):
+    def probe(*, podcast_id, selector, max_actions, allow_semantic_handoff):
         nonlocal probe_calls
         probe_calls += 1
         return _stage_selection("deterministic_remediation")
@@ -1025,9 +1006,7 @@ def test_failed_remediation_action_stops_without_second_remediation_probe(monkey
     monkeypatch.setattr(
         runner,
         "run_corpus_episode_intake",
-        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(
-            resolved_episode_ref="ep100", rows=[], warnings=[]
-        ),
+        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(resolved_episode_ref="ep100", rows=[], warnings=[]),
     )
     monkeypatch.setattr(runner, "_select_episode_workflow_stage", probe)
     monkeypatch.setattr(
@@ -1069,9 +1048,7 @@ def test_repeated_remediation_action_stops_without_automatic_retry(monkeypatch):
     monkeypatch.setattr(
         runner,
         "run_corpus_episode_intake",
-        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(
-            resolved_episode_ref="ep100", rows=[], warnings=[]
-        ),
+        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(resolved_episode_ref="ep100", rows=[], warnings=[]),
     )
     monkeypatch.setattr(
         runner,
@@ -1126,9 +1103,7 @@ def test_remediation_execution_cap_blocks_sixth_action_before_executor(monkeypat
     monkeypatch.setattr(
         runner,
         "run_corpus_episode_intake",
-        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(
-            resolved_episode_ref="ep100", rows=[], warnings=[]
-        ),
+        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(resolved_episode_ref="ep100", rows=[], warnings=[]),
     )
 
     def probe(*, podcast_id, selector, max_actions, allow_semantic_handoff):
@@ -1210,9 +1185,7 @@ def test_blocked_deterministic_stage_stops_without_later_executor(
             monkeypatch.setattr(
                 runner,
                 name,
-                lambda *args, _name=name, **kwargs: pytest.fail(
-                    f"{_name} must not run after a blocked stage"
-                ),
+                lambda *args, _name=name, **kwargs: pytest.fail(f"{_name} must not run after a blocked stage"),
             )
     monkeypatch.setattr(runner, "_write_run_report", lambda result: None)
 
@@ -1254,9 +1227,7 @@ def test_result_and_confirmed_report_omit_url_query_and_secret_like_text(monkeyp
     monkeypatch.setattr(
         runner,
         "run_corpus_episode_intake",
-        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(
-            resolved_episode_ref="ep100", rows=[], warnings=[]
-        ),
+        lambda podcast_id, *, episode_ref, confirm: SimpleNamespace(resolved_episode_ref="ep100", rows=[], warnings=[]),
     )
     monkeypatch.setattr(
         runner,
@@ -1349,10 +1320,7 @@ def test_execution_metadata_keeps_only_safe_paths_labels_and_text():
     assert result_row.source_report_paths == ["data/corpus/gooaye/EP100.plan.json"]
     assert result_row.warnings[0] == "safe bounded warning"
     assert result_row.reason == "value omitted by safety boundary"
-    assert all(
-        marker not in str(result_row)
-        for marker in (secret, "authorization", "private_key")
-    )
+    assert all(marker not in str(result_row) for marker in (secret, "authorization", "private_key"))
 
 
 @pytest.mark.parametrize(

@@ -43,14 +43,11 @@ _YOUTUBE_HOSTS = {
 }
 
 CACHE_STALE_WARNING = (
-    "SQLite cache may be stale; rebuild cache manually. "
-    "本流程不會自動重建，這一集要等你手動重建 cache 之後才搜尋得到。"
+    "SQLite cache may be stale; rebuild cache manually. 本流程不會自動重建，這一集要等你手動重建 cache 之後才搜尋得到。"
 )
 
 
-def derive_youtube_identity(
-    url: str, info: dict[str, Any] | None = None
-) -> YoutubeVideoIdentity:
+def derive_youtube_identity(url: str, info: dict[str, Any] | None = None) -> YoutubeVideoIdentity:
     """從網址（以及必要時的 metadata）推導 podcast_id 與 episode_ref。"""
 
     video_id = parse_youtube_video_id(url)
@@ -61,7 +58,7 @@ def derive_youtube_identity(
     else:
         channel_id = _channel_id_from_info(info)
         if channel_id is None:
-            raise ValueError(f"無法推導 YouTube podcast_id：{url}")
+            raise ValueError(f"Could not derive a YouTube podcast_id: {url}")
         channel_slug = _channel_id_slug(channel_id)
         podcast_id = f"yt-{channel_slug}"
     storage._safe_slug(podcast_id, "podcast_id")
@@ -78,7 +75,7 @@ def parse_youtube_video_id(url: str) -> str:
     parsed = urlparse(url.strip())
     host = parsed.netloc.lower()
     if host not in _YOUTUBE_HOSTS:
-        raise ValueError(f"不是 YouTube 影片網址：{url}")
+        raise ValueError(f"Not a YouTube video URL: {url}")
 
     candidate = ""
     if host in {"youtu.be", "www.youtu.be"}:
@@ -92,9 +89,9 @@ def parse_youtube_video_id(url: str) -> str:
             if len(parts) >= 2 and parts[0] in {"shorts", "embed", "live", "v"}:
                 candidate = parts[1]
     if candidate[:1] in {"-", "_"}:
-        raise ValueError("YouTube video id 不能以 - 或 _ 開頭")
+        raise ValueError("A YouTube video id must not start with - or _")
     if not _VIDEO_ID_PATTERN.fullmatch(candidate):
-        raise ValueError(f"不是 YouTube 影片網址：{url}")
+        raise ValueError(f"Not a YouTube video URL: {url}")
     return candidate
 
 
@@ -145,20 +142,14 @@ def run_youtube_video_ingest(
     except PodcastIngestCoreError:
         raise
     except Exception as exc:
-        raise YoutubeVideoIngestFailedError(f"解析來源 metadata 失敗：{exc}") from exc
+        raise YoutubeVideoIngestFailedError(f"Failed to resolve source metadata: {exc}") from exc
 
     identity = derive_youtube_identity(url, info)
     seed = build_seed(identity, info, title)
 
-    audio_target = storage.audio_asset_path(
-        identity.podcast_id, identity.episode_ref, seed.title, ".wav"
-    )
-    seed_target = storage.corpus_episode_seed_asset_path(
-        identity.podcast_id, identity.episode_ref
-    )
-    transcript_targets = storage.transcript_asset_paths(
-        identity.podcast_id, identity.episode_ref, seed.title
-    )
+    audio_target = storage.audio_asset_path(identity.podcast_id, identity.episode_ref, seed.title, ".wav")
+    seed_target = storage.corpus_episode_seed_asset_path(identity.podcast_id, identity.episode_ref)
+    transcript_targets = storage.transcript_asset_paths(identity.podcast_id, identity.episode_ref, seed.title)
     warnings = [*seed.warnings, CACHE_STALE_WARNING]
     registration_problem = _registration_problem(identity.podcast_id)
     if registration_problem is not None:
@@ -168,9 +159,7 @@ def run_youtube_video_ingest(
     if audio_exists:
         warnings.append(f"沿用既有音訊，未重新下載：{audio_target}")
 
-    report_paths = storage.youtube_video_ingest_run_asset_paths(
-        identity.podcast_id, identity.episode_ref
-    )
+    report_paths = storage.youtube_video_ingest_run_asset_paths(identity.podcast_id, identity.episode_ref)
     planned_writes = [str(seed_target)]
     if not audio_exists:
         planned_writes.append(str(audio_target))
@@ -291,7 +280,7 @@ def _acquire_audio(url: str, audio_target: Path, work_dir: str | Path | None) ->
     else:
         if _work_dir_is_under_data(work_dir):
             raise YoutubeVideoIngestFailedError(
-                "work_dir 不可位於 data/ 底下；來源影片不得寫入 corpus 樹。"
+                "work_dir must not sit under data/; source video must never be written into the corpus tree."
             )
         resolved_work_dir = Path(os.path.abspath(str(work_dir)))
     part_path = audio_target.with_suffix(audio_target.suffix + ".part")
@@ -304,7 +293,7 @@ def _acquire_audio(url: str, audio_target: Path, work_dir: str | Path | None) ->
     except PodcastIngestCoreError:
         raise
     except Exception as exc:
-        raise YoutubeVideoIngestFailedError(f"取得音訊失敗：{exc}") from exc
+        raise YoutubeVideoIngestFailedError(f"Audio acquisition failed: {exc}") from exc
     finally:
         try:
             part_path.unlink(missing_ok=True)
@@ -350,9 +339,7 @@ def _write_seed(seed_target: Path, seed: CorpusEpisodeSeed) -> None:
     part_path = seed_target.with_name(f"{seed_target.name}.part")
     try:
         part_path.unlink(missing_ok=True)
-        part_path.write_text(
-            json.dumps(asdict(seed), ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+        part_path.write_text(json.dumps(asdict(seed), ensure_ascii=False, indent=2), encoding="utf-8")
         part_path.replace(seed_target)
     except OSError:
         part_path.unlink(missing_ok=True)
@@ -417,9 +404,7 @@ def _channel_id_from_info(info: dict[str, Any] | None) -> str | None:
 def _channel_id_slug(channel_id: str) -> str:
     cleaned = channel_id.strip().lower()
     if re.fullmatch(r"[a-z0-9]+(?:-[a-z0-9]+)*", cleaned) is None:
-        raise ValueError(
-            f"channel_id 無法在不折損字元的情況下變成 podcast_id slug：{channel_id}"
-        )
+        raise ValueError(f"channel_id cannot become a podcast_id slug without dropping characters: {channel_id}")
     return cleaned
 
 
@@ -428,13 +413,11 @@ def _handle_slug(handle: str) -> str:
     cleaned = re.sub(r"[^a-z0-9-]", "", cleaned)
     cleaned = re.sub(r"-{2,}", "-", cleaned).strip("-")
     if not cleaned:
-        raise ValueError(f"無法從 handle 推導 slug：{handle}")
+        raise ValueError(f"Could not derive a slug from handle: {handle}")
     return cleaned
 
 
-def _resolve_title(
-    explicit: str | None, info: dict[str, Any], identity: YoutubeVideoIdentity
-) -> str:
+def _resolve_title(explicit: str | None, info: dict[str, Any], identity: YoutubeVideoIdentity) -> str:
     if explicit and explicit.strip():
         return _normalize_title(explicit)
     raw = str(info.get("title") or "").strip()

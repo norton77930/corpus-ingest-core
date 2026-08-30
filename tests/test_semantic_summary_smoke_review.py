@@ -118,9 +118,7 @@ def test_review_semantic_summary_smoke_fails_safety_issues(monkeypatch, tmp_path
     assert any(check["name"] == "prohibited_advice" and check["status"] == "fail" for check in payload["checks"])
 
 
-def test_review_semantic_summary_smoke_allows_transcript_derived_trade_descriptions(
-    monkeypatch, tmp_path
-):
+def test_review_semantic_summary_smoke_allows_transcript_derived_trade_descriptions(monkeypatch, tmp_path):
     import corpus_ingest_core.semantic_summary_smoke_review as review
 
     _write_semantic_summary(
@@ -140,15 +138,10 @@ def test_review_semantic_summary_smoke_allows_transcript_derived_trade_descripti
 
     payload = json.loads(result.review_json_path.read_text(encoding="utf-8"))
     assert result.review_status == "passed"
-    assert any(
-        check["name"] == "prohibited_advice" and check["status"] == "pass"
-        for check in payload["checks"]
-    )
+    assert any(check["name"] == "prohibited_advice" and check["status"] == "pass" for check in payload["checks"])
 
 
-def test_review_semantic_summary_smoke_rejects_direct_trade_advice(
-    monkeypatch, tmp_path
-):
+def test_review_semantic_summary_smoke_rejects_direct_trade_advice(monkeypatch, tmp_path):
     import corpus_ingest_core.semantic_summary_smoke_review as review
 
     _write_semantic_summary(
@@ -217,9 +210,7 @@ def test_review_semantic_summary_smoke_allows_attributed_quoted_historical_advic
     assert result.review_status == "passed"
 
 
-def test_review_semantic_summary_smoke_rejects_target_price_and_guaranteed_return(
-    monkeypatch, tmp_path
-):
+def test_review_semantic_summary_smoke_rejects_target_price_and_guaranteed_return(monkeypatch, tmp_path):
     import corpus_ingest_core.semantic_summary_smoke_review as review
 
     _write_semantic_summary(
@@ -233,15 +224,10 @@ def test_review_semantic_summary_smoke_rejects_target_price_and_guaranteed_retur
 
     payload = json.loads(result.review_json_path.read_text(encoding="utf-8"))
     assert result.review_status == "failed"
-    assert any(
-        check["name"] == "prohibited_advice" and check["status"] == "fail"
-        for check in payload["checks"]
-    )
+    assert any(check["name"] == "prohibited_advice" and check["status"] == "fail" for check in payload["checks"])
 
 
-def test_review_semantic_summary_smoke_warns_for_missing_quality_signals(
-    monkeypatch, tmp_path
-):
+def test_review_semantic_summary_smoke_warns_for_missing_quality_signals(monkeypatch, tmp_path):
     import corpus_ingest_core.semantic_summary_smoke_review as review
 
     _write_semantic_summary(
@@ -337,7 +323,7 @@ def test_review_rejects_json_and_yaml_quoted_credential_assignments(monkeypatch,
     _write_semantic_summary(
         monkeypatch,
         tmp_path,
-        extra='"password": "not-a-real-secret"\n\'token\': \'not-a-real-secret\'',
+        extra="\"password\": \"not-a-real-secret\"\n'token': 'not-a-real-secret'",
     )
     monkeypatch.setattr(review, "REPORTS_DIR", tmp_path / "reports")
 
@@ -345,10 +331,7 @@ def test_review_rejects_json_and_yaml_quoted_credential_assignments(monkeypatch,
 
     payload = json.loads(result.review_json_path.read_text(encoding="utf-8"))
     assert result.review_status == "failed"
-    assert any(
-        check["name"] == "secret_leak" and check["status"] == "fail"
-        for check in payload["checks"]
-    )
+    assert any(check["name"] == "secret_leak" and check["status"] == "fail" for check in payload["checks"])
 
 
 @pytest.mark.parametrize(
@@ -363,10 +346,7 @@ def test_red_attributed_quote_exception_only_excludes_the_matched_quote_content(
     from corpus_ingest_core.report_safety import matched_investment_advice_guard
 
     assert matched_investment_advice_guard(quoted_advice) is None
-    assert (
-        matched_investment_advice_guard(f"{quoted_advice} You should sell ACME.")
-        == "trade_action"
-    )
+    assert matched_investment_advice_guard(f"{quoted_advice} You should sell ACME.") == "trade_action"
 
 
 @pytest.mark.parametrize(
@@ -374,7 +354,7 @@ def test_red_attributed_quote_exception_only_excludes_the_matched_quote_content(
     (
         'The transcript quoted "You should buy ACME” as a historical example.',
         "The transcript said “You should buy ACME」 as a historical example.",
-        "主持人引述「建議買進 ACME\"作為歷史案例。",
+        '主持人引述「建議買進 ACME"作為歷史案例。',
     ),
 )
 def test_red_mismatched_quote_never_receives_the_attributed_advice_exception(mismatched_quote_advice):

@@ -20,12 +20,8 @@ REVIEW_MODE = "research-llm-smoke-review-v1"
 
 _SECRET_PATTERN = re.compile(r"\bsk-[A-Za-z0-9_-]{8,}\b")
 _TRACEBACK_PATTERN = re.compile(r"Traceback\s+\(most recent call last\):")
-_RAW_TRANSCRIPT_LEAK_PATTERN = re.compile(
-    r"raw transcript\s*(?:text|dump|content)\s*[:：]", re.IGNORECASE
-)
-_EXTERNAL_STATUS_TOKEN_PATTERN = re.compile(
-    r"not_requested|not_fetched|data_date\s*=\s*null", re.IGNORECASE
-)
+_RAW_TRANSCRIPT_LEAK_PATTERN = re.compile(r"raw transcript\s*(?:text|dump|content)\s*[:：]", re.IGNORECASE)
+_EXTERNAL_STATUS_TOKEN_PATTERN = re.compile(r"not_requested|not_fetched|data_date\s*=\s*null", re.IGNORECASE)
 _EXTERNAL_STATUS_CONTEXT_PATTERN = re.compile(
     r"unavailable|not market facts?|missing data|not fetched|尚未查證|未查證|不是市場事實",
     re.IGNORECASE,
@@ -91,9 +87,7 @@ def review_research_llm_smoke(
         "not_investment_advice_notice": True,
     }
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
-    review_json_path.write_text(
-        json.dumps(report_payload, ensure_ascii=False, indent=2), encoding="utf-8"
-    )
+    review_json_path.write_text(json.dumps(report_payload, ensure_ascii=False, indent=2), encoding="utf-8")
     review_markdown_path.write_text(_render_markdown(report_payload), encoding="utf-8")
 
     return ResearchLLMSmokeReviewResult(
@@ -129,9 +123,7 @@ def _load_synthesis_payload(path: Path) -> tuple[dict[str, Any] | None, list[dic
 def _load_markdown(path: Path) -> tuple[str | None, list[dict[str, str]]]:
     if not path.exists():
         return None, [_check("synthesis_markdown_exists", "blocked", f"missing: {path}")]
-    return path.read_text(encoding="utf-8"), [
-        _check("synthesis_markdown_exists", "pass", str(path))
-    ]
+    return path.read_text(encoding="utf-8"), [_check("synthesis_markdown_exists", "pass", str(path))]
 
 
 def _evaluate_payload(payload: dict[str, Any]) -> list[dict[str, str]]:
@@ -180,9 +172,7 @@ def _input_boundary_check(payload: dict[str, Any]) -> dict[str, str]:
                 f"{boundary}: source_semantic_context must be non-empty",
             )
         invalid_indexes = [
-            str(index)
-            for index, entry in enumerate(semantic_context)
-            if not _is_passed_semantic_context_entry(entry)
+            str(index) for index, entry in enumerate(semantic_context) if not _is_passed_semantic_context_entry(entry)
         ]
         if invalid_indexes:
             return _check(
@@ -254,14 +244,10 @@ def _evaluate_markdown(markdown_text: str) -> list[dict[str, str]]:
 
 
 def _external_status_check(markdown_text: str) -> dict[str, str]:
-    token_lines = [
-        line for line in markdown_text.splitlines() if _EXTERNAL_STATUS_TOKEN_PATTERN.search(line)
-    ]
+    token_lines = [line for line in markdown_text.splitlines() if _EXTERNAL_STATUS_TOKEN_PATTERN.search(line)]
     if not token_lines:
         return _check("external_status_boundary", "na", "no unavailable external status tokens")
-    weak_lines = [
-        line for line in token_lines if not _EXTERNAL_STATUS_CONTEXT_PATTERN.search(line)
-    ]
+    weak_lines = [line for line in token_lines if not _EXTERNAL_STATUS_CONTEXT_PATTERN.search(line)]
     if weak_lines:
         return _check(
             "external_status_boundary",

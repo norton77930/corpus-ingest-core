@@ -41,9 +41,7 @@ def validate_transcript(podcast_id: str, episode_ref: str) -> TranscriptValidati
     paths = resolve_canonical_transcript_asset_paths(podcast_id, episode_ref)
     if paths is None:
         part_paths = _candidate_part_paths(podcast_id, episode_ref)
-        warnings = [
-            f"發現殘留 .part 檔：{part_path}" for part_path in part_paths if part_path.exists()
-        ]
+        warnings = [f"發現殘留 .part 檔：{part_path}" for part_path in part_paths if part_path.exists()]
         return TranscriptValidationResult(
             podcast_id=podcast_id,
             episode_ref=episode_ref,
@@ -63,9 +61,7 @@ def validate_transcript(podcast_id: str, episode_ref: str) -> TranscriptValidati
         _part_path(paths.json_path),
     ]
     problems: list[str] = []
-    warnings = [
-        f"發現殘留 .part 檔：{part_path}" for part_path in part_paths if part_path.exists()
-    ]
+    warnings = [f"發現殘留 .part 檔：{part_path}" for part_path in part_paths if part_path.exists()]
 
     missing_outputs = []
     if not paths.json_path.exists():
@@ -149,9 +145,7 @@ def validate_transcript(podcast_id: str, episode_ref: str) -> TranscriptValidati
     if payload.get("completed") is False:
         partial_problems.append("transcript JSON 標示 completed=false。")
     if segment_count != len(normalized_segments):
-        partial_problems.append(
-            f"segment_count={segment_count} 與 segments 長度 {len(normalized_segments)} 不一致。"
-        )
+        partial_problems.append(f"segment_count={segment_count} 與 segments 長度 {len(normalized_segments)} 不一致。")
     if normalized_segments and text_length == 0:
         partial_problems.append("segments 非空但 TXT 沒有內容。")
     if normalized_segments and srt_length == 0:
@@ -236,7 +230,7 @@ def _result(
     part_paths: list[Path],
 ) -> TranscriptValidationResult:
     if status not in VALIDATION_STATUSES:
-        raise ValueError(f"未知 transcript validation status：{status}")
+        raise ValueError(f"Unknown transcript validation status: {status}")
     return TranscriptValidationResult(
         podcast_id=podcast_id,
         episode_ref=episode_ref,
@@ -266,9 +260,7 @@ def _load_json(json_path: Path, problems: list[str]) -> dict[str, Any] | None:
     return payload
 
 
-def _normalize_segments(
-    segments: list[Any], problems: list[str]
-) -> list[_NormalizedSegment]:
+def _normalize_segments(segments: list[Any], problems: list[str]) -> list[_NormalizedSegment]:
     normalized: list[_NormalizedSegment] = []
     previous_start = 0.0
     for index, segment in enumerate(segments, start=1):
@@ -289,9 +281,7 @@ def _normalize_segments(
             problems.append(f"segment {index} start 時間倒退。")
             continue
         previous_start = start
-        normalized.append(
-            {"id": segment.get("id", index), "start": start, "end": end, "text": text}
-        )
+        normalized.append({"id": segment.get("id", index), "start": start, "end": end, "text": text})
     return normalized
 
 

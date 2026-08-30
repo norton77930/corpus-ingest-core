@@ -1,45 +1,45 @@
 class PodcastIngestCoreError(Exception):
-    """Corpus Ingestion Core 的基礎錯誤。"""
+    """Base error for Corpus Ingestion Core."""
 
 
 class EpisodeNotFoundError(PodcastIngestCoreError):
-    """找不到指定 episode。"""
+    """The requested episode does not exist."""
 
 
 class AudioUrlMissingError(PodcastIngestCoreError):
-    """Episode 沒有可下載的音檔 URL。"""
+    """The episode carries no downloadable audio URL."""
 
 
 class DownloadFailedError(PodcastIngestCoreError):
-    """音檔下載失敗。"""
+    """Audio download failed."""
 
 
 class AudioFileMissingError(PodcastIngestCoreError):
-    """轉錄時找不到本機音檔。"""
+    """The local audio file is missing at transcription time."""
 
 
 class TranscriptionDependencyError(PodcastIngestCoreError):
-    """轉錄依賴套件不可用。"""
+    """A transcription dependency is unavailable."""
 
 
 class TranscriptionFailedError(PodcastIngestCoreError):
-    """轉錄過程或輸出寫入失敗。"""
+    """Transcription or its output write failed."""
 
 
 class TranscriptMissingError(PodcastIngestCoreError):
-    """找不到摘要需要的逐字稿輸出。"""
+    """The transcript output that summarization needs is missing."""
 
 
 class TranscriptParseError(PodcastIngestCoreError):
-    """逐字稿 JSON 格式不符合摘要需求。"""
+    """The transcript JSON does not match what summarization requires."""
 
 
 class SummaryFailedError(PodcastIngestCoreError):
-    """摘要產生或輸出寫入失敗。"""
+    """Summary generation or its output write failed."""
 
 
 class SemanticSummaryFailedError(PodcastIngestCoreError):
-    """語意摘要產生或輸出寫入失敗。"""
+    """Semantic summary generation or its output write failed."""
 
 
 class StudyGuideBundleError(PodcastIngestCoreError):
@@ -51,23 +51,23 @@ class WorkflowDerivationError(PodcastIngestCoreError):
 
 
 class CorpusIndexFailedError(PodcastIngestCoreError):
-    """Corpus artifact index 產生或輸出寫入失敗。"""
+    """Corpus artifact index generation or its output write failed."""
 
 
 class CorpusRemediationPlanFailedError(PodcastIngestCoreError):
-    """Corpus remediation plan 產生或輸出寫入失敗。"""
+    """Corpus remediation plan generation or its output write failed."""
 
 
 class CorpusRemediationRunnerFailedError(PodcastIngestCoreError):
-    """Corpus remediation runner 選取、執行或報告寫入失敗。"""
+    """Corpus remediation runner selection, execution, or report write failed."""
 
 
 class CorpusLocalTranscriptionRunnerFailedError(PodcastIngestCoreError):
-    """Corpus local transcription runner 選取、執行或報告寫入失敗。"""
+    """Corpus local transcription runner selection, execution, or report write failed."""
 
 
 class CorpusAudioDownloadRunnerFailedError(PodcastIngestCoreError):
-    """Corpus audio download runner 選取、執行或報告寫入失敗。"""
+    """Corpus audio download runner selection, execution, or report write failed."""
 
 
 class CorpusEpisodeIntakeFailedError(PodcastIngestCoreError):
@@ -86,15 +86,11 @@ class CorpusEpisodeCompletionWorkflowRunnerFailedError(PodcastIngestCoreError):
     """Corpus episode completion workflow validation or execution failed."""
 
 
-class CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError(
-    PodcastIngestCoreError
-):
+class CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError(PodcastIngestCoreError):
     """Latest deterministic episode workflow validation or execution failed."""
 
 
-class LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
-    PodcastIngestCoreError
-):
+class LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(PodcastIngestCoreError):
     """Latest verified research report workflow validation or execution failed."""
 
 
@@ -127,116 +123,116 @@ class VerifiedReportGapBacklogInputError(PodcastIngestCoreError):
 
 
 class LLMProviderConfigError(PodcastIngestCoreError):
-    """LLM provider 設定不完整或不合法。"""
+    """The LLM provider configuration is incomplete or invalid."""
 
 
 class LLMProviderRequestError(PodcastIngestCoreError):
-    """LLM provider 請求或回應失敗。"""
+    """An LLM provider request or its response failed."""
 
 
 class MentionExtractionInputError(PodcastIngestCoreError):
-    """Mention extraction 輸入參數不合法。"""
+    """Mention extraction received invalid input arguments."""
 
 
 class MentionExtractionFailedError(PodcastIngestCoreError):
-    """Mention extraction 產生或輸出寫入失敗。"""
+    """Mention extraction or its output write failed."""
 
 
 class EpisodeIntelligenceReportFailedError(PodcastIngestCoreError):
-    """Episode intelligence report 產生或輸出寫入失敗。"""
+    """Episode intelligence report generation or its output write failed."""
 
 
 class IndustryMappingInputError(PodcastIngestCoreError):
-    """Industry chain mapping 的輸入 artifact 不可用或不符合需求。"""
+    """An industry chain mapping input artifact is unavailable or does not meet requirements."""
 
 
 class IndustryMappingFailedError(PodcastIngestCoreError):
-    """Industry chain mapping 產生或輸出寫入失敗。"""
+    """Industry chain mapping generation or its output write failed."""
 
 
 class ExternalDataBoundaryInputError(PodcastIngestCoreError):
-    """External data boundary 的輸入 artifact 不可用或不符合需求。"""
+    """An external data boundary input artifact is unavailable or does not meet requirements."""
 
 
 class ExternalDataBoundaryFailedError(PodcastIngestCoreError):
-    """External data boundary 產生或輸出寫入失敗。"""
+    """External data boundary generation or its output write failed."""
 
 
 class ExternalDataVerificationInputError(PodcastIngestCoreError):
-    """External data verification 的輸入 artifact 或 provider 設定不合法。"""
+    """An external data verification input artifact or provider configuration is invalid."""
 
 
 class ExternalDataVerificationFailedError(PodcastIngestCoreError):
-    """External data verification 產生或輸出寫入失敗。"""
+    """External data verification generation or its output write failed."""
 
 
 class GooayeLensConfigError(PodcastIngestCoreError):
-    """Gooaye Lens config 缺失、損壞或不符合 schema。"""
+    """The Gooaye Lens config is missing, corrupt, or does not match the schema."""
 
 
 class StockLensReportInputError(PodcastIngestCoreError):
-    """Stock lens report 的輸入 artifact 不可用或不符合需求。"""
+    """A stock lens report input artifact is unavailable or does not meet requirements."""
 
 
 class StockLensReportFailedError(PodcastIngestCoreError):
-    """Stock lens report 產生或輸出寫入失敗。"""
+    """Stock lens report generation or its output write failed."""
 
 
 class StockLensSynthesisInputError(PodcastIngestCoreError):
-    """Stock lens LLM synthesis 的輸入 artifact 或確認資訊不合法。"""
+    """A stock lens LLM synthesis input artifact or acknowledgement is invalid."""
 
 
 class StockLensSynthesisFailedError(PodcastIngestCoreError):
-    """Stock lens LLM synthesis 產生或輸出寫入失敗。"""
+    """Stock lens LLM synthesis generation or its output write failed."""
 
 
 class ResearchWorkflowInputError(PodcastIngestCoreError):
-    """Research workflow 的輸入 artifact 不可用或不符合需求。"""
+    """A research workflow input artifact is unavailable or does not meet requirements."""
 
 
 class ResearchWorkflowFailedError(PodcastIngestCoreError):
-    """Research workflow 執行失敗。"""
+    """Research workflow execution failed."""
 
 
 class CacheInitializationError(PodcastIngestCoreError):
-    """SQLite cache 初始化失敗。"""
+    """SQLite cache initialization failed."""
 
 
 class EpisodeIndexError(PodcastIngestCoreError):
-    """單集 artifact 寫入 SQLite cache 失敗。"""
+    """Writing one episode's artifacts into the SQLite cache failed."""
 
 
 class SearchError(PodcastIngestCoreError):
-    """SQLite cache 搜尋失敗。"""
+    """SQLite cache search failed."""
 
 
 class UnsupportedSourceTypeError(PodcastIngestCoreError):
-    """對某個 podcast 來源型別呼叫了不適用的入口。"""
+    """An entry point was called for a podcast source_type it does not apply to."""
 
 
 class XVideoIngestDependencyError(PodcastIngestCoreError):
-    """缺少取得 X 影片所需的套件。"""
+    """A package required to acquire X videos is missing."""
 
 
 class XVideoIngestFailedError(PodcastIngestCoreError):
-    """X 影片取得流程失敗。"""
+    """The X video acquisition flow failed."""
 
 
 class VideoAcquireDependencyError(PodcastIngestCoreError):
-    """缺少共用影片取得所需的套件。"""
+    """A package required by the shared video acquisition path is missing."""
 
 
 class VideoAcquireFailedError(PodcastIngestCoreError):
-    """共用影片取得（metadata / 下載 / 抽音）失敗。"""
+    """Shared video acquisition (metadata / download / audio extraction) failed."""
 
 
 class YoutubeVideoIngestDependencyError(PodcastIngestCoreError):
-    """缺少取得 YouTube 影片所需的套件。"""
+    """A package required to acquire YouTube videos is missing."""
 
 
 class YoutubeVideoIngestFailedError(PodcastIngestCoreError):
-    """YouTube 影片取得流程失敗。"""
+    """The YouTube video acquisition flow failed."""
 
 
 class UnknownSummaryProfileError(PodcastIngestCoreError):
-    """設定檔指定了不存在的 summary_profile。"""
+    """The config names a summary_profile that does not exist."""

@@ -251,9 +251,7 @@ def test_red_reserved_selector_is_rejected_before_completion_core_selection(monk
     )
 
     with pytest.raises(CorpusEpisodeCompletionWorkflowRunnerFailedError):
-        workflow.run_corpus_episode_completion_workflow(
-            "gooaye", episode_ref=selector, action="intake", confirm=True
-        )
+        workflow.run_corpus_episode_completion_workflow("gooaye", episode_ref=selector, action="intake", confirm=True)
 
 
 @pytest.mark.parametrize("selector", ["latest", "LATEST", "Latest"])
@@ -379,9 +377,7 @@ def _resume_artifact_claim(claim_path_text: str, result_queue) -> None:
     ),
     ids=("checkpoint", "bundle"),
 )
-def test_red_process_lifetime_claim_releases_after_terminated_holder_and_keeps_lockfile(
-    tmp_path, claim_name
-):
+def test_red_process_lifetime_claim_releases_after_terminated_holder_and_keeps_lockfile(tmp_path, claim_name):
     """Crash recovery covers the exact claim names used by checkpoint and bundle writers."""
     import multiprocessing
 

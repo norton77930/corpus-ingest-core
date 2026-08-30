@@ -15,13 +15,13 @@ DEFAULT_PORT = 8767
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
-        description="以 loopback Streamable HTTP 啟動 corpus-ingest-core MCP server。"
+        description="Start the corpus-ingest-core MCP server over loopback Streamable HTTP."
     )
     parser.add_argument(
         "--port",
         type=int,
         default=_port_from_environment(),
-        help=f"Loopback listener port（預設 {DEFAULT_PORT}；可由 {PORT_ENV} 設定）。",
+        help=f"Loopback listener port (default {DEFAULT_PORT}; can be set by {PORT_ENV}).",
     )
     return parser.parse_args(argv)
 

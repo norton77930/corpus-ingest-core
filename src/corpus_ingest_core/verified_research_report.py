@@ -134,8 +134,13 @@ def _current_verified_research_source_snapshot(
     )
     lineage_manifest = lineage_evidence.publisher_manifest
     expected_roles = [
-        "transcript", "semantic_summary", "semantic_review", "mentions",
-        "intelligence", "industry_mapping", "external_boundary",
+        "transcript",
+        "semantic_summary",
+        "semantic_review",
+        "mentions",
+        "intelligence",
+        "industry_mapping",
+        "external_boundary",
     ]
     if include_fixture_verification:
         expected_roles.append("fixture")
@@ -179,8 +184,7 @@ def assemble_verified_research_report(
     except CanonicalTranscriptResolutionError as exc:
         raise VerifiedResearchReportInputError("verified report canonical transcript is ambiguous") from exc
     if transcript_paths is None or not all(
-        path.is_file()
-        for path in (transcript_paths.json_path, transcript_paths.text_path, transcript_paths.srt_path)
+        path.is_file() for path in (transcript_paths.json_path, transcript_paths.text_path, transcript_paths.srt_path)
     ):
         raise VerifiedResearchReportInputError("verified report transcript artifact contract is invalid")
     snapshot = _current_verified_research_source_snapshot(
@@ -213,7 +217,12 @@ def assemble_verified_research_report(
     _require_exact_status(intelligence, "report_status", "final", "intelligence")
     _require_exact_status(mapping, "mapping_status", "final", "industry mapping")
     _require_exact_status(boundary, "boundary_status", "final", "external boundary")
-    for source, role in ((mentions_source, "mentions"), (intelligence_source, "intelligence"), (mapping_source, "industry mapping"), (boundary_source, "external boundary")):
+    for source, role in (
+        (mentions_source, "mentions"),
+        (intelligence_source, "intelligence"),
+        (mapping_source, "industry mapping"),
+        (boundary_source, "external boundary"),
+    ):
         _assert_safe_source_bytes(source, role)
     source_artifacts = snapshot.source_artifacts
     if include_fixture_verification:
@@ -281,6 +290,7 @@ def assemble_verified_research_report(
         lineage_manifest=lineage_manifest,
     )
 
+
 def publish_verified_research_report_bundle(
     assembly: VerifiedResearchReportAssembly,
 ) -> VerifiedResearchReportBundle:
@@ -299,9 +309,7 @@ def publish_verified_research_report_bundle(
             if paths.bundle_dir.exists():
                 if _existing_bundle_matches(paths, assembly):
                     return _validated_bundle_return(paths, assembly, reused=True)
-                raise VerifiedResearchReportInputError(
-                    "existing verified report bundle conflicts with source digest"
-                )
+                raise VerifiedResearchReportInputError("existing verified report bundle conflicts with source digest")
 
             # Keep staging paths below Windows MAX_PATH even when test/workspace roots are long.
             staging_dir = paths.bundle_dir.parent / f".stage-{uuid.uuid4().hex[:12]}"
@@ -390,9 +398,7 @@ def _json_from_source(source: VerifiedResearchSourceArtifact, role: str) -> dict
     try:
         payload = json.loads(source.raw_bytes.decode("utf-8"))
     except (UnicodeDecodeError, json.JSONDecodeError) as exc:
-        raise VerifiedResearchReportInputError(
-            f"verified report {role} artifact is unreadable"
-        ) from exc
+        raise VerifiedResearchReportInputError(f"verified report {role} artifact is unreadable") from exc
     if not isinstance(payload, dict):
         raise VerifiedResearchReportInputError(f"verified report {role} artifact is invalid")
     return payload
@@ -402,9 +408,7 @@ def _text_from_source(source: VerifiedResearchSourceArtifact, role: str) -> str:
     try:
         text = source.raw_bytes.decode("utf-8")
     except UnicodeDecodeError as exc:
-        raise VerifiedResearchReportInputError(
-            f"verified report {role} artifact is unreadable"
-        ) from exc
+        raise VerifiedResearchReportInputError(f"verified report {role} artifact is unreadable") from exc
     if not text.strip():
         raise VerifiedResearchReportInputError(f"verified report {role} artifact is empty")
     return text
@@ -421,9 +425,7 @@ def _identified_json_from_source(
     return payload
 
 
-def _read_identified_json(
-    path: Path, podcast_id: str, episode_ref: str, role: str
-) -> dict[str, Any]:
+def _read_identified_json(path: Path, podcast_id: str, episode_ref: str, role: str) -> dict[str, Any]:
     return _identified_json_from_source(_source_artifact(role, path, True), podcast_id, episode_ref, role)
 
 
@@ -441,15 +443,11 @@ def _assert_safe_source_bytes(source: VerifiedResearchSourceArtifact, role: str)
     try:
         text = source.raw_bytes.decode("utf-8")
     except UnicodeDecodeError as exc:
-        raise VerifiedResearchReportInputError(
-            f"verified report {role} artifact is unreadable"
-        ) from exc
+        raise VerifiedResearchReportInputError(f"verified report {role} artifact is unreadable") from exc
     safety_text = text
     if role == "semantic review":
         # The deterministic check identifier is metadata, not a captured stack trace.
-        safety_text = safety_text.replace(
-            '"name": "traceback_leak"', '"name": "stack_trace_leak"'
-        )
+        safety_text = safety_text.replace('"name": "traceback_leak"', '"name": "stack_trace_leak"')
     if role == "stock lens":
         # Production lens policy wording (for example, "Do not produce target
         # prices") is declarative metadata, not advice.  Scan every actual report
@@ -460,9 +458,7 @@ def _assert_safe_source_bytes(source: VerifiedResearchSourceArtifact, role: str)
         contains_sensitive_text(safety_text, reject_any_uri=False)
         or _matched_source_advice_guard(safety_text) is not None
     ):
-        raise VerifiedResearchReportInputError(
-            f"verified report {role} artifact violates safety boundary"
-        )
+        raise VerifiedResearchReportInputError(f"verified report {role} artifact violates safety boundary")
 
 
 def _matched_source_advice_guard(text: str) -> str | None:
@@ -507,9 +503,7 @@ def _stock_lens_safety_text(text: str) -> str:
     dimensions = safe_lens.get("dimensions")
     if isinstance(dimensions, list):
         safe_lens["dimensions"] = [
-            {key: value for key, value in item.items() if key != "output_guidance"}
-            if isinstance(item, dict)
-            else item
+            {key: value for key, value in item.items() if key != "output_guidance"} if isinstance(item, dict) else item
             for item in dimensions
         ]
     sanitized["gooaye_lens"] = safe_lens
@@ -554,21 +548,15 @@ def _validate_transcript_snapshot(payload: dict[str, Any]) -> None:
             start = float(segment["start"])
             end = float(segment["end"])
         except (KeyError, TypeError, ValueError) as exc:
-            raise VerifiedResearchReportInputError(
-                "verified report transcript artifact contract is invalid"
-            ) from exc
+            raise VerifiedResearchReportInputError("verified report transcript artifact contract is invalid") from exc
         if start < 0 or end < start or start < previous_start:
             raise VerifiedResearchReportInputError("verified report transcript artifact contract is invalid")
         previous_start = start
 
 
-def _require_exact_status(
-    payload: dict[str, Any], key: str, expected: str, role: str
-) -> None:
+def _require_exact_status(payload: dict[str, Any], key: str, expected: str, role: str) -> None:
     if payload.get(key) != expected:
-        raise VerifiedResearchReportInputError(
-            f"verified report {role} status is not {expected}"
-        )
+        raise VerifiedResearchReportInputError(f"verified report {role} status is not {expected}")
 
 
 def _core_source_root(path: Path) -> Path:
@@ -602,16 +590,12 @@ def _core_source_root(path: Path) -> Path:
     return storage.CORPUS_DIR
 
 
-def _source_artifact(
-    role: str, path: Path, identity_valid: bool
-) -> VerifiedResearchSourceArtifact:
+def _source_artifact(role: str, path: Path, identity_valid: bool) -> VerifiedResearchSourceArtifact:
     """Capture a report source through the Core-owned snapshot boundary."""
 
     raw = secure_read_bytes(_core_source_root(path), path, max_bytes=64 * 1024 * 1024)
     if raw is None:
-        raise VerifiedResearchReportInputError(
-            f"verified report {role} artifact is unreadable"
-        )
+        raise VerifiedResearchReportInputError(f"verified report {role} artifact is unreadable")
     return _source_artifact_from_bytes(role, path, raw, identity_valid)
 
 
@@ -684,9 +668,7 @@ def _verified_timeline(intelligence: dict[str, Any]) -> list[dict[str, Any]]:
                 raise VerifiedResearchReportInputError("verified podcast evidence lacks timestamp provenance")
             if segment_id is None or isinstance(segment_id, (dict, list)):
                 raise VerifiedResearchReportInputError("verified podcast evidence lacks segment provenance")
-            evidence_text = _safe_text(
-                str(evidence.get("statement", evidence.get("text", "")))
-            )
+            evidence_text = _safe_text(str(evidence.get("statement", evidence.get("text", ""))))
             if not evidence_text or evidence_text == OMITTED_VALUE:
                 continue
             verified.append(
@@ -781,9 +763,13 @@ def _safe_boundary(boundary: dict[str, Any]) -> dict[str, Any]:
                 {
                     "classification": "external_status",
                     "company_name": _safe_text(str(candidate.get("company_name", ""))),
-                    "external_verification_status": _safe_text(str(candidate.get("external_verification_status", "not_requested"))),
+                    "external_verification_status": _safe_text(
+                        str(candidate.get("external_verification_status", "not_requested"))
+                    ),
                     "source_status": _safe_text(str(candidate.get("source_status", "not_fetched"))),
-                    "data_date": candidate.get("data_date") if candidate.get("data_date") is None else _safe_text(str(candidate.get("data_date"))),
+                    "data_date": candidate.get("data_date")
+                    if candidate.get("data_date") is None
+                    else _safe_text(str(candidate.get("data_date"))),
                 }
             )
     return {"verification_scope": "local_artifact_and_fixture_only", "candidates": statuses}
@@ -827,9 +813,7 @@ def _stock_direct_evidence(value: object) -> list[dict[str, Any]]:
                 and text != OMITTED_VALUE
                 and text
             ):
-                provenance.append(
-                    {"timestamp": timestamp, "segment_id": segment_id, "evidence": text}
-                )
+                provenance.append({"timestamp": timestamp, "segment_id": segment_id, "evidence": text})
         if not provenance:
             continue
         results.append(
@@ -883,7 +867,9 @@ def _stock_verification_details(value: object) -> list[dict[str, Any]]:
             {
                 "classification": "external_status",
                 "company_name": _safe_text(str(item.get("company_name", ""))),
-                "external_verification_status": _safe_text(str(item.get("external_verification_status", "not_requested"))),
+                "external_verification_status": _safe_text(
+                    str(item.get("external_verification_status", "not_requested"))
+                ),
                 "source_status": _safe_text(str(item.get("source_status", "not_fetched"))),
                 "data_date": None if item.get("data_date") is None else _safe_text(str(item.get("data_date"))),
                 "required_external_checks": _safe_required_external_checks(item.get("required_external_checks")),
@@ -895,16 +881,10 @@ def _stock_verification_details(value: object) -> list[dict[str, Any]]:
 def _safe_external_verification(value: object) -> dict[str, Any]:
     payload = value if isinstance(value, dict) else {}
     return {
-        "external_verification_status": _safe_text(
-            str(payload.get("external_verification_status", "not_requested"))
-        ),
+        "external_verification_status": _safe_text(str(payload.get("external_verification_status", "not_requested"))),
         "source_status": _safe_text(str(payload.get("source_status", "not_fetched"))),
-        "data_date": (
-            None if payload.get("data_date") is None else _safe_text(str(payload.get("data_date")))
-        ),
-        "required_external_checks": _safe_required_external_checks(
-            payload.get("required_external_checks")
-        ),
+        "data_date": (None if payload.get("data_date") is None else _safe_text(str(payload.get("data_date")))),
+        "required_external_checks": _safe_required_external_checks(payload.get("required_external_checks")),
     }
 
 
@@ -931,30 +911,18 @@ def _safe_required_external_checks(value: object) -> list[dict[str, Any]]:
 
 
 def _render_external_check_labels(checks: list[dict[str, Any]]) -> str:
-    labels = [
-        check["label"] or check["data_type"]
-        for check in checks
-        if check.get("label") or check.get("data_type")
-    ]
+    labels = [check["label"] or check["data_type"] for check in checks if check.get("label") or check.get("data_type")]
     return ", ".join(labels) or "none"
 
 
 def _safe_strings(value: object) -> list[str]:
     if not isinstance(value, list):
         return []
-    return [
-        item
-        for item in (_safe_text(str(candidate)) for candidate in value)
-        if item and item != OMITTED_VALUE
-    ]
+    return [item for item in (_safe_text(str(candidate)) for candidate in value) if item and item != OMITTED_VALUE]
 
 
 def _safe_summary(summary: str) -> str:
-    accepted = [
-        _safe_text(line.strip())
-        for line in summary.splitlines()
-        if line.strip() and not line.startswith("#")
-    ]
+    accepted = [_safe_text(line.strip()) for line in summary.splitlines() if line.strip() and not line.startswith("#")]
     accepted = [line for line in accepted if line != "value omitted by safety boundary"]
     return "\n".join(accepted[:80])
 
@@ -1105,7 +1073,13 @@ def _manifest_payload_from_metadata(
         },
         "lineage": assembly.lineage_manifest,
         "source_artifacts": [
-            {"role": source.role, "path": _safe_path(source.path), "sha256": source.sha256, "size_bytes": source.size_bytes, "identity_valid": source.identity_valid}
+            {
+                "role": source.role,
+                "path": _safe_path(source.path),
+                "sha256": source.sha256,
+                "size_bytes": source.size_bytes,
+                "identity_valid": source.identity_valid,
+            }
             for source in assembly.source_artifacts
         ],
         "bundle_files": {
@@ -1116,9 +1090,7 @@ def _manifest_payload_from_metadata(
 
 
 def _canonical_report_json_bytes(assembly: VerifiedResearchReportAssembly) -> bytes:
-    return json.dumps(
-        assembly.report_payload, ensure_ascii=False, indent=2, sort_keys=True
-    ).encode("utf-8")
+    return json.dumps(assembly.report_payload, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8")
 
 
 def _bytes_metadata(raw: bytes) -> dict[str, Any]:
@@ -1137,17 +1109,13 @@ def _verify_assembly_sources(assembly: VerifiedResearchReportAssembly) -> None:
         try:
             current_raw = source.path.read_bytes()
         except OSError as exc:
-            raise VerifiedResearchReportInputError(
-                "verified report source artifact changed during assembly"
-            ) from exc
+            raise VerifiedResearchReportInputError("verified report source artifact changed during assembly") from exc
         if (
             current_raw != source.raw_bytes
             or hashlib.sha256(current_raw).hexdigest() != source.sha256
             or len(current_raw) != source.size_bytes
         ):
-            raise VerifiedResearchReportInputError(
-                "verified report source artifact changed during assembly"
-            )
+            raise VerifiedResearchReportInputError("verified report source artifact changed during assembly")
     artifacts = assembly.lineage_manifest.get("artifacts")
     summary = artifacts.get("semantic_summary") if isinstance(artifacts, dict) else None
     summary_options = summary.get("options") if isinstance(summary, dict) else None
@@ -1200,16 +1168,12 @@ def _bundle_matches_expected(
             return False
         manifest = json.loads(manifest_bytes.decode("utf-8"))
         expected_manifest = _expected_manifest_payload(assembly)
-        if manifest != expected_manifest and not _legacy_source_paths_match(
-            manifest, expected_manifest, assembly
-        ):
+        if manifest != expected_manifest and not _legacy_source_paths_match(manifest, expected_manifest, assembly):
             return False
         # A legacy path representation may be equivalent, but the persisted
         # manifest still must be its own canonical byte encoding.  Reuse never
         # rewrites that historical identity.
-        return manifest_bytes == json.dumps(
-            manifest, ensure_ascii=False, indent=2, sort_keys=True
-        ).encode("utf-8")
+        return manifest_bytes == json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8")
     except (OSError, UnicodeDecodeError, json.JSONDecodeError):
         return False
 
@@ -1233,27 +1197,19 @@ def _legacy_source_paths_match(
     if (
         not isinstance(expected_sources, list)
         or not isinstance(actual_sources, list)
-        or not (
-            len(actual_sources)
-            == len(expected_sources)
-            == len(assembly.source_artifacts)
-        )
+        or not (len(actual_sources) == len(expected_sources) == len(assembly.source_artifacts))
     ):
         return False
-    if (
-        {key: value for key, value in manifest.items() if key != "source_artifacts"}
-        != {key: value for key, value in expected_manifest.items() if key != "source_artifacts"}
-    ):
+    if {key: value for key, value in manifest.items() if key != "source_artifacts"} != {
+        key: value for key, value in expected_manifest.items() if key != "source_artifacts"
+    }:
         return False
-    for actual, expected, source in zip(
-        actual_sources, expected_sources, assembly.source_artifacts, strict=True
-    ):
+    for actual, expected, source in zip(actual_sources, expected_sources, assembly.source_artifacts, strict=True):
         if not isinstance(actual, dict) or not isinstance(expected, dict):
             return False
-        if (
-            {key: value for key, value in actual.items() if key != "path"}
-            != {key: value for key, value in expected.items() if key != "path"}
-        ):
+        if {key: value for key, value in actual.items() if key != "path"} != {
+            key: value for key, value in expected.items() if key != "path"
+        }:
             return False
         raw_path = actual.get("path")
         if not isinstance(raw_path, str):

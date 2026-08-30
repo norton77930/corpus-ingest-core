@@ -28,19 +28,12 @@ _COMPLETION_EXECUTABLE_ACTIONS = {
 }
 _COMPLETION_TOOL_ERROR_TYPE = "CorpusEpisodeCompletionWorkflowRunnerFailedError"
 _COMPLETION_TOOL_ERROR_MESSAGE = "corpus episode completion workflow command failed"
-_LATEST_DETERMINISTIC_WORKFLOW_TOOL_ERROR_TYPE = (
-    "CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError"
-)
-_LATEST_DETERMINISTIC_WORKFLOW_TOOL_ERROR_MESSAGE = (
-    "corpus latest episode deterministic workflow command failed"
-)
-_VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL_ERROR_TYPE = (
-    "LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError"
-)
+_LATEST_DETERMINISTIC_WORKFLOW_TOOL_ERROR_TYPE = "CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError"
+_LATEST_DETERMINISTIC_WORKFLOW_TOOL_ERROR_MESSAGE = "corpus latest episode deterministic workflow command failed"
+_VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL_ERROR_TYPE = "LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError"
 _VERIFIED_RESEARCH_REPORT_WORKFLOW_TOOL_ERROR_MESSAGE = (
     "latest episode verified research report workflow command failed"
 )
-
 
 
 @mcp.tool()
@@ -232,9 +225,7 @@ def _latest_deterministic_workflow_tool_call(
     }
 
 
-def _verified_research_report_workflow_tool_call(
-    *, operation: Callable[[], Any], confirm: bool
-) -> dict[str, Any]:
+def _verified_research_report_workflow_tool_call(*, operation: Callable[[], Any], confirm: bool) -> dict[str, Any]:
     """Map SPEC 018 Core results into a category-only bounded MCP envelope."""
 
     try:
@@ -290,9 +281,7 @@ def _completion_request_rejected_early(
     if not confirm:
         return False
     normalized_action = action.strip().casefold() if isinstance(action, str) else ""
-    normalized_selector = (
-        episode_ref.strip().casefold() if isinstance(episode_ref, str) else ""
-    )
+    normalized_selector = episode_ref.strip().casefold() if isinstance(episode_ref, str) else ""
     return (
         completion_workflow_runner.confirmed_request_rejection_reason(
             selector=normalized_selector,
@@ -308,8 +297,7 @@ def _completion_result_requires_confirmation(result: Any) -> bool:
     if selected_action not in _COMPLETION_EXECUTABLE_ACTIONS:
         return False
     return any(
-        getattr(row, "status", None) == "selected"
-        and getattr(row, "requires_confirmation", False) is True
+        getattr(row, "status", None) == "selected" and getattr(row, "requires_confirmation", False) is True
         for row in (getattr(result, "rows", None) or ())
     )
 

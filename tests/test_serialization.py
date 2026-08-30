@@ -57,9 +57,7 @@ def test_nested_dataclasses_paths_and_sequences_are_converted():
     where = Path("data/y.json")
     branch = _Branch(leaf=_Leaf(name="b", where=where), tags=("x", "y"))
 
-    assert to_jsonable([branch]) == [
-        {"leaf": {"name": "b", "where": str(where)}, "tags": ["x", "y"]}
-    ]
+    assert to_jsonable([branch]) == [{"leaf": {"name": "b", "where": str(where)}, "tags": ["x", "y"]}]
 
 
 def test_non_dataclass_values_pass_through():

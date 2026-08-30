@@ -55,9 +55,7 @@ def test_secure_reader_rejects_mocked_windows_reparse_before_open(
     assert snapshots.secure_read_bytes(root, expected, max_bytes=1024) is None
 
 
-def test_secure_reader_rejects_opened_handle_identity_race(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_secure_reader_rejects_opened_handle_identity_race(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     import os
 
     import corpus_ingest_core.secure_local_snapshot as snapshots
@@ -207,6 +205,7 @@ def test_directory_listing_rejects_names_absent_after_enumeration(
     directory = root / "podcast"
     directory.mkdir(parents=True)
     (directory / "safe.json").write_text("safe", encoding="utf-8")
+
     # The stub answers unconditionally rather than matching on the argument,
     # which lets this test drop a `monkeypatch.setattr(snapshots.os, "name",
     # "nt")` it used to need.

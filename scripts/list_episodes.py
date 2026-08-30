@@ -11,7 +11,7 @@ from corpus_ingest_core import get_episode, list_episodes
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="列出 podcast episodes。")
+    parser = argparse.ArgumentParser(description="List podcast episodes.")
     parser.add_argument("podcast_id", nargs="?")
     parser.add_argument("--podcast", dest="podcast_option")
     parser.add_argument("--limit", type=int, default=10)
@@ -20,7 +20,7 @@ def main() -> None:
 
     podcast_id = args.podcast_option or args.podcast_id
     if podcast_id is None:
-        parser.error("必須提供 --podcast 或 positional podcast_id。")
+        parser.error("Provide --podcast, or positional podcast_id.")
 
     if args.episode:
         payload = _episode_to_dict(get_episode(podcast_id, args.episode))

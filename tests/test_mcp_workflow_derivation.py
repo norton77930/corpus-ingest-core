@@ -52,9 +52,7 @@ def _refuse_provider(monkeypatch) -> None:
     def refuse(*_args, **_kwargs):
         raise AssertionError("no provider may be constructed on this path")
 
-    monkeypatch.setattr(
-        "corpus_ingest_core.workflow_derivation.create_provider", refuse
-    )
+    monkeypatch.setattr("corpus_ingest_core.workflow_derivation.create_provider", refuse)
 
 
 def test_preview_is_zero_write_and_declares_zero_network(monkeypatch, tmp_data_dirs):
@@ -73,9 +71,9 @@ def test_preview_is_zero_write_and_declares_zero_network(monkeypatch, tmp_data_d
     assert result["network_read"] is False
     assert result["not_investment_advice"] is True
     assert result["writes"], "preview must still name what it would write"
-    assert any(
-        "operator_workflow" in read for read in result["reads"]
-    ), "preview must name the operator policy file the agent cannot choose"
+    assert any("operator_workflow" in read for read in result["reads"]), (
+        "preview must name the operator policy file the agent cannot choose"
+    )
     assert _tree(tmp_data_dirs) == before
 
 
@@ -91,9 +89,7 @@ def test_preview_needs_no_api_cost_ack(monkeypatch, tmp_data_dirs):
     assert result["ok"] is True
 
 
-def test_confirm_without_the_exact_ack_fails_before_any_provider(
-    monkeypatch, tmp_data_dirs
-):
+def test_confirm_without_the_exact_ack_fails_before_any_provider(monkeypatch, tmp_data_dirs):
     from corpus_ingest_core import mcp_server
 
     _ready_lecture(tmp_data_dirs)
@@ -101,9 +97,7 @@ def test_confirm_without_the_exact_ack_fails_before_any_provider(
     _refuse_provider(monkeypatch)
     before = _tree(tmp_data_dirs)
 
-    result = mcp_server.derive_workflow_bundle(
-        PODCAST, EPISODE, confirm=True, api_cost_ack="close-enough"
-    )
+    result = mcp_server.derive_workflow_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack="close-enough")
 
     assert result["ok"] is False
     assert "error_type" in result and "message" in result
@@ -121,9 +115,7 @@ def test_confirm_writes_the_pair_and_returns_metadata_only(monkeypatch, tmp_data
         lambda *_args, **_kwargs: _FakeProvider(payload, []),
     )
 
-    result = mcp_server.derive_workflow_bundle(
-        PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK
-    )
+    result = mcp_server.derive_workflow_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack=SEMANTIC_API_COST_ACK)
 
     assert result["ok"] is True
     data = result["data"]
@@ -161,13 +153,10 @@ def test_tool_takes_no_provider_endpoint_credential_or_context_path():
 def test_core_parameter_stays_off_the_mcp_surface(forbidden):
     from corpus_ingest_core import mcp_server, workflow_derivation
 
-    assert forbidden in inspect.signature(
-        workflow_derivation.run_workflow_derivation
-    ).parameters, "guarding a Core parameter that no longer exists"
-    assert (
-        forbidden
-        not in inspect.signature(mcp_server.derive_workflow_bundle).parameters
+    assert forbidden in inspect.signature(workflow_derivation.run_workflow_derivation).parameters, (
+        "guarding a Core parameter that no longer exists"
     )
+    assert forbidden not in inspect.signature(mcp_server.derive_workflow_bundle).parameters
 
 
 def test_live_registry_appends_workflow_derivation_as_tool_25():

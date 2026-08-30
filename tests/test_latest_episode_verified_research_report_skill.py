@@ -19,26 +19,46 @@ def test_cli_defaults_to_preview_forwards_only_bounded_inputs(monkeypatch, capsy
     monkeypatch.setattr(
         cli,
         "run_latest_episode_verified_research_report_workflow",
-        lambda podcast_id, **kwargs: captured.update({"podcast_id": podcast_id, **kwargs})
-        or SimpleNamespace(outcome="dry_run"),
+        lambda podcast_id, **kwargs: (
+            captured.update({"podcast_id": podcast_id, **kwargs}) or SimpleNamespace(outcome="dry_run")
+        ),
     )
     monkeypatch.setattr(cli, "result_to_dict", lambda result: {"outcome": result.outcome})
 
     assert cli.main(["--podcast", "gooaye"]) == 0
     assert json.loads(capsys.readouterr().out) == {"outcome": "dry_run"}
     assert captured == {
-        "podcast_id": "gooaye", "confirm": False, "expected_episode_ref": None,
-        "api_cost_ack": "", "stock_query": None, "include_fixture_verification": False,
-        "transcription_model": None, "transcription_device": "cpu",
-        "transcription_compute_type": "int8", "transcription_vad_filter": False,
-        "semantic_provider": "openai-compatible", "semantic_model": None,
-        "semantic_base_url": None, "semantic_api_key_env": "OPENAI_API_KEY",
-        "semantic_reasoning_effort": None, "semantic_read_timeout_seconds": 120,
-        "semantic_chunk_seconds": 600, "semantic_max_segments_per_chunk": 120,
+        "podcast_id": "gooaye",
+        "confirm": False,
+        "expected_episode_ref": None,
+        "api_cost_ack": "",
+        "stock_query": None,
+        "include_fixture_verification": False,
+        "transcription_model": None,
+        "transcription_device": "cpu",
+        "transcription_compute_type": "int8",
+        "transcription_vad_filter": False,
+        "semantic_provider": "openai-compatible",
+        "semantic_model": None,
+        "semantic_base_url": None,
+        "semantic_api_key_env": "OPENAI_API_KEY",
+        "semantic_reasoning_effort": None,
+        "semantic_read_timeout_seconds": 120,
+        "semantic_chunk_seconds": 600,
+        "semantic_max_segments_per_chunk": 120,
         "publish_report": True,
     }
     options = {option for action in cli.build_parser()._actions for option in action.option_strings}
-    for forbidden in ("--force", "--allow-partial", "--retry", "--schedule", "--output-path", "--base-url", "--env-file", "--semantic-api-key-env"):
+    for forbidden in (
+        "--force",
+        "--allow-partial",
+        "--retry",
+        "--schedule",
+        "--output-path",
+        "--base-url",
+        "--env-file",
+        "--semantic-api-key-env",
+    ):
         assert forbidden not in options
 
 
@@ -49,16 +69,24 @@ def test_cli_no_publish_forwards_false_without_changing_loopback_routing(monkeyp
     monkeypatch.setattr(
         cli,
         "run_latest_episode_verified_research_report_workflow",
-        lambda podcast_id, **kwargs: captured.update({"podcast_id": podcast_id, **kwargs})
-        or SimpleNamespace(outcome="dry_run"),
+        lambda podcast_id, **kwargs: (
+            captured.update({"podcast_id": podcast_id, **kwargs}) or SimpleNamespace(outcome="dry_run")
+        ),
     )
     monkeypatch.setattr(cli, "result_to_dict", lambda result: {"outcome": result.outcome})
 
-    assert cli.main([
-        "--podcast", "gooaye",
-        "--no-publish",
-        "--semantic-base-url", "http://127.0.0.1:8317/v1",
-    ]) == 0
+    assert (
+        cli.main(
+            [
+                "--podcast",
+                "gooaye",
+                "--no-publish",
+                "--semantic-base-url",
+                "http://127.0.0.1:8317/v1",
+            ]
+        )
+        == 0
+    )
 
     assert captured["publish_report"] is False
     assert captured["semantic_api_key_env"] == "CLI_PROXY_API_KEY"
@@ -78,13 +106,21 @@ def test_confirmed_cli_no_publish_forwards_ack_and_hides_core_failure(monkeypatc
 
     monkeypatch.setattr(cli, "run_latest_episode_verified_research_report_workflow", fail_core)
 
-    assert cli.main([
-        "--podcast", "gooaye",
-        "--confirm",
-        "--no-publish",
-        "--expected-episode-ref", "EP700",
-        "--api-cost-ack", SEMANTIC_API_COST_ACK,
-    ]) == 1
+    assert (
+        cli.main(
+            [
+                "--podcast",
+                "gooaye",
+                "--confirm",
+                "--no-publish",
+                "--expected-episode-ref",
+                "EP700",
+                "--api-cost-ack",
+                SEMANTIC_API_COST_ACK,
+            ]
+        )
+        == 1
+    )
 
     assert captured["publish_report"] is False
     assert captured["api_cost_ack"] == SEMANTIC_API_COST_ACK
@@ -104,13 +140,22 @@ def test_red_cli_rejects_remote_base_url_before_core_and_hides_host(monkeypatch,
         lambda *args, **kwargs: pytest.fail("remote URL must not reach Core"),
     )
 
-    assert cli.main([
-        "--podcast", "gooaye",
-        "--confirm",
-        "--expected-episode-ref", "EP700",
-        "--api-cost-ack", SEMANTIC_API_COST_ACK,
-        "--semantic-base-url", "https://remote.invalid/v1",
-    ]) == 1
+    assert (
+        cli.main(
+            [
+                "--podcast",
+                "gooaye",
+                "--confirm",
+                "--expected-episode-ref",
+                "EP700",
+                "--api-cost-ack",
+                SEMANTIC_API_COST_ACK,
+                "--semantic-base-url",
+                "https://remote.invalid/v1",
+            ]
+        )
+        == 1
+    )
     assert "remote.invalid" not in capsys.readouterr().err
 
 
@@ -123,10 +168,17 @@ def test_red_cli_rejects_ipv6_loopback_before_core_and_hides_host(monkeypatch, c
         lambda *args, **kwargs: pytest.fail("IPv6 URL must not reach Core"),
     )
 
-    assert cli.main([
-        "--podcast", "gooaye",
-        "--semantic-base-url", "http://[::1]:8317/v1",
-    ]) == 1
+    assert (
+        cli.main(
+            [
+                "--podcast",
+                "gooaye",
+                "--semantic-base-url",
+                "http://[::1]:8317/v1",
+            ]
+        )
+        == 1
+    )
     assert "::1" not in capsys.readouterr().err
 
 
@@ -137,17 +189,27 @@ def test_red_cli_forwards_nondefault_semantic_request_controls(monkeypatch, caps
     monkeypatch.setattr(
         cli,
         "run_latest_episode_verified_research_report_workflow",
-        lambda podcast_id, **kwargs: captured.update({"podcast_id": podcast_id, **kwargs})
-        or SimpleNamespace(outcome="dry_run"),
+        lambda podcast_id, **kwargs: (
+            captured.update({"podcast_id": podcast_id, **kwargs}) or SimpleNamespace(outcome="dry_run")
+        ),
     )
     monkeypatch.setattr(cli, "result_to_dict", lambda result: {"outcome": result.outcome})
 
-    assert cli.main([
-        "--podcast", "gooaye",
-        "--semantic-reasoning-effort", "medium",
-        "--semantic-read-timeout-seconds", "600",
-        "--semantic-base-url", "http://127.0.0.1:8317/v1",
-    ]) == 0
+    assert (
+        cli.main(
+            [
+                "--podcast",
+                "gooaye",
+                "--semantic-reasoning-effort",
+                "medium",
+                "--semantic-read-timeout-seconds",
+                "600",
+                "--semantic-base-url",
+                "http://127.0.0.1:8317/v1",
+            ]
+        )
+        == 0
+    )
     assert json.loads(capsys.readouterr().out) == {"outcome": "dry_run"}
     assert captured["semantic_reasoning_effort"] == "medium"
     assert captured["semantic_read_timeout_seconds"] == 600
@@ -164,7 +226,10 @@ def test_cli_rejects_bad_confirmed_ack_before_core(monkeypatch, capsys):
         lambda *args, **kwargs: pytest.fail("invalid acknowledgement must not call core"),
     )
 
-    assert cli.main(["--podcast", "gooaye", "--confirm", "--expected-episode-ref", "EP700", "--api-cost-ack", "wrong"]) == 1
+    assert (
+        cli.main(["--podcast", "gooaye", "--confirm", "--expected-episode-ref", "EP700", "--api-cost-ack", "wrong"])
+        == 1
+    )
     assert capsys.readouterr().out == ""
 
 
@@ -173,21 +238,41 @@ def test_mcp_tool_is_fifteenth_bounded_dry_run_surface(monkeypatch):
 
     signature = inspect.signature(mcp_server.run_latest_episode_verified_research_report_workflow)
     assert list(signature.parameters) == [
-        "podcast_id", "confirm", "expected_episode_ref", "api_cost_ack", "stock_query",
-        "include_fixture_verification", "transcription_model", "transcription_device",
-        "transcription_compute_type", "transcription_vad_filter", "semantic_provider",
-        "semantic_model", "semantic_chunk_seconds", "semantic_max_segments_per_chunk",
+        "podcast_id",
+        "confirm",
+        "expected_episode_ref",
+        "api_cost_ack",
+        "stock_query",
+        "include_fixture_verification",
+        "transcription_model",
+        "transcription_device",
+        "transcription_compute_type",
+        "transcription_vad_filter",
+        "semantic_provider",
+        "semantic_model",
+        "semantic_chunk_seconds",
+        "semantic_max_segments_per_chunk",
     ]
     assert signature.parameters["confirm"].default is False
-    for forbidden in ("force", "allow_partial", "retry", "scheduler", "base_url", "api_key_env", "output_path", "progress_callback"):
+    for forbidden in (
+        "force",
+        "allow_partial",
+        "retry",
+        "scheduler",
+        "base_url",
+        "api_key_env",
+        "output_path",
+        "progress_callback",
+    ):
         assert forbidden not in signature.parameters
 
     captured = {}
     monkeypatch.setattr(
         mcp_server.verified_research_report_workflow_runner,
         "run_latest_episode_verified_research_report_workflow",
-        lambda podcast_id, **kwargs: captured.update({"podcast_id": podcast_id, **kwargs})
-        or SimpleNamespace(outcome="dry_run"),
+        lambda podcast_id, **kwargs: (
+            captured.update({"podcast_id": podcast_id, **kwargs}) or SimpleNamespace(outcome="dry_run")
+        ),
     )
     monkeypatch.setattr(
         mcp_server.verified_research_report_workflow_runner,
@@ -222,7 +307,9 @@ def test_mcp_bad_confirmed_request_is_rejected_before_core(monkeypatch):
 
 
 def test_portable_skill_requires_preview_then_episode_scoped_exact_ack_and_one_call():
-    skill = (ROOT / ".agents" / "skills" / "latest-episode-verified-research-report" / "SKILL.md").read_text(encoding="utf-8")
+    skill = (ROOT / ".agents" / "skills" / "latest-episode-verified-research-report" / "SKILL.md").read_text(
+        encoding="utf-8"
+    )
 
     assert "name: latest-episode-verified-research-report" in skill
     assert "run_latest_episode_verified_research_report_workflow" in skill

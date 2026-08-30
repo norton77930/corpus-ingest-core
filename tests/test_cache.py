@@ -93,12 +93,7 @@ def test_initialize_cache_creates_schema(tmp_path):
     db_path = initialize_cache(tmp_path / "cache.sqlite3")
 
     with sqlite3.connect(db_path) as connection:
-        tables = {
-            row[0]
-            for row in connection.execute(
-                "select name from sqlite_master where type = 'table'"
-            )
-        }
+        tables = {row[0] for row in connection.execute("select name from sqlite_master where type = 'table'")}
     assert {"episodes", "transcript_segments", "mentions", "mention_evidence"} <= tables
 
 
@@ -139,9 +134,7 @@ def test_index_episode_indexes_mentions_json(monkeypatch, tmp_path):
     with sqlite3.connect(db_path) as connection:
         mention_count = connection.execute("select count(*) from mentions").fetchone()[0]
         evidence_count = connection.execute("select count(*) from mention_evidence").fetchone()[0]
-        markdown_path = connection.execute(
-            "select mentions_markdown_path from episodes"
-        ).fetchone()[0]
+        markdown_path = connection.execute("select mentions_markdown_path from episodes").fetchone()[0]
     assert result.mention_count == 1
     assert mention_count == 1
     assert evidence_count == 1

@@ -96,23 +96,15 @@ def test_fixture_redirects_every_storage_dir(tmp_data_dirs):
     root = tmp_data_dirs
     for name in conftest.storage_dir_constant_names():
         value = getattr(storage, name)
-        assert value == root or root in value.parents, (
-            f"storage.{name} escaped the tmp root: {value}"
-        )
+        assert value == root or root in value.parents, f"storage.{name} escaped the tmp root: {value}"
     for module_name, attribute in conftest.EVALS_REPORTS_DIR_BINDINGS:
         module = importlib.import_module(module_name)
         value = getattr(module, attribute)
-        assert root in value.parents, (
-            f"{module_name}.{attribute} escaped the tmp root: {value}"
-        )
+        assert root in value.parents, f"{module_name}.{attribute} escaped the tmp root: {value}"
 
 
 def _data_dir_in_subprocess(extra_env: dict[str, str]) -> str:
-    env = {
-        key: value
-        for key, value in os.environ.items()
-        if key not in _names(DATA_DIR_ENV)
-    }
+    env = {key: value for key, value in os.environ.items() if key not in _names(DATA_DIR_ENV)}
     env.update(extra_env)
     env["PYTHONPATH"] = str(REPO_ROOT / "src")
     completed = subprocess.run(
@@ -153,12 +145,8 @@ def test_data_dir_still_honors_the_pre_rename_variable():
 
 def test_current_data_dir_variable_wins_over_the_deprecated_one():
     legacy = DEPRECATED_ALIASES[DATA_DIR_ENV]
-    result = _data_dir_in_subprocess(
-        {DATA_DIR_ENV: "current-root", legacy: "legacy-root"}
-    )
+    result = _data_dir_in_subprocess({DATA_DIR_ENV: "current-root", legacy: "legacy-root"})
     assert result == "current-root"
-
-
 
 
 def _config_path_in_subprocess(extra_env: dict[str, str]) -> str:
@@ -166,11 +154,7 @@ def _config_path_in_subprocess(extra_env: dict[str, str]) -> str:
     at import time, so an in-process monkeypatch would not exercise it.
     """
 
-    env = {
-        key: value
-        for key, value in os.environ.items()
-        if key not in _names(CONFIG_ENV)
-    }
+    env = {key: value for key, value in os.environ.items() if key not in _names(CONFIG_ENV)}
     env.update(extra_env)
     env["PYTHONPATH"] = str(REPO_ROOT / "src")
     completed = subprocess.run(
@@ -201,18 +185,19 @@ def test_config_path_still_honors_the_pre_rename_variable():
     override = str(Path("legacy-profiles.yaml"))
     legacy = DEPRECATED_ALIASES[CONFIG_ENV]
     assert _config_path_in_subprocess({legacy: override}) == override
+
+
 def test_evals_reports_dir_literal_is_defined_only_in_storage():
     pattern = re.compile(r'Path\(\s*"evals"\s*\)')
     src_dir = REPO_ROOT / "src" / "corpus_ingest_core"
     offenders = [
         path.name
         for path in sorted(src_dir.glob("*.py"))
-        if path.name != "storage.py"
-        and pattern.search(path.read_text(encoding="utf-8"))
+        if path.name != "storage.py" and pattern.search(path.read_text(encoding="utf-8"))
     ]
     assert not offenders, (
         "the evals reports root must be defined once in storage.py and "
-        f"re-exported; found Path(\"evals\") in: {offenders}"
+        f're-exported; found Path("evals") in: {offenders}'
     )
 
 
@@ -245,15 +230,11 @@ def test_every_renamed_variable_has_its_alias_wired():
     from corpus_ingest_core import local_env_names
 
     current = {
-        name: value
-        for name, value in vars(local_env_names).items()
-        if name.endswith("_ENV") and isinstance(value, str)
+        name: value for name, value in vars(local_env_names).items() if name.endswith("_ENV") and isinstance(value, str)
     }
     assert current, "no *_ENV constants found -- the module was restructured"
 
-    missing = sorted(
-        value for value in current.values() if value not in DEPRECATED_ALIASES
-    )
+    missing = sorted(value for value in current.values() if value not in DEPRECATED_ALIASES)
     assert not missing, (
         f"these variables have no pre-rename alias: {missing}. Every renamed "
         "variable needs one until 0.3.0, or a machine configured before the "
@@ -262,9 +243,9 @@ def test_every_renamed_variable_has_its_alias_wired():
     for new_name, old_name in DEPRECATED_ALIASES.items():
         assert new_name.startswith("CORPUS_INGEST_"), new_name
         assert old_name.startswith("PODCAST_INGEST_"), old_name
-        assert new_name.removeprefix("CORPUS_INGEST_") == old_name.removeprefix(
-            "PODCAST_INGEST_"
-        ), f"{new_name} and {old_name} are not the same variable renamed"
+        assert new_name.removeprefix("CORPUS_INGEST_") == old_name.removeprefix("PODCAST_INGEST_"), (
+            f"{new_name} and {old_name} are not the same variable renamed"
+        )
 
 
 @pytest.mark.parametrize("name", sorted(DEPRECATED_ALIASES))

@@ -40,11 +40,12 @@ def _write_transcript(
 
     paths = transcript_asset_paths(podcast_id, episode_ref, title)
     paths.text_path.parent.mkdir(parents=True, exist_ok=True)
-    paths.text_path.write_text(
-        "\n".join(segment["text"] for segment in segments), encoding="utf-8"
-    )
+    paths.text_path.write_text("\n".join(segment["text"] for segment in segments), encoding="utf-8")
     paths.srt_path.write_text(
-        "\n".join(f"{index}\n00:00:00,000 --> 00:00:01,000\n{segment['text']}\n" for index, segment in enumerate(segments, start=1)),
+        "\n".join(
+            f"{index}\n00:00:00,000 --> 00:00:01,000\n{segment['text']}\n"
+            for index, segment in enumerate(segments, start=1)
+        ),
         encoding="utf-8",
     )
     payload = {
@@ -110,9 +111,7 @@ def test_semantic_summarizer_calls_validation_before_provider(monkeypatch, tmp_p
     assert len(provider.chunk_calls) == 3
 
 
-def test_semantic_summarizer_forwards_reasoning_effort_to_provider(
-    monkeypatch, tmp_path
-):
+def test_semantic_summarizer_forwards_reasoning_effort_to_provider(monkeypatch, tmp_path):
     import corpus_ingest_core.semantic_summarizer as semantic_summarizer
 
     _write_transcript(monkeypatch, tmp_path)
@@ -708,18 +707,14 @@ def _profile_with_summary(summary_profile):
     )
 
 
-def test_finance_rendering_is_byte_identical_to_the_pre_spec_037_document(
-    monkeypatch, tmp_path
-):
+def test_finance_rendering_is_byte_identical_to_the_pre_spec_037_document(monkeypatch, tmp_path):
     """Every published verified research report descends from a semantic summary.
     This literal is the fixed point that keeps 股癌's shape from drifting."""
 
     import corpus_ingest_core.semantic_summarizer as semantic_summarizer
 
     paths = _write_transcript(monkeypatch, tmp_path)
-    monkeypatch.setattr(
-        semantic_summarizer, "_build_provider", lambda **kwargs: FakeProvider()
-    )
+    monkeypatch.setattr(semantic_summarizer, "_build_provider", lambda **kwargs: FakeProvider())
 
     asset = semantic_summarizer.semantic_summarize_episode(
         "gooaye",
@@ -729,15 +724,10 @@ def test_finance_rendering_is_byte_identical_to_the_pre_spec_037_document(
     )
 
     assert paths.json_path.exists()
-    assert (
-        Path(asset.summary_path).read_text(encoding="utf-8")
-        == _EXPECTED_FINANCE_DOCUMENT
-    )
+    assert Path(asset.summary_path).read_text(encoding="utf-8") == _EXPECTED_FINANCE_DOCUMENT
 
 
-def test_learning_notes_replaces_the_disclaimer_and_keeps_the_envelope(
-    monkeypatch, tmp_path
-):
+def test_learning_notes_replaces_the_disclaimer_and_keeps_the_envelope(monkeypatch, tmp_path):
     import corpus_ingest_core.semantic_summarizer as semantic_summarizer
 
     _write_transcript(monkeypatch, tmp_path)
@@ -746,9 +736,7 @@ def test_learning_notes_replaces_the_disclaimer_and_keeps_the_envelope(
         "load_podcast_profile",
         lambda podcast_id: _profile_with_summary("learning-notes"),
     )
-    monkeypatch.setattr(
-        semantic_summarizer, "_build_provider", lambda **kwargs: FakeProvider()
-    )
+    monkeypatch.setattr(semantic_summarizer, "_build_provider", lambda **kwargs: FakeProvider())
 
     asset = semantic_summarizer.semantic_summarize_episode(
         "gooaye",
@@ -808,9 +796,7 @@ def test_semantic_summarize_episode_has_no_per_run_profile_argument():
 
     from corpus_ingest_core.semantic_summarizer import semantic_summarize_episode
 
-    assert "summary_profile" not in inspect.signature(
-        semantic_summarize_episode
-    ).parameters
+    assert "summary_profile" not in inspect.signature(semantic_summarize_episode).parameters
 
 
 def test_empty_transcript_branch_still_honours_the_profile(monkeypatch, tmp_path):

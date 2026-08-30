@@ -76,9 +76,7 @@ _SAFE_BASE_URL = re.compile(r"^https?://[A-Za-z0-9.-]+(?::[0-9]{1,5})?(?:/[A-Za-
 _SAFE_CHECKPOINT_STAGE = re.compile(r"^[a-z_]{1,64}$")
 _SAFE_CHECKPOINT_STATUS = re.compile(r"^[a-z_]{1,32}$")
 _SAFE_CHECKPOINT_PATH = re.compile(r"^(?:[A-Za-z]:[\\/]|/)?[A-Za-z0-9._一-鿿\\/-]{1,1024}$")
-_CHECKPOINT_TERMINAL_OUTCOMES = {
-    "in_progress", "completed", "reused", "blocked", "failed", "rejected", "manual"
-}
+_CHECKPOINT_TERMINAL_OUTCOMES = {"in_progress", "completed", "reused", "blocked", "failed", "rejected", "manual"}
 _SUMMARY_SNAPSHOT_MAX_BYTES = 2 * 1024 * 1024
 _LINEAGE_SNAPSHOT_MAX_BYTES = 64 * 1024 * 1024
 _RESEARCH_SNAPSHOT_MAX_BYTES = 16 * 1024 * 1024
@@ -135,9 +133,7 @@ def _acquire_episode_workflow_claim(
 
     shared_claim = episode_writer_claim(podcast_id, episode_ref)
     shared_claim.__enter__()
-    workflow_claim = exclusive_artifact_claim(
-        checkpoint_path.with_name(f".{checkpoint_path.name}.workflow.claim")
-    )
+    workflow_claim = exclusive_artifact_claim(checkpoint_path.with_name(f".{checkpoint_path.name}.workflow.claim"))
     try:
         workflow_claim.__enter__()
     except BaseException:
@@ -163,17 +159,13 @@ def _acquire_canonical_transcript_scope(podcast_id: str, episode_ref: str) -> No
 
     identity = resolve_canonical_transcript_identity(podcast_id, episode_ref)
     if identity is None:
-        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
-            "canonical transcript is missing"
-        )
+        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("canonical transcript is missing")
     scope = canonical_transcript_scope(identity)
     scope.__enter__()
     _CURRENT_CANONICAL_SCOPE.set(scope)
 
 
-def _mint_latest_regeneration_capability(
-    podcast_id: str, episode_ref: str
-) -> _ControlledRegenerationCapability:
+def _mint_latest_regeneration_capability(podcast_id: str, episode_ref: str) -> _ControlledRegenerationCapability:
     """Authorize one overwrite only inside the confirmed pinned workflow scope."""
 
     if (
@@ -233,16 +225,12 @@ def run_latest_episode_verified_research_report_workflow(
     if not isinstance(confirm, bool):
         raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("confirm is invalid")
     if not isinstance(publish_report, bool):
-        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
-            "publish_report is invalid"
-        )
+        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("publish_report is invalid")
     normalized_podcast_id = _normalize_podcast_id(podcast_id)
     normalized_expected_episode_ref = _normalize_expected_episode_ref(expected_episode_ref)
     normalized_stock_query = _normalize_stock_query(stock_query)
     if not publish_report and normalized_stock_query is not None:
-        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
-            "no-publish stock_query is unsupported"
-        )
+        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("no-publish stock_query is unsupported")
     normalized_semantic_base_url = _normalize_semantic_base_url(semantic_base_url)
     normalized_semantic_api_key_env = _normalize_semantic_api_key_env(semantic_api_key_env)
     _normalize_api_cost_ack(api_cost_ack)
@@ -256,9 +244,7 @@ def run_latest_episode_verified_research_report_workflow(
         transcription_vad_filter=transcription_vad_filter,
         semantic_provider=semantic_provider,
         semantic_model=semantic_model,
-        semantic_base_url_identity_sha256=_semantic_base_url_identity_sha256(
-            normalized_semantic_base_url
-        ),
+        semantic_base_url_identity_sha256=_semantic_base_url_identity_sha256(normalized_semantic_base_url),
         semantic_reasoning_effort=semantic_reasoning_effort,
         semantic_read_timeout_seconds=semantic_read_timeout_seconds,
         semantic_chunk_seconds=semantic_chunk_seconds,
@@ -297,9 +283,7 @@ def run_latest_episode_verified_research_report_workflow(
             expected_episode_ref=None,
             outcome="dry_run",
             filters=filters,
-            stage_plan=_preview_plan(
-                normalized_podcast_id, canonical_episode_ref, publish_report=publish_report
-            ),
+            stage_plan=_preview_plan(normalized_podcast_id, canonical_episode_ref, publish_report=publish_report),
         )
 
     if canonical_episode_ref != normalized_expected_episode_ref:
@@ -324,9 +308,7 @@ def run_latest_episode_verified_research_report_workflow(
         normalized_podcast_id, canonical_episode_ref, "0" * 64
     ).checkpoint_path
     try:
-        _acquire_episode_workflow_claim(
-            checkpoint_path, normalized_podcast_id, canonical_episode_ref
-        )
+        _acquire_episode_workflow_claim(checkpoint_path, normalized_podcast_id, canonical_episode_ref)
     except Exception as exc:  # noqa: BLE001 - claim acquisition is a bounded boundary.
         return _stage_failure_result(
             podcast_id=normalized_podcast_id,
@@ -441,8 +423,18 @@ def run_latest_episode_verified_research_report_workflow(
             checkpoint_path=checkpoint_path,
             stage_plan=[_step("deterministic_processing", "blocked", "deterministic child identity mismatch")],
         )
-    deterministic_status = "completed" if deterministic.outcome == "ready_for_semantic_summary" else deterministic.outcome
-    stages.append(_step("deterministic_processing", deterministic_status, "pinned deterministic workflow completed" if deterministic_status == "completed" else "pinned deterministic workflow stopped"))
+    deterministic_status = (
+        "completed" if deterministic.outcome == "ready_for_semantic_summary" else deterministic.outcome
+    )
+    stages.append(
+        _step(
+            "deterministic_processing",
+            deterministic_status,
+            "pinned deterministic workflow completed"
+            if deterministic_status == "completed"
+            else "pinned deterministic workflow stopped",
+        )
+    )
     checkpoint_history.append({"stage": "deterministic_processing", "status": deterministic_status})
     _record_checkpoint_warning(
         warnings, checkpoint_path, normalized_podcast_id, canonical_episode_ref, checkpoint_history
@@ -459,9 +451,7 @@ def run_latest_episode_verified_research_report_workflow(
             stage_plan=stages,
         )
     try:
-        _acquire_canonical_transcript_scope(
-            normalized_podcast_id, canonical_episode_ref
-        )
+        _acquire_canonical_transcript_scope(normalized_podcast_id, canonical_episode_ref)
     except Exception as exc:  # noqa: BLE001 - selector failure is a bounded gate.
         return _stage_failure_result(
             podcast_id=normalized_podcast_id,
@@ -475,9 +465,7 @@ def run_latest_episode_verified_research_report_workflow(
             warnings=warnings,
         )
 
-    lineage_current = _lineage_is_current(
-        normalized_podcast_id, canonical_episode_ref, filters
-    )
+    lineage_current = _lineage_is_current(normalized_podcast_id, canonical_episode_ref, filters)
     summary_lineage_current = _lineage_roles_are_current(
         normalized_podcast_id,
         canonical_episode_ref,
@@ -520,16 +508,20 @@ def run_latest_episode_verified_research_report_workflow(
     if semantic_state["summary"] not in {"available", "missing"}:
         stages.append(_step("semantic_summary", "blocked", "semantic summary is unavailable"))
         return _result(
-            podcast_id=normalized_podcast_id, confirm=True, episode_ref=canonical_episode_ref,
-            expected_episode_ref=normalized_expected_episode_ref, outcome="blocked", filters=filters,
-            checkpoint_path=checkpoint_path, stage_plan=stages, warnings=warnings,
+            podcast_id=normalized_podcast_id,
+            confirm=True,
+            episode_ref=canonical_episode_ref,
+            expected_episode_ref=normalized_expected_episode_ref,
+            outcome="blocked",
+            filters=filters,
+            checkpoint_path=checkpoint_path,
+            stage_plan=stages,
+            warnings=warnings,
         )
 
     if summary_regeneration_required:
         try:
-            authorization = _mint_latest_regeneration_capability(
-                normalized_podcast_id, canonical_episode_ref
-            )
+            authorization = _mint_latest_regeneration_capability(normalized_podcast_id, canonical_episode_ref)
             _controlled_summary_regeneration_transaction(
                 normalized_podcast_id,
                 canonical_episode_ref,
@@ -562,9 +554,15 @@ def run_latest_episode_verified_research_report_workflow(
         if not summary_lineage_current:
             stages.append(_step("semantic_summary", "blocked", "semantic summary lineage is not current"))
             return _result(
-                podcast_id=normalized_podcast_id, confirm=True, episode_ref=canonical_episode_ref,
-                expected_episode_ref=normalized_expected_episode_ref, outcome="blocked", filters=filters,
-                checkpoint_path=checkpoint_path, stage_plan=stages, warnings=warnings,
+                podcast_id=normalized_podcast_id,
+                confirm=True,
+                episode_ref=canonical_episode_ref,
+                expected_episode_ref=normalized_expected_episode_ref,
+                outcome="blocked",
+                filters=filters,
+                checkpoint_path=checkpoint_path,
+                stage_plan=stages,
+                warnings=warnings,
             )
         stages.append(_step("semantic_summary", "completed", "semantic summary regenerated"))
         checkpoint_history.append({"stage": "semantic_summary", "status": "completed"})
@@ -592,9 +590,11 @@ def run_latest_episode_verified_research_report_workflow(
                 normalized_podcast_id,
                 canonical_episode_ref,
                 filters,
-                {"semantic_summary": storage.semantic_summary_asset_path(
-                    normalized_podcast_id, canonical_episode_ref, title
-                )},
+                {
+                    "semantic_summary": storage.semantic_summary_asset_path(
+                        normalized_podcast_id, canonical_episode_ref, title
+                    )
+                },
                 summary_commits,
             ) as record_summary_commit:
                 summary_result = run_corpus_semantic_remediation(
@@ -627,9 +627,15 @@ def run_latest_episode_verified_research_report_workflow(
         if not _child_identity_matches(summary_result, canonical_episode_ref) or not _child_succeeded(summary_result):
             stages.append(_step("semantic_summary", "failed", "semantic summary child did not complete"))
             return _result(
-                podcast_id=normalized_podcast_id, confirm=True, episode_ref=canonical_episode_ref,
-                expected_episode_ref=normalized_expected_episode_ref, outcome="failed", filters=filters,
-                checkpoint_path=checkpoint_path, stage_plan=stages, warnings=warnings,
+                podcast_id=normalized_podcast_id,
+                confirm=True,
+                episode_ref=canonical_episode_ref,
+                expected_episode_ref=normalized_expected_episode_ref,
+                outcome="failed",
+                filters=filters,
+                checkpoint_path=checkpoint_path,
+                stage_plan=stages,
+                warnings=warnings,
             )
         fresh_summary = _child_generated(summary_result)
         if fresh_summary and "semantic_summary" not in summary_commits:
@@ -638,9 +644,7 @@ def run_latest_episode_verified_research_report_workflow(
             record_summary_commit(
                 ChildArtifactCommit(
                     "semantic_summary",
-                    storage.semantic_summary_asset_path(
-                        normalized_podcast_id, canonical_episode_ref, title
-                    ),
+                    storage.semantic_summary_asset_path(normalized_podcast_id, canonical_episode_ref, title),
                     True,
                     {},
                 )
@@ -651,9 +655,15 @@ def run_latest_episode_verified_research_report_workflow(
         if not summary_lineage_current or "semantic_summary" not in summary_commits:
             stages.append(_step("semantic_summary", "blocked", "semantic summary lacks controlled generation proof"))
             return _result(
-                podcast_id=normalized_podcast_id, confirm=True, episode_ref=canonical_episode_ref,
-                expected_episode_ref=normalized_expected_episode_ref, outcome="blocked", filters=filters,
-                checkpoint_path=checkpoint_path, stage_plan=stages, warnings=warnings,
+                podcast_id=normalized_podcast_id,
+                confirm=True,
+                episode_ref=canonical_episode_ref,
+                expected_episode_ref=normalized_expected_episode_ref,
+                outcome="blocked",
+                filters=filters,
+                checkpoint_path=checkpoint_path,
+                stage_plan=stages,
+                warnings=warnings,
             )
         stages.append(_step("semantic_summary", "completed", "semantic summary completed"))
         checkpoint_history.append({"stage": "semantic_summary", "status": "completed"})
@@ -680,9 +690,14 @@ def run_latest_episode_verified_research_report_workflow(
     if semantic_state["summary"] != "available":
         stages[-1] = _step("semantic_summary", "blocked", "semantic summary is unavailable")
         return _result(
-            podcast_id=normalized_podcast_id, confirm=True, episode_ref=canonical_episode_ref,
-            expected_episode_ref=normalized_expected_episode_ref, outcome="blocked", filters=filters,
-            checkpoint_path=checkpoint_path, stage_plan=stages,
+            podcast_id=normalized_podcast_id,
+            confirm=True,
+            episode_ref=canonical_episode_ref,
+            expected_episode_ref=normalized_expected_episode_ref,
+            outcome="blocked",
+            filters=filters,
+            checkpoint_path=checkpoint_path,
+            stage_plan=stages,
         )
 
     if not publish_report and semantic_state["review"] == "passed":
@@ -699,9 +714,7 @@ def run_latest_episode_verified_research_report_workflow(
                 review_commits,
             ) as record_review_commit:
                 if is_authenticity_rereview:
-                    review_result = _run_018_authenticity_rereview(
-                        normalized_podcast_id, canonical_episode_ref
-                    )
+                    review_result = _run_018_authenticity_rereview(normalized_podcast_id, canonical_episode_ref)
                 else:
                     review_result = run_corpus_semantic_remediation(
                         normalized_podcast_id,
@@ -724,44 +737,64 @@ def run_latest_episode_verified_research_report_workflow(
         if not _child_identity_matches(review_result, canonical_episode_ref):
             stages.append(_step("semantic_review", "failed", "semantic review child identity mismatch"))
             return _result(
-                podcast_id=normalized_podcast_id, confirm=True, episode_ref=canonical_episode_ref,
-                expected_episode_ref=normalized_expected_episode_ref, outcome="failed", filters=filters,
-                checkpoint_path=checkpoint_path, stage_plan=stages, warnings=warnings,
+                podcast_id=normalized_podcast_id,
+                confirm=True,
+                episode_ref=canonical_episode_ref,
+                expected_episode_ref=normalized_expected_episode_ref,
+                outcome="failed",
+                filters=filters,
+                checkpoint_path=checkpoint_path,
+                stage_plan=stages,
+                warnings=warnings,
             )
         if is_authenticity_rereview:
             if getattr(review_result, "review_status", None) != "passed":
                 stages.append(_step("semantic_review", "blocked", "semantic review did not pass"))
                 return _result(
-                    podcast_id=normalized_podcast_id, confirm=True, episode_ref=canonical_episode_ref,
-                    expected_episode_ref=normalized_expected_episode_ref, outcome="blocked", filters=filters,
-                    checkpoint_path=checkpoint_path, stage_plan=stages, warnings=warnings,
+                    podcast_id=normalized_podcast_id,
+                    confirm=True,
+                    episode_ref=canonical_episode_ref,
+                    expected_episode_ref=normalized_expected_episode_ref,
+                    outcome="blocked",
+                    filters=filters,
+                    checkpoint_path=checkpoint_path,
+                    stage_plan=stages,
+                    warnings=warnings,
                 )
         elif not _child_succeeded(review_result):
             child_rows = getattr(review_result, "rows", None)
             child_status = (
-                getattr(child_rows[0], "status", None)
-                if isinstance(child_rows, list) and child_rows
-                else None
+                getattr(child_rows[0], "status", None) if isinstance(child_rows, list) and child_rows else None
             )
             if child_status == "blocked":
                 stages.append(_step("semantic_review", "blocked", "semantic review did not pass"))
                 return _result(
-                    podcast_id=normalized_podcast_id, confirm=True, episode_ref=canonical_episode_ref,
-                    expected_episode_ref=normalized_expected_episode_ref, outcome="blocked", filters=filters,
-                    checkpoint_path=checkpoint_path, stage_plan=stages, warnings=warnings,
+                    podcast_id=normalized_podcast_id,
+                    confirm=True,
+                    episode_ref=canonical_episode_ref,
+                    expected_episode_ref=normalized_expected_episode_ref,
+                    outcome="blocked",
+                    filters=filters,
+                    checkpoint_path=checkpoint_path,
+                    stage_plan=stages,
+                    warnings=warnings,
                 )
             stages.append(_step("semantic_review", "failed", "semantic review child did not complete"))
             return _result(
-                podcast_id=normalized_podcast_id, confirm=True, episode_ref=canonical_episode_ref,
-                expected_episode_ref=normalized_expected_episode_ref, outcome="failed", filters=filters,
-                checkpoint_path=checkpoint_path, stage_plan=stages, warnings=warnings,
+                podcast_id=normalized_podcast_id,
+                confirm=True,
+                episode_ref=canonical_episode_ref,
+                expected_episode_ref=normalized_expected_episode_ref,
+                outcome="failed",
+                filters=filters,
+                checkpoint_path=checkpoint_path,
+                stage_plan=stages,
+                warnings=warnings,
             )
         if "semantic_review" not in review_commits:
             review_path = getattr(review_result, "review_json_path", None)
             if isinstance(review_path, Path):
-                record_review_commit(
-                    ChildArtifactCommit("semantic_review", review_path, True, {})
-                )
+                record_review_commit(ChildArtifactCommit("semantic_review", review_path, True, {}))
         try:
             semantic_state = _semantic_state(normalized_podcast_id, canonical_episode_ref, title)
         except Exception as exc:  # noqa: BLE001 - post-review inspection is bounded.
@@ -783,9 +816,15 @@ def run_latest_episode_verified_research_report_workflow(
             if not review_lineage_current or "semantic_review" not in review_commits:
                 stages.append(_step("semantic_review", "blocked", "semantic review lacks controlled generation proof"))
                 return _result(
-                    podcast_id=normalized_podcast_id, confirm=True, episode_ref=canonical_episode_ref,
-                    expected_episode_ref=normalized_expected_episode_ref, outcome="blocked", filters=filters,
-                    checkpoint_path=checkpoint_path, stage_plan=stages, warnings=warnings,
+                    podcast_id=normalized_podcast_id,
+                    confirm=True,
+                    episode_ref=canonical_episode_ref,
+                    expected_episode_ref=normalized_expected_episode_ref,
+                    outcome="blocked",
+                    filters=filters,
+                    checkpoint_path=checkpoint_path,
+                    stage_plan=stages,
+                    warnings=warnings,
                 )
             stages.append(_step("semantic_review", "completed", "semantic review passed"))
             checkpoint_history.append({"stage": "semantic_review", "status": "passed"})
@@ -801,16 +840,19 @@ def run_latest_episode_verified_research_report_workflow(
 
     if semantic_state["review"] != "passed":
         return _result(
-            podcast_id=normalized_podcast_id, confirm=True, episode_ref=canonical_episode_ref,
-            expected_episode_ref=normalized_expected_episode_ref, outcome="blocked", filters=filters,
-            checkpoint_path=checkpoint_path, stage_plan=stages,
+            podcast_id=normalized_podcast_id,
+            confirm=True,
+            episode_ref=canonical_episode_ref,
+            expected_episode_ref=normalized_expected_episode_ref,
+            outcome="blocked",
+            filters=filters,
+            checkpoint_path=checkpoint_path,
+            stage_plan=stages,
         )
 
     research_commits: set[str] = set()
     research_expected_paths = {
-        "mentions": storage.mention_asset_paths(
-            normalized_podcast_id, canonical_episode_ref, title
-        ).json_path,
+        "mentions": storage.mention_asset_paths(normalized_podcast_id, canonical_episode_ref, title).json_path,
         "intelligence": storage.episode_intelligence_report_asset_paths(
             normalized_podcast_id, canonical_episode_ref, title
         ).json_path,
@@ -850,21 +892,21 @@ def run_latest_episode_verified_research_report_workflow(
         nullcontext(_ClearedResearchArtifacts())
         if research_lineage_current
         else _unproven_research_artifacts_cleared(
-            {
-                role: (research_roots[role], path)
-                for role, path in research_expected_paths.items()
-            }
+            {role: (research_roots[role], path) for role, path in research_expected_paths.items()}
         )
     )
     research_status: str | None = None
     superseded_research_roles: dict[str, str] = {}
     try:
-        with cleared_prestate as clearing, _progressive_lineage_scope(
-            normalized_podcast_id,
-            canonical_episode_ref,
-            filters,
-            research_expected_paths,
-            research_commits,
+        with (
+            cleared_prestate as clearing,
+            _progressive_lineage_scope(
+                normalized_podcast_id,
+                canonical_episode_ref,
+                filters,
+                research_expected_paths,
+                research_commits,
+            ),
         ):
             research_result = run_research_workflow(
                 normalized_podcast_id,
@@ -899,9 +941,14 @@ def run_latest_episode_verified_research_report_workflow(
     if research_status != "completed":
         stages.append(_step("research", "blocked", "research workflow did not complete"))
         return _result(
-            podcast_id=normalized_podcast_id, confirm=True, episode_ref=canonical_episode_ref,
-            expected_episode_ref=normalized_expected_episode_ref, outcome="blocked", filters=filters,
-            checkpoint_path=checkpoint_path, stage_plan=stages,
+            podcast_id=normalized_podcast_id,
+            confirm=True,
+            episode_ref=canonical_episode_ref,
+            expected_episode_ref=normalized_expected_episode_ref,
+            outcome="blocked",
+            filters=filters,
+            checkpoint_path=checkpoint_path,
+            stage_plan=stages,
         )
     stages.append(_step("research", "completed", "deterministic research completed"))
     if superseded_research_roles:
@@ -912,23 +959,16 @@ def run_latest_episode_verified_research_report_workflow(
                 scope="research",
                 episode_ref=canonical_episode_ref,
                 message="superseded unproven research artifacts: "
-                + ", ".join(
-                    f"{role}={sha256}"
-                    for role, sha256 in sorted(superseded_research_roles.items())
-                ),
+                + ", ".join(f"{role}={sha256}" for role, sha256 in sorted(superseded_research_roles.items())),
             )
         )
     checkpoint_history.append({"stage": "research", "status": "completed"})
     _record_checkpoint_warning(
         warnings, checkpoint_path, normalized_podcast_id, canonical_episode_ref, checkpoint_history
     )
-    lineage_current = _lineage_is_current(
-        normalized_podcast_id, canonical_episode_ref, filters
-    )
+    lineage_current = _lineage_is_current(normalized_podcast_id, canonical_episode_ref, filters)
     if not lineage_current and not set(research_expected_paths) <= research_commits:
-        stages[-1] = _step(
-            "research", "blocked", "research artifacts lack controlled current lineage"
-        )
+        stages[-1] = _step("research", "blocked", "research artifacts lack controlled current lineage")
         return _result(
             podcast_id=normalized_podcast_id,
             confirm=True,
@@ -942,9 +982,7 @@ def run_latest_episode_verified_research_report_workflow(
         )
 
     if not publish_report:
-        if not _lineage_is_current(
-            normalized_podcast_id, canonical_episode_ref, filters
-        ):
+        if not _lineage_is_current(normalized_podcast_id, canonical_episode_ref, filters):
             stages.append(
                 _step(
                     "lineage_validation",
@@ -963,11 +1001,7 @@ def run_latest_episode_verified_research_report_workflow(
                 stage_plan=stages,
                 warnings=warnings,
             )
-        stages.append(
-            _step(
-                "lineage_validation", "completed", "full verified research lineage is current"
-            )
-        )
+        stages.append(_step("lineage_validation", "completed", "full verified research lineage is current"))
         checkpoint_history.append({"stage": "lineage_validation", "status": "completed"})
         _record_checkpoint_warning(
             warnings,
@@ -1010,7 +1044,13 @@ def run_latest_episode_verified_research_report_workflow(
             stages=stages,
             warnings=warnings,
         )
-    stages.append(_step("publish", "reused" if bundle.reused else "completed", "verified report bundle reused" if bundle.reused else "verified report bundle published"))
+    stages.append(
+        _step(
+            "publish",
+            "reused" if bundle.reused else "completed",
+            "verified report bundle reused" if bundle.reused else "verified report bundle published",
+        )
+    )
     checkpoint_history.append({"stage": "publish", "status": "reused" if bundle.reused else "completed"})
     return _result(
         podcast_id=normalized_podcast_id,
@@ -1083,18 +1123,56 @@ def _preview_plan(
 ) -> list[LatestEpisodeVerifiedResearchReportWorkflowStep]:
     report_root = f"data/research-reports/{podcast_id}/{episode_ref}/v1-{{source_digest}}"
     plan = [
-        _step("deterministic_processing", "planned", "reuse pinned deterministic intake, download, transcription, and remediation", planned_reads=["configured podcast RSS feed", "in-memory corpus snapshot"], planned_writes=[f"data/corpus/{podcast_id}/...", f"data/transcripts/{podcast_id}/..."]),
-        _step("semantic_summary", "planned", "generate at most one missing semantic summary", requires_ack=True, transfer_risk=True, api_cost_risk=True, planned_reads=[f"data/transcripts/{podcast_id}/{episode_ref}__*.json"], planned_writes=[f"data/summaries/{podcast_id}/{episode_ref}__*.semantic.md"]),
-        _step("semantic_review", "planned", "run deterministic semantic review only when missing", planned_writes=["evals/research-llm-smoke/reports/*.semantic-review.json"]),
-        _step("research", "planned", "generate deterministic research artifacts with fixed safe options", planned_writes=[f"data/mentions/{podcast_id}/...", f"data/reports/{podcast_id}/...", f"data/mappings/{podcast_id}/...", f"data/external/{podcast_id}/..."]),
+        _step(
+            "deterministic_processing",
+            "planned",
+            "reuse pinned deterministic intake, download, transcription, and remediation",
+            planned_reads=["configured podcast RSS feed", "in-memory corpus snapshot"],
+            planned_writes=[f"data/corpus/{podcast_id}/...", f"data/transcripts/{podcast_id}/..."],
+        ),
+        _step(
+            "semantic_summary",
+            "planned",
+            "generate at most one missing semantic summary",
+            requires_ack=True,
+            transfer_risk=True,
+            api_cost_risk=True,
+            planned_reads=[f"data/transcripts/{podcast_id}/{episode_ref}__*.json"],
+            planned_writes=[f"data/summaries/{podcast_id}/{episode_ref}__*.semantic.md"],
+        ),
+        _step(
+            "semantic_review",
+            "planned",
+            "run deterministic semantic review only when missing",
+            planned_writes=["evals/research-llm-smoke/reports/*.semantic-review.json"],
+        ),
+        _step(
+            "research",
+            "planned",
+            "generate deterministic research artifacts with fixed safe options",
+            planned_writes=[
+                f"data/mentions/{podcast_id}/...",
+                f"data/reports/{podcast_id}/...",
+                f"data/mappings/{podcast_id}/...",
+                f"data/external/{podcast_id}/...",
+            ],
+        ),
     ]
     if not publish_report:
-        plan.append(
-            _step("lineage_validation", "planned", "validate full current lineage before stopping")
-        )
+        plan.append(_step("lineage_validation", "planned", "validate full current lineage before stopping"))
         return plan
     plan.append(
-        _step("publish", "planned", "atomically publish JSON, Markdown, and manifest bundle", planned_writes=[f"{report_root}/report.json", f"{report_root}/report.md", f"{report_root}/manifest.json", f"data/corpus/{podcast_id}/verified-research/{episode_ref}.checkpoint.json"])
+        _step(
+            "publish",
+            "planned",
+            "atomically publish JSON, Markdown, and manifest bundle",
+            planned_writes=[
+                f"{report_root}/report.json",
+                f"{report_root}/report.md",
+                f"{report_root}/manifest.json",
+                f"data/corpus/{podcast_id}/verified-research/{episode_ref}.checkpoint.json",
+            ],
+        )
     )
     return plan
 
@@ -1112,34 +1190,63 @@ def _step(
     planned_writes: list[str] | None = None,
 ) -> LatestEpisodeVerifiedResearchReportWorkflowStep:
     return LatestEpisodeVerifiedResearchReportWorkflowStep(
-        stage=stage, status=status, reason=reason, requires_confirmation=status == "planned",
-        requires_api_cost_ack=requires_ack, network_risk=stage == "deterministic_processing",
-        local_compute_risk=stage == "deterministic_processing", transcript_transfer_risk=transfer_risk,
-        may_incur_api_cost=api_cost_risk, planned_reads=planned_reads or [], planned_writes=planned_writes or [],
-        output_paths=[], failure_category=failure_category,
+        stage=stage,
+        status=status,
+        reason=reason,
+        requires_confirmation=status == "planned",
+        requires_api_cost_ack=requires_ack,
+        network_risk=stage == "deterministic_processing",
+        local_compute_risk=stage == "deterministic_processing",
+        transcript_transfer_risk=transfer_risk,
+        may_incur_api_cost=api_cost_risk,
+        planned_reads=planned_reads or [],
+        planned_writes=planned_writes or [],
+        output_paths=[],
+        failure_category=failure_category,
     )
 
 
 def _result(
-    *, podcast_id: str, confirm: bool, episode_ref: str | None, expected_episode_ref: str | None,
-    outcome: str, filters: LatestEpisodeVerifiedResearchReportWorkflowRunFilter,
-    stage_plan: list[LatestEpisodeVerifiedResearchReportWorkflowStep], checkpoint_path: Path | None = None,
-    report_version: str | None = None, source_digest: str | None = None, bundle_dir: Path | None = None,
+    *,
+    podcast_id: str,
+    confirm: bool,
+    episode_ref: str | None,
+    expected_episode_ref: str | None,
+    outcome: str,
+    filters: LatestEpisodeVerifiedResearchReportWorkflowRunFilter,
+    stage_plan: list[LatestEpisodeVerifiedResearchReportWorkflowStep],
+    checkpoint_path: Path | None = None,
+    report_version: str | None = None,
+    source_digest: str | None = None,
+    bundle_dir: Path | None = None,
     warnings: list[LatestEpisodeVerifiedResearchReportWorkflowWarning] | None = None,
-    report_json_path: Path | None = None, report_markdown_path: Path | None = None, manifest_path: Path | None = None,
+    report_json_path: Path | None = None,
+    report_markdown_path: Path | None = None,
+    manifest_path: Path | None = None,
     approval_boundary_rejected: bool = False,
     finalize_checkpoint: bool = True,
 ) -> LatestEpisodeVerifiedResearchReportWorkflowRunResult:
     workflow_warnings = warnings if warnings is not None else []
     result = LatestEpisodeVerifiedResearchReportWorkflowRunResult(
-        podcast_id=podcast_id, run_mode=_RUN_MODE_CONFIRMED if confirm else _RUN_MODE_DRY_RUN,
-        confirm=confirm, selector=DEFAULT_SELECTOR, episode_ref=episode_ref,
-        expected_episode_ref=expected_episode_ref, outcome=outcome,
-        required_api_cost_ack=SEMANTIC_API_COST_ACK, report_version=report_version,
-        source_digest=source_digest, bundle_dir=bundle_dir, report_json_path=report_json_path,
-        report_markdown_path=report_markdown_path, manifest_path=manifest_path,
-        checkpoint_path=checkpoint_path, filters=filters, stage_plan=stage_plan,
-        warnings=workflow_warnings, not_investment_advice=True,
+        podcast_id=podcast_id,
+        run_mode=_RUN_MODE_CONFIRMED if confirm else _RUN_MODE_DRY_RUN,
+        confirm=confirm,
+        selector=DEFAULT_SELECTOR,
+        episode_ref=episode_ref,
+        expected_episode_ref=expected_episode_ref,
+        outcome=outcome,
+        required_api_cost_ack=SEMANTIC_API_COST_ACK,
+        report_version=report_version,
+        source_digest=source_digest,
+        bundle_dir=bundle_dir,
+        report_json_path=report_json_path,
+        report_markdown_path=report_markdown_path,
+        manifest_path=manifest_path,
+        checkpoint_path=checkpoint_path,
+        filters=filters,
+        stage_plan=stage_plan,
+        warnings=workflow_warnings,
+        not_investment_advice=True,
     )
     if finalize_checkpoint:
         _finalize_confirmed_checkpoint(
@@ -1172,8 +1279,7 @@ def _finalize_confirmed_checkpoint(
     history = [
         {"stage": step.stage, "status": step.status}
         for step in result.stage_plan
-        if _SAFE_CHECKPOINT_STAGE.fullmatch(step.stage)
-        and _SAFE_CHECKPOINT_STATUS.fullmatch(step.status)
+        if _SAFE_CHECKPOINT_STAGE.fullmatch(step.stage) and _SAFE_CHECKPOINT_STATUS.fullmatch(step.status)
     ]
     references = {
         key: str(path)
@@ -1209,30 +1315,29 @@ def _filters(**values: Any) -> LatestEpisodeVerifiedResearchReportWorkflowRunFil
     _require_positive(values["semantic_max_segments_per_chunk"], "semantic_max_segments_per_chunk", maximum=10_000)
     provider = _safe_dependency(values["semantic_provider"], "semantic_provider")
     model = _optional_safe_dependency(values["semantic_model"], "semantic_model")
-    reasoning_effort = _optional_safe_dependency(
-        values.get("semantic_reasoning_effort"), "semantic_reasoning_effort"
-    )
+    reasoning_effort = _optional_safe_dependency(values.get("semantic_reasoning_effort"), "semantic_reasoning_effort")
     transcription_model = _optional_safe_dependency(values["transcription_model"], "transcription_model")
     transcription_device = _safe_dependency(values["transcription_device"], "transcription_device")
-    transcription_compute_type = _safe_dependency(
-        values["transcription_compute_type"], "transcription_compute_type"
-    )
+    transcription_compute_type = _safe_dependency(values["transcription_compute_type"], "transcription_compute_type")
     if not isinstance(values["transcription_vad_filter"], bool):
         raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("transcription_vad_filter is invalid")
     if not isinstance(values["include_fixture_verification"], bool):
         raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("include_fixture_verification is invalid")
     return LatestEpisodeVerifiedResearchReportWorkflowRunFilter(
-        expected_episode_ref=values["expected_episode_ref"], stock_query=values["stock_query"],
+        expected_episode_ref=values["expected_episode_ref"],
+        stock_query=values["stock_query"],
         include_fixture_verification=values["include_fixture_verification"],
-        transcription_model=transcription_model, transcription_device=transcription_device,
-        transcription_compute_type=transcription_compute_type, transcription_vad_filter=values["transcription_vad_filter"],
-        semantic_provider=provider, semantic_model=model,
-        semantic_base_url_identity_sha256=_optional_sha256(
-            values.get("semantic_base_url_identity_sha256")
-        ),
+        transcription_model=transcription_model,
+        transcription_device=transcription_device,
+        transcription_compute_type=transcription_compute_type,
+        transcription_vad_filter=values["transcription_vad_filter"],
+        semantic_provider=provider,
+        semantic_model=model,
+        semantic_base_url_identity_sha256=_optional_sha256(values.get("semantic_base_url_identity_sha256")),
         semantic_reasoning_effort=reasoning_effort,
         semantic_read_timeout_seconds=values.get("semantic_read_timeout_seconds", 120),
-        semantic_chunk_seconds=values["semantic_chunk_seconds"], semantic_max_segments_per_chunk=values["semantic_max_segments_per_chunk"],
+        semantic_chunk_seconds=values["semantic_chunk_seconds"],
+        semantic_max_segments_per_chunk=values["semantic_max_segments_per_chunk"],
     )
 
 
@@ -1240,7 +1345,9 @@ def _require_confirmed_approval(expected_episode_ref: str | None, api_cost_ack: 
     if expected_episode_ref is None:
         raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("confirmed expected_episode_ref is invalid")
     if api_cost_ack != SEMANTIC_API_COST_ACK:
-        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("confirmed workflow requires exact api_cost_ack")
+        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
+            "confirmed workflow requires exact api_cost_ack"
+        )
 
 
 def _normalize_podcast_id(value: str) -> str:
@@ -1302,9 +1409,7 @@ def _optional_sha256(value: object) -> str | None:
     if value is None:
         return None
     if not isinstance(value, str) or not re.fullmatch(r"[0-9a-f]{64}", value):
-        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
-            "semantic base URL identity is invalid"
-        )
+        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("semantic base URL identity is invalid")
     return value
 
 
@@ -1341,16 +1446,18 @@ def _transcript_title(podcast_id: str, episode_ref: str) -> str:
     try:
         paths = resolve_canonical_transcript_asset_paths(podcast_id, episode_ref)
     except CanonicalTranscriptResolutionError as exc:
-        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
-            "canonical transcript is ambiguous"
-        ) from exc
+        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("canonical transcript is ambiguous") from exc
     if paths is None:
         raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("transcript is missing")
     try:
         payload = json.loads(paths.json_path.read_text(encoding="utf-8"))
     except (OSError, UnicodeDecodeError, json.JSONDecodeError) as exc:
         raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("transcript is unreadable") from exc
-    if not isinstance(payload, dict) or payload.get("podcast_id") != podcast_id or payload.get("episode_ref") != episode_ref:
+    if (
+        not isinstance(payload, dict)
+        or payload.get("podcast_id") != podcast_id
+        or payload.get("episode_ref") != episode_ref
+    ):
         raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("transcript identity mismatch")
     title = payload.get("title")
     if not isinstance(title, str) or not title.strip():
@@ -1487,9 +1594,7 @@ def _progressive_lineage_scope(
         if not commit.generated:
             # Reuse is safe only when an earlier controlled generation already
             # validates this exact role.  A child result alone never blesses it.
-            if not _lineage_roles_are_current(
-                podcast_id, episode_ref, filters, roles=(commit.role,)
-            ):
+            if not _lineage_roles_are_current(podcast_id, episode_ref, filters, roles=(commit.role,)):
                 raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
                     "child reused an artifact without current verified lineage"
                 )
@@ -1554,18 +1659,12 @@ def _progressive_lineage_scope(
         if commit.role == "semantic_summary":
             # The transcript root is selected independently by the corpus seed,
             # not by the sidecar being written.
-            transcript_paths = resolve_canonical_transcript_asset_paths(
-                podcast_id, episode_ref
-            )
+            transcript_paths = resolve_canonical_transcript_asset_paths(podcast_id, episode_ref)
             if transcript_paths is None:
-                raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
-                    "canonical transcript is missing"
-                )
+                raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("canonical transcript is missing")
             transcript_sha256 = _sha256_if_file(transcript_paths.json_path)
             if transcript_sha256 is None:
-                raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
-                    "canonical transcript is unreadable"
-                )
+                raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("canonical transcript is unreadable")
             proofs["transcript"] = {
                 "expected_path": _canonical_local_path(transcript_paths.json_path),
                 "pre_sha256": None,
@@ -1615,9 +1714,7 @@ def _controlled_summary_regeneration_transaction(
     """Replace summary plus lineage as one in-process compensating transaction."""
 
     try:
-        _validate_controlled_regeneration_capability(
-            authorization, podcast_id, episode_ref
-        )
+        _validate_controlled_regeneration_capability(authorization, podcast_id, episode_ref)
     except ValueError as exc:
         raise _ControlledRegenerationFailure(
             "authority", "controlled semantic regeneration authority is invalid"
@@ -1636,9 +1733,7 @@ def _controlled_summary_regeneration_transaction(
         max_bytes=_LINEAGE_SNAPSHOT_MAX_BYTES,
     )
     if summary_before is None or (sidecar_existed and sidecar_before is None):
-        raise _ControlledRegenerationFailure(
-            "pre_state", "controlled semantic regeneration pre-state is unavailable"
-        )
+        raise _ControlledRegenerationFailure("pre_state", "controlled semantic regeneration pre-state is unavailable")
 
     commits: list[ChildArtifactCommit] = []
     committed = False
@@ -1689,18 +1784,14 @@ def _controlled_summary_regeneration_transaction(
         substage = "transcript_source"
         transcript_paths = resolve_canonical_transcript_asset_paths(podcast_id, episode_ref)
         if transcript_paths is None:
-            raise _ControlledRegenerationFailure(
-                "transcript_source", "canonical transcript is missing"
-            )
+            raise _ControlledRegenerationFailure("transcript_source", "canonical transcript is missing")
         transcript = secure_snapshot(
             storage.TRANSCRIPTS_DIR,
             transcript_paths.json_path,
             max_bytes=_LINEAGE_SNAPSHOT_MAX_BYTES,
         )
         if transcript is None:
-            raise _ControlledRegenerationFailure(
-                "transcript_source", "canonical transcript is unreadable"
-            )
+            raise _ControlledRegenerationFailure("transcript_source", "canonical transcript is unreadable")
         substage = "lineage_record"
         record_current_verified_research_lineage(
             podcast_id,
@@ -1840,9 +1931,7 @@ def _unproven_research_artifacts_cleared(targets: dict[str, tuple[Path, Path]]):
         _discard_superseded_research_artifacts(quarantined)
         return
     if not _restore_research_prestate(quarantined):
-        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
-            "unproven research artifact recovery failed"
-        )
+        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("unproven research artifact recovery failed")
 
 
 def _restore_research_prestate(quarantined: list[tuple[Path, Path]]) -> bool:
@@ -1988,9 +2077,7 @@ class _ControlledRegenerationFailure(LatestEpisodeVerifiedResearchReportWorkflow
 
     def __init__(self, substage: str, message: str) -> None:
         super().__init__(message)
-        self.substage = (
-            substage if substage in _CONTROLLED_REGENERATION_SUBSTAGES else "unclassified"
-        )
+        self.substage = substage if substage in _CONTROLLED_REGENERATION_SUBSTAGES else "unclassified"
 
 
 def _failed_substage(exception: BaseException, fallback: str) -> str:
@@ -2035,9 +2122,7 @@ def _record_checkpoint_warning(
             terminal_outcome=terminal_outcome,
             bundle_references=bundle_references,
             invocation_generation=(
-                invocation_generation
-                if invocation_generation is not None
-                else _CURRENT_INVOCATION_GENERATION.get()
+                invocation_generation if invocation_generation is not None else _CURRENT_INVOCATION_GENERATION.get()
             ),
         )
     except Exception:  # noqa: BLE001 - checkpoint persistence is always non-fatal metadata.
@@ -2061,11 +2146,7 @@ def _bundle_references(bundle: Any) -> dict[str, str]:
         "report_markdown_path": str(bundle.report_markdown_path),
         "manifest_path": str(bundle.manifest_path),
     }
-    return {
-        key: value
-        for key, value in references.items()
-        if _safe_checkpoint_reference(value)
-    }
+    return {key: value for key, value in references.items() if _safe_checkpoint_reference(value)}
 
 
 def _read_checkpoint(path: Path, podcast_id: str, episode_ref: str) -> dict[str, Any]:
@@ -2078,9 +2159,7 @@ def _read_checkpoint(path: Path, podcast_id: str, episode_ref: str) -> dict[str,
             "verified research checkpoint is unreadable"
         ) from exc
     if not isinstance(payload, dict):
-        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
-            "verified research checkpoint is invalid"
-        )
+        raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("verified research checkpoint is invalid")
     if (
         payload.get("schema_version") != REPORT_SCHEMA_VERSION
         or payload.get("podcast_id") != podcast_id
@@ -2105,8 +2184,7 @@ def _read_checkpoint(path: Path, podcast_id: str, episode_ref: str) -> dict[str,
         )
     report_version = payload.get("report_version")
     if report_version is not None and (
-        not isinstance(report_version, str)
-        or not re.fullmatch(r"v1-[a-f0-9]{64}", report_version)
+        not isinstance(report_version, str) or not re.fullmatch(r"v1-[a-f0-9]{64}", report_version)
     ):
         raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
             "verified research checkpoint report version is invalid"
@@ -2132,10 +2210,14 @@ def _read_checkpoint(path: Path, podcast_id: str, episode_ref: str) -> dict[str,
             "verified research checkpoint successful generation is invalid"
         )
     references = payload.get("bundle_references", {})
-    if not isinstance(references, dict) or len(references) > 4 or any(
-        key not in {"bundle_dir", "report_json_path", "report_markdown_path", "manifest_path"}
-        or not _safe_checkpoint_reference(value)
-        for key, value in references.items()
+    if (
+        not isinstance(references, dict)
+        or len(references) > 4
+        or any(
+            key not in {"bundle_dir", "report_json_path", "report_markdown_path", "manifest_path"}
+            or not _safe_checkpoint_reference(value)
+            for key, value in references.items()
+        )
     ):
         raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
             "verified research checkpoint bundle references are invalid"
@@ -2189,9 +2271,7 @@ def _validated_checkpoint_history(value: object) -> list[dict[str, str]]:
     return history
 
 
-def _merge_checkpoint_history(
-    persisted: list[dict[str, str]], current: list[dict[str, str]]
-) -> list[dict[str, str]]:
+def _merge_checkpoint_history(persisted: list[dict[str, str]], current: list[dict[str, str]]) -> list[dict[str, str]]:
     merged = list(persisted)
     for item in _validated_checkpoint_history(current):
         if item not in merged:
@@ -2333,10 +2413,7 @@ def _write_checkpoint_locked(
             # Legacy writers lack a reserved generation and cannot supersede a
             # generation-aware successful bundle.  A smaller generation is stale.
             or invocation_generation is None
-            or (
-                persisted_success_generation is not None
-                and persisted_success_generation >= invocation_generation
-            )
+            or (persisted_success_generation is not None and persisted_success_generation >= invocation_generation)
         )
         # This read/compare/write executes beneath the per-episode OS claim.
         # A late invocation can merge stage history, but a completed newer
@@ -2349,12 +2426,8 @@ def _write_checkpoint_locked(
             effective_successful_generation = persisted_success_generation
         else:
             effective_terminal_outcome = terminal_outcome
-            effective_source_digest = (
-                source_digest if source_digest is not None else persisted["source_digest"]
-            )
-            effective_report_version = (
-                report_version if report_version is not None else persisted["report_version"]
-            )
+            effective_source_digest = source_digest if source_digest is not None else persisted["source_digest"]
+            effective_report_version = report_version if report_version is not None else persisted["report_version"]
             references = (
                 dict(bundle_references)
                 if isinstance(bundle_references, dict) and bundle_references
@@ -2372,10 +2445,14 @@ def _write_checkpoint_locked(
             raise ValueError("source digest")
         if effective_report_version is not None and not re.fullmatch(r"v1-[a-f0-9]{64}", effective_report_version):
             raise ValueError("report version")
-        if not isinstance(references, dict) or len(references) > 4 or any(
-            key not in {"bundle_dir", "report_json_path", "report_markdown_path", "manifest_path"}
-            or not _safe_checkpoint_reference(value)
-            for key, value in references.items()
+        if (
+            not isinstance(references, dict)
+            or len(references) > 4
+            or any(
+                key not in {"bundle_dir", "report_json_path", "report_markdown_path", "manifest_path"}
+                or not _safe_checkpoint_reference(value)
+                for key, value in references.items()
+            )
         ):
             raise ValueError("bundle references")
         payload = {

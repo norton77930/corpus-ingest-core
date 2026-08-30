@@ -80,7 +80,7 @@ def test_registry_documents_official_active_feature_selection_for_backfilled_spe
         "not the feature spec directory",
         "checklists/requirements.md",
         "SPECIFY_FEATURE_DIRECTORY",
-        "$env:SPECIFY_FEATURE_DIRECTORY=\"specs/003-metadata-search-mcp-core\"",
+        '$env:SPECIFY_FEATURE_DIRECTORY="specs/003-metadata-search-mcp-core"',
         ".specify/feature.json",
         "local-only",
         "gitignored",
@@ -151,9 +151,7 @@ def test_registry_maps_existing_code_scripts_and_tests_to_packages():
 
 def test_safety_boundaries_are_recorded_in_relevant_backfill_packages():
     safety_text = "\n".join(
-        _read(SPECS / package / relative_path)
-        for package in CAPABILITY_PACKAGES
-        for relative_path in REQUIRED_FILES
+        _read(SPECS / package / relative_path) for package in CAPABILITY_PACKAGES for relative_path in REQUIRED_FILES
     )
 
     for phrase in [

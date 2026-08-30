@@ -39,10 +39,7 @@ def test_required_headings_match_fr_010_to_012():
 
 
 def test_prompt_forbids_workflow_derivation_and_finance_shape():
-    text = (
-        STUDY_GUIDE_PROFILE.system_message
-        + STUDY_GUIDE_PROFILE.user_instructions
-    )
+    text = STUDY_GUIDE_PROFILE.system_message + STUDY_GUIDE_PROFILE.user_instructions
     for marker in WORKFLOW_MARKERS:
         assert marker in text
     assert "逐字稿" in text

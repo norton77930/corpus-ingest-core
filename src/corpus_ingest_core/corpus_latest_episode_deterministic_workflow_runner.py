@@ -59,9 +59,7 @@ _SENSITIVE_ASSIGNMENT_PATTERN = re.compile(
     r"client[_-]?secret|private[_-]?key)\s*[:=]\s*\S+",
     re.IGNORECASE,
 )
-_URI_WITH_QUERY_OR_FRAGMENT_PATTERN = re.compile(
-    r"\b[A-Za-z][A-Za-z0-9+.-]*:[^\s?#]*[?#]\S*"
-)
+_URI_WITH_QUERY_OR_FRAGMENT_PATTERN = re.compile(r"\b[A-Za-z][A-Za-z0-9+.-]*:[^\s?#]*[?#]\S*")
 _ALLOWED_PLANNED_READS = {
     "configured podcast RSS feed",
     "in-memory corpus snapshot",
@@ -135,9 +133,7 @@ def run_corpus_latest_episode_deterministic_workflow(
             rows=[_terminal_row(None, "blocked", "latest episode could not be resolved")],
         )
     if not confirm:
-        probe_row, _selected_stage = _probe_stage(
-            normalized_podcast_id, canonical_episode_ref
-        )
+        probe_row, _selected_stage = _probe_stage(normalized_podcast_id, canonical_episode_ref)
         return _build_result(
             podcast_id=normalized_podcast_id,
             confirm=False,
@@ -175,9 +171,7 @@ def _run_pinned_deterministic_workflow(
     while True:
         if selected_stage == STAGE_COMPLETED:
             try:
-                canonical_transcript = resolve_canonical_transcript_asset_paths(
-                    podcast_id, canonical_episode_ref
-                )
+                canonical_transcript = resolve_canonical_transcript_asset_paths(podcast_id, canonical_episode_ref)
             except CanonicalTranscriptResolutionError:
                 rows.append(
                     _terminal_row(
@@ -238,8 +232,7 @@ def _run_pinned_deterministic_workflow(
                 write_report=write_report,
             )
         if selected_stage == STAGE_DETERMINISTIC_REMEDIATION and (
-            remediation_actions >= _MAX_REMEDIATION_ACTIONS
-            or probe_row.action_id in completed_remediation_action_ids
+            remediation_actions >= _MAX_REMEDIATION_ACTIONS or probe_row.action_id in completed_remediation_action_ids
         ):
             rows.append(
                 _terminal_row(
@@ -373,9 +366,7 @@ def _probe_stage(
             STAGE_BLOCKED,
         )
     source_rows = selection.get("rows", [])
-    source_row = (
-        source_rows[0] if isinstance(source_rows, list) and source_rows else None
-    )
+    source_row = source_rows[0] if isinstance(source_rows, list) and source_rows else None
     return (
         _row_from_source(
             episode_ref,
@@ -466,13 +457,11 @@ def _row_from_execution(
     source_action_id_value = getattr(source_row, "action_id", None)
     selected_action_id = _safe_action_id(selected_action_id_value)
     source_action_id = _safe_action_id(source_action_id_value)
-    action_identity_is_invalid = (
-        selected_action_id_value is not None and selected_action_id is None
-    ) or (source_action_id_value is not None and source_action_id is None)
+    action_identity_is_invalid = (selected_action_id_value is not None and selected_action_id is None) or (
+        source_action_id_value is not None and source_action_id is None
+    )
     action_identity_mismatches = (
-        selected_action_id is not None
-        and source_action_id is not None
-        and selected_action_id != source_action_id
+        selected_action_id is not None and source_action_id is not None and selected_action_id != source_action_id
     )
     if action_identity_is_invalid or action_identity_mismatches:
         return replace(
@@ -497,9 +486,7 @@ def _row_from_execution(
         planned_reads=_safe_paths_or_labels(getattr(source_row, "planned_reads", [])),
         planned_writes=_safe_local_paths(getattr(source_row, "planned_writes", [])),
         output_paths=_safe_local_paths(getattr(source_row, "output_paths", [])),
-        source_report_paths=_safe_local_paths(
-            getattr(source_row, "source_report_paths", [])
-        ),
+        source_report_paths=_safe_local_paths(getattr(source_row, "source_report_paths", [])),
         failure_category=_safe_identifier(getattr(source_row, "failure_category", None)),
         warnings=_safe_text_list(getattr(source_row, "warnings", [])),
     )
@@ -508,13 +495,10 @@ def _row_from_execution(
 def _source_status(rows: list[object]) -> str:
     statuses = {
         status
-        if status
-        in {"failed", "executed", "downloaded", "seeded", "reused", "blocked", "rejected"}
+        if status in {"failed", "executed", "downloaded", "seeded", "reused", "blocked", "rejected"}
         else "blocked"
         for row in rows
-        for status in [
-            getattr(row, "outcome_status", getattr(row, "status", None))
-        ]
+        for status in [getattr(row, "outcome_status", getattr(row, "status", None))]
     }
     if "failed" in statuses:
         return "failed"
@@ -646,9 +630,7 @@ def _confirmed_result(
     *,
     write_report: bool = True,
 ) -> CorpusLatestEpisodeDeterministicWorkflowRunResult:
-    report_paths = storage.corpus_latest_episode_deterministic_workflow_run_asset_paths(
-        podcast_id
-    )
+    report_paths = storage.corpus_latest_episode_deterministic_workflow_run_asset_paths(podcast_id)
     warnings = [
         CorpusLatestEpisodeDeterministicWorkflowRunWarning(
             scope="cache",
@@ -695,9 +677,7 @@ def _write_run_report(result: CorpusLatestEpisodeDeterministicWorkflowRunResult)
 
 def _normalize_podcast_id(value: str) -> str:
     if not isinstance(value, str) or not _SAFE_PODCAST_ID.fullmatch(value):
-        raise CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError(
-            "podcast_id is invalid"
-        )
+        raise CorpusLatestEpisodeDeterministicWorkflowRunnerFailedError("podcast_id is invalid")
     return value
 
 
@@ -720,11 +700,7 @@ def _safe_action_id(value: object) -> str | None:
 def _safe_paths_or_labels(value: object) -> list[str]:
     if not isinstance(value, list):
         return []
-    return [
-        item
-        for item in value
-        if item in _ALLOWED_PLANNED_READS or _is_safe_local_path(item)
-    ]
+    return [item for item in value if item in _ALLOWED_PLANNED_READS or _is_safe_local_path(item)]
 
 
 def _safe_local_paths(value: object) -> list[str]:
@@ -742,9 +718,7 @@ def _safe_text_list(value: object) -> list[str]:
 def _is_safe_local_path(value: object) -> bool:
     if not isinstance(value, str):
         return False
-    if not is_safe_local_path_structure(
-        value, allow_absolute=False, require_separator=False
-    ):
+    if not is_safe_local_path_structure(value, allow_absolute=False, require_separator=False):
         return False
     lowered = value.lower()
     if any(fragment in lowered for fragment in _FORBIDDEN_PATH_FRAGMENTS):

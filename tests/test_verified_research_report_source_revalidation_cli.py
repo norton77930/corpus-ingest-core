@@ -72,9 +72,9 @@ def test_cli_oversized_locator_uses_core_fixed_error_without_storage_access(monk
     import corpus_ingest_core.verified_research_report_source_revalidation as revalidation
 
     monkeypatch.setattr(
-        revalidation, "_exact_bundle_evidence", lambda locator: (_ for _ in ()).throw(
-            AssertionError("oversized locator reached storage")
-        )
+        revalidation,
+        "_exact_bundle_evidence",
+        lambda locator: (_ for _ in ()).throw(AssertionError("oversized locator reached storage")),
     )
 
     assert cli.main(["p" * 129, "EP672", _DIGEST]) == 1

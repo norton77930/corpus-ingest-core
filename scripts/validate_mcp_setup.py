@@ -19,39 +19,23 @@ PROJECT_ROOT = Path(__file__).resolve().parents[1]
 RUNNER_PATH = PROJECT_ROOT / "scripts" / "run_mcp_server.py"
 DEFAULT_QUERY = "台積電"
 COMPLETION_TOOL_NAME = "run_corpus_episode_completion_workflow"
-COMPLETION_SKILL_PATH = (
-    PROJECT_ROOT / ".agents" / "skills" / "corpus-episode-completion" / "SKILL.md"
-)
+COMPLETION_SKILL_PATH = PROJECT_ROOT / ".agents" / "skills" / "corpus-episode-completion" / "SKILL.md"
 LATEST_DETERMINISTIC_TOOL_NAME = "run_corpus_latest_episode_deterministic_workflow"
-LATEST_DETERMINISTIC_SKILL_PATH = (
-    PROJECT_ROOT
-    / ".agents"
-    / "skills"
-    / "corpus-latest-episode-processing"
-    / "SKILL.md"
-)
+LATEST_DETERMINISTIC_SKILL_PATH = PROJECT_ROOT / ".agents" / "skills" / "corpus-latest-episode-processing" / "SKILL.md"
 VERIFIED_RESEARCH_REPORT_TOOL_NAME = "run_latest_episode_verified_research_report_workflow"
 VERIFIED_RESEARCH_REPORT_SKILL_PATH = (
-    PROJECT_ROOT
-    / ".agents"
-    / "skills"
-    / "latest-episode-verified-research-report"
-    / "SKILL.md"
+    PROJECT_ROOT / ".agents" / "skills" / "latest-episode-verified-research-report" / "SKILL.md"
 )
 EPISODE_VERIFIED_RESEARCH_REPORT_TOOL_NAME = "run_episode_verified_research_report_workflow"
 EPISODE_VERIFIED_RESEARCH_REPORT_SKILL_PATH = (
-    PROJECT_ROOT
-    / ".agents"
-    / "skills"
-    / "episode-verified-research-report"
-    / "SKILL.md"
+    PROJECT_ROOT / ".agents" / "skills" / "episode-verified-research-report" / "SKILL.md"
 )
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
-    parser = argparse.ArgumentParser(description="驗證本機 MCP server setup readiness。")
-    parser.add_argument("--podcast", default="gooaye", help="Podcast ID，預設 gooaye。")
-    parser.add_argument("--query", default=DEFAULT_QUERY, help="Search smoke query。")
+    parser = argparse.ArgumentParser(description="Validate local MCP server setup readiness.")
+    parser.add_argument("--podcast", default="gooaye", help="Podcast ID (default: gooaye).")
+    parser.add_argument("--query", default=DEFAULT_QUERY, help="Search smoke query.")
     return parser.parse_args(argv)
 
 
@@ -326,8 +310,7 @@ def _check_completion_surface(checks: list[dict[str, Any]], mcp_server) -> None:
             checks,
             "completion_confirmed_next_guard",
             rejected.get("ok") is False
-            and rejected.get("error_type")
-            == "CorpusEpisodeCompletionWorkflowRunnerFailedError",
+            and rejected.get("error_type") == "CorpusEpisodeCompletionWorkflowRunnerFailedError",
             tool=COMPLETION_TOOL_NAME,
         )
     except Exception:
@@ -381,8 +364,7 @@ def _check_completion_surface(checks: list[dict[str, Any]], mcp_server) -> None:
             checks,
             "verified_research_report_confirmed_guard",
             rejected.get("ok") is False
-            and rejected.get("error_type")
-            == "LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError",
+            and rejected.get("error_type") == "LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError",
             tool=VERIFIED_RESEARCH_REPORT_TOOL_NAME,
         )
     except Exception:

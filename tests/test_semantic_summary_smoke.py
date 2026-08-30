@@ -7,10 +7,7 @@ from pathlib import Path
 
 import pytest
 
-ACK = (
-    "I understand this may call an external LLM API, send transcript text outside this machine, "
-    "and incur costs."
-)
+ACK = "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
 
 
 def _summary_asset(tmp_path: Path):
@@ -34,9 +31,7 @@ def _summary_asset(tmp_path: Path):
     )
 
 
-def test_semantic_summary_smoke_dry_run_writes_nothing_and_exposes_no_secret(
-    monkeypatch, tmp_path, capsys
-):
+def test_semantic_summary_smoke_dry_run_writes_nothing_and_exposes_no_secret(monkeypatch, tmp_path, capsys):
     from scripts import run_semantic_summary_smoke
 
     from corpus_ingest_core.models import TranscriptValidationResult
@@ -96,9 +91,7 @@ def test_semantic_summary_smoke_dry_run_writes_nothing_and_exposes_no_secret(
     assert "raw transcript" not in output.lower()
 
 
-def test_semantic_summary_smoke_confirm_requires_exact_ack_before_execution(
-    monkeypatch, capsys
-):
+def test_semantic_summary_smoke_confirm_requires_exact_ack_before_execution(monkeypatch, capsys):
     from scripts import run_semantic_summary_smoke
 
     monkeypatch.setattr(
@@ -128,9 +121,7 @@ def test_semantic_summary_smoke_confirm_requires_exact_ack_before_execution(
     assert "exact api_cost_ack" in capsys.readouterr().err
 
 
-def test_semantic_summary_smoke_confirm_runs_semantic_summary_with_profile_and_env(
-    monkeypatch, tmp_path, capsys
-):
+def test_semantic_summary_smoke_confirm_runs_semantic_summary_with_profile_and_env(monkeypatch, tmp_path, capsys):
     from scripts import run_semantic_summary_smoke
 
     env_path = tmp_path / ".env"

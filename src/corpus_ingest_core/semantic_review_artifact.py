@@ -49,9 +49,9 @@ _SHA256_PATTERN = re.compile(r"^[a-f0-9]{64}$")
 _TIMESTAMP_PATTERN = r"\d{8}-\d{6}"
 _TIMESTAMP_EVIDENCE_PATTERN = re.compile(r"\[\d{2}:\d{2}:\d{2}\s*-\s*\d{2}:\d{2}:\d{2}\]")
 _TRACEBACK_PATTERN = re.compile(r"Traceback\s+\(most recent call last\):")
-_RAW_TRANSCRIPT_DUMP_PATTERN = re.compile(
-    r"raw transcript\s*(?:text|dump|content)\s*[:：]", re.IGNORECASE
-)
+_RAW_TRANSCRIPT_DUMP_PATTERN = re.compile(r"raw transcript\s*(?:text|dump|content)\s*[:：]", re.IGNORECASE)
+
+
 @dataclass(frozen=True)
 class SemanticReviewFilename:
     """Parsed canonical or collision semantic-review filename."""
@@ -99,19 +99,13 @@ def evaluate_semantic_review_bytes(
     if summary_bytes is None:
         message = unavailable_message or "missing semantic summary"
         checks = [_check("semantic_summary_exists", "blocked", message)]
-        checks.extend(
-            _check(name, "blocked", "semantic summary is unavailable")
-            for name in REVIEW_CHECK_NAMES[1:]
-        )
+        checks.extend(_check(name, "blocked", "semantic summary is unavailable") for name in REVIEW_CHECK_NAMES[1:])
         return _evaluation(None, checks)
     try:
         markdown = summary_bytes.decode("utf-8")
     except UnicodeDecodeError as exc:
         checks = [_check("semantic_summary_exists", "blocked", type(exc).__name__)]
-        checks.extend(
-            _check(name, "blocked", "semantic summary is unavailable")
-            for name in REVIEW_CHECK_NAMES[1:]
-        )
+        checks.extend(_check(name, "blocked", "semantic summary is unavailable") for name in REVIEW_CHECK_NAMES[1:])
         return _evaluation(None, checks)
 
     checks = [_check("semantic_summary_exists", "pass", str(semantic_summary_path))]
@@ -271,9 +265,7 @@ def inspect_semantic_review(
 
     summary_raw = semantic_summary_bytes
     if summary_raw is None:
-        summary_raw = secure_read_bytes(
-            storage.SUMMARIES_DIR, semantic_summary_path, max_bytes=_MAX_REVIEW_BYTES
-        )
+        summary_raw = secure_read_bytes(storage.SUMMARIES_DIR, semantic_summary_path, max_bytes=_MAX_REVIEW_BYTES)
     if summary_raw is None:
         return SemanticReviewInspection("missing", None, None, "missing", None, None)
     try:
@@ -310,8 +302,13 @@ def inspect_semantic_review(
         return latest_invalid
     if rejected:
         return SemanticReviewInspection(
-            "available", semantic_summary_path, summary_sha256, "needs_review",
-            rejected[-1], None, summary_raw,
+            "available",
+            semantic_summary_path,
+            summary_sha256,
+            "needs_review",
+            rejected[-1],
+            None,
+            summary_raw,
         )
     return SemanticReviewInspection(
         "available", semantic_summary_path, summary_sha256, "missing", None, None, summary_raw
@@ -337,9 +334,7 @@ def inspect_semantic_review_file(
         review_reports_dir = REPORTS_DIR
     summary_raw = semantic_summary_bytes
     if summary_raw is None:
-        summary_raw = secure_read_bytes(
-            storage.SUMMARIES_DIR, semantic_summary_path, max_bytes=_MAX_REVIEW_BYTES
-        )
+        summary_raw = secure_read_bytes(storage.SUMMARIES_DIR, semantic_summary_path, max_bytes=_MAX_REVIEW_BYTES)
     if summary_raw is None:
         return SemanticReviewInspection("missing", None, None, "missing", None, None)
     try:
@@ -349,15 +344,17 @@ def inspect_semantic_review_file(
     if not summary_raw.strip():
         return SemanticReviewInspection("unavailable", semantic_summary_path, None, "missing", None, None, summary_raw)
     summary_sha256 = hashlib.sha256(summary_raw).hexdigest()
-    review_raw = secure_read_bytes(
-        review_reports_dir, review_path, max_bytes=_MAX_REVIEW_BYTES
-    )
+    review_raw = secure_read_bytes(review_reports_dir, review_path, max_bytes=_MAX_REVIEW_BYTES)
     try:
         payload = json.loads(review_raw.decode("utf-8")) if review_raw is not None else None
     except (UnicodeDecodeError, json.JSONDecodeError):
-        return SemanticReviewInspection("available", semantic_summary_path, summary_sha256, "needs_review", review_path, None, summary_raw)
+        return SemanticReviewInspection(
+            "available", semantic_summary_path, summary_sha256, "needs_review", review_path, None, summary_raw
+        )
     if review_raw is None:
-        return SemanticReviewInspection("available", semantic_summary_path, summary_sha256, "needs_review", review_path, None, summary_raw)
+        return SemanticReviewInspection(
+            "available", semantic_summary_path, summary_sha256, "needs_review", review_path, None, summary_raw
+        )
     if not _is_authentic_review_payload(
         payload,
         podcast_id=podcast_id,
@@ -366,13 +363,25 @@ def inspect_semantic_review_file(
         semantic_summary_bytes=summary_raw,
     ):
         return SemanticReviewInspection(
-            "available", semantic_summary_path, summary_sha256, "needs_review", review_path,
-            payload if isinstance(payload, dict) else None, summary_raw, review_raw,
+            "available",
+            semantic_summary_path,
+            summary_sha256,
+            "needs_review",
+            review_path,
+            payload if isinstance(payload, dict) else None,
+            summary_raw,
+            review_raw,
         )
     assert isinstance(payload, dict)
     return SemanticReviewInspection(
-        "available", semantic_summary_path, summary_sha256, payload["review_status"], review_path,
-        payload, summary_raw, review_raw,
+        "available",
+        semantic_summary_path,
+        summary_sha256,
+        payload["review_status"],
+        review_path,
+        payload,
+        summary_raw,
+        review_raw,
     )
 
 
@@ -395,17 +404,29 @@ def _is_authentic_review_payload(
         semantic_summary_bytes=semantic_summary_bytes,
     )
     required_fields = (
-        "review_mode", "review_boundary", "review_status", "podcast_id", "episode_ref",
-        "semantic_summary_path", "semantic_summary_sha256", "check_count", "failed_check_count",
-        "warning_count", "blocked_check_count", "checks", "not_investment_advice_notice",
+        "review_mode",
+        "review_boundary",
+        "review_status",
+        "podcast_id",
+        "episode_ref",
+        "semantic_summary_path",
+        "semantic_summary_sha256",
+        "check_count",
+        "failed_check_count",
+        "warning_count",
+        "blocked_check_count",
+        "checks",
+        "not_investment_advice_notice",
     )
     if any(payload.get(field) != expected[field] for field in required_fields):
         return False
     # Protect against a superficially valid value in a field that appears only in
     # old reports.  The SHA format also guards accidental non-canonical hashes.
     review_hash = payload.get("semantic_summary_sha256")
-    return isinstance(review_hash, str) and bool(_SHA256_PATTERN.fullmatch(review_hash)) and (
-        evaluation.review_status == payload["review_status"]
+    return (
+        isinstance(review_hash, str)
+        and bool(_SHA256_PATTERN.fullmatch(review_hash))
+        and (evaluation.review_status == payload["review_status"])
     )
 
 

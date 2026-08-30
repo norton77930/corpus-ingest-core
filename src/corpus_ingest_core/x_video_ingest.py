@@ -42,9 +42,7 @@ _X_HOSTS = {
 }
 # X handle：字母、數字、底線，最長 15 字。底線在 podcast_id slug 不合法，
 # 因此下面會換成連字號。
-_STATUS_PATH_PATTERN = re.compile(
-    r"^/(?P<handle>[A-Za-z0-9_]{1,15})/status/(?P<status_id>\d+)"
-)
+_STATUS_PATH_PATTERN = re.compile(r"^/(?P<handle>[A-Za-z0-9_]{1,15})/status/(?P<status_id>\d+)")
 
 
 @dataclass(frozen=True)
@@ -65,13 +63,9 @@ def derive_identity(url: str) -> XVideoIdentity:
     """
 
     parsed = urlparse(url.strip())
-    match = (
-        _STATUS_PATH_PATTERN.match(parsed.path)
-        if parsed.netloc.lower() in _X_HOSTS
-        else None
-    )
+    match = _STATUS_PATH_PATTERN.match(parsed.path) if parsed.netloc.lower() in _X_HOSTS else None
     if match is None:
-        raise ValueError(f"不是 X 貼文網址：{url}")
+        raise ValueError(f"Not an X post URL: {url}")
 
     handle = match.group("handle")
     status_id = match.group("status_id")
@@ -139,8 +133,7 @@ class XVideoIngestResult:
 # 字面，快取守衛測試就會判定為未經審查的自動重建風險（憲章原則 VIII）。其他
 # runner 也是這樣表達同一件事。註解本身同樣不能出現該字面。
 CACHE_STALE_WARNING = (
-    "SQLite cache may be stale; rebuild cache manually. "
-    "本流程不會自動重建，這一集要等你手動重建 cache 之後才搜尋得到。"
+    "SQLite cache may be stale; rebuild cache manually. 本流程不會自動重建，這一集要等你手動重建 cache 之後才搜尋得到。"
 )
 
 
@@ -170,19 +163,13 @@ def run_x_video_ingest(
         # 這是整條流程最先、也最常失敗的一步：貼文沒有影片、已刪除、轉私密，
         # 或 yt-dlp 的 X extractor 壞掉。它同時位在 dry-run 路徑上，所以第三方
         # 例外若不在這裡收斂，使用者第一次執行看到的就會是 traceback。
-        raise XVideoIngestFailedError(f"解析來源 metadata 失敗：{exc}") from exc
+        raise XVideoIngestFailedError(f"Failed to resolve source metadata: {exc}") from exc
 
     seed = build_seed(identity, info, title)
 
-    audio_target = storage.audio_asset_path(
-        identity.podcast_id, identity.episode_ref, seed.title, ".wav"
-    )
-    seed_target = storage.corpus_episode_seed_asset_path(
-        identity.podcast_id, identity.episode_ref
-    )
-    transcript_targets = storage.transcript_asset_paths(
-        identity.podcast_id, identity.episode_ref, seed.title
-    )
+    audio_target = storage.audio_asset_path(identity.podcast_id, identity.episode_ref, seed.title, ".wav")
+    seed_target = storage.corpus_episode_seed_asset_path(identity.podcast_id, identity.episode_ref)
+    transcript_targets = storage.transcript_asset_paths(identity.podcast_id, identity.episode_ref, seed.title)
     warnings = [*seed.warnings, CACHE_STALE_WARNING]
     registration_problem = _registration_problem(identity.podcast_id)
     if registration_problem is not None:
@@ -195,9 +182,7 @@ def run_x_video_ingest(
     if audio_exists:
         warnings.append(f"沿用既有音訊，未重新下載：{audio_target}")
 
-    report_paths = storage.x_video_ingest_run_asset_paths(
-        identity.podcast_id, identity.episode_ref
-    )
+    report_paths = storage.x_video_ingest_run_asset_paths(identity.podcast_id, identity.episode_ref)
     planned_writes = [str(seed_target)]
     if not audio_exists:
         planned_writes.append(str(audio_target))
@@ -302,9 +287,7 @@ def _write_run_report(result: XVideoIngestResult) -> None:
             markdown,
         )
     except OSError as exc:
-        raise XVideoIngestFailedError(
-            f"failed to write x-video ingest run report: {type(exc).__name__}"
-        ) from exc
+        raise XVideoIngestFailedError(f"failed to write x-video ingest run report: {type(exc).__name__}") from exc
 
 
 def _write_seed(seed_target: Path, seed: CorpusEpisodeSeed) -> None:
@@ -318,9 +301,7 @@ def _write_seed(seed_target: Path, seed: CorpusEpisodeSeed) -> None:
     part_path = seed_target.with_name(f"{seed_target.name}.part")
     try:
         part_path.unlink(missing_ok=True)
-        part_path.write_text(
-            json.dumps(asdict(seed), ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+        part_path.write_text(json.dumps(asdict(seed), ensure_ascii=False, indent=2), encoding="utf-8")
         part_path.replace(seed_target)
     except OSError:
         part_path.unlink(missing_ok=True)
@@ -331,9 +312,7 @@ def _acquire_audio(url: str, audio_target: Path, work_dir: str | Path | None) ->
     """下載影片並抽出音軌；影片本身絕不落在 data/ 底下。"""
 
     owns_work_dir = work_dir is None
-    resolved_work_dir = (
-        Path(tempfile.mkdtemp(prefix="x-video-")) if work_dir is None else Path(work_dir)
-    )
+    resolved_work_dir = Path(tempfile.mkdtemp(prefix="x-video-")) if work_dir is None else Path(work_dir)
     part_path = audio_target.with_suffix(audio_target.suffix + ".part")
     try:
         video_path = _download_video(url, resolved_work_dir)
@@ -348,7 +327,7 @@ def _acquire_audio(url: str, audio_target: Path, work_dir: str | Path | None) ->
         # yt-dlp 的 DownloadError 與 PyAV 的 FFmpegError 都直接繼承 Exception，
         # 不是 OSError；X 的 extractor 又特別常壞。只接 OSError 會讓第三方例外
         # 直接拋穿到 CLI，而 CLI 只處理本專案的錯誤型別。
-        raise XVideoIngestFailedError(f"取得音訊失敗：{exc}") from exc
+        raise XVideoIngestFailedError(f"Audio acquisition failed: {exc}") from exc
     finally:
         # 成功時 replace 已經把 .part 移走，這裡是 no-op；失敗時無論哪種例外
         # 都不會有殘留檔案留在 data/audio/。
@@ -432,9 +411,7 @@ def _write_resampled(wav, resampled) -> None:
     video_acquire.write_resampled(wav, resampled)
 
 
-def _resolve_title(
-    explicit: str | None, info: dict[str, Any], identity: XVideoIdentity
-) -> str:
+def _resolve_title(explicit: str | None, info: dict[str, Any], identity: XVideoIdentity) -> str:
     """決定要用哪個標題。
 
     yt-dlp 對 X 貼文回的 ``title`` 其實是 ``{uploader} - {截斷的推文}...``。

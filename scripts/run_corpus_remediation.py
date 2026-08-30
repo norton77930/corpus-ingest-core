@@ -12,9 +12,7 @@ from corpus_ingest_core.corpus_remediation_runner import result_to_dict
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Preview or run deterministic corpus remediation actions."
-    )
+    parser = argparse.ArgumentParser(description="Preview or run deterministic corpus remediation actions.")
     parser.add_argument("--podcast", required=True, dest="podcast_id")
     parser.add_argument("--confirm", action="store_true")
     parser.add_argument("--episode", dest="episode_ref")

@@ -15,14 +15,13 @@ def _use_tmp_data_dirs(monkeypatch, tmp_path):
     monkeypatch.setattr(storage, "EXTERNAL_DIR", tmp_path / "external")
     import corpus_ingest_core.external_data_verification as external_verification
 
-    monkeypatch.setattr(
-        external_verification, "PREVERIFICATION_BOUNDARIES_DIR", tmp_path / "corpus"
-    )
+    monkeypatch.setattr(external_verification, "PREVERIFICATION_BOUNDARIES_DIR", tmp_path / "corpus")
     monkeypatch.setattr(
         external_verification,
         "current_canonical_transcript_identity",
         lambda _podcast_id, _episode_ref: SimpleNamespace(title="EP672 title"),
     )
+
 
 def _write_boundary(
     monkeypatch,
@@ -113,7 +112,8 @@ def _write_boundary(
 
 def _write_fixture(tmp_path, *, include_nvidia=True):
     fixture_path = tmp_path / "external_market_data_fixtures.yaml"
-    nvidia = """
+    nvidia = (
+        """
   - company_name: NVIDIA
     tickers:
       - NVDA
@@ -124,7 +124,10 @@ def _write_fixture(tmp_path, *, include_nvidia=True):
       market_snapshot:
         snapshot_label: Fixture-only market snapshot
         source_note: local fixture data
-""" if include_nvidia else ""
+"""
+        if include_nvidia
+        else ""
+    )
     fixture_path.write_text(
         f"""
 version: 1
@@ -172,9 +175,7 @@ def test_verify_external_data_boundary_dry_run_writes_nothing(monkeypatch, tmp_p
     assert paths.markdown_path.read_text(encoding="utf-8") == before_markdown
 
 
-def test_verify_external_data_boundary_confirm_updates_fixture_matches(
-    monkeypatch, tmp_path
-):
+def test_verify_external_data_boundary_confirm_updates_fixture_matches(monkeypatch, tmp_path):
     from corpus_ingest_core.external_data_verification import verify_external_data_boundary
 
     paths = _write_boundary(monkeypatch, tmp_path)
@@ -215,9 +216,7 @@ def test_verify_external_data_boundary_confirm_updates_fixture_matches(
     assert "not investment advice" in markdown
 
 
-def test_verify_external_data_boundary_missing_fixture_warns_without_fabricating(
-    monkeypatch, tmp_path
-):
+def test_verify_external_data_boundary_missing_fixture_warns_without_fabricating(monkeypatch, tmp_path):
     from corpus_ingest_core.external_data_verification import verify_external_data_boundary
 
     paths = _write_boundary(monkeypatch, tmp_path)
@@ -239,9 +238,7 @@ def test_verify_external_data_boundary_missing_fixture_warns_without_fabricating
     assert "external_data" not in payload["candidate_boundaries"][0]
 
 
-def test_verify_external_data_boundary_unmatched_candidate_warns(
-    monkeypatch, tmp_path
-):
+def test_verify_external_data_boundary_unmatched_candidate_warns(monkeypatch, tmp_path):
     from corpus_ingest_core.external_data_verification import verify_external_data_boundary
 
     paths = _write_boundary(monkeypatch, tmp_path)
@@ -262,14 +259,12 @@ def test_verify_external_data_boundary_unmatched_candidate_warns(
     assert inferred["data_date"] is None
 
 
-def test_verify_external_data_boundary_rejects_missing_corrupt_and_unsupported(
-    monkeypatch, tmp_path
-):
+def test_verify_external_data_boundary_rejects_missing_corrupt_and_unsupported(monkeypatch, tmp_path):
     from corpus_ingest_core.errors import ExternalDataVerificationInputError
     from corpus_ingest_core.external_data_verification import verify_external_data_boundary
 
     _use_tmp_data_dirs(monkeypatch, tmp_path)
-    with pytest.raises(ExternalDataVerificationInputError, match="external boundary"):
+    with pytest.raises(ExternalDataVerificationInputError, match="External boundary not found"):
         verify_external_data_boundary("gooaye", "EP999", confirm=True)
 
     _write_boundary(monkeypatch, tmp_path, corrupt=True)
@@ -302,9 +297,7 @@ def test_verify_external_data_boundary_handles_partial_boundary(monkeypatch, tmp
     assert asset.verification_status == "partial-draft"
 
 
-def test_verify_external_data_boundary_reuses_verified_artifact_unless_force(
-    monkeypatch, tmp_path
-):
+def test_verify_external_data_boundary_reuses_verified_artifact_unless_force(monkeypatch, tmp_path):
     from corpus_ingest_core.external_data_verification import verify_external_data_boundary
 
     paths = _write_boundary(monkeypatch, tmp_path, verified=True)
@@ -371,9 +364,7 @@ def test_verify_external_data_boundary_output_contains_no_advice(monkeypatch, tm
     )
 
     combined = (
-        paths.json_path.read_text(encoding="utf-8")
-        + "\n"
-        + paths.markdown_path.read_text(encoding="utf-8")
+        paths.json_path.read_text(encoding="utf-8") + "\n" + paths.markdown_path.read_text(encoding="utf-8")
     ).lower()
     assert "buy" not in combined
     assert "sell" not in combined
@@ -383,9 +374,7 @@ def test_verify_external_data_boundary_output_contains_no_advice(monkeypatch, tm
     assert "recommendation" not in combined
 
 
-def test_verify_external_data_boundary_cli_parses_options_and_outputs_json(
-    monkeypatch, capsys, tmp_path
-):
+def test_verify_external_data_boundary_cli_parses_options_and_outputs_json(monkeypatch, capsys, tmp_path):
     from scripts import verify_external_data_boundary
 
     from corpus_ingest_core.models import ExternalDataVerificationAsset

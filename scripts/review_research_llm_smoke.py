@@ -13,9 +13,7 @@ from corpus_ingest_core.serialization import to_jsonable
 
 
 def main(argv: list[str] | None = None) -> int:
-    parser = argparse.ArgumentParser(
-        description="Create a deterministic Research LLM smoke review report."
-    )
+    parser = argparse.ArgumentParser(description="Create a deterministic Research LLM smoke review report.")
     parser.add_argument("podcast_id", nargs="?")
     parser.add_argument("episode_ref", nargs="?")
     parser.add_argument("stock_query", nargs="?")
@@ -30,9 +28,7 @@ def main(argv: list[str] | None = None) -> int:
     episode_ref = args.episode_option or args.episode_ref
     stock_query = args.stock_option or args.stock_query
     if podcast_id is None or episode_ref is None or stock_query is None:
-        parser.error(
-            "必須提供 --podcast、--episode 與 --stock，或 positional podcast_id episode_ref stock_query。"
-        )
+        parser.error("Provide --podcast, --episode, and --stock, or positional podcast_id episode_ref stock_query.")
 
     result = review_research_llm_smoke(
         podcast_id,

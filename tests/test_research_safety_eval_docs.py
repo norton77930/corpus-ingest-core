@@ -15,16 +15,8 @@ def test_research_safety_eval_docs_exist():
     assert (DOCS / "research-safety-eval.md").exists()
     assert (DOCS / "research-eval-prompts.md").exists()
     assert (DOCS / "research-llm-smoke.md").exists()
-    assert (
-        EVALS
-        / "research-safety"
-        / "phase-6h-research-session-template.md"
-    ).exists()
-    assert (
-        EVALS
-        / "research-llm-smoke"
-        / "phase-6o-llm-smoke-template.md"
-    ).exists()
+    assert (EVALS / "research-safety" / "phase-6h-research-session-template.md").exists()
+    assert (EVALS / "research-llm-smoke" / "phase-6o-llm-smoke-template.md").exists()
 
 
 def test_research_eval_prompts_cover_llm_and_research_safety_cases():
@@ -51,9 +43,7 @@ def test_research_eval_prompts_cover_llm_and_research_safety_cases():
 
 
 def test_research_session_template_tracks_required_safety_fields():
-    content = _read(
-        EVALS / "research-safety" / "phase-6h-research-session-template.md"
-    )
+    content = _read(EVALS / "research-safety" / "phase-6h-research-session-template.md")
 
     assert "LLM tool used / not used" in content
     assert "API-cost acknowledgement status" in content
@@ -72,9 +62,7 @@ def test_research_safety_eval_docs_link_from_readme_and_roadmap():
     # The research boundary claims and the Phase 6H-6V.1 history moved out of
     # README.md: contract wording now lives in docs/api.md and the phase
     # history in docs/agent-handoff.md. README keeps the entry-point links.
-    operator_docs = "\n".join(
-        [readme, _read(DOCS / "api.md"), _read(DOCS / "agent-handoff.md")]
-    )
+    operator_docs = "\n".join([readme, _read(DOCS / "api.md"), _read(DOCS / "agent-handoff.md")])
 
     assert "docs/research-safety-eval.md" in readme
     assert "docs/research-eval-prompts.md" in readme
@@ -156,11 +144,7 @@ def test_research_safety_eval_docs_link_from_readme_and_roadmap():
 
 
 def test_research_llm_smoke_template_tracks_quality_fields():
-    content = _read(
-        EVALS
-        / "research-llm-smoke"
-        / "phase-6o-llm-smoke-template.md"
-    )
+    content = _read(EVALS / "research-llm-smoke" / "phase-6o-llm-smoke-template.md")
 
     assert "Provider / model" in content
     assert "Artifact paths" in content

@@ -24,9 +24,7 @@ from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Preview or run one corpus semantic remediation action."
-    )
+    parser = argparse.ArgumentParser(description="Preview or run one corpus semantic remediation action.")
     parser.add_argument("--podcast", required=True)
     parser.add_argument("--episode", required=True)
     parser.add_argument("--action", default="next")
@@ -55,14 +53,9 @@ def main() -> None:
     args = parser.parse_args()
     action = args.action.strip()
 
-    if (
-        args.confirm
-        and action == "semantic_summary"
-        and args.api_cost_ack != SEMANTIC_API_COST_ACK
-    ):
+    if args.confirm and action == "semantic_summary" and args.api_cost_ack != SEMANTIC_API_COST_ACK:
         print(
-            "semantic_summary requires exact api_cost_ack: "
-            f"{SEMANTIC_API_COST_ACK}",
+            f"semantic_summary requires exact api_cost_ack: {SEMANTIC_API_COST_ACK}",
             file=sys.stderr,
         )
         raise SystemExit(1)
@@ -103,11 +96,7 @@ def main() -> None:
             read_timeout_seconds=args.read_timeout_seconds,
             chunk_seconds=args.chunk_seconds,
             max_segments_per_chunk=args.max_segments_per_chunk,
-            progress_callback=(
-                _print_progress
-                if args.confirm and action == "semantic_summary"
-                else None
-            ),
+            progress_callback=(_print_progress if args.confirm and action == "semantic_summary" else None),
         )
     except CorpusSemanticRemediationRunnerFailedError as exc:
         print(str(exc), file=sys.stderr)
@@ -137,17 +126,11 @@ def main() -> None:
 def _resolve_llm_options(
     args: argparse.Namespace,
 ) -> tuple[str, str | None, str | None, str]:
-    profile = (
-        load_llm_profile(args.llm_profile, args.llm_profile_path)
-        if args.llm_profile
-        else None
-    )
+    profile = load_llm_profile(args.llm_profile, args.llm_profile_path) if args.llm_profile else None
     provider = args.provider or (profile.provider if profile else "openai-compatible")
     model = args.model or (profile.model if profile else None)
     base_url = args.base_url or (profile.base_url if profile else None)
-    api_key_env = args.api_key_env or (
-        profile.api_key_env if profile else "OPENAI_API_KEY"
-    )
+    api_key_env = args.api_key_env or (profile.api_key_env if profile else "OPENAI_API_KEY")
     return provider, model, base_url, api_key_env
 
 
@@ -168,8 +151,7 @@ def _print_progress(event: str, **payload: object) -> None:
     elif event in {"chunk_start", "chunk_done"}:
         status = "start" if event == "chunk_start" else "done"
         print(
-            "semantic_summary_progress: "
-            f"chunk {payload.get('index')}/{payload.get('total')} {status}",
+            f"semantic_summary_progress: chunk {payload.get('index')}/{payload.get('total')} {status}",
             file=sys.stderr,
         )
     elif event == "final_start":

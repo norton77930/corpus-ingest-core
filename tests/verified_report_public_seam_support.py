@@ -7,6 +7,7 @@ generation -- is monkeypatched to fail the test if it is reached, so the
 fixture can never quietly depend on the network, a credential, or live
 market data.
 """
+
 from __future__ import annotations
 
 import hashlib
@@ -40,10 +41,12 @@ def _use_tmp_dirs(monkeypatch, tmp_path: Path) -> None:
         raising=False,
     )
 
+
 def _write_json(path: Path, payload: dict) -> Path:
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     return path
+
 
 def _write_completed_artifacts(
     monkeypatch,
@@ -68,9 +71,7 @@ def _write_completed_artifacts(
             "segment_count": 1,
             "last_segment_end_seconds": 5.0,
             "completed": True,
-            "segments": [
-                {"id": 1, "start": 0.0, "end": 5.0, "text": "NVIDIA 與 AI 的本地 fixture"}
-            ],
+            "segments": [{"id": 1, "start": 0.0, "end": 5.0, "text": "NVIDIA 與 AI 的本地 fixture"}],
         },
     )
     transcript.text_path.write_text("private transcript sentinel", encoding="utf-8")
@@ -229,9 +230,7 @@ def _write_completed_artifacts(
             "external_boundary": boundary.json_path,
         }
         if stock_query:
-            proof_paths["stock_lens"] = storage.stock_lens_report_asset_paths(
-                "gooaye", stock_query
-            ).json_path
+            proof_paths["stock_lens"] = storage.stock_lens_report_asset_paths("gooaye", stock_query).json_path
         generation_proofs = {
             role: {
                 "expected_path": path.resolve().as_posix(),
@@ -300,13 +299,34 @@ def _record_lineage(*, stock_query: str) -> None:
     }
     from corpus_ingest_core.semantic_review_artifact import inspect_semantic_review
     from corpus_ingest_core.semantic_summary_smoke_review import REPORTS_DIR
-    review = inspect_semantic_review("gooaye", "EP700", semantic_summary_path=paths["semantic_summary"], review_reports_dir=REPORTS_DIR)
+
+    review = inspect_semantic_review(
+        "gooaye", "EP700", semantic_summary_path=paths["semantic_summary"], review_reports_dir=REPORTS_DIR
+    )
     assert review.review_path is not None
     paths["semantic_review"] = review.review_path
     record_current_verified_research_lineage(
-        "gooaye", "EP700", stock_query=stock_query, include_fixture_verification=False,
-        generation_proofs={role: {"expected_path": path.resolve().as_posix(), "pre_sha256": None, "post_sha256": hashlib.sha256(path.read_bytes()).hexdigest(), "execution": "external_selector" if role == "transcript" else "generated"} for role, path in paths.items()},
-        summary_options={"summary_mode": "semantic-llm", "requested_provider": "openai-compatible", "requested_model": None, "requested_base_url_identity_sha256": None, "requested_chunk_seconds": 600, "requested_max_segments_per_chunk": 120},
+        "gooaye",
+        "EP700",
+        stock_query=stock_query,
+        include_fixture_verification=False,
+        generation_proofs={
+            role: {
+                "expected_path": path.resolve().as_posix(),
+                "pre_sha256": None,
+                "post_sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+                "execution": "external_selector" if role == "transcript" else "generated",
+            }
+            for role, path in paths.items()
+        },
+        summary_options={
+            "summary_mode": "semantic-llm",
+            "requested_provider": "openai-compatible",
+            "requested_model": None,
+            "requested_base_url_identity_sha256": None,
+            "requested_chunk_seconds": 600,
+            "requested_max_segments_per_chunk": 120,
+        },
     )
 
 
@@ -331,7 +351,54 @@ def run_verified_report_public_workflow(monkeypatch, tmp_path: Path) -> None:
     _write_completed_artifacts(monkeypatch, tmp_path, stock_query="NVDA")
     stock_path = storage.stock_lens_report_asset_paths("gooaye", "NVDA").json_path
     stock = json.loads(stock_path.read_text(encoding="utf-8"))
-    stock.update({"direct_podcast_evidence": [{"episode_ref": "EP700", "title": "EP700 Alpha", "company_name": "NVIDIA", "tickers": ["NVDA"], "relation": "AI supplier", "relation_type": "supplier", "evidence_status": "podcast_explicit", "verification_status": "podcast_evidence", "evidence": [{"timestamp": "[00:00:00 - 00:00:05]", "segment_id": 1, "text": "fixture"}], "external_boundary": {"external_verification_status": "not_requested", "source_status": "not_fetched", "data_date": None, "required_external_checks": []}}], "inferred_research_leads": [{"episode_ref": "EP700", "company_name": "NVIDIA", "tickers": ["NVDA"], "relation": "AI inference", "relation_type": "research_lead", "evidence_status": "inferred_from_industry", "verification_status": "needs_verification", "external_boundary": {"external_verification_status": "not_requested", "source_status": "not_fetched", "data_date": None}}], "external_verification_needs": [{"company_name": "NVIDIA", "external_verification_status": "not_requested", "source_status": "not_fetched", "data_date": None, "required_external_checks": []}]})
+    stock.update(
+        {
+            "direct_podcast_evidence": [
+                {
+                    "episode_ref": "EP700",
+                    "title": "EP700 Alpha",
+                    "company_name": "NVIDIA",
+                    "tickers": ["NVDA"],
+                    "relation": "AI supplier",
+                    "relation_type": "supplier",
+                    "evidence_status": "podcast_explicit",
+                    "verification_status": "podcast_evidence",
+                    "evidence": [{"timestamp": "[00:00:00 - 00:00:05]", "segment_id": 1, "text": "fixture"}],
+                    "external_boundary": {
+                        "external_verification_status": "not_requested",
+                        "source_status": "not_fetched",
+                        "data_date": None,
+                        "required_external_checks": [],
+                    },
+                }
+            ],
+            "inferred_research_leads": [
+                {
+                    "episode_ref": "EP700",
+                    "company_name": "NVIDIA",
+                    "tickers": ["NVDA"],
+                    "relation": "AI inference",
+                    "relation_type": "research_lead",
+                    "evidence_status": "inferred_from_industry",
+                    "verification_status": "needs_verification",
+                    "external_boundary": {
+                        "external_verification_status": "not_requested",
+                        "source_status": "not_fetched",
+                        "data_date": None,
+                    },
+                }
+            ],
+            "external_verification_needs": [
+                {
+                    "company_name": "NVIDIA",
+                    "external_verification_status": "not_requested",
+                    "source_status": "not_fetched",
+                    "data_date": None,
+                    "required_external_checks": [],
+                }
+            ],
+        }
+    )
     stock_path.write_text(json.dumps(stock), encoding="utf-8")
     _record_lineage(stock_query="NVDA")
 
@@ -344,7 +411,10 @@ def run_verified_report_public_workflow(monkeypatch, tmp_path: Path) -> None:
     appendix = assembly.report_payload["stock_query_appendix"]
     assert appendix["direct_podcast_evidence"][0]["classification"] == "verified_podcast_fact"
     assert appendix["direct_podcast_evidence"][0]["provenance"][0]["timestamp"] == "[00:00:00 - 00:00:05]"
-    assert appendix["direct_podcast_evidence"][0]["external_verification"]["external_verification_status"] == "not_requested"
+    assert (
+        appendix["direct_podcast_evidence"][0]["external_verification"]["external_verification_status"]
+        == "not_requested"
+    )
     assert appendix["direct_podcast_evidence"][0]["external_verification"]["source_status"] == "not_fetched"
     assert appendix["inferred_research_leads"][0]["classification"] == "deterministic_inference"
     assert appendix["inferred_research_leads"][0]["verification_status"] == "needs_verification"
@@ -359,8 +429,10 @@ def run_verified_report_public_workflow(monkeypatch, tmp_path: Path) -> None:
     # size.  Mutating any representative field changes the independently
     # computed digest, so an old lineage/published digest cannot match it.
     for index, source_artifact in enumerate(assembly.source_artifacts):
+
         class MutatedSource:
             pass
+
         mutated = []
         for candidate_index, candidate in enumerate(assembly.source_artifacts):
             replacement = MutatedSource()
@@ -371,12 +443,14 @@ def run_verified_report_public_workflow(monkeypatch, tmp_path: Path) -> None:
             if candidate_index == index:
                 replacement.sha256 = hashlib.sha256((candidate.sha256 + "-mutated").encode("utf-8")).hexdigest()
             mutated.append(replacement)
+
         class MutatedAssembly:
             podcast_id = assembly.podcast_id
             episode_ref = assembly.episode_ref
             stock_query = assembly.stock_query
             include_fixture_verification = assembly.include_fixture_verification
             source_artifacts = mutated
+
         assert _independent_source_digest(MutatedAssembly()) != first.source_digest, source_artifact.role
     stock_path.write_text(stock_path.read_text(encoding="utf-8") + " ", encoding="utf-8")
     with pytest.raises(VerifiedResearchReportInputError):

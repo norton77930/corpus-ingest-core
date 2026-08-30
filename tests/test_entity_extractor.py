@@ -58,13 +58,9 @@ def _write_transcript(
     paths = transcript_asset_paths(podcast_id, episode_ref, title)
     paths.text_path.parent.mkdir(parents=True, exist_ok=True)
     if write_text:
-        paths.text_path.write_text(
-            "\n".join(segment["text"] for segment in segments), encoding="utf-8"
-        )
+        paths.text_path.write_text("\n".join(segment["text"] for segment in segments), encoding="utf-8")
     if write_srt:
-        paths.srt_path.write_text(
-            "1\n00:00:00,000 --> 00:00:01,000\n字幕\n", encoding="utf-8"
-        )
+        paths.srt_path.write_text("1\n00:00:00,000 --> 00:00:01,000\n字幕\n", encoding="utf-8")
     if write_json:
         if json_text is not None:
             paths.json_path.write_text(json_text, encoding="utf-8")
@@ -78,9 +74,7 @@ def _write_transcript(
                 "completed": completed,
                 "segments": segments,
             }
-            paths.json_path.write_text(
-                json.dumps(payload, ensure_ascii=False), encoding="utf-8"
-            )
+            paths.json_path.write_text(json.dumps(payload, ensure_ascii=False), encoding="utf-8")
     return paths
 
 
@@ -173,16 +167,12 @@ def test_extract_mentions_allows_partial_when_requested(monkeypatch, tmp_path):
     assert asset.mention_count > 0
 
 
-def test_extract_mentions_counts_repeated_mentions_and_limits_evidence(
-    monkeypatch, tmp_path
-):
+def test_extract_mentions_counts_repeated_mentions_and_limits_evidence(monkeypatch, tmp_path):
     import corpus_ingest_core.entity_extractor as extractor
 
     _write_transcript(monkeypatch, tmp_path)
 
-    asset = extractor.extract_mentions(
-        "gooaye", "EP672", max_evidence_per_mention=1
-    )
+    asset = extractor.extract_mentions("gooaye", "EP672", max_evidence_per_mention=1)
     payload = json.loads(asset.mentions_json_path.read_text(encoding="utf-8"))
     mentions = {mention["text"]: mention for mention in payload["mentions"]}
 
@@ -230,7 +220,7 @@ def test_extract_mentions_force_rewrites_existing_artifacts(monkeypatch, tmp_pat
 def test_mention_path_removes_illegal_characters_and_emoji():
     from corpus_ingest_core.storage import mention_asset_paths
 
-    paths = mention_asset_paths("gooaye", "EP672", ' bad <title> 🐣 : / \\ | ? * ok ')
+    paths = mention_asset_paths("gooaye", "EP672", " bad <title> 🐣 : / \\ | ? * ok ")
 
     assert not any(character in paths.json_path.name for character in '<>:"/\\|?*')
     assert "🐣" not in paths.json_path.name
@@ -238,9 +228,7 @@ def test_mention_path_removes_illegal_characters_and_emoji():
     assert paths.markdown_path.name == "EP672__bad_title_ok.mentions.md"
 
 
-def test_extract_mentions_cli_parses_options_and_outputs_json(
-    monkeypatch, capsys, tmp_path
-):
+def test_extract_mentions_cli_parses_options_and_outputs_json(monkeypatch, capsys, tmp_path):
     from scripts import extract_mentions
 
     from corpus_ingest_core.models import MentionExtractionAsset

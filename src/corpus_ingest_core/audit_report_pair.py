@@ -48,9 +48,7 @@ def write_atomic_audit_report_pair(
             old_json = json_path.read_bytes() if old_pair is not None else None
             old_markdown = markdown_path.read_bytes() if old_pair is not None else None
             token = uuid.uuid4().hex
-            markdown_stage = markdown_path.with_name(
-                f".audit-stage-{token}-{markdown_path.name}"
-            )
+            markdown_stage = markdown_path.with_name(f".audit-stage-{token}-{markdown_path.name}")
             json_stage = json_path.with_name(f".audit-stage-{token}-{json_path.name}")
             try:
                 json_path.parent.mkdir(parents=True, exist_ok=True)
@@ -99,9 +97,7 @@ def read_complete_audit_report_pair(
     if not isinstance(payload, dict):
         return None
     pair = payload.get(_PAIR_KEY)
-    if not isinstance(pair, dict) or set(pair) != {
-        "schema_version", "generation", "markdown_sha256"
-    }:
+    if not isinstance(pair, dict) or set(pair) != {"schema_version", "generation", "markdown_sha256"}:
         return None
     generation = pair.get("generation")
     markdown_sha256 = pair.get("markdown_sha256")
@@ -141,9 +137,7 @@ def _render_pair(payload: dict[str, Any], markdown: str) -> tuple[str, bytes, st
             "markdown_sha256": markdown_sha256,
         },
     }
-    json_bytes = json.dumps(
-        committed_payload, ensure_ascii=False, indent=2, sort_keys=True
-    ).encode("utf-8")
+    json_bytes = json.dumps(committed_payload, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8")
     return generation, json_bytes, rendered_markdown
 
 
@@ -205,11 +199,15 @@ def _canonical_json_bytes(payload: dict[str, Any]) -> bytes:
 
 
 def _markdown_marker(generation: str, payload_sha256: str) -> str:
-    return _MARKER_PREFIX + json.dumps(
-        {"generation": generation, "json_payload_sha256": payload_sha256},
-        sort_keys=True,
-        separators=(",", ":"),
-    ) + _MARKER_SUFFIX
+    return (
+        _MARKER_PREFIX
+        + json.dumps(
+            {"generation": generation, "json_payload_sha256": payload_sha256},
+            sort_keys=True,
+            separators=(",", ":"),
+        )
+        + _MARKER_SUFFIX
+    )
 
 
 def _parse_markdown_marker(markdown: str) -> dict[str, str] | None:

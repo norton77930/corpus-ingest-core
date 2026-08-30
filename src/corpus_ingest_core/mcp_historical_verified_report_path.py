@@ -24,13 +24,7 @@ def dispatch(
     if not isinstance(episode_ref, str) or not episode_ref.strip():
         return tool_error_payload()
     try:
-        return success(
-            core.result_to_dict(
-                core.suggest_historical_verified_report_next_step(
-                    podcast_id, episode_ref
-                )
-            )
-        )
+        return success(core.result_to_dict(core.suggest_historical_verified_report_next_step(podcast_id, episode_ref)))
     except Exception:
         return tool_error_payload()
 

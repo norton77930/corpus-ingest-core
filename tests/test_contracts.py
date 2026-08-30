@@ -15,10 +15,7 @@ def test_loads_registered_profiles_from_yaml():
     profile = profiles["gooaye"]
     assert profile.podcast_id == "gooaye"
     assert profile.display_name == "Gooaye 股癌"
-    assert profile.rss_url == (
-        "https://feeds.soundon.fm/podcasts/"
-        "954689a5-3096-43a4-a80b-7810b219cef3.xml"
-    )
+    assert profile.rss_url == ("https://feeds.soundon.fm/podcasts/954689a5-3096-43a4-a80b-7810b219cef3.xml")
     assert profile.language == "zh"
     assert profile.default_episode_prefix == "EP"
     assert profile.source_type == "rss"
@@ -268,52 +265,26 @@ def test_storage_paths_are_deterministic_and_under_data():
     )
 
     assert audio_path("gooaye", "ep-001") == Path("data/audio/gooaye/ep-001.mp3")
-    assert transcript_path("gooaye", "ep-001") == Path(
-        "data/transcripts/gooaye/ep-001.json"
-    )
+    assert transcript_path("gooaye", "ep-001") == Path("data/transcripts/gooaye/ep-001.json")
     assert summary_path("gooaye", "ep-001") == Path("data/summaries/gooaye/ep-001.md")
     mention_paths = mention_asset_paths("gooaye", "EP001", "Title")
-    assert mention_paths.json_path == Path(
-        "data/mentions/gooaye/EP001__Title.mentions.json"
-    )
-    assert mention_paths.markdown_path == Path(
-        "data/mentions/gooaye/EP001__Title.mentions.md"
-    )
+    assert mention_paths.json_path == Path("data/mentions/gooaye/EP001__Title.mentions.json")
+    assert mention_paths.markdown_path == Path("data/mentions/gooaye/EP001__Title.mentions.md")
     report_paths = episode_intelligence_report_asset_paths("gooaye", "EP001", "Title")
-    assert report_paths.json_path == Path(
-        "data/reports/gooaye/EP001__Title.intelligence.json"
-    )
-    assert report_paths.markdown_path == Path(
-        "data/reports/gooaye/EP001__Title.intelligence.md"
-    )
+    assert report_paths.json_path == Path("data/reports/gooaye/EP001__Title.intelligence.json")
+    assert report_paths.markdown_path == Path("data/reports/gooaye/EP001__Title.intelligence.md")
     mapping_paths = industry_chain_mapping_asset_paths("gooaye", "EP001", "Title")
-    assert mapping_paths.json_path == Path(
-        "data/mappings/gooaye/EP001__Title.industry-map.json"
-    )
-    assert mapping_paths.markdown_path == Path(
-        "data/mappings/gooaye/EP001__Title.industry-map.md"
-    )
+    assert mapping_paths.json_path == Path("data/mappings/gooaye/EP001__Title.industry-map.json")
+    assert mapping_paths.markdown_path == Path("data/mappings/gooaye/EP001__Title.industry-map.md")
     boundary_paths = external_data_boundary_asset_paths("gooaye", "EP001", "Title")
-    assert boundary_paths.json_path == Path(
-        "data/external/gooaye/EP001__Title.external-boundary.json"
-    )
-    assert boundary_paths.markdown_path == Path(
-        "data/external/gooaye/EP001__Title.external-boundary.md"
-    )
+    assert boundary_paths.json_path == Path("data/external/gooaye/EP001__Title.external-boundary.json")
+    assert boundary_paths.markdown_path == Path("data/external/gooaye/EP001__Title.external-boundary.md")
     stock_lens_paths = stock_lens_report_asset_paths("gooaye", "TSM")
-    assert stock_lens_paths.json_path == Path(
-        "data/stock-lens/gooaye/TSM.stock-lens.json"
-    )
-    assert stock_lens_paths.markdown_path == Path(
-        "data/stock-lens/gooaye/TSM.stock-lens.md"
-    )
+    assert stock_lens_paths.json_path == Path("data/stock-lens/gooaye/TSM.stock-lens.json")
+    assert stock_lens_paths.markdown_path == Path("data/stock-lens/gooaye/TSM.stock-lens.md")
     synthesis_paths = stock_lens_synthesis_asset_paths("gooaye", "TSM")
-    assert synthesis_paths.json_path == Path(
-        "data/stock-lens/gooaye/TSM.stock-lens-synthesis.json"
-    )
-    assert synthesis_paths.markdown_path == Path(
-        "data/stock-lens/gooaye/TSM.stock-lens-synthesis.md"
-    )
+    assert synthesis_paths.json_path == Path("data/stock-lens/gooaye/TSM.stock-lens-synthesis.json")
+    assert synthesis_paths.markdown_path == Path("data/stock-lens/gooaye/TSM.stock-lens-synthesis.md")
     assert cache_path("gooaye") == Path("data/cache/gooaye/episodes.json")
     assert cache_db_path() == Path("data/cache/podcast_ingest.sqlite3")
 
@@ -393,12 +364,6 @@ def test_corpus_semantic_remediation_additive_public_contract():
 
     assert callable(run_corpus_semantic_remediation)
     assert callable(corpus_semantic_remediation_run_asset_paths)
-    assert CorpusSemanticRemediationRunAssetPaths.__name__ == (
-        "CorpusSemanticRemediationRunAssetPaths"
-    )
-    assert CorpusSemanticRemediationRunResult.__name__ == (
-        "CorpusSemanticRemediationRunResult"
-    )
-    assert issubclass(
-        CorpusSemanticRemediationRunnerFailedError, PodcastIngestCoreError
-    )
+    assert CorpusSemanticRemediationRunAssetPaths.__name__ == ("CorpusSemanticRemediationRunAssetPaths")
+    assert CorpusSemanticRemediationRunResult.__name__ == ("CorpusSemanticRemediationRunResult")
+    assert issubclass(CorpusSemanticRemediationRunnerFailedError, PodcastIngestCoreError)

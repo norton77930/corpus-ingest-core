@@ -15,9 +15,7 @@ from .errors import PodcastIngestCoreError
 from .mcp_runtime import mcp, tool_action_plan, tool_error
 
 YOUTUBE_VIDEO_CACHE_STALE_WARNING = youtube_video_ingest.CACHE_STALE_WARNING
-NOT_INVESTMENT_ADVICE = (
-    "Research framework only: no buy/sell/hold, target price, or guaranteed return."
-)
+NOT_INVESTMENT_ADVICE = "Research framework only: no buy/sell/hold, target price, or guaranteed return."
 PREVIEW_NETWORK_SCOPE = "public_metadata_only"
 
 

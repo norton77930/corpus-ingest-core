@@ -14,8 +14,7 @@ from .summary_profiles import (
 
 DEFAULT_OPENAI_COMPATIBLE_BASE_URL = "https://api.openai.com/v1"
 SEMANTIC_API_COST_ACK = (
-    "I understand this may call an external LLM API, send transcript text outside this machine, "
-    "and incur costs."
+    "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
 )
 
 
@@ -23,9 +22,7 @@ def require_exact_api_cost_ack(api_cost_ack: str) -> None:
     """在 provider construction 前強制 exact acknowledgement（audit F-03）。"""
 
     if api_cost_ack != SEMANTIC_API_COST_ACK:
-        raise LLMProviderConfigError(
-            f"LLM provider requires exact api_cost_ack: {SEMANTIC_API_COST_ACK}"
-        )
+        raise LLMProviderConfigError(f"LLM provider requires exact api_cost_ack: {SEMANTIC_API_COST_ACK}")
 
 
 class SemanticSummaryProvider(Protocol):
@@ -85,9 +82,7 @@ class OpenAICompatibleProvider:
             )
 
         api_key = os.environ.get(api_key_env, "").strip()
-        resolved_model = (
-            model or os.environ.get("MODEL") or os.environ.get("OPENAI_MODEL", "")
-        ).strip()
+        resolved_model = (model or os.environ.get("MODEL") or os.environ.get("OPENAI_MODEL", "")).strip()
         resolved_base_url = (
             base_url
             or os.environ.get("BASE_URL")
@@ -96,9 +91,9 @@ class OpenAICompatibleProvider:
         ).strip()
 
         if not api_key:
-            raise LLMProviderConfigError(f"缺少 LLM API key 環境變數：{api_key_env}")
+            raise LLMProviderConfigError(f"Missing LLM API key environment variable: {api_key_env}")
         if not resolved_model:
-            raise LLMProviderConfigError("缺少 LLM model；請提供 --model 或設定 MODEL。")
+            raise LLMProviderConfigError("Missing LLM model; pass --model or set MODEL.")
 
         self.api_key = api_key
         self.model = resolved_model
@@ -176,10 +171,10 @@ class OpenAICompatibleProvider:
             payload = response.json()
             content = payload["choices"][0]["message"]["content"]
         except (ValueError, KeyError, IndexError, TypeError) as exc:
-            raise LLMProviderRequestError("LLM provider response 格式不符合預期。") from exc
+            raise LLMProviderRequestError("The LLM provider response is not in the expected shape.") from exc
 
         if not isinstance(content, str) or not content.strip():
-            raise LLMProviderRequestError("LLM provider response 缺少可用內容。")
+            raise LLMProviderRequestError("The LLM provider response carries no usable content.")
         return content.strip()
 
 
@@ -202,7 +197,7 @@ def create_provider(
 
     require_exact_api_cost_ack(api_cost_ack)
     if provider != "openai-compatible":
-        raise LLMProviderConfigError(f"不支援的 LLM provider：{provider}")
+        raise LLMProviderConfigError(f"Unsupported LLM provider: {provider}")
     return OpenAICompatibleProvider(
         model=model,
         base_url=base_url,

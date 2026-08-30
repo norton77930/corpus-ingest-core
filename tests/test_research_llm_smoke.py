@@ -7,10 +7,7 @@ from dataclasses import asdict
 
 import pytest
 
-ACK = (
-    "I understand this may call an external LLM API, send transcript text outside this machine, "
-    "and incur costs."
-)
+ACK = "I understand this may call an external LLM API, send transcript text outside this machine, and incur costs."
 
 
 def _workflow_result(*, dry_run: bool, confirm: bool):
@@ -37,9 +34,7 @@ def _workflow_result(*, dry_run: bool, confirm: bool):
                     "data/stock-lens/gooaye/台積電.stock-lens-synthesis.md",
                 ],
                 risks=["Calls an external LLM API", "May incur API cost risk"],
-                generated_artifacts=[]
-                if dry_run
-                else ["data/stock-lens/gooaye/台積電.stock-lens-synthesis.json"],
+                generated_artifacts=[] if dry_run else ["data/stock-lens/gooaye/台積電.stock-lens-synthesis.json"],
                 reused_artifacts=[],
             )
         ],
@@ -54,9 +49,7 @@ def _workflow_result(*, dry_run: bool, confirm: bool):
     )
 
 
-def test_research_llm_smoke_dry_run_calls_workflow_without_confirm(
-    monkeypatch, tmp_path, capsys
-):
+def test_research_llm_smoke_dry_run_calls_workflow_without_confirm(monkeypatch, tmp_path, capsys):
     from scripts import run_research_llm_smoke
 
     config_path = tmp_path / "llm_profiles.yaml"
@@ -121,9 +114,7 @@ profiles:
     assert "secret-value" not in capsys.readouterr().out
 
 
-def test_research_llm_smoke_confirm_requires_exact_ack_before_workflow(
-    monkeypatch, capsys
-):
+def test_research_llm_smoke_confirm_requires_exact_ack_before_workflow(monkeypatch, capsys):
     from scripts import run_research_llm_smoke
 
     monkeypatch.setattr(
@@ -155,9 +146,7 @@ def test_research_llm_smoke_confirm_requires_exact_ack_before_workflow(
     assert "exact api_cost_ack" in capsys.readouterr().err
 
 
-def test_research_llm_smoke_confirm_passes_expected_workflow_options(
-    monkeypatch, capsys
-):
+def test_research_llm_smoke_confirm_passes_expected_workflow_options(monkeypatch, capsys):
     from scripts import run_research_llm_smoke
 
     import corpus_ingest_core.stock_lens_synthesis as synthesis
@@ -236,9 +225,7 @@ def test_research_llm_smoke_confirm_passes_expected_workflow_options(
     assert payload["debug_llm_output_path"] == debug_path
 
 
-def test_research_llm_smoke_stdout_does_not_expose_sensitive_or_raw_text(
-    monkeypatch, capsys
-):
+def test_research_llm_smoke_stdout_does_not_expose_sensitive_or_raw_text(monkeypatch, capsys):
     from scripts import run_research_llm_smoke
 
     monkeypatch.setenv("TEST_API_KEY", "secret-value")

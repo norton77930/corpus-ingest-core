@@ -32,9 +32,7 @@ def list_episodes(podcast_id: str = "gooaye", limit: int = 10) -> dict[str, Any]
 def get_episode(podcast_id: str = "gooaye", episode_ref: str = "latest") -> dict[str, Any]:
     """查詢單一 podcast episode metadata；支援 latest 與大小寫不敏感 EP ref。"""
 
-    return mcp_runtime._tool_call(
-        lambda: _episode_to_safe_dict(feed_reader.get_episode(podcast_id, episode_ref))
-    )
+    return mcp_runtime._tool_call(lambda: _episode_to_safe_dict(feed_reader.get_episode(podcast_id, episode_ref)))
 
 
 @mcp.tool()

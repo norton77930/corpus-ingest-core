@@ -11,7 +11,7 @@ from corpus_ingest_core import PodcastIngestCoreError, extract_mentions
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="擷取單一 podcast episode 的 deterministic mentions。")
+    parser = argparse.ArgumentParser(description="Extract deterministic mentions from one podcast episode.")
     parser.add_argument("podcast_id", nargs="?")
     parser.add_argument("episode_ref", nargs="?")
     parser.add_argument("--podcast", dest="podcast_option")
@@ -24,7 +24,7 @@ def main() -> None:
     podcast_id = args.podcast_option or args.podcast_id
     episode_ref = args.episode_option or args.episode_ref
     if podcast_id is None or episode_ref is None:
-        parser.error("必須提供 --podcast 與 --episode，或 positional podcast_id episode_ref。")
+        parser.error("Provide --podcast and --episode, or positional podcast_id episode_ref.")
 
     try:
         result = extract_mentions(

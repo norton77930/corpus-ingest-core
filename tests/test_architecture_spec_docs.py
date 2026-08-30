@@ -268,14 +268,12 @@ def test_corpus_runtime_lifecycle_status_matches_registry_and_roadmap():
         assert "**Status**: Implemented" in spec
 
     roadmap = _read(DOCS / "roadmap.md")
-    assert (
-        "Latest implemented corpus package is "
-        "**020-verified-research-report-catalog**"
-    ) in roadmap
+    assert ("Latest implemented corpus package is **020-verified-research-report-catalog**") in roadmap
     assert "SPEC 017 is Implemented" in roadmap
     assert "SPEC 019 is Implemented" in roadmap
     assert "SPEC 020 is **Implemented**" in roadmap
     assert "next unused feature package number is **021**" in roadmap
+
 
 def test_014_stabilization_docs_define_strict_zero_file_dry_run():
     feature = ROOT / "specs" / "014-corpus-fresh-episode-workflow-runner"
@@ -315,14 +313,13 @@ def test_014_stabilization_docs_define_strict_zero_file_dry_run():
     assert "one shared snapshot" in matrix
     assert "exact 12 MCP tools" in matrix
 
+
 def test_015_semantic_remediation_docs_and_registry_contract():
     feature = ROOT / "specs" / "015-corpus-semantic-remediation-runner"
     readme = (ROOT / "docs" / "api.md").read_text(encoding="utf-8")
     architecture = (ROOT / "docs" / "architecture.md").read_text(encoding="utf-8")
     registry = (ROOT / "specs" / "README.md").read_text(encoding="utf-8")
-    verification = (ROOT / "docs" / "verification-matrix.md").read_text(
-        encoding="utf-8"
-    )
+    verification = (ROOT / "docs" / "verification-matrix.md").read_text(encoding="utf-8")
     handoff = (ROOT / "docs" / "agent-handoff.md").read_text(encoding="utf-8")
     roadmap = (ROOT / "docs" / "roadmap.md").read_text(encoding="utf-8")
     agents = (ROOT / "AGENTS.md").read_text(encoding="utf-8")
@@ -415,13 +412,7 @@ def test_017_latest_episode_deterministic_workflow_docs_and_agent_surface_contra
     quickstart = _read(feature / "quickstart.md")
     requirements = _read(feature / "checklists" / "requirements.md")
     tasks = _read(feature / "tasks.md")
-    skill = _read(
-        ROOT
-        / ".agents"
-        / "skills"
-        / "corpus-latest-episode-processing"
-        / "SKILL.md"
-    )
+    skill = _read(ROOT / ".agents" / "skills" / "corpus-latest-episode-processing" / "SKILL.md")
     roadmap = _read(DOCS / "roadmap.md")
     readme = _read(DOCS / "api.md")
     architecture = _read(DOCS / "architecture.md")
@@ -577,15 +568,9 @@ def test_readme_lists_current_corpus_workflow_surfaces_in_their_sections():
     # unchanged: each corpus workflow surface must appear in the section that
     # documents that kind of surface, not just somewhere in the file.
     api = _read(DOCS / "api.md")
-    directory_section = api.split("## CLI reference", 1)[1].split(
-        "## MCP tool registry", 1
-    )[0]
-    core_block = api.split("## Core function reference", 1)[1].split(
-        "```python", 1
-    )[1].split("```", 1)[0]
-    output_section = api.split("## Output paths", 1)[1].split(
-        "## CLI reference", 1
-    )[0]
+    directory_section = api.split("## CLI reference", 1)[1].split("## MCP tool registry", 1)[0]
+    core_block = api.split("## Core function reference", 1)[1].split("```python", 1)[1].split("```", 1)[0]
+    output_section = api.split("## Output paths", 1)[1].split("## CLI reference", 1)[0]
     mcp_section = api.split("## MCP tool registry", 1)[1]
 
     for script in [

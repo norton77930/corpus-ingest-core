@@ -28,9 +28,7 @@ LLM_RUNTIME = "openai-compatible /chat/completions"
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(
-        description="Run a dry-run-first LLM research smoke workflow."
-    )
+    parser = argparse.ArgumentParser(description="Run a dry-run-first LLM research smoke workflow.")
     parser.add_argument("podcast_id", nargs="?")
     parser.add_argument("episode_ref", nargs="?")
     parser.add_argument("stock_query", nargs="?")
@@ -65,9 +63,7 @@ def main() -> None:
     episode_ref = args.episode_option or args.episode_ref
     stock_query = args.stock_option or args.stock_query
     if podcast_id is None or episode_ref is None or stock_query is None:
-        parser.error(
-            "必須提供 --podcast、--episode 與 --stock，或 positional podcast_id episode_ref stock_query。"
-        )
+        parser.error("Provide --podcast, --episode, and --stock, or positional podcast_id episode_ref stock_query.")
 
     try:
         local_env_result = _load_local_env_from_args(args)
@@ -194,11 +190,7 @@ def _debug_output_path(*, podcast_id: str, episode_ref: str, stock_query: str) -
 
 
 def _resolve_llm_options(args: argparse.Namespace) -> tuple[str, str | None, str | None, str]:
-    profile = (
-        load_llm_profile(args.llm_profile, args.llm_profile_path)
-        if args.llm_profile
-        else None
-    )
+    profile = load_llm_profile(args.llm_profile, args.llm_profile_path) if args.llm_profile else None
     provider = args.provider or (profile.provider if profile else "openai-compatible")
     model = args.model or (profile.model if profile else None)
     base_url = args.base_url or (profile.base_url if profile else None)

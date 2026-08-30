@@ -16,9 +16,7 @@ from corpus_ingest_core.local_env import load_local_env
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Preview or write 05/06 workflow derivation files."
-    )
+    parser = argparse.ArgumentParser(description="Preview or write 05/06 workflow derivation files.")
     parser.add_argument("--podcast-id", "--podcast", dest="podcast", required=True)
     parser.add_argument("--episode-ref", "--episode", dest="episode", required=True)
     parser.add_argument("--confirm", action="store_true")

@@ -77,9 +77,7 @@ def test_red_stale_sidecar_and_manifest_cannot_select_ambiguous_transcript(
     alpha = variants["EP700 Alpha"]
     assert hasattr(alpha, "json_path")
     alpha_json = alpha.json_path
-    stale_lineage = (
-        storage.CORPUS_DIR / "gooaye" / "verified-research" / "EP700.lineage.json"
-    )
+    stale_lineage = storage.CORPUS_DIR / "gooaye" / "verified-research" / "EP700.lineage.json"
     _write_json(
         stale_lineage,
         {
@@ -94,13 +92,7 @@ def test_red_stale_sidecar_and_manifest_cannot_select_ambiguous_transcript(
             },
         },
     )
-    manifest = (
-        storage.RESEARCH_REPORTS_DIR
-        / "gooaye"
-        / "EP700"
-        / ("v1-" + "a" * 64)
-        / "manifest.json"
-    )
+    manifest = storage.RESEARCH_REPORTS_DIR / "gooaye" / "EP700" / ("v1-" + "a" * 64) / "manifest.json"
     _write_json(
         manifest,
         {
@@ -152,20 +144,14 @@ def test_red_seeded_corrected_transcript_is_actual_semantic_and_research_input(
 
     monkeypatch.setattr(semantic, "_build_provider", lambda **_kwargs: _Provider())
 
-    summary = semantic.semantic_summarize_episode(
-        "gooaye", "EP700", api_cost_ack=SEMANTIC_API_COST_ACK
-    )
+    summary = semantic.semantic_summarize_episode("gooaye", "EP700", api_cost_ack=SEMANTIC_API_COST_ACK)
     mentions = extract_mentions("gooaye", "EP700")
 
     assert summary.transcript_json_path == corrected.json_path
-    assert summary.summary_path == storage.semantic_summary_asset_path(
-        "gooaye", "EP700", "EP700 Corrected"
-    )
+    assert summary.summary_path == storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Corrected")
     assert chunks == ["[00:00:00 - 00:00:01] NVIDIA content from EP700 Corrected"]
     assert mentions.source_transcript_json_path == corrected.json_path
-    assert mentions.mentions_json_path == storage.mention_asset_paths(
-        "gooaye", "EP700", "EP700 Corrected"
-    ).json_path
+    assert mentions.mentions_json_path == storage.mention_asset_paths("gooaye", "EP700", "EP700 Corrected").json_path
 
 
 def test_red_audit_report_pair_rejects_second_replace_half_commit(
@@ -332,9 +318,7 @@ def test_red_progressive_lineage_survives_later_audit_or_research_failure(
             raise OSError("015 audit report write failed")
 
     assert summary_commits == {"semantic_summary"}
-    with runner._progressive_lineage_scope(
-        "gooaye", "EP700", filters, {"semantic_summary": summary_path}, set()
-    ):
+    with runner._progressive_lineage_scope("gooaye", "EP700", filters, {"semantic_summary": summary_path}, set()):
         notify_child_artifact_committed(
             "semantic_summary",
             summary_path,
@@ -345,9 +329,7 @@ def test_red_progressive_lineage_survives_later_audit_or_research_failure(
     mention_path = storage.mention_asset_paths("gooaye", "EP700", "EP700 Alpha").json_path
     mention_commits: set[str] = set()
     with pytest.raises(OSError, match="later research stage"):
-        with runner._progressive_lineage_scope(
-            "gooaye", "EP700", filters, {"mentions": mention_path}, mention_commits
-        ):
+        with runner._progressive_lineage_scope("gooaye", "EP700", filters, {"mentions": mention_path}, mention_commits):
             _write_json(
                 mention_path,
                 {
@@ -362,9 +344,7 @@ def test_red_progressive_lineage_survives_later_audit_or_research_failure(
             raise OSError("later research stage failed")
 
     assert mention_commits == {"mentions"}
-    with runner._progressive_lineage_scope(
-        "gooaye", "EP700", filters, {"mentions": mention_path}, set()
-    ):
+    with runner._progressive_lineage_scope("gooaye", "EP700", filters, {"mentions": mention_path}, set()):
         notify_child_artifact_committed("mentions", mention_path, generated=False)
 
 
@@ -422,9 +402,7 @@ def test_red_same_episode_direct_semantic_calls_share_one_cost_claim(
     def invoke() -> None:
         try:
             barrier.wait()
-            semantic.semantic_summarize_episode(
-                "gooaye", "EP700", api_cost_ack=SEMANTIC_API_COST_ACK
-            )
+            semantic.semantic_summarize_episode("gooaye", "EP700", api_cost_ack=SEMANTIC_API_COST_ACK)
         except BaseException as exc:  # pragma: no cover - asserted below.
             failures.append(exc)
 

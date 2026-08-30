@@ -65,15 +65,9 @@ def resolve_canonical_transcript_asset_paths(
     names = secure_directory_names(storage.TRANSCRIPTS_DIR, transcript_dir, max_entries=4_096)
     if names is None:
         return None
-    raw_candidates = [
-        transcript_dir / name
-        for name in names
-        if fnmatch.fnmatchcase(name, f"{episode_ref}__*.json")
-    ]
+    raw_candidates = [transcript_dir / name for name in names if fnmatch.fnmatchcase(name, f"{episode_ref}__*.json")]
     candidates = [
-        paths
-        for path in raw_candidates
-        if (paths := _identity_valid_paths(path, podcast_id, episode_ref)) is not None
+        paths for path in raw_candidates if (paths := _identity_valid_paths(path, podcast_id, episode_ref)) is not None
     ]
     if not candidates:
         # Preserve a precise parser/validator diagnosis for one malformed legacy
@@ -226,9 +220,7 @@ def _validate_scoped_identity(identity: CanonicalTranscriptIdentity) -> None:
 
     if not _identity_valid_paths(identity.paths.json_path, identity.podcast_id, identity.episode_ref):
         raise CanonicalTranscriptResolutionError("canonical transcript identity is no longer valid")
-    raw = secure_read_bytes(
-        storage.TRANSCRIPTS_DIR, identity.paths.json_path, max_bytes=_MAX_TRANSCRIPT_BYTES
-    )
+    raw = secure_read_bytes(storage.TRANSCRIPTS_DIR, identity.paths.json_path, max_bytes=_MAX_TRANSCRIPT_BYTES)
     if raw is None:
         raise CanonicalTranscriptResolutionError("canonical transcript is unreadable")
     current_sha256 = hashlib.sha256(raw).hexdigest()

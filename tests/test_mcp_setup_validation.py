@@ -144,9 +144,7 @@ def test_latest_deterministic_skill_metadata_requires_confirmed_single_call_desc
     )
 
     assert validate_mcp_setup._has_latest_deterministic_skill_metadata(confirmed_skill)
-    assert not validate_mcp_setup._has_latest_deterministic_skill_metadata(
-        blocked_preview_skill
-    )
+    assert not validate_mcp_setup._has_latest_deterministic_skill_metadata(blocked_preview_skill)
 
 
 def test_run_validation_checks_completion_tool_skill_and_early_guard(tmp_path, monkeypatch):

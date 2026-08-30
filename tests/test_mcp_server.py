@@ -90,9 +90,7 @@ def test_to_jsonable_handles_side_effect_asset_dataclasses():
     assert jsonable[0]["local_path"] == str(Path("data/audio/gooaye/audio.mp3"))
     assert jsonable[1]["json_path"] == str(Path("data/transcripts/gooaye/EP672.json"))
     assert jsonable[2]["summary_path"] == str(Path("data/summaries/gooaye/EP672.md"))
-    assert jsonable[3]["mentions_json_path"] == str(
-        Path("data/mentions/gooaye/EP672.mentions.json")
-    )
+    assert jsonable[3]["mentions_json_path"] == str(Path("data/mentions/gooaye/EP672.mentions.json"))
 
 
 def test_mcp_server_imports_and_exposes_server_object():
@@ -554,21 +552,30 @@ def test_transcribe_episode_confirm_calls_core_and_warns_cache_stale(monkeypatch
 def test_transcribe_episode_rejects_unknown_model_device_and_compute_type():
     from corpus_ingest_core import mcp_server
 
-    assert mcp_server.transcribe_episode(
-        episode_ref="EP672",
-        confirm=True,
-        model="unknown",
-    )["error_type"] == "ValueError"
-    assert mcp_server.transcribe_episode(
-        episode_ref="EP672",
-        confirm=True,
-        device="metal",
-    )["error_type"] == "ValueError"
-    assert mcp_server.transcribe_episode(
-        episode_ref="EP672",
-        confirm=True,
-        compute_type="bf16",
-    )["error_type"] == "ValueError"
+    assert (
+        mcp_server.transcribe_episode(
+            episode_ref="EP672",
+            confirm=True,
+            model="unknown",
+        )["error_type"]
+        == "ValueError"
+    )
+    assert (
+        mcp_server.transcribe_episode(
+            episode_ref="EP672",
+            confirm=True,
+            device="metal",
+        )["error_type"]
+        == "ValueError"
+    )
+    assert (
+        mcp_server.transcribe_episode(
+            episode_ref="EP672",
+            confirm=True,
+            compute_type="bf16",
+        )["error_type"]
+        == "ValueError"
+    )
 
 
 def test_side_effect_tool_core_error_returns_error_response(monkeypatch):
@@ -1089,8 +1096,9 @@ def test_verified_research_report_workflow_mcp_uses_dry_run_envelope_and_early_g
     monkeypatch.setattr(
         mcp_server.verified_research_report_workflow_runner,
         "run_latest_episode_verified_research_report_workflow",
-        lambda podcast_id, **kwargs: captured.update({"podcast_id": podcast_id, **kwargs})
-        or SimpleNamespace(outcome="dry_run"),
+        lambda podcast_id, **kwargs: (
+            captured.update({"podcast_id": podcast_id, **kwargs}) or SimpleNamespace(outcome="dry_run")
+        ),
     )
     monkeypatch.setattr(
         mcp_server.verified_research_report_workflow_runner,
@@ -1164,7 +1172,13 @@ def test_catalog_mcp_tool_delegates_once_and_returns_success_envelope(monkeypatc
         {"action": "list", "source_digest": "a" * 64},
         {"action": "search", "query": "   "},
         {"action": "search", "query": "query", "source_digest": "a" * 64},
-        {"action": "inspect", "podcast_id": "gooaye", "episode_ref": "EP672", "source_digest": "a" * 64, "query": "forbidden"},
+        {
+            "action": "inspect",
+            "podcast_id": "gooaye",
+            "episode_ref": "EP672",
+            "source_digest": "a" * 64,
+            "query": "forbidden",
+        },
         {"action": "inspect", "podcast_id": "gooaye", "episode_ref": "EP672", "source_digest": "a" * 64, "limit": 7},
         {"action": "inspect", "podcast_id": None, "episode_ref": "EP672", "source_digest": "a" * 64},
         {"action": "unknown"},
@@ -1261,9 +1275,7 @@ def _workflow_result(*, dry_run=True, requires_api_cost_ack=False, stock_query="
                     "May incur API cost risk",
                     "Uses no raw transcript text",
                 ],
-                generated_artifacts=[]
-                if dry_run
-                else ["data/stock-lens/gooaye/台積電.stock-lens-synthesis.json"],
+                generated_artifacts=[] if dry_run else ["data/stock-lens/gooaye/台積電.stock-lens-synthesis.json"],
                 reused_artifacts=[],
             )
         )
@@ -1503,9 +1515,7 @@ def test_to_jsonable_handles_semantic_summary_asset():
 
     jsonable = to_jsonable(asset)
 
-    assert jsonable["summary_path"] == str(
-        Path("data/summaries/gooaye/EP672.semantic.md")
-    )
+    assert jsonable["summary_path"] == str(Path("data/summaries/gooaye/EP672.semantic.md"))
     assert jsonable["provider"] == "openai-compatible"
     assert jsonable["model"] == "test-model"
     assert jsonable["chunk_count"] == 2
@@ -1519,10 +1529,9 @@ def test_source_revalidation_mcp_tool_delegates_once_and_returns_safe_envelope(m
     monkeypatch.setattr(
         adapter.core,
         "revalidate_verified_research_report_sources",
-        lambda podcast_id, episode_ref, source_digest: calls.append(
-            (podcast_id, episode_ref, source_digest)
-        )
-        or object(),
+        lambda podcast_id, episode_ref, source_digest: (
+            calls.append((podcast_id, episode_ref, source_digest)) or object()
+        ),
     )
     monkeypatch.setattr(
         adapter.core,
@@ -1530,9 +1539,7 @@ def test_source_revalidation_mcp_tool_delegates_once_and_returns_safe_envelope(m
         lambda result: {"safe": True, "not_investment_advice": True},
     )
 
-    response = mcp_server.revalidate_verified_research_report_sources(
-        "gooaye", "EP672", "a" * 64
-    )
+    response = mcp_server.revalidate_verified_research_report_sources("gooaye", "EP672", "a" * 64)
 
     assert calls == [("gooaye", "EP672", "a" * 64)]
     assert response == {
@@ -1580,9 +1587,7 @@ def test_source_revalidation_mcp_core_failure_is_fixed_and_private_detail_free(m
         lambda *args: (_ for _ in ()).throw(RuntimeError(r"D:\\private\\body.txt traceback")),
     )
 
-    response = mcp_server.revalidate_verified_research_report_sources(
-        "gooaye", "EP672", "a" * 64
-    )
+    response = mcp_server.revalidate_verified_research_report_sources("gooaye", "EP672", "a" * 64)
 
     assert response == {
         "ok": False,
@@ -1602,10 +1607,7 @@ def test_coverage_mcp_tool_delegates_once_and_returns_safe_envelope(monkeypatch)
     monkeypatch.setattr(
         adapter.core,
         "list_verified_research_report_coverage",
-        lambda podcast_id, *, has_bundle=None, limit=50: calls.append(
-            (podcast_id, has_bundle, limit)
-        )
-        or object(),
+        lambda podcast_id, *, has_bundle=None, limit=50: calls.append((podcast_id, has_bundle, limit)) or object(),
     )
     monkeypatch.setattr(
         adapter.core,
@@ -1617,9 +1619,7 @@ def test_coverage_mcp_tool_delegates_once_and_returns_safe_envelope(monkeypatch)
         },
     )
 
-    response = mcp_server.query_verified_research_report_coverage(
-        "gooaye", has_bundle=False, limit=20
-    )
+    response = mcp_server.query_verified_research_report_coverage("gooaye", has_bundle=False, limit=20)
 
     assert calls == [("gooaye", False, 20)]
     assert response == {
@@ -1668,9 +1668,7 @@ def test_coverage_mcp_core_failure_is_fixed_and_private_detail_free(monkeypatch)
     monkeypatch.setattr(
         adapter.core,
         "list_verified_research_report_coverage",
-        lambda *args, **kw: (_ for _ in ()).throw(
-            RuntimeError(r"D:\\private\\report.json traceback")
-        ),
+        lambda *args, **kw: (_ for _ in ()).throw(RuntimeError(r"D:\\private\\report.json traceback")),
     )
 
     response = mcp_server.query_verified_research_report_coverage("gooaye")
@@ -1693,8 +1691,7 @@ def test_historical_path_mcp_tool_delegates_once_and_returns_safe_envelope(monke
     monkeypatch.setattr(
         adapter.core,
         "suggest_historical_verified_report_next_step",
-        lambda podcast_id, episode_ref: calls.append((podcast_id, episode_ref))
-        or object(),
+        lambda podcast_id, episode_ref: calls.append((podcast_id, episode_ref)) or object(),
     )
     monkeypatch.setattr(
         adapter.core,
@@ -1752,9 +1749,7 @@ def test_historical_path_mcp_core_failure_is_fixed_and_private_detail_free(monke
     monkeypatch.setattr(
         adapter.core,
         "suggest_historical_verified_report_next_step",
-        lambda *args, **kw: (_ for _ in ()).throw(
-            RuntimeError(r"D:\\private\\seed.json traceback")
-        ),
+        lambda *args, **kw: (_ for _ in ()).throw(RuntimeError(r"D:\\private\\seed.json traceback")),
     )
 
     response = mcp_server.suggest_historical_verified_report_next_step("gooaye", "EP1")

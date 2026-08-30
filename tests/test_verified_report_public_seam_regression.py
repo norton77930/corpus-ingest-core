@@ -1,4 +1,5 @@
 """Regression guard for the verified-report public workflow seam."""
+
 from __future__ import annotations
 
 from pathlib import Path

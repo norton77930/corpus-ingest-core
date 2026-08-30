@@ -69,28 +69,100 @@ SAMPLE_001 = SyntheticEpisode(
     episode_ref="SAMPLE-001",
     title="Harbour Robotics and the GPU hour",
     lines=(
-        (0.0, 9.0, "Welcome to The Synthetic Signal. Everything in this feed is invented: the companies, the numbers, the hosts, and this warning."),
-        (9.0, 21.0, "I am Ada Kestrel, and across the desk is Milo Vance. Neither of us exists, and none of this is investment advice."),
-        (21.0, 37.5, "Today we are talking about Harbour Robotics, a fictional company that builds picking arms for fictional warehouses."),
-        (37.5, 56.0, "Harbour Robotics published an invented quarterly note last week, claiming its arms now run their models entirely on-device."),
-        (56.0, 76.5, "On-device means no round trip to a rented server, and that changes what a GPU hour is worth to a company like Harbour Robotics."),
-        (76.5, 99.0, "Let us put an imaginary number on it. In this made-up market a rented GPU hour costs forty-one dollars."),
-        (99.0, 123.5, "Harbour Robotics says it burned eleven thousand GPU hours last quarter training its grasp model."),
-        (123.5, 150.0, "That is an invented four hundred and fifty-one thousand dollars, which is an invented rounding error for an invented company."),
-        (150.0, 178.5, "The interesting part is not the bill. It is that they moved the AI workload off rented capacity and onto hardware they own."),
-        (178.5, 209.0, "Northwind Logistics, another company we made up, went the other way and rents every hour it uses."),
-        (209.0, 241.5, "Northwind Logistics runs roughly six hundred fictional trucks and leases all of its AI capacity by the hour."),
-        (241.5, 276.0, "Which approach is better? We do not know. This show does not exist, so we are not going to pretend to know."),
-        (276.0, 312.5, "What we can do is leave a timestamp on every sentence, so you can check what was actually said instead of what you remember."),
+        (
+            0.0,
+            9.0,
+            "Welcome to The Synthetic Signal. Everything in this feed is invented: the companies, the numbers, the hosts, and this warning.",
+        ),
+        (
+            9.0,
+            21.0,
+            "I am Ada Kestrel, and across the desk is Milo Vance. Neither of us exists, and none of this is investment advice.",
+        ),
+        (
+            21.0,
+            37.5,
+            "Today we are talking about Harbour Robotics, a fictional company that builds picking arms for fictional warehouses.",
+        ),
+        (
+            37.5,
+            56.0,
+            "Harbour Robotics published an invented quarterly note last week, claiming its arms now run their models entirely on-device.",
+        ),
+        (
+            56.0,
+            76.5,
+            "On-device means no round trip to a rented server, and that changes what a GPU hour is worth to a company like Harbour Robotics.",
+        ),
+        (
+            76.5,
+            99.0,
+            "Let us put an imaginary number on it. In this made-up market a rented GPU hour costs forty-one dollars.",
+        ),
+        (
+            99.0,
+            123.5,
+            "Harbour Robotics says it burned eleven thousand GPU hours last quarter training its grasp model.",
+        ),
+        (
+            123.5,
+            150.0,
+            "That is an invented four hundred and fifty-one thousand dollars, which is an invented rounding error for an invented company.",
+        ),
+        (
+            150.0,
+            178.5,
+            "The interesting part is not the bill. It is that they moved the AI workload off rented capacity and onto hardware they own.",
+        ),
+        (
+            178.5,
+            209.0,
+            "Northwind Logistics, another company we made up, went the other way and rents every hour it uses.",
+        ),
+        (
+            209.0,
+            241.5,
+            "Northwind Logistics runs roughly six hundred fictional trucks and leases all of its AI capacity by the hour.",
+        ),
+        (
+            241.5,
+            276.0,
+            "Which approach is better? We do not know. This show does not exist, so we are not going to pretend to know.",
+        ),
+        (
+            276.0,
+            312.5,
+            "What we can do is leave a timestamp on every sentence, so you can check what was actually said instead of what you remember.",
+        ),
         (312.5, 351.0, "After the break: Meridian Grid, a fictional utility that nobody should model anything on."),
-        (351.0, 391.5, "Meridian Grid announced an invented tariff change that lifts the price of overnight power by nine percent."),
+        (
+            351.0,
+            391.5,
+            "Meridian Grid announced an invented tariff change that lifts the price of overnight power by nine percent.",
+        ),
         (391.5, 434.0, "For Harbour Robotics that matters, because in this story their charging fleet runs overnight."),
-        (434.0, 478.5, "It is a second-order effect, and it only shows up if you can search a transcript instead of trusting your memory of it."),
+        (
+            434.0,
+            478.5,
+            "It is a second-order effect, and it only shows up if you can search a transcript instead of trusting your memory of it.",
+        ),
         (478.5, 525.0, "Milo, if you had to summarise the fictional quarter in one line, what would it be?"),
-        (525.0, 573.5, "Harbour Robotics bought certainty, Northwind Logistics bought flexibility, and Meridian Grid quietly repriced both of them."),
+        (
+            525.0,
+            573.5,
+            "Harbour Robotics bought certainty, Northwind Logistics bought flexibility, and Meridian Grid quietly repriced both of them.",
+        ),
         (573.5, 624.0, "None of which happened. We are a test fixture with a microphone."),
-        (624.0, 676.0, "That is the whole point of this sample corpus: search it, cite it, and remember that every word was written for a demo."),
-        (676.0, 722.5, "Next episode we will invent a CPI print and pretend to care about it. Thanks for listening to nobody."),
+        (
+            624.0,
+            676.0,
+            "That is the whole point of this sample corpus: search it, cite it, and remember that every word was written for a demo.",
+        ),
+        (
+            676.0,
+            722.5,
+            "Next episode we will invent a CPI print and pretend to care about it. Thanks for listening to nobody.",
+        ),
     ),
 )
 
@@ -99,21 +171,53 @@ SAMPLE_002 = SyntheticEpisode(
     title="Northwind Logistics and the CPI print",
     lines=(
         (0.0, 10.5, "This is episode two of The Synthetic Signal, and like episode one it is completely fabricated."),
-        (10.5, 24.0, "Ada Kestrel here with Milo Vance. Every company, price and statistic in this episode was invented for a software demo."),
-        (24.0, 42.5, "Northwind Logistics reported an invented eleven percent drop in spot freight rates this quarter."),
-        (42.5, 64.0, "Spot rates are what you pay when you did not book ahead, which in this made-up market is most of the time."),
+        (
+            10.5,
+            24.0,
+            "Ada Kestrel here with Milo Vance. Every company, price and statistic in this episode was invented for a software demo.",
+        ),
+        (
+            24.0,
+            42.5,
+            "Northwind Logistics reported an invented eleven percent drop in spot freight rates this quarter.",
+        ),
+        (
+            42.5,
+            64.0,
+            "Spot rates are what you pay when you did not book ahead, which in this made-up market is most of the time.",
+        ),
         (64.0, 88.5, "The invented CPI print for the quarter came in at two point four percent."),
         (88.5, 114.0, "Milo, does a fictional CPI print tell you anything at all about fictional freight?"),
         (114.0, 142.5, "Not directly. Fuel is a much bigger input than the CPI basket we invented would suggest."),
-        (142.5, 173.0, "Our made-up GDP figure grew one point one percent, which in this fantasy counts as a soft landing."),
-        (173.0, 205.5, "Harbour Robotics turns up here too, because Northwind Logistics is a fictional customer of theirs."),
+        (
+            142.5,
+            173.0,
+            "Our made-up GDP figure grew one point one percent, which in this fantasy counts as a soft landing.",
+        ),
+        (
+            173.0,
+            205.5,
+            "Harbour Robotics turns up here too, because Northwind Logistics is a fictional customer of theirs.",
+        ),
         (205.5, 239.0, "They bought two hundred imaginary picking arms and claim a thirty percent throughput gain."),
         (239.0, 274.5, "A claim like that is exactly the kind of thing you want a timestamp attached to."),
         (274.5, 312.0, "Meridian Grid, our invented utility, raised overnight power prices again in this storyline."),
-        (312.0, 352.5, "That pushes Northwind Logistics towards daytime charging, which collides with their invented delivery windows."),
+        (
+            312.0,
+            352.5,
+            "That pushes Northwind Logistics towards daytime charging, which collides with their invented delivery windows.",
+        ),
         (352.5, 395.0, "The AI scheduling system they lease is supposed to solve exactly that, in this fiction."),
-        (395.0, 440.5, "It costs them a fictional nineteen dollars per GPU hour, billed monthly, and it is not clear it earns that back."),
-        (440.5, 488.0, "That is the show. None of it is real, none of it is advice, and all of it carries a timestamp you can check."),
+        (
+            395.0,
+            440.5,
+            "It costs them a fictional nineteen dollars per GPU hour, billed monthly, and it is not clear it earns that back.",
+        ),
+        (
+            440.5,
+            488.0,
+            "That is the show. None of it is real, none of it is advice, and all of it carries a timestamp you can check.",
+        ),
     ),
 )
 
@@ -138,8 +242,7 @@ def main() -> int:
         validation = validator.validate_transcript(PODCAST_ID, episode.episode_ref)
         if validation.status != "valid":
             print(
-                f"transcript for {episode.episode_ref} is {validation.status}: "
-                f"{'; '.join(validation.problems)}",
+                f"transcript for {episode.episode_ref} is {validation.status}: {'; '.join(validation.problems)}",
                 file=sys.stderr,
             )
             return 1
@@ -148,10 +251,7 @@ def main() -> int:
         print(f"[summary]    {episode.episode_ref}: {summary.summary_path}")
 
         mentions = entity_extractor.extract_mentions(PODCAST_ID, episode.episode_ref, force=True)
-        print(
-            f"[mentions]   {episode.episode_ref}: {mentions.mention_count} mentions "
-            f"-> {mentions.mentions_json_path}"
-        )
+        print(f"[mentions]   {episode.episode_ref}: {mentions.mention_count} mentions -> {mentions.mentions_json_path}")
 
     rebuilt = cache.rebuild_cache(podcast_id=PODCAST_ID, force=True)
     print(

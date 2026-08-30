@@ -181,16 +181,10 @@ class LatestEpisodeVerifiedResearchReportPaths:
 def audio_path(podcast_id: str, episode_ref: str) -> Path:
     """回傳音檔輸出路徑。"""
 
-    return (
-        AUDIO_DIR
-        / _safe_slug(podcast_id, "podcast_id")
-        / f"{_safe_slug(episode_ref, 'episode_ref')}.mp3"
-    )
+    return AUDIO_DIR / _safe_slug(podcast_id, "podcast_id") / f"{_safe_slug(episode_ref, 'episode_ref')}.mp3"
 
 
-def audio_asset_path(
-    podcast_id: str, episode_ref: str, title: str, extension: str
-) -> Path:
+def audio_asset_path(podcast_id: str, episode_ref: str, title: str, extension: str) -> Path:
     """回傳 Phase 1B 音檔輸出路徑。"""
 
     normalized_extension = _normalize_extension(extension)
@@ -201,9 +195,7 @@ def audio_asset_path(
     )
 
 
-def transcript_asset_paths(
-    podcast_id: str, episode_ref: str, title: str
-) -> TranscriptAssetPaths:
+def transcript_asset_paths(podcast_id: str, episode_ref: str, title: str) -> TranscriptAssetPaths:
     """回傳逐字稿 TXT、SRT、JSON 三種輸出路徑。"""
 
     base_path = (
@@ -218,9 +210,7 @@ def transcript_asset_paths(
     )
 
 
-def find_transcript_asset_paths(
-    podcast_id: str, episode_ref: str
-) -> TranscriptAssetPaths | None:
+def find_transcript_asset_paths(podcast_id: str, episode_ref: str) -> TranscriptAssetPaths | None:
     """依 episode_ref 尋找既有逐字稿輸出路徑。"""
 
     transcript_dir = TRANSCRIPTS_DIR / _safe_slug(podcast_id, "podcast_id")
@@ -251,21 +241,13 @@ def title_slug(title: str, fallback: str) -> str:
 def transcript_path(podcast_id: str, episode_ref: str) -> Path:
     """回傳逐字稿輸出路徑。"""
 
-    return (
-        TRANSCRIPTS_DIR
-        / _safe_slug(podcast_id, "podcast_id")
-        / f"{_safe_slug(episode_ref, 'episode_ref')}.json"
-    )
+    return TRANSCRIPTS_DIR / _safe_slug(podcast_id, "podcast_id") / f"{_safe_slug(episode_ref, 'episode_ref')}.json"
 
 
 def summary_path(podcast_id: str, episode_ref: str) -> Path:
     """回傳摘要輸出路徑。"""
 
-    return (
-        SUMMARIES_DIR
-        / _safe_slug(podcast_id, "podcast_id")
-        / f"{_safe_slug(episode_ref, 'episode_ref')}.md"
-    )
+    return SUMMARIES_DIR / _safe_slug(podcast_id, "podcast_id") / f"{_safe_slug(episode_ref, 'episode_ref')}.md"
 
 
 def summary_asset_path(podcast_id: str, episode_ref: str, title: str) -> Path:
@@ -329,18 +311,14 @@ def find_episode_intelligence_report_asset_paths(
     if not matches:
         return None
     json_path = matches[0]
-    markdown_path = json_path.with_name(
-        json_path.name.removesuffix(".intelligence.json") + ".intelligence.md"
-    )
+    markdown_path = json_path.with_name(json_path.name.removesuffix(".intelligence.json") + ".intelligence.md")
     return EpisodeIntelligenceReportAssetPaths(
         json_path=json_path,
         markdown_path=markdown_path,
     )
 
 
-def industry_chain_mapping_asset_paths(
-    podcast_id: str, episode_ref: str, title: str
-) -> IndustryChainMappingAssetPaths:
+def industry_chain_mapping_asset_paths(podcast_id: str, episode_ref: str, title: str) -> IndustryChainMappingAssetPaths:
     """回傳 industry chain mapping 的 JSON 與 Markdown 輸出路徑。"""
 
     base_path = (
@@ -354,9 +332,7 @@ def industry_chain_mapping_asset_paths(
     )
 
 
-def find_industry_chain_mapping_asset_paths(
-    podcast_id: str, episode_ref: str
-) -> IndustryChainMappingAssetPaths | None:
+def find_industry_chain_mapping_asset_paths(podcast_id: str, episode_ref: str) -> IndustryChainMappingAssetPaths | None:
     """依 episode_ref 尋找既有 industry chain mapping 輸出路徑。"""
 
     mapping_dir = MAPPINGS_DIR / _safe_slug(podcast_id, "podcast_id")
@@ -365,18 +341,14 @@ def find_industry_chain_mapping_asset_paths(
     if not matches:
         return None
     json_path = matches[0]
-    markdown_path = json_path.with_name(
-        json_path.name.removesuffix(".industry-map.json") + ".industry-map.md"
-    )
+    markdown_path = json_path.with_name(json_path.name.removesuffix(".industry-map.json") + ".industry-map.md")
     return IndustryChainMappingAssetPaths(
         json_path=json_path,
         markdown_path=markdown_path,
     )
 
 
-def external_data_boundary_asset_paths(
-    podcast_id: str, episode_ref: str, title: str
-) -> ExternalDataBoundaryAssetPaths:
+def external_data_boundary_asset_paths(podcast_id: str, episode_ref: str, title: str) -> ExternalDataBoundaryAssetPaths:
     """回傳 external data boundary 的 JSON 與 Markdown 輸出路徑。"""
 
     base_path = (
@@ -390,9 +362,7 @@ def external_data_boundary_asset_paths(
     )
 
 
-def find_external_data_boundary_asset_paths(
-    podcast_id: str, episode_ref: str
-) -> ExternalDataBoundaryAssetPaths | None:
+def find_external_data_boundary_asset_paths(podcast_id: str, episode_ref: str) -> ExternalDataBoundaryAssetPaths | None:
     """依 episode_ref 尋找既有 external data boundary 輸出路徑。"""
 
     boundary_dir = EXTERNAL_DIR / _safe_slug(podcast_id, "podcast_id")
@@ -410,32 +380,20 @@ def find_external_data_boundary_asset_paths(
     )
 
 
-def stock_lens_report_asset_paths(
-    podcast_id: str, stock_query: str
-) -> StockLensReportAssetPaths:
+def stock_lens_report_asset_paths(podcast_id: str, stock_query: str) -> StockLensReportAssetPaths:
     """回傳 stock lens report 的 JSON 與 Markdown 輸出路徑。"""
 
-    base_path = (
-        STOCK_LENS_DIR
-        / _safe_slug(podcast_id, "podcast_id")
-        / title_slug(stock_query, "stock")
-    )
+    base_path = STOCK_LENS_DIR / _safe_slug(podcast_id, "podcast_id") / title_slug(stock_query, "stock")
     return StockLensReportAssetPaths(
         json_path=base_path.with_suffix(".stock-lens.json"),
         markdown_path=base_path.with_suffix(".stock-lens.md"),
     )
 
 
-def stock_lens_synthesis_asset_paths(
-    podcast_id: str, stock_query: str
-) -> StockLensSynthesisAssetPaths:
+def stock_lens_synthesis_asset_paths(podcast_id: str, stock_query: str) -> StockLensSynthesisAssetPaths:
     """回傳 stock lens LLM synthesis 的 JSON 與 Markdown 輸出路徑。"""
 
-    base_path = (
-        STOCK_LENS_DIR
-        / _safe_slug(podcast_id, "podcast_id")
-        / title_slug(stock_query, "stock")
-    )
+    base_path = STOCK_LENS_DIR / _safe_slug(podcast_id, "podcast_id") / title_slug(stock_query, "stock")
     return StockLensSynthesisAssetPaths(
         json_path=base_path.with_suffix(".stock-lens-synthesis.json"),
         markdown_path=base_path.with_suffix(".stock-lens-synthesis.md"),
@@ -506,16 +464,10 @@ class YoutubeVideoIngestRunAssetPaths:
     markdown_path: Path
 
 
-def x_video_ingest_run_asset_paths(
-    podcast_id: str, episode_ref: str
-) -> XVideoIngestRunAssetPaths:
+def x_video_ingest_run_asset_paths(podcast_id: str, episode_ref: str) -> XVideoIngestRunAssetPaths:
     """回傳一次 X 影片取得的 metadata-only run report 路徑。"""
 
-    base_dir = (
-        CORPUS_DIR
-        / _safe_slug(podcast_id, "podcast_id")
-        / "x-video-ingest-runs"
-    )
+    base_dir = CORPUS_DIR / _safe_slug(podcast_id, "podcast_id") / "x-video-ingest-runs"
     safe_ref = _safe_episode_ref(episode_ref)
     return XVideoIngestRunAssetPaths(
         json_path=base_dir / f"{safe_ref}.x-video-ingest.json",
@@ -523,16 +475,10 @@ def x_video_ingest_run_asset_paths(
     )
 
 
-def youtube_video_ingest_run_asset_paths(
-    podcast_id: str, episode_ref: str
-) -> YoutubeVideoIngestRunAssetPaths:
+def youtube_video_ingest_run_asset_paths(podcast_id: str, episode_ref: str) -> YoutubeVideoIngestRunAssetPaths:
     """回傳一次 YouTube 影片取得的 metadata-only run report 路徑。"""
 
-    base_dir = (
-        CORPUS_DIR
-        / _safe_slug(podcast_id, "podcast_id")
-        / "youtube-video-ingest-runs"
-    )
+    base_dir = CORPUS_DIR / _safe_slug(podcast_id, "podcast_id") / "youtube-video-ingest-runs"
     safe_ref = _safe_episode_ref(episode_ref)
     return YoutubeVideoIngestRunAssetPaths(
         json_path=base_dir / f"{safe_ref}.youtube-video-ingest.json",
@@ -611,9 +557,7 @@ def corpus_latest_episode_deterministic_workflow_run_asset_paths(
     )
 
 
-def study_guide_bundle_paths(
-    podcast_id: str, episode_ref: str, title: str
-) -> StudyGuideBundlePaths:
+def study_guide_bundle_paths(podcast_id: str, episode_ref: str, title: str) -> StudyGuideBundlePaths:
     """Return the four canonical study-guide Markdown paths for one episode."""
 
     return study_guide_bundle_paths_from_stem(
@@ -622,23 +566,12 @@ def study_guide_bundle_paths(
     )
 
 
-def study_guide_bundle_paths_from_stem(
-    podcast_id: str, identity_stem: str
-) -> StudyGuideBundlePaths:
+def study_guide_bundle_paths_from_stem(podcast_id: str, identity_stem: str) -> StudyGuideBundlePaths:
     """Return bundle paths for a canonical ``{episode_ref}__{title_slug}`` stem."""
 
-    if (
-        not identity_stem
-        or "/" in identity_stem
-        or "\\" in identity_stem
-        or ".." in identity_stem
-    ):
+    if not identity_stem or "/" in identity_stem or "\\" in identity_stem or ".." in identity_stem:
         raise ValueError("study-guide identity stem is not a safe filename")
-    bundle_dir = (
-        STUDY_GUIDES_DIR
-        / _safe_slug(podcast_id, "podcast_id")
-        / identity_stem
-    )
+    bundle_dir = STUDY_GUIDES_DIR / _safe_slug(podcast_id, "podcast_id") / identity_stem
     return StudyGuideBundlePaths(
         bundle_dir=bundle_dir,
         cover_path=bundle_dir / "00_video_info.md",
@@ -648,9 +581,7 @@ def study_guide_bundle_paths_from_stem(
     )
 
 
-def workflow_derivation_paths_from_stem(
-    podcast_id: str, identity_stem: str
-) -> WorkflowDerivationPaths:
+def workflow_derivation_paths_from_stem(podcast_id: str, identity_stem: str) -> WorkflowDerivationPaths:
     """Return 05/06 paths beside the Spec 038 lecture files."""
 
     lecture = study_guide_bundle_paths_from_stem(podcast_id, identity_stem)
@@ -661,16 +592,10 @@ def workflow_derivation_paths_from_stem(
     )
 
 
-def workflow_derivation_run_asset_paths(
-    podcast_id: str, episode_ref: str
-) -> WorkflowDerivationRunAssetPaths:
+def workflow_derivation_run_asset_paths(podcast_id: str, episode_ref: str) -> WorkflowDerivationRunAssetPaths:
     """Return metadata-only workflow-derivation run report paths."""
 
-    run_dir = (
-        CORPUS_DIR
-        / _safe_slug(podcast_id, "podcast_id")
-        / "workflow-derivation-runs"
-    )
+    run_dir = CORPUS_DIR / _safe_slug(podcast_id, "podcast_id") / "workflow-derivation-runs"
     ref = _safe_episode_ref(episode_ref)
     return WorkflowDerivationRunAssetPaths(
         json_path=run_dir / f"{ref}.workflow-derivation.json",
@@ -678,16 +603,10 @@ def workflow_derivation_run_asset_paths(
     )
 
 
-def study_guide_run_asset_paths(
-    podcast_id: str, episode_ref: str
-) -> StudyGuideRunAssetPaths:
+def study_guide_run_asset_paths(podcast_id: str, episode_ref: str) -> StudyGuideRunAssetPaths:
     """Return metadata-only study-guide run report paths."""
 
-    run_dir = (
-        CORPUS_DIR
-        / _safe_slug(podcast_id, "podcast_id")
-        / "study-guide-runs"
-    )
+    run_dir = CORPUS_DIR / _safe_slug(podcast_id, "podcast_id") / "study-guide-runs"
     ref = _safe_episode_ref(episode_ref)
     return StudyGuideRunAssetPaths(
         json_path=run_dir / f"{ref}.study-guide-run.json",
@@ -706,18 +625,8 @@ def latest_episode_verified_research_report_paths(
         raise ValueError("source_digest must be a lowercase SHA-256 hex digest.")
     safe_podcast_id = _safe_slug(podcast_id, "podcast_id")
     safe_episode_ref = _safe_episode_ref(episode_ref)
-    bundle_dir = (
-        RESEARCH_REPORTS_DIR
-        / safe_podcast_id
-        / safe_episode_ref
-        / f"v1-{source_digest}"
-    )
-    checkpoint_path = (
-        CORPUS_DIR
-        / safe_podcast_id
-        / "verified-research"
-        / f"{safe_episode_ref}.checkpoint.json"
-    )
+    bundle_dir = RESEARCH_REPORTS_DIR / safe_podcast_id / safe_episode_ref / f"v1-{source_digest}"
+    checkpoint_path = CORPUS_DIR / safe_podcast_id / "verified-research" / f"{safe_episode_ref}.checkpoint.json"
     return LatestEpisodeVerifiedResearchReportPaths(
         bundle_dir=bundle_dir,
         report_json_path=bundle_dir / "report.json",
@@ -760,7 +669,7 @@ def ensure_data_directories() -> None:
 
 def _safe_slug(value: str, field_name: str) -> str:
     if not isinstance(value, str) or not _SAFE_SLUG_PATTERN.fullmatch(value):
-        raise ValueError(f"{field_name} 必須是小寫 slug，只允許 a-z、0-9 與 -。")
+        raise ValueError(f"{field_name} must be a lowercase slug using only a-z, 0-9, and -.")
     return value
 
 
@@ -780,7 +689,7 @@ def is_safe_episode_ref(value: object, *, max_length: int | None = None) -> bool
 
 def _safe_episode_ref(value: str) -> str:
     if not is_safe_episode_ref(value):
-        raise ValueError("episode_ref 必須只包含 A-Z、a-z、0-9、- 與 _。")
+        raise ValueError("episode_ref may contain only A-Z, a-z, 0-9, -, and _.")
     return value
 
 

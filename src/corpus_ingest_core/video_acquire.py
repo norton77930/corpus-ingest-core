@@ -50,9 +50,7 @@ DOWNLOAD_OPTION_KEYS: tuple[str, ...] = (
 # does publish no audio-only stream. Neither branch contains a +, so this can
 # never reintroduce the muxer requirement.
 AUDIO_ONLY_FORMAT = "bestaudio/best"
-_FORBIDDEN_CREDENTIAL_KEYS = frozenset(
-    {"cookiefile", "cookiesfrombrowser", "username", "password", "videopassword"}
-)
+_FORBIDDEN_CREDENTIAL_KEYS = frozenset({"cookiefile", "cookiesfrombrowser", "username", "password", "videopassword"})
 
 
 def guest_download_options(target_dir: Path) -> dict[str, Any]:
@@ -78,7 +76,7 @@ def resolve_metadata(
     with yt_dlp.YoutubeDL(METADATA_OPTIONS) as client:
         info = client.extract_info(url, download=False)
     if not isinstance(info, dict):
-        raise failed_error(f"無法解析來源 metadata：{url}")
+        raise failed_error(f"Could not resolve source metadata: {url}")
     return info
 
 
@@ -99,7 +97,7 @@ def download_video(
     with yt_dlp.YoutubeDL(options) as client:
         info = client.extract_info(url, download=True)
         if not isinstance(info, dict):
-            raise failed_error(f"下載失敗：{url}")
+            raise failed_error(f"Download failed: {url}")
         return downloaded_path(client, info)
 
 
@@ -122,15 +120,11 @@ def extract_audio(
     av = _load_av(dependency_error)
     container = av.open(str(video_path))
     try:
-        audio_stream = next(
-            (stream for stream in container.streams if stream.type == "audio"), None
-        )
+        audio_stream = next((stream for stream in container.streams if stream.type == "audio"), None)
         if audio_stream is None:
-            raise failed_error(f"影片沒有音軌：{video_path}")
+            raise failed_error(f"The video carries no audio track: {video_path}")
 
-        resampler = av.audio.resampler.AudioResampler(
-            format="s16", layout="mono", rate=16000
-        )
+        resampler = av.audio.resampler.AudioResampler(format="s16", layout="mono", rate=16000)
         with wave.open(str(audio_path), "wb") as wav:
             wav.setnchannels(1)
             wav.setsampwidth(2)
@@ -163,9 +157,7 @@ def acquire_wav(
     work_prefix: str = "video-",
 ) -> None:
     owns_work_dir = work_dir is None
-    resolved_work_dir = (
-        Path(tempfile.mkdtemp(prefix=work_prefix)) if work_dir is None else Path(work_dir)
-    )
+    resolved_work_dir = Path(tempfile.mkdtemp(prefix=work_prefix)) if work_dir is None else Path(work_dir)
     part_path = audio_target.with_suffix(audio_target.suffix + ".part")
     try:
         video_path = download_video(
@@ -186,7 +178,7 @@ def acquire_wav(
     except PodcastIngestCoreError:
         raise
     except Exception as exc:
-        raise failed_error(f"取得音訊失敗：{exc}") from exc
+        raise failed_error(f"Audio acquisition failed: {exc}") from exc
     finally:
         try:
             part_path.unlink(missing_ok=True)
@@ -200,19 +192,19 @@ def _assert_guest_options(options: dict[str, Any]) -> None:
     forbidden = _FORBIDDEN_CREDENTIAL_KEYS.intersection(options)
     if forbidden:
         raise VideoAcquireFailedError(
-            f"取得選項不得含憑證鍵：{', '.join(sorted(forbidden))}"
+            f"Acquisition options must not carry credential keys: {', '.join(sorted(forbidden))}"
         )
     if options.get("ignoreconfig") is not True:
-        raise VideoAcquireFailedError("取得選項必須 ignoreconfig，以免讀到使用者 yt-dlp 設定")
+        raise VideoAcquireFailedError(
+            "Acquisition options must set ignoreconfig, so the user's own yt-dlp config is never read"
+        )
 
 
 def _load_yt_dlp(dependency_error: type[PodcastIngestCoreError]):
     try:
         import yt_dlp
     except ImportError as exc:  # pragma: no cover
-        raise dependency_error(
-            "需要 yt-dlp 才能取得影片，請先安裝：pip install yt-dlp"
-        ) from exc
+        raise dependency_error("Acquiring video needs yt-dlp; install it first: pip install yt-dlp") from exc
     return yt_dlp
 
 
@@ -220,7 +212,5 @@ def _load_av(dependency_error: type[PodcastIngestCoreError]):
     try:
         import av
     except ImportError as exc:  # pragma: no cover
-        raise dependency_error(
-            "需要 PyAV 才能抽出音軌，請先安裝：pip install av"
-        ) from exc
+        raise dependency_error("Extracting the audio track needs PyAV; install it first: pip install av") from exc
     return av

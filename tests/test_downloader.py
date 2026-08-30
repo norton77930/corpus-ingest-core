@@ -47,8 +47,7 @@ def test_download_audio_uses_episode_audio_url(monkeypatch, tmp_path):
     monkeypatch.setattr(
         downloader.requests,
         "get",
-        lambda url, **_kwargs: requested_urls.append(url)
-        or FakeResponse(headers={"Content-Type": "audio/mpeg"}),
+        lambda url, **_kwargs: requested_urls.append(url) or FakeResponse(headers={"Content-Type": "audio/mpeg"}),
     )
 
     asset = downloader.download_audio("gooaye", "EP672")
@@ -138,7 +137,7 @@ def test_audio_filename_removes_windows_illegal_characters(monkeypatch, tmp_path
     monkeypatch.setattr(
         downloader,
         "get_episode",
-        lambda *_args: _episode(title=' bad <title> : / \\\\ | ? * name '),
+        lambda *_args: _episode(title=" bad <title> : / \\\\ | ? * name "),
     )
     monkeypatch.setattr(
         downloader.requests,

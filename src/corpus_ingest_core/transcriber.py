@@ -51,16 +51,14 @@ def transcribe_episode(
         else download_audio(podcast_id, episode_ref)
     )
     if not audio_asset.local_path.exists():
-        raise AudioFileMissingError(f"找不到本機音檔：{audio_asset.local_path}")
+        raise AudioFileMissingError(f"Local audio file not found: {audio_asset.local_path}")
 
-    paths = transcript_asset_paths(
-        audio_asset.podcast_id, audio_asset.episode_ref, audio_asset.title
-    )
+    paths = transcript_asset_paths(audio_asset.podcast_id, audio_asset.episode_ref, audio_asset.title)
     if not force and _all_transcript_outputs_exist(paths):
         validation = validate_transcript(audio_asset.podcast_id, audio_asset.episode_ref)
         if validation.status not in {"valid", "empty"}:
             raise TranscriptionFailedError(
-                f"既有逐字稿狀態為 {validation.status}，請使用 --force 重新轉錄。"
+                f"The existing transcript has status {validation.status}; pass --force to transcribe it again."
             )
         return TranscriptAsset(
             podcast_id=audio_asset.podcast_id,
@@ -83,9 +81,7 @@ def transcribe_episode(
     whisper_model_class = _load_whisper_model_class()
     try:
         _cleanup_paths(_transcript_part_paths(paths))
-        whisper_model = whisper_model_class(
-            model_name, device=device, compute_type=compute_type
-        )
+        whisper_model = whisper_model_class(model_name, device=device, compute_type=compute_type)
         raw_segments, _info = whisper_model.transcribe(
             str(audio_asset.local_path),
             language=profile.language,
@@ -117,7 +113,7 @@ def transcribe_episode(
     except TranscriptionFailedError:
         raise
     except Exception as exc:
-        raise TranscriptionFailedError(f"轉錄失敗：{exc}") from exc
+        raise TranscriptionFailedError(f"Transcription failed: {exc}") from exc
 
     return TranscriptAsset(
         podcast_id=audio_asset.podcast_id,
@@ -159,7 +155,7 @@ def _load_whisper_model_class():
     try:
         from faster_whisper import WhisperModel
     except ImportError as exc:
-        raise TranscriptionDependencyError("faster-whisper 未安裝。") from exc
+        raise TranscriptionDependencyError("faster-whisper is not installed.") from exc
     return WhisperModel
 
 
@@ -270,16 +266,12 @@ def _write_transcript_outputs(
             "segment_count": len(segments),
             "segments": segments,
         }
-        part_paths[2].write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
-        for part_path, target_path in zip(
-            part_paths, [paths.text_path, paths.srt_path, paths.json_path], strict=True
-        ):
+        part_paths[2].write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+        for part_path, target_path in zip(part_paths, [paths.text_path, paths.srt_path, paths.json_path], strict=True):
             part_path.replace(target_path)
     except OSError as exc:
         _cleanup_paths(part_paths)
-        raise TranscriptionFailedError(f"寫入逐字稿失敗：{exc}") from exc
+        raise TranscriptionFailedError(f"Failed to write the transcript: {exc}") from exc
 
 
 def _write_progress_output(
@@ -313,11 +305,9 @@ def _write_progress_output(
     }
     try:
         progress_path.parent.mkdir(parents=True, exist_ok=True)
-        progress_path.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+        progress_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
     except OSError as exc:
-        raise TranscriptionFailedError(f"寫入轉錄進度失敗：{exc}") from exc
+        raise TranscriptionFailedError(f"Failed to write transcription progress: {exc}") from exc
 
 
 def _part_path(path: Path) -> Path:
@@ -337,9 +327,7 @@ def _cleanup_paths(paths: list[Path]) -> None:
 
 
 def _utc_now_iso() -> str:
-    return datetime.now(UTC).replace(microsecond=0).isoformat().replace(
-        "+00:00", "Z"
-    )
+    return datetime.now(UTC).replace(microsecond=0).isoformat().replace("+00:00", "Z")
 
 
 def _audio_size_bytes(audio_asset) -> int | None:

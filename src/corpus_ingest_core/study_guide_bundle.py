@@ -33,10 +33,7 @@ from .study_guide_profiles import (
 )
 from .summary_profiles import LEARNING_NOTES
 
-CACHE_STALE_WARNING = (
-    "SQLite cache may be stale; rebuild cache manually. "
-    "本流程不會自動重建。"
-)
+CACHE_STALE_WARNING = "SQLite cache may be stale; rebuild cache manually. 本流程不會自動重建。"
 _CHUNK_SPLIT = re.compile(r"(?im)^##\s+Chunk Summaries\s*$")
 _HEADING = re.compile(r"(?im)^#{1,3}\s*(?:\d+\.\s*)?(.+?)\s*$")
 _TIMESTAMP = re.compile(r"\[\d{2}:\d{2}:\d{2}\s*-\s*\d{2}:\d{2}:\d{2}\]")
@@ -65,8 +62,7 @@ def run_study_guide_bundle(
     profile = load_podcast_profile(podcast_id)
     if profile.summary_profile != REQUIRED_PROFILE:
         raise StudyGuideBundleError(
-            f"study-guide bundle requires summary_profile={REQUIRED_PROFILE}; "
-            f"got {profile.summary_profile!r}"
+            f"study-guide bundle requires summary_profile={REQUIRED_PROFILE}; got {profile.summary_profile!r}"
         )
 
     source_path = canonical_semantic_summary_path(podcast_id, episode_ref)
@@ -79,27 +75,20 @@ def run_study_guide_bundle(
     source_text = _read_capped_utf8(source_path)
     if _is_finance_shaped(source_text):
         raise StudyGuideBundleError(
-            "source semantic summary is finance-shaped; "
-            "refusing to generate a study-guide bundle"
+            "source semantic summary is finance-shaped; refusing to generate a study-guide bundle"
         )
 
     title = _episode_title(podcast_id, episode_ref, source_path)
     stem = source_path.name.removesuffix(".semantic.md")
     paths = storage.study_guide_bundle_paths_from_stem(podcast_id, stem)
     file_map = _file_map(paths)
-    existing_readable = {
-        label
-        for label, path in file_map.items()
-        if path.is_file() and _is_readable(path)
-    }
+    existing_readable = {label for label, path in file_map.items() if path.is_file() and _is_readable(path)}
     lecture_complete = {"03", "04", "07"} <= existing_readable
     complete = existing_readable == {"00", "03", "04", "07"}
     reuse_all = complete and not force
     cover_only = lecture_complete and "00" not in existing_readable and not force
     if existing_readable and not reuse_all and not cover_only and not force:
-        raise StudyGuideBundleError(
-            "incomplete study-guide bundle; pass force=true to replace the whole set"
-        )
+        raise StudyGuideBundleError("incomplete study-guide bundle; pass force=true to replace the whole set")
 
     planned_reads = [str(source_path)]
     seed_path = storage.corpus_episode_seed_asset_path(podcast_id, episode_ref)
@@ -251,11 +240,7 @@ def _find_audio(podcast_id: str, episode_ref: str) -> Path | None:
     if not audio_dir.is_dir():
         return None
     suffix = {".mp3", ".m4a", ".wav", ".aac", ".flac"}
-    matches = sorted(
-        path
-        for path in audio_dir.glob(f"{episode_ref}__*")
-        if path.suffix.lower() in suffix
-    )
+    matches = sorted(path for path in audio_dir.glob(f"{episode_ref}__*") if path.suffix.lower() in suffix)
     return matches[0] if matches else None
 
 
@@ -294,9 +279,7 @@ def _heading_titles(text: str) -> set[str]:
 
 def _source_window(source_text: str) -> str:
     if _CHUNK_SPLIT.search(source_text) is None:
-        raise StudyGuideBundleError(
-            "source semantic summary is missing the Chunk Summaries heading"
-        )
+        raise StudyGuideBundleError("source semantic summary is missing the Chunk Summaries heading")
     return _CHUNK_SPLIT.split(source_text, maxsplit=1)[0]
 
 
@@ -324,9 +307,7 @@ def _parse_bundle_payload(raw: str) -> dict[str, str]:
         raise StudyGuideBundleError("study-guide model output is not an object")
     missing = [key for key in BUNDLE_KEYS if key not in payload]
     if missing:
-        raise StudyGuideBundleError(
-            f"study-guide model output missing keys: {', '.join(missing)}"
-        )
+        raise StudyGuideBundleError(f"study-guide model output missing keys: {', '.join(missing)}")
     parsed: dict[str, str] = {}
     for key in BUNDLE_KEYS:
         value = payload[key]
@@ -346,33 +327,21 @@ def _validate_generated(parsed: dict[str, str], source_text: str) -> None:
     for key, headings in required.items():
         body = parsed[key]
         titles = _heading_titles(body)
-        missing = [
-            heading
-            for heading in headings
-            if not _has_heading(titles, heading) and heading not in body
-        ]
+        missing = [heading for heading in headings if not _has_heading(titles, heading) and heading not in body]
         if missing:
-            raise StudyGuideBundleError(
-                f"{key} missing required headings: {', '.join(missing)}"
-            )
+            raise StudyGuideBundleError(f"{key} missing required headings: {', '.join(missing)}")
         if any(_has_heading(titles, heading) for heading in FINANCE_HEADINGS):
             raise StudyGuideBundleError(f"{key} contains finance headings")
         for marker in WORKFLOW_MARKERS:
             if marker in body and marker not in source_window:
-                raise StudyGuideBundleError(
-                    f"{key} invents workflow marker {marker!r}"
-                )
+                raise StudyGuideBundleError(f"{key} invents workflow marker {marker!r}")
         if matched_investment_advice_guard(body) is not None:
             raise StudyGuideBundleError(f"{key} failed prohibited_advice")
         source_clocks = set(_CLOCK.findall(source_window))
-        for stamp in _TIMESTAMP.findall(body) + [
-            f"[{clock}]" for clock in _CLOCK.findall(body)
-        ]:
+        for stamp in _TIMESTAMP.findall(body) + [f"[{clock}]" for clock in _CLOCK.findall(body)]:
             clocks = _CLOCK.findall(stamp)
             if clocks and any(clock not in source_clocks for clock in clocks):
-                raise StudyGuideBundleError(
-                    f"{key} uses timestamp {stamp} that is not in the source summary"
-                )
+                raise StudyGuideBundleError(f"{key} uses timestamp {stamp} that is not in the source summary")
 
 
 def _has_heading(titles: set[str], expected: str) -> bool:

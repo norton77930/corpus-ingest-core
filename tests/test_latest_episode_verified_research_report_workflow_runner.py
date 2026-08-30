@@ -78,9 +78,7 @@ def _write_completed_artifacts(
             "segment_count": 1,
             "last_segment_end_seconds": 5.0,
             "completed": True,
-            "segments": [
-                {"id": 1, "start": 0.0, "end": 5.0, "text": "NVIDIA 與 AI 的本地 fixture"}
-            ],
+            "segments": [{"id": 1, "start": 0.0, "end": 5.0, "text": "NVIDIA 與 AI 的本地 fixture"}],
         },
     )
     transcript.text_path.write_text("private transcript sentinel", encoding="utf-8")
@@ -239,9 +237,7 @@ def _write_completed_artifacts(
             "external_boundary": boundary.json_path,
         }
         if stock_query:
-            proof_paths["stock_lens"] = storage.stock_lens_report_asset_paths(
-                "gooaye", stock_query
-            ).json_path
+            proof_paths["stock_lens"] = storage.stock_lens_report_asset_paths("gooaye", stock_query).json_path
         generation_proofs = {
             role: {
                 "expected_path": path.resolve().as_posix(),
@@ -303,10 +299,24 @@ def test_public_contract_models_and_safe_parameter_surface():
     assert signature.parameters["api_cost_ack"].default == ""
     assert core.LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
     assert [field.name for field in fields(core.LatestEpisodeVerifiedResearchReportWorkflowRunResult)] == [
-        "podcast_id", "run_mode", "confirm", "selector", "episode_ref",
-        "expected_episode_ref", "outcome", "required_api_cost_ack", "report_version",
-        "source_digest", "bundle_dir", "report_json_path", "report_markdown_path",
-        "manifest_path", "checkpoint_path", "filters", "stage_plan", "warnings",
+        "podcast_id",
+        "run_mode",
+        "confirm",
+        "selector",
+        "episode_ref",
+        "expected_episode_ref",
+        "outcome",
+        "required_api_cost_ack",
+        "report_version",
+        "source_digest",
+        "bundle_dir",
+        "report_json_path",
+        "report_markdown_path",
+        "manifest_path",
+        "checkpoint_path",
+        "filters",
+        "stage_plan",
+        "warnings",
         "not_investment_advice",
     ]
     for forbidden in ("force", "partial", "retry", "scheduler", "provider_url", "output_path"):
@@ -323,8 +333,12 @@ def test_storage_paths_are_pure_and_preview_is_strict_zero_write(monkeypatch, tm
     assert paths.checkpoint_path == tmp_path / "corpus" / "gooaye" / "verified-research" / "EP700.checkpoint.json"
     assert not (tmp_path / "research-reports").exists()
     calls = []
-    monkeypatch.setattr(runner, "_resolve_latest_episode", lambda podcast_id: calls.append(podcast_id) or ("EP700", None))
-    monkeypatch.setattr(runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: pytest.fail("preview dispatched child"))
+    monkeypatch.setattr(
+        runner, "_resolve_latest_episode", lambda podcast_id: calls.append(podcast_id) or ("EP700", None)
+    )
+    monkeypatch.setattr(
+        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: pytest.fail("preview dispatched child")
+    )
     before = _manifest(tmp_path)
 
     result = runner.run_latest_episode_verified_research_report_workflow("gooaye")
@@ -334,7 +348,11 @@ def test_storage_paths_are_pure_and_preview_is_strict_zero_write(monkeypatch, tm
     assert result.episode_ref == "EP700"
     assert result.required_api_cost_ack
     assert [step.stage for step in result.stage_plan] == [
-        "deterministic_processing", "semantic_summary", "semantic_review", "research", "publish"
+        "deterministic_processing",
+        "semantic_summary",
+        "semantic_review",
+        "research",
+        "publish",
     ]
     assert result.bundle_dir is None and result.checkpoint_path is None
     assert _manifest(tmp_path) == before
@@ -353,9 +371,7 @@ def test_no_publish_preview_is_strict_zero_write_and_omits_publication(monkeypat
     )
     before = _manifest(tmp_path)
 
-    result = runner.run_latest_episode_verified_research_report_workflow(
-        "gooaye", publish_report=False
-    )
+    result = runner.run_latest_episode_verified_research_report_workflow("gooaye", publish_report=False)
 
     assert result.outcome == "dry_run"
     assert [step.stage for step in result.stage_plan] == [
@@ -369,9 +385,7 @@ def test_no_publish_preview_is_strict_zero_write_and_omits_publication(monkeypat
 
 
 @pytest.mark.parametrize("publish_report", (0, None, "false"))
-def test_publish_report_requires_a_strict_bool_before_latest_resolution(
-    monkeypatch, publish_report
-):
+def test_publish_report_requires_a_strict_bool_before_latest_resolution(monkeypatch, publish_report):
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
 
@@ -382,9 +396,7 @@ def test_publish_report_requires_a_strict_bool_before_latest_resolution(
     )
 
     with pytest.raises(LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError):
-        runner.run_latest_episode_verified_research_report_workflow(
-            "gooaye", publish_report=publish_report
-        )
+        runner.run_latest_episode_verified_research_report_workflow("gooaye", publish_report=publish_report)
 
 
 def test_confirmed_no_publish_completes_current_lineage_without_bundle(monkeypatch, tmp_path):
@@ -394,9 +406,7 @@ def test_confirmed_no_publish_completes_current_lineage_without_bundle(monkeypat
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     _record_current_018_lineage()
-    checkpoint_path = storage.latest_episode_verified_research_report_paths(
-        "gooaye", "EP700", "0" * 64
-    ).checkpoint_path
+    checkpoint_path = storage.latest_episode_verified_research_report_paths("gooaye", "EP700", "0" * 64).checkpoint_path
     previous_digest = "a" * 64
     previous_references = {
         "bundle_dir": "data/research-reports/gooaye/EP700/v1-" + previous_digest,
@@ -415,9 +425,7 @@ def test_confirmed_no_publish_completes_current_lineage_without_bundle(monkeypat
         bundle_references=previous_references,
     )
     monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *_: ("EP700", None))
-    monkeypatch.setattr(
-        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
-    )
+    monkeypatch.setattr(runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result())
     for name in (
         "_adopt_complete_bundle",
         "assemble_verified_research_report",
@@ -460,29 +468,22 @@ def test_confirmed_no_publish_completes_current_lineage_without_bundle(monkeypat
     assert checkpoint["source_digest"] == previous_digest
     assert checkpoint["report_version"] == "v1-" + previous_digest
     assert checkpoint["bundle_references"] == previous_references
-    assert {"stage": "lineage_validation", "status": "completed"} in checkpoint[
-        "stage_history"
-    ]
+    assert {"stage": "lineage_validation", "status": "completed"} in checkpoint["stage_history"]
 
 
-def test_no_publish_rereviews_a_current_passed_review_and_blocks_failed_review(
-    monkeypatch, tmp_path
-):
+def test_no_publish_rereviews_a_current_passed_review_and_blocks_failed_review(monkeypatch, tmp_path):
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     _record_current_018_lineage()
     monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *_: ("EP700", None))
-    monkeypatch.setattr(
-        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
-    )
+    monkeypatch.setattr(runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result())
     review_calls = []
     monkeypatch.setattr(
         runner,
         "_run_018_authenticity_rereview",
-        lambda *args: review_calls.append(args)
-        or SimpleNamespace(episode_ref="EP700", review_status="failed"),
+        lambda *args: review_calls.append(args) or SimpleNamespace(episode_ref="EP700", review_status="failed"),
     )
     for name in (
         "run_research_workflow",
@@ -565,18 +566,14 @@ def test_manual_checkpoint_clears_non_success_bundle_references(tmp_path, termin
 
 
 @pytest.mark.parametrize("failure_stage", ("semantic_review", "research", "lineage_validation"))
-def test_no_publish_failures_never_assemble_publish_or_return_ready(
-    monkeypatch, tmp_path, failure_stage
-):
+def test_no_publish_failures_never_assemble_publish_or_return_ready(monkeypatch, tmp_path, failure_stage):
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     _record_current_018_lineage()
-    checkpoint_path = storage.latest_episode_verified_research_report_paths(
-        "gooaye", "EP700", "0" * 64
-    ).checkpoint_path
+    checkpoint_path = storage.latest_episode_verified_research_report_paths("gooaye", "EP700", "0" * 64).checkpoint_path
     stale_digest = "b" * 64
     runner._write_checkpoint(
         checkpoint_path,
@@ -586,14 +583,10 @@ def test_no_publish_failures_never_assemble_publish_or_return_ready(
         source_digest=stale_digest,
         report_version="v1-" + stale_digest,
         terminal_outcome="failed",
-        bundle_references={
-            "bundle_dir": "data/research-reports/gooaye/EP700/v1-" + stale_digest
-        },
+        bundle_references={"bundle_dir": "data/research-reports/gooaye/EP700/v1-" + stale_digest},
     )
     monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *_: ("EP700", None))
-    monkeypatch.setattr(
-        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
-    )
+    monkeypatch.setattr(runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result())
     for name in ("assemble_verified_research_report", "publish_verified_research_report_bundle"):
         monkeypatch.setattr(
             runner,
@@ -660,10 +653,24 @@ def test_invalid_ack_blocks_rss_env_provider_writer_and_child_stages(monkeypatch
 
     calls = {name: 0 for name in ("rss", "deterministic", "semantic", "research", "publish")}
     monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *args: calls.__setitem__("rss", calls["rss"] + 1))
-    monkeypatch.setattr(runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: calls.__setitem__("deterministic", calls["deterministic"] + 1))
-    monkeypatch.setattr(runner, "run_corpus_semantic_remediation", lambda *args, **kwargs: calls.__setitem__("semantic", calls["semantic"] + 1))
-    monkeypatch.setattr(runner, "run_research_workflow", lambda *args, **kwargs: calls.__setitem__("research", calls["research"] + 1))
-    monkeypatch.setattr(runner, "publish_verified_research_report_bundle", lambda *args, **kwargs: calls.__setitem__("publish", calls["publish"] + 1))
+    monkeypatch.setattr(
+        runner,
+        "_run_pinned_deterministic_workflow",
+        lambda *args, **kwargs: calls.__setitem__("deterministic", calls["deterministic"] + 1),
+    )
+    monkeypatch.setattr(
+        runner,
+        "run_corpus_semantic_remediation",
+        lambda *args, **kwargs: calls.__setitem__("semantic", calls["semantic"] + 1),
+    )
+    monkeypatch.setattr(
+        runner, "run_research_workflow", lambda *args, **kwargs: calls.__setitem__("research", calls["research"] + 1)
+    )
+    monkeypatch.setattr(
+        runner,
+        "publish_verified_research_report_bundle",
+        lambda *args, **kwargs: calls.__setitem__("publish", calls["publish"] + 1),
+    )
 
     with pytest.raises(LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError):
         runner.run_latest_episode_verified_research_report_workflow(
@@ -740,8 +747,12 @@ def test_review_passed_runs_pinned_deterministic_research_once_with_fixed_option
     assert result.outcome == "completed"
     assert calls == {"latest": 1, "semantic": 0}
     assert captured == {
-        "stock_query": "NVDA", "confirm": True, "force": False, "allow_partial": False,
-        "include_semantic_summary": False, "include_stock_lens_synthesis": False,
+        "stock_query": "NVDA",
+        "confirm": True,
+        "force": False,
+        "allow_partial": False,
+        "include_semantic_summary": False,
+        "include_stock_lens_synthesis": False,
         "include_external_data_verification": False,
     }
     assert result.manifest_path is not None and result.manifest_path.exists()
@@ -760,6 +771,7 @@ def test_missing_summary_runs_summary_then_review_once_and_requires_exact_pass(m
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     from corpus_ingest_core import storage
+
     storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha").unlink()
     review_dir = tmp_path / "evals" / "research-llm-smoke" / "reports"
     for path in review_dir.glob("*"):
@@ -784,7 +796,9 @@ def test_missing_summary_runs_summary_then_review_once_and_requires_exact_pass(m
         return SimpleNamespace(episode_ref="EP700", rows=[SimpleNamespace(status="executed")])
 
     monkeypatch.setattr(runner, "run_corpus_semantic_remediation", semantic)
-    monkeypatch.setattr(runner, "run_research_workflow", lambda *args, **kwargs: SimpleNamespace(workflow_status="completed"))
+    monkeypatch.setattr(
+        runner, "run_research_workflow", lambda *args, **kwargs: SimpleNamespace(workflow_status="completed")
+    )
 
     result = runner.run_latest_episode_verified_research_report_workflow(
         "gooaye", confirm=True, expected_episode_ref="EP700", api_cost_ack=SEMANTIC_API_COST_ACK
@@ -794,12 +808,8 @@ def test_missing_summary_runs_summary_then_review_once_and_requires_exact_pass(m
     assert calls == ["semantic_summary", "semantic_review"]
 
 
-@pytest.mark.parametrize(
-    "review_defect", ("missing_hash", "stale_hash", "forged_payload")
-)
-def test_stale_passed_review_is_deterministically_rereviewed_before_research(
-    monkeypatch, tmp_path, review_defect
-):
+@pytest.mark.parametrize("review_defect", ("missing_hash", "stale_hash", "forged_payload"))
+def test_stale_passed_review_is_deterministically_rereviewed_before_research(monkeypatch, tmp_path, review_defect):
     """SPEC 018 re-reviews its own stale or forged authenticity deficits once."""
     import corpus_ingest_core.corpus_index as corpus_index
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
@@ -822,15 +832,12 @@ def test_stale_passed_review_is_deterministically_rereviewed_before_research(
 
     monkeypatch.setattr(runner, "_adopt_complete_bundle", lambda *args: None)
     monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *args: ("EP700", None))
-    monkeypatch.setattr(
-        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
-    )
+    monkeypatch.setattr(runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result())
     research_calls = []
     monkeypatch.setattr(
         runner,
         "run_research_workflow",
-        lambda *args, **kwargs: research_calls.append((args, kwargs))
-        or SimpleNamespace(workflow_status="completed"),
+        lambda *args, **kwargs: research_calls.append((args, kwargs)) or SimpleNamespace(workflow_status="completed"),
     )
 
     result = runner.run_latest_episode_verified_research_report_workflow(
@@ -853,9 +860,7 @@ def test_stale_passed_review_is_deterministically_rereviewed_before_research(
     assert result.manifest_path is not None and result.manifest_path.exists()
 
 
-def test_stale_passed_review_with_failed_rereview_returns_bounded_blocked(
-    monkeypatch, tmp_path
-):
+def test_stale_passed_review_with_failed_rereview_returns_bounded_blocked(monkeypatch, tmp_path):
     """A real deterministic rereview failure never becomes a workflow failure."""
     import corpus_ingest_core.corpus_index as corpus_index
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
@@ -878,9 +883,7 @@ def test_stale_passed_review_with_failed_rereview_returns_bounded_blocked(
 
     monkeypatch.setattr(runner, "_adopt_complete_bundle", lambda *args: None)
     monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *args: ("EP700", None))
-    monkeypatch.setattr(
-        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
-    )
+    monkeypatch.setattr(runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result())
     monkeypatch.setattr(
         runner,
         "run_research_workflow",
@@ -927,9 +930,13 @@ def test_nonpassed_review_stops_before_research_and_publish(monkeypatch, tmp_pat
         summary.write_bytes(b"\xff")
     monkeypatch.setattr(runner, "_resolve_latest_episode", lambda podcast_id: ("EP700", None))
     monkeypatch.setattr(runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result())
-    monkeypatch.setattr(runner, "run_corpus_semantic_remediation", lambda *args, **kwargs: pytest.fail("review must not be retried"))
+    monkeypatch.setattr(
+        runner, "run_corpus_semantic_remediation", lambda *args, **kwargs: pytest.fail("review must not be retried")
+    )
     monkeypatch.setattr(runner, "run_research_workflow", lambda *args, **kwargs: pytest.fail("research must not run"))
-    monkeypatch.setattr(runner, "publish_verified_research_report_bundle", lambda *args, **kwargs: pytest.fail("publish must not run"))
+    monkeypatch.setattr(
+        runner, "publish_verified_research_report_bundle", lambda *args, **kwargs: pytest.fail("publish must not run")
+    )
 
     result = runner.run_latest_episode_verified_research_report_workflow(
         "gooaye", confirm=True, expected_episode_ref="EP700", api_cost_ack=SEMANTIC_API_COST_ACK
@@ -959,9 +966,7 @@ def test_bundle_reuses_identical_digest_and_fails_closed_on_conflicting_final(mo
     assert not list((storage.RESEARCH_REPORTS_DIR / "gooaye" / "EP700").glob("*.staging"))
 
 
-def test_bundle_reuses_legacy_canonical_manifest_source_paths(
-    monkeypatch, tmp_path
-):
+def test_bundle_reuses_legacy_canonical_manifest_source_paths(monkeypatch, tmp_path):
     """Core-derived relative and canonical source strings denote one bundle."""
     import os
 
@@ -975,20 +980,15 @@ def test_bundle_reuses_legacy_canonical_manifest_source_paths(
     assembly = replace(
         assembly,
         source_artifacts=[
-            replace(source, path=Path(os.path.relpath(source.path)))
-            for source in assembly.source_artifacts
+            replace(source, path=Path(os.path.relpath(source.path))) for source in assembly.source_artifacts
         ],
     )
-    canonical_paths = {
-        source.role: source.path.resolve().as_posix() for source in assembly.source_artifacts
-    }
+    canonical_paths = {source.role: source.path.resolve().as_posix() for source in assembly.source_artifacts}
     bundle = publish_verified_research_report_bundle(assembly)
     manifest = json.loads(bundle.manifest_path.read_text(encoding="utf-8"))
     for source in manifest["source_artifacts"]:
         source["path"] = canonical_paths[source["role"]]
-    bundle.manifest_path.write_bytes(
-        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8")
-    )
+    bundle.manifest_path.write_bytes(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8"))
 
     reused = publish_verified_research_report_bundle(assembly)
 
@@ -1011,9 +1011,7 @@ def test_bundle_reuse_never_resolves_persisted_source_path(monkeypatch, tmp_path
     manifest = json.loads(bundle.manifest_path.read_text(encoding="utf-8"))
     hostile = "HOSTILE-PERSISTED-MANIFEST-PATH"
     manifest["source_artifacts"][0]["path"] = hostile
-    bundle.manifest_path.write_bytes(
-        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8")
-    )
+    bundle.manifest_path.write_bytes(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8"))
     original_resolve = Path.resolve
 
     def reject_hostile_resolve(path: Path, *args: object, **kwargs: object) -> Path:
@@ -1028,9 +1026,7 @@ def test_bundle_reuse_never_resolves_persisted_source_path(monkeypatch, tmp_path
 
 
 @pytest.mark.parametrize("cardinality", ("missing", "extra"))
-def test_bundle_reuse_rejects_manifest_source_artifact_cardinality_mismatch(
-    monkeypatch, tmp_path, cardinality
-):
+def test_bundle_reuse_rejects_manifest_source_artifact_cardinality_mismatch(monkeypatch, tmp_path, cardinality):
     """Malformed persisted cardinality fails as the bounded public conflict."""
     from corpus_ingest_core import VerifiedResearchReportInputError
     from corpus_ingest_core.verified_research_report import (
@@ -1046,9 +1042,7 @@ def test_bundle_reuse_rejects_manifest_source_artifact_cardinality_mismatch(
         manifest["source_artifacts"].pop()
     else:
         manifest["source_artifacts"].append(dict(manifest["source_artifacts"][0]))
-    bundle.manifest_path.write_bytes(
-        json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8")
-    )
+    bundle.manifest_path.write_bytes(json.dumps(manifest, ensure_ascii=False, indent=2, sort_keys=True).encode("utf-8"))
 
     with pytest.raises(VerifiedResearchReportInputError, match="conflicts with source digest"):
         publish_verified_research_report_bundle(assembly)
@@ -1100,9 +1094,7 @@ def test_complete_matching_bundle_is_adopted_without_rerunning_children(monkeypa
     )
 
     _write_completed_artifacts(monkeypatch, tmp_path)
-    publish_verified_research_report_bundle(
-        assemble_verified_research_report("gooaye", "EP700", stock_query=None)
-    )
+    publish_verified_research_report_bundle(assemble_verified_research_report("gooaye", "EP700", stock_query=None))
     monkeypatch.setattr(runner, "_resolve_latest_episode", lambda podcast_id: ("EP700", None))
     monkeypatch.setattr(
         runner,
@@ -1151,9 +1143,7 @@ def test_checkpoint_failure_after_publish_returns_bundle_with_bounded_warning(mo
     def fail_final_checkpoint(*args, **kwargs):
         calls["count"] += 1
         if calls["count"] == 3:
-            raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError(
-                "checkpoint write failed"
-            )
+            raise LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError("checkpoint write failed")
 
     monkeypatch.setattr(runner, "_write_checkpoint", fail_final_checkpoint)
 
@@ -1217,9 +1207,7 @@ def test_adoption_requires_valid_transcript_complete_output_contract(monkeypatch
     )
 
     _write_completed_artifacts(monkeypatch, tmp_path)
-    publish_verified_research_report_bundle(
-        assemble_verified_research_report("gooaye", "EP700", stock_query=None)
-    )
+    publish_verified_research_report_bundle(assemble_verified_research_report("gooaye", "EP700", stock_query=None))
     storage.find_transcript_asset_paths("gooaye", "EP700").text_path.unlink()
 
     assert runner._adopt_complete_bundle("gooaye", "EP700", None) is None
@@ -1375,9 +1363,7 @@ def test_fixture_verification_changes_canonical_digest_and_manifest_options(monk
     assert with_fixture.report_payload["assembly_options"]["include_fixture_verification"] is True
 
 
-def test_red_identical_timestamped_rereview_at_new_path_creates_a_new_auditable_bundle(
-    monkeypatch, tmp_path
-):
+def test_red_identical_timestamped_rereview_at_new_path_creates_a_new_auditable_bundle(monkeypatch, tmp_path):
     """Path-distinct authentic review provenance cannot conflict forever with v1."""
     from corpus_ingest_core.semantic_summary_smoke_review import review_semantic_summary_smoke
     from corpus_ingest_core.verified_research_report import (
@@ -1388,16 +1374,12 @@ def test_red_identical_timestamped_rereview_at_new_path_creates_a_new_auditable_
     _write_completed_artifacts(monkeypatch, tmp_path)
     first_assembly = assemble_verified_research_report("gooaye", "EP700", stock_query=None)
     first_bundle = publish_verified_research_report_bundle(first_assembly)
-    first_review = next(
-        source for source in first_assembly.source_artifacts if source.role == "semantic_review"
-    )
+    first_review = next(source for source in first_assembly.source_artifacts if source.role == "semantic_review")
 
     rereview = review_semantic_summary_smoke("gooaye", "EP700")
     _record_current_018_lineage()
     second_assembly = assemble_verified_research_report("gooaye", "EP700", stock_query=None)
-    second_review = next(
-        source for source in second_assembly.source_artifacts if source.role == "semantic_review"
-    )
+    second_review = next(source for source in second_assembly.source_artifacts if source.role == "semantic_review")
     second_bundle = publish_verified_research_report_bundle(second_assembly)
 
     assert rereview.review_json_path == second_review.path
@@ -1407,9 +1389,10 @@ def test_red_identical_timestamped_rereview_at_new_path_creates_a_new_auditable_
     assert first_bundle.bundle_dir != second_bundle.bundle_dir
     assert second_bundle.reused is False
     manifest = json.loads(second_bundle.manifest_path.read_text(encoding="utf-8"))
-    assert next(
-        item["path"] for item in manifest["source_artifacts"] if item["role"] == "semantic_review"
-    ) == second_review.path.as_posix()
+    assert (
+        next(item["path"] for item in manifest["source_artifacts"] if item["role"] == "semantic_review")
+        == second_review.path.as_posix()
+    )
 
 
 def test_public_filters_and_result_serialization_reject_or_scrub_unsafe_values(monkeypatch):
@@ -1455,14 +1438,33 @@ def test_report_retains_sanitized_evidence_and_readable_stock_appendix(monkeypat
         "evidence_status": "podcast_explicit",
         "verification_status": "podcast_evidence",
         "evidence": [{"timestamp": "[00:00:00 - 00:00:05]", "segment_id": 1, "text": "NVIDIA fixture"}],
-        "external_boundary": {"external_verification_status": "not_requested", "source_status": "not_fetched", "data_date": None, "required_external_checks": ["revenue"]},
+        "external_boundary": {
+            "external_verification_status": "not_requested",
+            "source_status": "not_fetched",
+            "data_date": None,
+            "required_external_checks": ["revenue"],
+        },
     }
-    inferred_lead = {**direct_evidence, "company_name": "Related Company", "evidence_status": "inferred_from_industry", "verification_status": "needs_verification", "evidence": []}
+    inferred_lead = {
+        **direct_evidence,
+        "company_name": "Related Company",
+        "evidence_status": "inferred_from_industry",
+        "verification_status": "needs_verification",
+        "evidence": [],
+    }
     stock.update(
         {
             "direct_podcast_evidence": [direct_evidence],
             "inferred_research_leads": [inferred_lead],
-            "external_verification_needs": [{"company_name": "NVIDIA", "external_verification_status": "not_requested", "source_status": "not_fetched", "data_date": None, "required_external_checks": ["revenue"]}],
+            "external_verification_needs": [
+                {
+                    "company_name": "NVIDIA",
+                    "external_verification_status": "not_requested",
+                    "source_status": "not_fetched",
+                    "data_date": None,
+                    "required_external_checks": ["revenue"],
+                }
+            ],
         }
     )
     stock_path.write_text(json.dumps(stock), encoding="utf-8")
@@ -1516,9 +1518,7 @@ def test_destination_race_reuses_only_a_matching_bundle(monkeypatch, tmp_path):
     assert bundle.reused is True
 
 
-def test_assembly_uses_one_immutable_source_snapshot_across_parse_safety_and_digest(
-    monkeypatch, tmp_path
-):
+def test_assembly_uses_one_immutable_source_snapshot_across_parse_safety_and_digest(monkeypatch, tmp_path):
     """A disk mutation after the first source read cannot mix parsed and hashed bytes."""
     import corpus_ingest_core.verified_research_report as report
     from corpus_ingest_core import storage
@@ -1547,9 +1547,7 @@ def test_assembly_uses_one_immutable_source_snapshot_across_parse_safety_and_dig
 
     assembly = report.assemble_verified_research_report("gooaye", "EP700", stock_query=None)
 
-    transcript_source = next(
-        source for source in assembly.source_artifacts if source.role == "transcript"
-    )
+    transcript_source = next(source for source in assembly.source_artifacts if source.role == "transcript")
     assert assembly.report_payload["episode_identity"]["title"] == "EP700 Alpha"
     assert transcript_source.sha256 == hashlib.sha256(original_bytes).hexdigest()
     assert transcript_source.size_bytes == len(original_bytes)
@@ -1659,9 +1657,7 @@ def test_review_inspector_rejects_timestamped_matching_hash_forgery(monkeypatch,
         encoding="utf-8",
     )
 
-    inspection = report.inspect_semantic_review(
-        "gooaye", "EP700", semantic_summary_path=summary_path
-    )
+    inspection = report.inspect_semantic_review("gooaye", "EP700", semantic_summary_path=summary_path)
 
     assert inspection.review_status == "needs_review"
 
@@ -1680,9 +1676,7 @@ def test_checkpoint_intermediate_merge_keeps_last_successful_bundle_metadata(tmp
                 "source_digest": "a" * 64,
                 "report_version": "v1-" + "a" * 64,
                 "terminal_outcome": "completed",
-                "bundle_references": {
-                    "manifest_path": "data/research-reports/gooaye/EP700/v1-a/manifest.json"
-                },
+                "bundle_references": {"manifest_path": "data/research-reports/gooaye/EP700/v1-a/manifest.json"},
                 "not_investment_advice": True,
             }
         ),
@@ -1718,9 +1712,7 @@ def test_red_reserved_generations_prevent_deterministic_stale_success_overwrite(
         source_digest=newer_digest,
         report_version="v1-" + newer_digest,
         terminal_outcome="completed",
-        bundle_references={
-            "manifest_path": "data/research-reports/gooaye/EP700/v1-b/manifest.json"
-        },
+        bundle_references={"manifest_path": "data/research-reports/gooaye/EP700/v1-b/manifest.json"},
         invocation_generation=newer_generation,
     )
     runner._write_checkpoint(
@@ -1731,9 +1723,7 @@ def test_red_reserved_generations_prevent_deterministic_stale_success_overwrite(
         source_digest="a" * 64,
         report_version="v1-" + "a" * 64,
         terminal_outcome="completed",
-        bundle_references={
-            "manifest_path": "data/research-reports/gooaye/EP700/v1-a/manifest.json"
-        },
+        bundle_references={"manifest_path": "data/research-reports/gooaye/EP700/v1-a/manifest.json"},
         invocation_generation=older_generation,
     )
 
@@ -1934,9 +1924,7 @@ def test_reuse_revalidates_bundle_after_first_matching_comparison(monkeypatch, t
     "source_name",
     ("mentions", "intelligence", "industry_mapping", "external_boundary", "stock_lens"),
 )
-def test_red_assembler_rejects_personalized_advice_from_every_rendered_source(
-    monkeypatch, tmp_path, source_name
-):
+def test_red_assembler_rejects_personalized_advice_from_every_rendered_source(monkeypatch, tmp_path, source_name):
     from corpus_ingest_core import storage
     from corpus_ingest_core.verified_research_report import (
         VerifiedResearchReportInputError,
@@ -2037,9 +2025,7 @@ def test_red_workflow_claim_failure_returns_bounded_terminal_result_before_child
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _use_tmp_dirs(monkeypatch, tmp_path)
-    checkpoint_path = storage.latest_episode_verified_research_report_paths(
-        "gooaye", "EP700", "0" * 64
-    ).checkpoint_path
+    checkpoint_path = storage.latest_episode_verified_research_report_paths("gooaye", "EP700", "0" * 64).checkpoint_path
     valid_checkpoint = {
         "schema_version": runner.REPORT_SCHEMA_VERSION,
         "podcast_id": "gooaye",
@@ -2100,9 +2086,7 @@ def test_red_workflow_claim_failure_returns_bounded_terminal_result_before_child
 
     assert result.outcome == "failed"
     assert result.checkpoint_path == checkpoint_path
-    assert [(step.stage, step.status) for step in result.stage_plan] == [
-        ("workflow_claim", "failed")
-    ]
+    assert [(step.stage, step.status) for step in result.stage_plan] == [("workflow_claim", "failed")]
     assert result.stage_plan[0].failure_category in {
         "LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError",
         "OSError",
@@ -2114,18 +2098,14 @@ def test_red_workflow_claim_failure_returns_bounded_terminal_result_before_child
     assert calls == []
 
 
-def test_red_reservation_failure_skips_finalization_and_preserves_newer_generation(
-    monkeypatch, tmp_path
-):
+def test_red_reservation_failure_skips_finalization_and_preserves_newer_generation(monkeypatch, tmp_path):
     """An unreserved invocation cannot retry or merge into a newer checkpoint."""
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
     _use_tmp_dirs(monkeypatch, tmp_path)
-    checkpoint_path = storage.latest_episode_verified_research_report_paths(
-        "gooaye", "EP700", "0" * 64
-    ).checkpoint_path
+    checkpoint_path = storage.latest_episode_verified_research_report_paths("gooaye", "EP700", "0" * 64).checkpoint_path
     newer_digest = "b" * 64
     checkpoint_payload = {
         "schema_version": runner.REPORT_SCHEMA_VERSION,
@@ -2135,9 +2115,7 @@ def test_red_reservation_failure_skips_finalization_and_preserves_newer_generati
         "source_digest": newer_digest,
         "report_version": "v1-" + newer_digest,
         "terminal_outcome": "completed",
-        "bundle_references": {
-            "manifest_path": "data/research-reports/gooaye/EP700/v1-b/manifest.json"
-        },
+        "bundle_references": {"manifest_path": "data/research-reports/gooaye/EP700/v1-b/manifest.json"},
         "invocation_generation": 2,
         "successful_invocation_generation": 2,
         "not_investment_advice": True,
@@ -2168,16 +2146,12 @@ def test_red_reservation_failure_skips_finalization_and_preserves_newer_generati
     )
 
     assert result.outcome == "failed"
-    assert [(step.stage, step.status) for step in result.stage_plan] == [
-        ("checkpoint_reservation", "failed")
-    ]
+    assert [(step.stage, step.status) for step in result.stage_plan] == [("checkpoint_reservation", "failed")]
     assert len(attempts) == 1
     assert checkpoint_path.read_bytes() == before
 
 
-def test_red_018_rereview_converges_past_future_forged_and_rejected_candidates(
-    monkeypatch, tmp_path
-):
+def test_red_018_rereview_converges_past_future_forged_and_rejected_candidates(monkeypatch, tmp_path):
     """A new authentic review must supersede invalid higher-sorting filenames."""
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core import storage
@@ -2206,9 +2180,7 @@ def test_red_018_rereview_converges_past_future_forged_and_rejected_candidates(
     )
     monkeypatch.setattr(runner, "_adopt_complete_bundle", lambda *args: None)
     monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *args: ("EP700", None))
-    monkeypatch.setattr(
-        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
-    )
+    monkeypatch.setattr(runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result())
     monkeypatch.setattr(
         runner,
         "run_research_workflow",
@@ -2233,14 +2205,13 @@ def test_red_018_rereview_converges_past_future_forged_and_rejected_candidates(
     assert after.review_status == "passed"
     assert after.review_path is not None and after.review_path != future_forged
     manifest = json.loads(result.manifest_path.read_text(encoding="utf-8"))
-    assert next(
-        item["path"] for item in manifest["source_artifacts"] if item["role"] == "semantic_review"
-    ) == after.review_path.as_posix()
+    assert (
+        next(item["path"] for item in manifest["source_artifacts"] if item["role"] == "semantic_review")
+        == after.review_path.as_posix()
+    )
 
 
-def test_red_confirmed_existing_summary_without_lineage_uses_private_regeneration(
-    monkeypatch, tmp_path
-):
+def test_red_confirmed_existing_summary_without_lineage_uses_private_regeneration(monkeypatch, tmp_path):
     from types import SimpleNamespace
 
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
@@ -2256,9 +2227,7 @@ def test_red_confirmed_existing_summary_without_lineage_uses_private_regeneratio
     summary_path = storage.semantic_summary_asset_path("gooaye", "EP700", "EP700 Alpha")
     monkeypatch.setattr(runner, "_adopt_complete_bundle", lambda *args: None)
     monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *args: ("EP700", None))
-    monkeypatch.setattr(
-        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
-    )
+    monkeypatch.setattr(runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result())
     calls = []
 
     def regenerate(*args, **kwargs):
@@ -2279,6 +2248,7 @@ def test_red_confirmed_existing_summary_without_lineage_uses_private_regeneratio
         )
 
     monkeypatch.setattr(runner, "_run_controlled_semantic_summary_regeneration", regenerate)
+
     def public_remediation(*args, **kwargs):
         assert kwargs["action"] == "semantic_review"
         assert "force" not in kwargs
@@ -2290,9 +2260,7 @@ def test_red_confirmed_existing_summary_without_lineage_uses_private_regeneratio
         "_run_018_authenticity_rereview",
         lambda *args, **kwargs: SimpleNamespace(episode_ref="EP700", review_status="failed"),
     )
-    monkeypatch.setattr(
-        runner, "run_research_workflow", lambda *args, **kwargs: pytest.fail("research must not run")
-    )
+    monkeypatch.setattr(runner, "run_research_workflow", lambda *args, **kwargs: pytest.fail("research must not run"))
 
     result = runner.run_latest_episode_verified_research_report_workflow(
         "gooaye",
@@ -2320,14 +2288,10 @@ def test_red_regeneration_provider_failure_reports_substage_category(monkeypatch
     summary_before = summary_path.read_bytes()
     monkeypatch.setattr(runner, "_adopt_complete_bundle", lambda *args: None)
     monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *args: ("EP700", None))
-    monkeypatch.setattr(
-        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
-    )
+    monkeypatch.setattr(runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result())
 
     def regenerate(*args, **kwargs):
-        raise TimeoutError(
-            "read timed out for http://127.0.0.1:8317/v1 key=not-a-real-secret"
-        )
+        raise TimeoutError("read timed out for http://127.0.0.1:8317/v1 key=not-a-real-secret")
 
     monkeypatch.setattr(runner, "_run_controlled_semantic_summary_regeneration", regenerate)
 
@@ -2343,10 +2307,7 @@ def test_red_regeneration_provider_failure_reports_substage_category(monkeypatch
         "semantic_summary",
         "failed",
     )
-    assert (
-        result.stage_plan[-1].failure_category
-        == "controlled_regeneration_provider_generation"
-    )
+    assert result.stage_plan[-1].failure_category == "controlled_regeneration_provider_generation"
     serialized = json.dumps(runner.result_to_dict(result))
     assert "not-a-real-secret" not in serialized
     assert "8317" not in serialized
@@ -2471,9 +2432,7 @@ def test_red_regeneration_proof_failures_report_distinct_substages(
 
     with episode_writer_claim("gooaye", "EP700"):
         authorization = _mint_controlled_regeneration_capability("gooaye", "EP700")
-        with pytest.raises(
-            LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
-        ) as excinfo:
+        with pytest.raises(LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError) as excinfo:
             runner._controlled_summary_regeneration_transaction(
                 "gooaye",
                 "EP700",
@@ -2549,9 +2508,7 @@ def test_red_regeneration_transaction_substages_are_allowlisted_constants(
     if mode == "pre_state":
         summary_path.unlink()
     if mode == "transcript_source":
-        monkeypatch.setattr(
-            runner, "resolve_canonical_transcript_asset_paths", lambda *args, **kwargs: None
-        )
+        monkeypatch.setattr(runner, "resolve_canonical_transcript_asset_paths", lambda *args, **kwargs: None)
     if mode in {"lineage_record", "rollback"}:
         monkeypatch.setattr(
             runner,
@@ -2568,12 +2525,8 @@ def test_red_regeneration_transaction_substages_are_allowlisted_constants(
         monkeypatch.setattr(runner, "_restore_regeneration_prestate", lambda *args: False)
 
     with episode_writer_claim("gooaye", "EP700"):
-        authorization = (
-            None if mode == "authority" else _mint_controlled_regeneration_capability("gooaye", "EP700")
-        )
-        with pytest.raises(
-            LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError
-        ) as excinfo:
+        authorization = None if mode == "authority" else _mint_controlled_regeneration_capability("gooaye", "EP700")
+        with pytest.raises(LatestEpisodeVerifiedResearchReportWorkflowRunnerFailedError) as excinfo:
             runner._controlled_summary_regeneration_transaction(
                 "gooaye",
                 "EP700",
@@ -2586,9 +2539,7 @@ def test_red_regeneration_transaction_substages_are_allowlisted_constants(
             )
 
     assert runner._safe_failure_category(excinfo.value) == expected_category
-    assert expected_category.removeprefix("controlled_regeneration_") in (
-        runner._CONTROLLED_REGENERATION_SUBSTAGES
-    )
+    assert expected_category.removeprefix("controlled_regeneration_") in (runner._CONTROLLED_REGENERATION_SUBSTAGES)
     assert "injected" not in str(excinfo.value)
     if mode in {"authority", "pre_state"}:
         assert child_calls == []
@@ -2598,9 +2549,7 @@ def test_red_regeneration_transaction_substages_are_allowlisted_constants(
 
 
 @pytest.mark.parametrize("failure_stage", ("record", "post_validation"))
-def test_controlled_regeneration_rolls_back_summary_and_lineage_on_failure(
-    monkeypatch, tmp_path, failure_stage
-):
+def test_controlled_regeneration_rolls_back_summary_and_lineage_on_failure(monkeypatch, tmp_path, failure_stage):
     from types import SimpleNamespace
 
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
@@ -2782,9 +2731,7 @@ def test_red_research_is_forced_when_its_lineage_roles_are_not_current(
     _record_current_018_lineage(roles=lineage_roles)
     monkeypatch.setattr(runner, "_adopt_complete_bundle", lambda *args: None)
     monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *args: ("EP700", None))
-    monkeypatch.setattr(
-        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
-    )
+    monkeypatch.setattr(runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result())
     monkeypatch.setattr(
         runner,
         "_run_controlled_semantic_summary_regeneration",
@@ -2820,9 +2767,7 @@ def _unproven_research_scenario(monkeypatch, tmp_path):
     _record_current_018_lineage(roles=("transcript", "semantic_summary", "semantic_review"))
     monkeypatch.setattr(runner, "_adopt_complete_bundle", lambda *args: None)
     monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *args: ("EP700", None))
-    monkeypatch.setattr(
-        runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result()
-    )
+    monkeypatch.setattr(runner, "_run_pinned_deterministic_workflow", lambda *args, **kwargs: _ready_result())
     monkeypatch.setattr(
         runner,
         "_run_controlled_semantic_summary_regeneration",
@@ -2830,21 +2775,13 @@ def _unproven_research_scenario(monkeypatch, tmp_path):
     )
     return {
         "mentions": storage.mention_asset_paths("gooaye", "EP700", "EP700 Alpha").json_path,
-        "intelligence": storage.episode_intelligence_report_asset_paths(
-            "gooaye", "EP700", "EP700 Alpha"
-        ).json_path,
-        "industry_mapping": storage.industry_chain_mapping_asset_paths(
-            "gooaye", "EP700", "EP700 Alpha"
-        ).json_path,
-        "external_boundary": storage.external_data_boundary_asset_paths(
-            "gooaye", "EP700", "EP700 Alpha"
-        ).json_path,
+        "intelligence": storage.episode_intelligence_report_asset_paths("gooaye", "EP700", "EP700 Alpha").json_path,
+        "industry_mapping": storage.industry_chain_mapping_asset_paths("gooaye", "EP700", "EP700 Alpha").json_path,
+        "external_boundary": storage.external_data_boundary_asset_paths("gooaye", "EP700", "EP700 Alpha").json_path,
     }
 
 
-def test_red_unproven_research_artifacts_are_cleared_before_the_child_runs(
-    monkeypatch, tmp_path
-):
+def test_red_unproven_research_artifacts_are_cleared_before_the_child_runs(monkeypatch, tmp_path):
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
@@ -2869,9 +2806,7 @@ def test_red_unproven_research_artifacts_are_cleared_before_the_child_runs(
     assert observed == {role: False for role in paths}
 
 
-def test_cleared_research_artifacts_are_restored_byte_exactly_when_the_child_fails(
-    monkeypatch, tmp_path
-):
+def test_cleared_research_artifacts_are_restored_byte_exactly_when_the_child_fails(monkeypatch, tmp_path):
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core.semantic_summarizer import SEMANTIC_API_COST_ACK
 
@@ -2932,9 +2867,7 @@ def test_regenerated_research_artifacts_survive_a_successful_stage(monkeypatch, 
     assert not list(tmp_path.rglob("*.restore.part"))
     assert not list(tmp_path.rglob("*.superseded"))
     audit = [
-        warning
-        for warning in result.warnings
-        if warning.message.startswith("superseded unproven research artifacts:")
+        warning for warning in result.warnings if warning.message.startswith("superseded unproven research artifacts:")
     ]
     assert len(audit) == 1
     for role in paths:
@@ -3007,9 +2940,7 @@ def test_incomplete_research_child_restores_the_superseded_artifacts(monkeypatch
     assert not list(tmp_path.rglob("*.superseded"))
 
 
-def test_red_research_completed_without_proof_coverage_restores_the_artifacts(
-    monkeypatch, tmp_path
-):
+def test_red_research_completed_without_proof_coverage_restores_the_artifacts(monkeypatch, tmp_path):
     from types import SimpleNamespace
 
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
@@ -3039,9 +2970,7 @@ def test_red_research_completed_without_proof_coverage_restores_the_artifacts(
     assert {role: path.read_bytes() for role, path in paths.items()} == before
     assert not list(tmp_path.rglob("*.superseded"))
     assert not [
-        warning
-        for warning in result.warnings
-        if warning.message.startswith("superseded unproven research artifacts:")
+        warning for warning in result.warnings if warning.message.startswith("superseded unproven research artifacts:")
     ]
 
 
@@ -3096,15 +3025,9 @@ def _record_current_018_lineage(
         "transcript": transcript.json_path,
         "semantic_summary": storage.semantic_summary_asset_path(podcast_id, episode_ref, title),
         "mentions": storage.mention_asset_paths(podcast_id, episode_ref, title).json_path,
-        "intelligence": storage.episode_intelligence_report_asset_paths(
-            podcast_id, episode_ref, title
-        ).json_path,
-        "industry_mapping": storage.industry_chain_mapping_asset_paths(
-            podcast_id, episode_ref, title
-        ).json_path,
-        "external_boundary": storage.external_data_boundary_asset_paths(
-            podcast_id, episode_ref, title
-        ).json_path,
+        "intelligence": storage.episode_intelligence_report_asset_paths(podcast_id, episode_ref, title).json_path,
+        "industry_mapping": storage.industry_chain_mapping_asset_paths(podcast_id, episode_ref, title).json_path,
+        "external_boundary": storage.external_data_boundary_asset_paths(podcast_id, episode_ref, title).json_path,
     }
     review = inspect_semantic_review(
         podcast_id,
@@ -3115,13 +3038,9 @@ def _record_current_018_lineage(
     if review.review_path is not None:
         role_paths["semantic_review"] = review.review_path
     if include_fixture_verification:
-        role_paths["fixture"] = storage.external_data_boundary_asset_paths(
-            podcast_id, episode_ref, title
-        ).json_path
+        role_paths["fixture"] = storage.external_data_boundary_asset_paths(podcast_id, episode_ref, title).json_path
     if stock_query is not None:
-        role_paths["stock_lens"] = storage.stock_lens_report_asset_paths(
-            podcast_id, stock_query
-        ).json_path
+        role_paths["stock_lens"] = storage.stock_lens_report_asset_paths(podcast_id, stock_query).json_path
     requested_roles = roles or tuple(role_paths)
     generation_proofs = {
         role: {
@@ -3164,16 +3083,10 @@ def _mark_boundary_fixture_verified(monkeypatch, tmp_path: Path) -> Path:
         "DEFAULT_EXTERNAL_MARKET_DATA_FIXTURE_PATH",
         fixture_path,
     )
-    monkeypatch.setattr(
-        external_verification, "PREVERIFICATION_BOUNDARIES_DIR", storage.CORPUS_DIR
-    )
-    boundary_path = storage.external_data_boundary_asset_paths(
-        "gooaye", "EP700", "EP700 Alpha"
-    ).json_path
+    monkeypatch.setattr(external_verification, "PREVERIFICATION_BOUNDARIES_DIR", storage.CORPUS_DIR)
+    boundary_path = storage.external_data_boundary_asset_paths("gooaye", "EP700", "EP700 Alpha").json_path
     original_raw = boundary_path.read_bytes()
-    snapshot_path = external_verification._write_preverification_boundary_snapshot(
-        "gooaye", "EP700", original_raw
-    )
+    snapshot_path = external_verification._write_preverification_boundary_snapshot("gooaye", "EP700", original_raw)
     boundary = json.loads(original_raw)
     boundary["external_data_verification"] = {
         "verification_mode": "fixture-external-data-v1",
@@ -3222,9 +3135,7 @@ def test_red_018_transcript_bytes_mutation_invalidates_all_derived_lineage(monke
         assemble_verified_research_report("gooaye", "EP700", stock_query=None)
 
 
-def test_red_018_fixture_bytes_mutation_blocks_fixture_bound_assembly_and_adoption(
-    monkeypatch, tmp_path
-):
+def test_red_018_fixture_bytes_mutation_blocks_fixture_bound_assembly_and_adoption(monkeypatch, tmp_path):
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
     from corpus_ingest_core.verified_research_report import (
         VerifiedResearchReportInputError,
@@ -3235,19 +3146,13 @@ def test_red_018_fixture_bytes_mutation_blocks_fixture_bound_assembly_and_adopti
     _write_completed_artifacts(monkeypatch, tmp_path)
     fixture_path = _mark_boundary_fixture_verified(monkeypatch, tmp_path)
     _record_current_018_lineage(include_fixture_verification=True)
-    assembly = assemble_verified_research_report(
-        "gooaye", "EP700", stock_query=None, include_fixture_verification=True
-    )
+    assembly = assemble_verified_research_report("gooaye", "EP700", stock_query=None, include_fixture_verification=True)
     publish_verified_research_report_bundle(assembly)
     fixture_path.write_text("candidates: []\n# changed\n", encoding="utf-8")
 
     with pytest.raises(VerifiedResearchReportInputError, match="fixture|lineage"):
-        assemble_verified_research_report(
-            "gooaye", "EP700", stock_query=None, include_fixture_verification=True
-        )
-    assert runner._adopt_complete_bundle(
-        "gooaye", "EP700", None, include_fixture_verification=True
-    ) is None
+        assemble_verified_research_report("gooaye", "EP700", stock_query=None, include_fixture_verification=True)
+    assert runner._adopt_complete_bundle("gooaye", "EP700", None, include_fixture_verification=True) is None
 
 
 def test_red_018_upstream_mentions_mutation_invalidates_research_chain(monkeypatch, tmp_path):
@@ -3274,25 +3179,27 @@ def test_red_018_stock_input_set_mutation_invalidates_stock_lens_lineage(monkeyp
     )
 
     _write_completed_artifacts(monkeypatch, tmp_path, stock_query="NVDA")
-    sibling_mapping = storage.industry_chain_mapping_asset_paths(
-        "gooaye", "EP699", "EP699 Sibling"
-    ).json_path
-    sibling_boundary = storage.external_data_boundary_asset_paths(
-        "gooaye", "EP699", "EP699 Sibling"
-    ).json_path
+    sibling_mapping = storage.industry_chain_mapping_asset_paths("gooaye", "EP699", "EP699 Sibling").json_path
+    sibling_boundary = storage.external_data_boundary_asset_paths("gooaye", "EP699", "EP699 Sibling").json_path
     _write_json(
         sibling_mapping,
         {
-            "podcast_id": "gooaye", "episode_ref": "EP699", "title": "EP699 Sibling",
-            "mapping_mode": "deterministic-industry-chain-v1", "mapping_status": "final",
+            "podcast_id": "gooaye",
+            "episode_ref": "EP699",
+            "title": "EP699 Sibling",
+            "mapping_mode": "deterministic-industry-chain-v1",
+            "mapping_status": "final",
             "stock_candidates": [],
         },
     )
     _write_json(
         sibling_boundary,
         {
-            "podcast_id": "gooaye", "episode_ref": "EP699", "title": "EP699 Sibling",
-            "boundary_mode": "external-data-boundary-v1", "boundary_status": "final",
+            "podcast_id": "gooaye",
+            "episode_ref": "EP699",
+            "title": "EP699 Sibling",
+            "boundary_mode": "external-data-boundary-v1",
+            "boundary_status": "final",
             "candidate_boundaries": [],
         },
     )
@@ -3300,12 +3207,8 @@ def test_red_018_stock_input_set_mutation_invalidates_stock_lens_lineage(monkeyp
     sibling_mapping.write_bytes(sibling_mapping.read_bytes() + b"\n")
     # Unused siblings are not silently part of this report's input closure.
     assemble_verified_research_report("gooaye", "EP700", stock_query="NVDA")
-    storage.industry_chain_mapping_asset_paths(
-        "gooaye", "EP700", "EP700 Alpha"
-    ).json_path.write_bytes(
-        storage.industry_chain_mapping_asset_paths(
-            "gooaye", "EP700", "EP700 Alpha"
-        ).json_path.read_bytes() + b"\n"
+    storage.industry_chain_mapping_asset_paths("gooaye", "EP700", "EP700 Alpha").json_path.write_bytes(
+        storage.industry_chain_mapping_asset_paths("gooaye", "EP700", "EP700 Alpha").json_path.read_bytes() + b"\n"
     )
 
     with pytest.raises(
@@ -3328,12 +3231,8 @@ def test_red_018_adopts_valid_bundle_despite_corrupt_checkpoint(monkeypatch, tmp
 
     _write_completed_artifacts(monkeypatch, tmp_path)
     _record_current_018_lineage()
-    publish_verified_research_report_bundle(
-        assemble_verified_research_report("gooaye", "EP700", stock_query=None)
-    )
-    checkpoint_path = storage.latest_episode_verified_research_report_paths(
-        "gooaye", "EP700", "0" * 64
-    ).checkpoint_path
+    publish_verified_research_report_bundle(assemble_verified_research_report("gooaye", "EP700", stock_query=None))
+    checkpoint_path = storage.latest_episode_verified_research_report_paths("gooaye", "EP700", "0" * 64).checkpoint_path
     checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
     checkpoint_path.write_bytes(b"not JSON")
     monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *_: ("EP700", None))
@@ -3455,9 +3354,7 @@ def test_red_018_same_episode_threads_hold_one_cost_boundary(monkeypatch, tmp_pa
     assert sorted(result.outcome for result in results) == ["completed", "reused"]
 
 
-def test_red_strict_transcript_resolver_rejects_ambiguous_title_variants_and_uses_seed(
-    monkeypatch, tmp_path
-):
+def test_red_strict_transcript_resolver_rejects_ambiguous_title_variants_and_uses_seed(monkeypatch, tmp_path):
     """017/018 must never derive a canonical transcript from filename sorting."""
 
     from corpus_ingest_core import storage
@@ -3472,8 +3369,11 @@ def test_red_strict_transcript_resolver_rejects_ambiguous_title_variants_and_use
         _write_json(
             paths.json_path,
             {
-                "podcast_id": "gooaye", "episode_ref": "EP700", "title": title,
-                "segment_count": 1, "completed": True,
+                "podcast_id": "gooaye",
+                "episode_ref": "EP700",
+                "title": title,
+                "segment_count": 1,
+                "completed": True,
                 "segments": [{"id": 1, "start": 0, "end": 1, "text": "fixture"}],
             },
         )
@@ -3493,9 +3393,7 @@ def test_red_strict_transcript_resolver_rejects_ambiguous_title_variants_and_use
     )
 
 
-def test_red_v2_lineage_without_generation_proofs_cannot_assemble_or_adopt(
-    monkeypatch, tmp_path
-):
+def test_red_v2_lineage_without_generation_proofs_cannot_assemble_or_adopt(monkeypatch, tmp_path):
     """Correct v2 hashes/options alone may not bless pre-existing report bytes."""
 
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
@@ -3517,9 +3415,7 @@ def test_red_v2_lineage_without_generation_proofs_cannot_assemble_or_adopt(
     assert runner._adopt_complete_bundle("gooaye", "EP700", None) is None
 
 
-def test_red_adoption_rejects_bundle_when_requested_semantic_identity_changes(
-    monkeypatch, tmp_path
-):
+def test_red_adoption_rejects_bundle_when_requested_semantic_identity_changes(monkeypatch, tmp_path):
     """A bundle for request A cannot satisfy provider/model/base/chunk request B."""
 
     import corpus_ingest_core.latest_episode_verified_research_report_workflow_runner as runner
@@ -3530,9 +3426,7 @@ def test_red_adoption_rejects_bundle_when_requested_semantic_identity_changes(
     )
 
     _write_completed_artifacts(monkeypatch, tmp_path)
-    publish_verified_research_report_bundle(
-        assemble_verified_research_report("gooaye", "EP700", stock_query=None)
-    )
+    publish_verified_research_report_bundle(assemble_verified_research_report("gooaye", "EP700", stock_query=None))
     monkeypatch.setattr(runner, "_resolve_latest_episode", lambda *_: ("EP700", None))
 
     result = runner.run_latest_episode_verified_research_report_workflow(
@@ -3550,9 +3444,7 @@ def test_red_adoption_rejects_bundle_when_requested_semantic_identity_changes(
     assert result.outcome != "reused"
 
 
-def test_red_fixture_enablement_records_in_place_boundary_and_fixture_proofs(
-    monkeypatch, tmp_path
-):
+def test_red_fixture_enablement_records_in_place_boundary_and_fixture_proofs(monkeypatch, tmp_path):
     """A trusted unverified boundary may become fixture-verified in place once."""
 
     import corpus_ingest_core.external_data_verification as verification
@@ -3569,9 +3461,7 @@ def test_red_fixture_enablement_records_in_place_boundary_and_fixture_proofs(
     fixture_path.write_text("candidates: []\n", encoding="utf-8")
     monkeypatch.setattr(verification, "DEFAULT_EXTERNAL_MARKET_DATA_FIXTURE_PATH", fixture_path)
     monkeypatch.setattr(verification, "PREVERIFICATION_BOUNDARIES_DIR", storage.CORPUS_DIR)
-    boundary_path = storage.external_data_boundary_asset_paths(
-        "gooaye", "EP700", "EP700 Alpha"
-    ).json_path
+    boundary_path = storage.external_data_boundary_asset_paths("gooaye", "EP700", "EP700 Alpha").json_path
     filters = runner._filters(
         expected_episode_ref="EP700",
         stock_query=None,
@@ -3595,9 +3485,7 @@ def test_red_fixture_enablement_records_in_place_boundary_and_fixture_proofs(
         {"external_boundary": boundary_path, "fixture": boundary_path},
         committed,
     ):
-        asset = verify_external_data_boundary(
-            "gooaye", "EP700", confirm=True, fixture_path=fixture_path
-        )
+        asset = verify_external_data_boundary("gooaye", "EP700", confirm=True, fixture_path=fixture_path)
         assert asset.generated
         notify_child_artifact_committed("fixture", boundary_path, generated=True)
 
@@ -3611,8 +3499,14 @@ def test_red_fixture_enablement_records_in_place_boundary_and_fixture_proofs(
         require_generation_proofs=True,
     )
     assert set(validation["artifacts"]) == {
-        "transcript", "semantic_summary", "semantic_review", "mentions",
-        "intelligence", "industry_mapping", "external_boundary", "fixture",
+        "transcript",
+        "semantic_summary",
+        "semantic_review",
+        "mentions",
+        "intelligence",
+        "industry_mapping",
+        "external_boundary",
+        "fixture",
     }
 
 
@@ -3638,28 +3532,38 @@ def test_red_fresh_fixture_run_records_non_preexisting_fixture_proof(monkeypatch
     boundary.json_path.unlink()
     boundary.markdown_path.unlink()
     filters = runner._filters(
-        expected_episode_ref="EP700", stock_query=None, include_fixture_verification=True,
-        transcription_model=None, transcription_device="cpu", transcription_compute_type="int8",
-        transcription_vad_filter=False, semantic_provider="openai-compatible", semantic_model=None,
-        semantic_base_url_identity_sha256=None, semantic_chunk_seconds=600,
+        expected_episode_ref="EP700",
+        stock_query=None,
+        include_fixture_verification=True,
+        transcription_model=None,
+        transcription_device="cpu",
+        transcription_compute_type="int8",
+        transcription_vad_filter=False,
+        semantic_provider="openai-compatible",
+        semantic_model=None,
+        semantic_base_url_identity_sha256=None,
+        semantic_chunk_seconds=600,
         semantic_max_segments_per_chunk=120,
     )
     committed: set[str] = set()
     with runner._progressive_lineage_scope(
-        "gooaye", "EP700", filters,
-        {"external_boundary": boundary.json_path, "fixture": boundary.json_path}, committed,
+        "gooaye",
+        "EP700",
+        filters,
+        {"external_boundary": boundary.json_path, "fixture": boundary.json_path},
+        committed,
     ):
         generated_boundary = generate_external_data_boundary("gooaye", "EP700")
-        notify_child_artifact_committed(
-            "external_boundary", generated_boundary.boundary_json_path, generated=True
-        )
-        fixture = verify_external_data_boundary(
-            "gooaye", "EP700", confirm=True, fixture_path=fixture_path
-        )
+        notify_child_artifact_committed("external_boundary", generated_boundary.boundary_json_path, generated=True)
+        fixture = verify_external_data_boundary("gooaye", "EP700", confirm=True, fixture_path=fixture_path)
         notify_child_artifact_committed("fixture", fixture.boundary_json_path, generated=True)
 
     assert committed == {"external_boundary", "fixture"}
     validate_current_verified_research_lineage(
-        "gooaye", "EP700", stock_query=None, include_fixture_verification=True,
-        summary_options=runner._summary_lineage_options(filters), require_generation_proofs=True,
+        "gooaye",
+        "EP700",
+        stock_query=None,
+        include_fixture_verification=True,
+        summary_options=runner._summary_lineage_options(filters),
+        require_generation_proofs=True,
     )

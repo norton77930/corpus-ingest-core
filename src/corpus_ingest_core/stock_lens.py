@@ -34,17 +34,13 @@ def generate_stock_lens_report(
     """從既有 local research artifacts 產生 deterministic stock lens report。"""
 
     if not stock_query.strip():
-        raise ValueError("stock_query 必須是非空字串。")
+        raise ValueError("stock_query must be a non-empty string.")
     if max_evidence_items < 1:
-        raise ValueError("max_evidence_items 必須大於 0。")
+        raise ValueError("max_evidence_items must be greater than 0.")
 
     profile = load_podcast_profile(podcast_id)
     report_paths = storage.stock_lens_report_asset_paths(podcast_id, stock_query)
-    if (
-        report_paths.json_path.exists()
-        and report_paths.markdown_path.exists()
-        and not force
-    ):
+    if report_paths.json_path.exists() and report_paths.markdown_path.exists() and not force:
         existing = _load_existing_report_counts(report_paths.json_path)
         return StockLensReportAsset(
             podcast_id=podcast_id,
@@ -72,9 +68,7 @@ def generate_stock_lens_report(
     for mapping_path in mapping_paths:
         mapping_payload = _load_mapping_payload(mapping_path)
         if _required_text(mapping_payload, "mapping_mode") != SUPPORTED_MAPPING_MODE:
-            raise StockLensReportInputError(
-                f"industry mapping mode 不支援：{mapping_path}"
-            )
+            raise StockLensReportInputError(f"Unsupported industry mapping mode: {mapping_path}")
         if mapping_payload.get("podcast_id") != podcast_id:
             raise StockLensReportInputError("industry mapping identity does not match podcast")
         episode_ref = _required_text(mapping_payload, "episode_ref")
@@ -89,16 +83,12 @@ def generate_stock_lens_report(
                 _input_identity("industry_mapping", mapping_path),
                 _input_identity(
                     "external_boundary",
-                    storage.external_data_boundary_asset_paths(
-                        podcast_id, episode_ref, title
-                    ).json_path,
+                    storage.external_data_boundary_asset_paths(podcast_id, episode_ref, title).json_path,
                 ),
             )
         )
         matched_candidates = [
-            candidate
-            for candidate in _stock_candidates(mapping_payload)
-            if _candidate_matches(candidate, stock_query)
+            candidate for candidate in _stock_candidates(mapping_payload) if _candidate_matches(candidate, stock_query)
         ]
         if not matched_candidates:
             continue
@@ -107,25 +97,21 @@ def generate_stock_lens_report(
         if mapping_status == "partial-draft":
             if not allow_partial:
                 raise StockLensReportInputError(
-                    "matched industry mapping status is partial-draft；請使用 --allow-partial。"
+                    "matched industry mapping status is partial-draft; pass --allow-partial to proceed."
                 )
             has_partial = True
         elif mapping_status != "final":
-            raise StockLensReportInputError(
-                f"industry mapping status 不支援：{mapping_status}"
-            )
+            raise StockLensReportInputError(f"Unsupported industry mapping status: {mapping_status}")
 
         boundary_status = _required_text(boundary_payload, "boundary_status")
         if boundary_status == "partial-draft":
             if not allow_partial:
                 raise StockLensReportInputError(
-                    "matched external boundary status is partial-draft；請使用 --allow-partial。"
+                    "matched external boundary status is partial-draft; pass --allow-partial to proceed."
                 )
             has_partial = True
         elif boundary_status != "final":
-            raise StockLensReportInputError(
-                f"external boundary status 不支援：{boundary_status}"
-            )
+            raise StockLensReportInputError(f"Unsupported external boundary status: {boundary_status}")
 
         boundary_candidates = _boundary_candidates(boundary_payload)
         for candidate in matched_candidates:
@@ -154,14 +140,14 @@ def generate_stock_lens_report(
         "stock_query": stock_query,
         "report_mode": REPORT_MODE,
         "generation_options": {"max_evidence_items": max_evidence_items},
-        "input_set_lineage": sorted(
-            used_input_set, key=lambda item: (item["role"], item["path"])
-        ),
+        "input_set_lineage": sorted(used_input_set, key=lambda item: (item["role"], item["path"])),
         "lens_config": _config_file_identity(Path("config/gooaye_lens.yaml")),
         "report_status": report_status,
         "source_status": {
             "industry_mappings": "available" if mapping_paths else "missing",
-            "external_boundaries": "available" if _has_boundary(direct_evidence, inferred_leads) else "missing_or_not_matched",
+            "external_boundaries": "available"
+            if _has_boundary(direct_evidence, inferred_leads)
+            else "missing_or_not_matched",
             "gooaye_lens": "available",
         },
         "query_match_summary": {
@@ -180,9 +166,7 @@ def generate_stock_lens_report(
             "dimensions": [asdict(dimension) for dimension in lens_model.dimensions],
             "safety_rules": lens_model.safety_rules,
         },
-        "external_verification_needs": _external_verification_needs(
-            direct_evidence + inferred_leads
-        ),
+        "external_verification_needs": _external_verification_needs(direct_evidence + inferred_leads),
         "warnings": warnings,
         "not_investment_advice": True,
     }
@@ -211,17 +195,15 @@ def _load_mapping_payload(json_path: Path) -> dict[str, Any]:
     try:
         payload = json.loads(json_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        raise StockLensReportInputError(f"industry mapping JSON 格式錯誤：{json_path}") from exc
+        raise StockLensReportInputError(f"Malformed industry mapping JSON: {json_path}") from exc
     except OSError as exc:
-        raise StockLensReportInputError(f"無法讀取 industry mapping：{exc}") from exc
+        raise StockLensReportInputError(f"Could not read the industry mapping: {exc}") from exc
     if not isinstance(payload, dict):
-        raise StockLensReportInputError("industry mapping JSON 必須是 object。")
+        raise StockLensReportInputError("The industry mapping JSON must be an object.")
     return payload
 
 
-def _load_boundary_payload(
-    *, podcast_id: str, episode_ref: str, title: str
-) -> dict[str, Any]:
+def _load_boundary_payload(*, podcast_id: str, episode_ref: str, title: str) -> dict[str, Any]:
     """Load only the boundary at the mapping's immutable identity-derived path."""
 
     paths = storage.external_data_boundary_asset_paths(podcast_id, episode_ref, title)
@@ -232,13 +214,11 @@ def _load_boundary_payload(
     try:
         payload = json.loads(paths.json_path.read_text(encoding="utf-8"))
     except json.JSONDecodeError as exc:
-        raise StockLensReportInputError(
-            f"external boundary JSON 格式錯誤：{paths.json_path}"
-        ) from exc
+        raise StockLensReportInputError(f"Malformed external boundary JSON: {paths.json_path}") from exc
     except OSError as exc:
-        raise StockLensReportInputError(f"無法讀取 external boundary：{exc}") from exc
+        raise StockLensReportInputError(f"Could not read the external boundary: {exc}") from exc
     if not isinstance(payload, dict):
-        raise StockLensReportInputError("external boundary JSON 必須是 object。")
+        raise StockLensReportInputError("The external boundary JSON must be an object.")
     if (
         payload.get("podcast_id") != podcast_id
         or payload.get("episode_ref") != episode_ref
@@ -246,9 +226,7 @@ def _load_boundary_payload(
     ):
         raise StockLensReportInputError("external boundary identity does not match mapping")
     if _required_text(payload, "boundary_mode") != SUPPORTED_BOUNDARY_MODE:
-        raise StockLensReportInputError(
-            f"external boundary mode 不支援：{paths.json_path}"
-        )
+        raise StockLensReportInputError(f"Unsupported external boundary mode: {paths.json_path}")
     return payload
 
 
@@ -267,7 +245,7 @@ def _input_identity(role: str, path: Path) -> dict[str, str]:
 def _required_text(payload: dict[str, Any], key: str) -> str:
     value = payload.get(key)
     if not isinstance(value, str) or not value.strip():
-        raise StockLensReportInputError(f"stock lens input 缺少有效欄位：{key}")
+        raise StockLensReportInputError(f"Stock lens input is missing a valid field: {key}")
     return value
 
 
@@ -310,9 +288,7 @@ def _matching_external_boundary(
 def _external_boundary_payload(candidate: dict[str, Any]) -> dict[str, Any]:
     checks = candidate.get("required_external_checks")
     return {
-        "external_verification_status": str(
-            candidate.get("external_verification_status", "not_requested")
-        ),
+        "external_verification_status": str(candidate.get("external_verification_status", "not_requested")),
         "source_status": str(candidate.get("source_status", "not_fetched")),
         "data_date": candidate.get("data_date"),
         "required_external_checks": checks if isinstance(checks, list) else [],
@@ -362,9 +338,7 @@ def _external_verification_needs(matches: list[dict[str, Any]]) -> list[dict[str
                 "tickers": match["tickers"],
                 "episode_ref": match["episode_ref"],
                 "required_external_checks": checks,
-                "external_verification_status": match["external_boundary"][
-                    "external_verification_status"
-                ],
+                "external_verification_status": match["external_boundary"]["external_verification_status"],
                 "source_status": match["external_boundary"]["source_status"],
                 "data_date": match["external_boundary"]["data_date"],
             }
@@ -472,9 +446,7 @@ def _render_markdown(*, display_name: str, payload: dict[str, Any]) -> str:
     if not payload["external_verification_needs"]:
         lines.extend(["No matched candidates require external verification in this report.", ""])
     for need in payload["external_verification_needs"]:
-        check_types = ", ".join(
-            check.get("data_type", "") for check in need["required_external_checks"]
-        )
+        check_types = ", ".join(check.get("data_type", "") for check in need["required_external_checks"])
         if not check_types:
             check_types = "not configured"
         lines.append(
@@ -541,4 +513,4 @@ def _write_report(
                 part_path.unlink(missing_ok=True)
             except OSError:
                 pass
-        raise StockLensReportFailedError(f"寫入 stock lens report 失敗：{exc}") from exc
+        raise StockLensReportFailedError(f"Failed to write the stock lens report: {exc}") from exc

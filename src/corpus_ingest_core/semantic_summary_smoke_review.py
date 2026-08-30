@@ -49,11 +49,7 @@ def review_semantic_summary_smoke(
         _publish_review_artifacts(report_json_path, report_markdown_path, payload, markdown)
         # JSON is the commit marker.  For a readable summary, ensure the neutral
         # inspector agrees with the exact claimed artifact before returning it.
-        if (
-            summary_path is not None
-            and summary_bytes is not None
-            and evaluation.semantic_summary_sha256 is not None
-        ):
+        if summary_path is not None and summary_bytes is not None and evaluation.semantic_summary_sha256 is not None:
             inspection = inspect_semantic_review_file(
                 podcast_id,
                 episode_ref,
@@ -112,11 +108,7 @@ def _claimed_report_paths(base_path: Path):
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     index = 1
     while True:
-        candidate = (
-            base_path
-            if index == 1
-            else base_path.with_name(f"{base_path.stem}-{index}{base_path.suffix}")
-        )
+        candidate = base_path if index == 1 else base_path.with_name(f"{base_path.stem}-{index}{base_path.suffix}")
         claim_path = candidate.with_name(f".{candidate.name}.claim")
         try:
             claim = exclusive_artifact_claim(claim_path, timeout_seconds=0.0)
@@ -143,16 +135,12 @@ def _publish_review_artifacts(
     """Write invocation-unique staging files; JSON is committed last."""
 
     stage_token = uuid.uuid4().hex
-    markdown_stage = report_markdown_path.with_name(
-        f".{report_markdown_path.name}.{stage_token}.part"
-    )
+    markdown_stage = report_markdown_path.with_name(f".{report_markdown_path.name}.{stage_token}.part")
     json_stage = report_json_path.with_name(f".{report_json_path.name}.{stage_token}.part")
     markdown_committed = False
     try:
         markdown_stage.write_text(markdown, encoding="utf-8")
-        json_stage.write_text(
-            json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
-        )
+        json_stage.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
         markdown_stage.replace(report_markdown_path)
         markdown_committed = True
         # A reader treats JSON as the commit marker, so it is committed only after

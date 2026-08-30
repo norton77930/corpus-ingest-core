@@ -53,11 +53,9 @@ def test_write_run_report_bodies_delegate_to_sanctioned_writers():
                     "sanctioned writer from run_report_io or audit_report_pair"
                 )
                 assert ".part" not in segment, (
-                    f"{path.name}: _write_run_report must not inline .part "
-                    "staging; use run_report_io"
+                    f"{path.name}: _write_run_report must not inline .part staging; use run_report_io"
                 )
                 writer_modules.add(path.name)
     assert writer_modules == EXPECTED_WRITER_MODULES, (
-        f"run-report writer module set changed — update deliberately: "
-        f"{sorted(writer_modules)}"
+        f"run-report writer module set changed — update deliberately: {sorted(writer_modules)}"
     )

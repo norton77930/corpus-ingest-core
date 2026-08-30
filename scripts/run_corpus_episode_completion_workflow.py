@@ -26,9 +26,7 @@ from corpus_ingest_core.local_env import DEFAULT_LOCAL_ENV_PATH, load_local_env
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="Preview or execute one human-approved corpus completion action."
-    )
+    parser = argparse.ArgumentParser(description="Preview or execute one human-approved corpus completion action.")
     parser.add_argument("--podcast", required=True, dest="podcast_id")
     parser.add_argument("--episode", default="latest", dest="episode_ref")
     parser.add_argument("--action", default="next")
@@ -58,11 +56,7 @@ def main(argv: list[str] | None = None) -> int:
     if args.confirm and episode_ref == "latest":
         print(CONFIRMED_EPISODE_REF_MUST_BE_CANONICAL_MESSAGE, file=sys.stderr)
         return 1
-    if (
-        args.confirm
-        and action == "semantic_summary"
-        and args.api_cost_ack != SEMANTIC_API_COST_ACK
-    ):
+    if args.confirm and action == "semantic_summary" and args.api_cost_ack != SEMANTIC_API_COST_ACK:
         print(SEMANTIC_SUMMARY_REQUIRES_EXACT_ACK_MESSAGE, file=sys.stderr)
         return 1
     if args.confirm and action == "semantic_summary":
@@ -89,11 +83,7 @@ def main(argv: list[str] | None = None) -> int:
             semantic_api_key_env=args.semantic_api_key_env,
             semantic_chunk_seconds=args.semantic_chunk_seconds,
             semantic_max_segments_per_chunk=args.semantic_max_segments_per_chunk,
-            progress_callback=(
-                _print_summary_progress
-                if args.confirm and action == "semantic_summary"
-                else None
-            ),
+            progress_callback=(_print_summary_progress if args.confirm and action == "semantic_summary" else None),
         )
     except CorpusEpisodeCompletionWorkflowRunnerFailedError as exc:
         print(
@@ -123,8 +113,7 @@ def _print_summary_progress(event: str, **payload: object) -> None:
     elif event in {"chunk_start", "chunk_done"}:
         status = "start" if event == "chunk_start" else "done"
         print(
-            "semantic_summary_progress: "
-            f"chunk {payload.get('index')}/{payload.get('total')} {status}",
+            f"semantic_summary_progress: chunk {payload.get('index')}/{payload.get('total')} {status}",
             file=sys.stderr,
         )
 

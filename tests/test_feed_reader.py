@@ -80,9 +80,7 @@ def test_list_episodes_respects_limit(monkeypatch):
     monkeypatch.setattr(
         feed_reader.feedparser,
         "parse",
-        lambda _url: _fake_feed(
-            [_entry("EP672 又新高拉"), _entry("EP671 前一集"), _entry("EP670 再前一集")]
-        ),
+        lambda _url: _fake_feed([_entry("EP672 又新高拉"), _entry("EP671 前一集"), _entry("EP670 再前一集")]),
     )
 
     episodes = feed_reader.list_episodes("gooaye", limit=2)

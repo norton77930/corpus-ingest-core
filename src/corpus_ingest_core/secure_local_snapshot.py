@@ -56,11 +56,7 @@ def secure_snapshot(root: Path, path: Path, *, max_bytes: int) -> SecureLocalSna
         before = candidate.lstat()
     except OSError:
         return None
-    if (
-        _is_reparse(before)
-        or not stat.S_ISREG(before.st_mode)
-        or before.st_size > max_bytes
-    ):
+    if _is_reparse(before) or not stat.S_ISREG(before.st_mode) or before.st_size > max_bytes:
         return None
     identity = _identity(before)
     descriptor: int | None = None
@@ -184,11 +180,7 @@ def _checked_root(root: Path) -> _Root | None:
         root_stat = lexical.lstat()
     except OSError:
         return None
-    if (
-        _is_reparse(root_stat)
-        or not stat.S_ISDIR(root_stat.st_mode)
-        or not _safe_root_ancestor_chain(lexical)
-    ):
+    if _is_reparse(root_stat) or not stat.S_ISDIR(root_stat.st_mode) or not _safe_root_ancestor_chain(lexical):
         return None
     device, inode, _mode = _identity(root_stat)
     # The complete lexical root chain has been proven non-reparse.  Keep this
@@ -280,8 +272,7 @@ def _identity(value: Any) -> tuple[int, int, int]:
 
 def _is_reparse(value: Any) -> bool:
     return stat.S_ISLNK(value.st_mode) or bool(
-        getattr(value, "st_file_attributes", 0)
-        & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
+        getattr(value, "st_file_attributes", 0) & getattr(stat, "FILE_ATTRIBUTE_REPARSE_POINT", 0)
     )
 
 
@@ -450,13 +441,13 @@ def _normalize_windows_final_path(value: str) -> str | None:
     if not isinstance(value, str):
         return None
     if value.startswith(unc_prefix):
-        suffix = value[len(unc_prefix):]
+        suffix = value[len(unc_prefix) :]
         pieces = suffix.split("\\")
         if len(pieces) < 2 or not pieces[0] or not pieces[1]:
             return None
         return "\\\\" + suffix
     if value.startswith(dos_prefix):
-        suffix = value[len(dos_prefix):]
+        suffix = value[len(dos_prefix) :]
         if len(suffix) < 3 or suffix[1] != ":" or suffix[2] != "\\" or not suffix[0].isalpha():
             return None
         return suffix
