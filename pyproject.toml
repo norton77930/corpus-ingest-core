@@ -34,7 +34,7 @@ dependencies = [
     # Raising it means running the suite against the new major and reading
     # tests/test_mcp_tool_registry_contract.py, not widening a range.
     # .github/dependabot.yml stops the bot from proposing it.
-    "mcp[cli]>=1.27,<2",
+    "mcp[cli]>=1.27,<3",
     "PyYAML>=6.0",
     "requests>=2.31",
     # Spec 036：X 影片取得。兩者都採惰性匯入，缺套件時由
