@@ -16,10 +16,12 @@ APPLY_FILENAME = "06_apply_to_my_workflow.md"
 
 PROMPT_EXAMPLES_HEADINGS = (
     "壞 prompt vs 好 prompt",
+    "可複用模板",
     "不確定事項",
 )
 APPLY_HEADINGS = (
     "如何套用到我的工作流",
+    "運算元應用",
     "不確定事項",
 )
 

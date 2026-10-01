@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import shutil
 from pathlib import Path
 
 import pytest
@@ -277,6 +278,131 @@ def test_lecture_stays_available_without_derivation_files(tmp_data_dirs):
     stem = storage.semantic_summary_asset_path(PODCAST, EPISODE, TITLE).name.removesuffix(".semantic.md")
     lecture = storage.study_guide_bundle_paths_from_stem(PODCAST, stem)
     assert lecture.cover_path.is_file()
+
+
+def test_failed_publish_leaves_neither_derivation_file(tmp_data_dirs, monkeypatch):
+    _ready_lecture(tmp_data_dirs)
+    context = _context(tmp_data_dirs, ["Claude Code", "Codex"])
+    from corpus_ingest_core import storage
+
+    stem = storage.semantic_summary_asset_path(PODCAST, EPISODE, TITLE).name.removesuffix(".semantic.md")
+    bundle = storage.study_guide_bundle_paths_from_stem(PODCAST, stem).bundle_dir
+    lecture_before = {name: (bundle / name).read_bytes() for name in LECTURE}
+    before = _tree(tmp_data_dirs)
+    live_06 = bundle / "06_apply_to_my_workflow.md"
+
+    real_copy2 = shutil.copy2
+
+    def copy2(src, dst, *args, **kwargs):
+        if Path(dst).resolve() == live_06.resolve():
+            raise OSError("boom")
+        return real_copy2(src, dst, *args, **kwargs)
+
+    monkeypatch.setattr(shutil, "copy2", copy2)
+    publishes = {"count": 0}
+    real_rename = Path.rename
+
+    def rename(self, target):
+        target_path = Path(target)
+        staged_06 = self / "06_apply_to_my_workflow.md"
+        if (
+            target_path.resolve() == bundle.resolve()
+            and self.resolve() != bundle.resolve()
+            and staged_06.is_file()
+        ):
+            publishes["count"] += 1
+            if publishes["count"] == 1:
+                raise OSError("boom")
+        return real_rename(self, target)
+
+    monkeypatch.setattr(Path, "rename", rename)
+    monkeypatch.setattr(
+        "corpus_ingest_core.workflow_derivation.create_provider",
+        lambda *_args, **_kwargs: _FakeProvider(_valid_payload(), []),
+    )
+
+    with pytest.raises(WorkflowDerivationError, match="failed to write derivation pair"):
+        run_workflow_derivation(
+            PODCAST,
+            EPISODE,
+            confirm=True,
+            api_cost_ack=SEMANTIC_API_COST_ACK,
+            workflow_context=context,
+        )
+
+    assert _tree(tmp_data_dirs) == before
+    for name, body in lecture_before.items():
+        assert (bundle / name).read_bytes() == body
+    assert not (bundle / "05_prompt_examples.md").exists()
+    assert not live_06.exists()
+
+
+def _write_existing_pair(tmp_data_dirs: Path) -> None:
+    from corpus_ingest_core import storage
+
+    stem = storage.semantic_summary_asset_path(PODCAST, EPISODE, TITLE).name.removesuffix(".semantic.md")
+    paths = storage.workflow_derivation_paths_from_stem(PODCAST, stem)
+    payload = _valid_payload()
+    paths.prompt_examples_path.write_text(payload["05_prompt_examples"], encoding="utf-8")
+    paths.apply_path.write_text(payload["06_apply_to_my_workflow"], encoding="utf-8")
+
+
+def test_confirm_reuse_omits_cache_warning_and_skips_provider(tmp_data_dirs, monkeypatch):
+    _ready_lecture(tmp_data_dirs)
+    _write_existing_pair(tmp_data_dirs)
+    context = _context(tmp_data_dirs, ["Claude Code", "Codex"])
+
+    def boom(*_args, **_kwargs):
+        raise AssertionError("provider must not be constructed")
+
+    monkeypatch.setattr("corpus_ingest_core.workflow_derivation.create_provider", boom)
+    result = run_workflow_derivation(
+        PODCAST,
+        EPISODE,
+        confirm=True,
+        workflow_context=context,
+    )
+
+    assert result.reused is True
+    assert result.warnings == []
+
+
+def test_confirm_rejects_05_without_reusable_template(tmp_data_dirs, monkeypatch):
+    _ready_lecture(tmp_data_dirs)
+    context = _context(tmp_data_dirs, ["Claude Code", "Codex"])
+    payload = _valid_payload()
+    payload["05_prompt_examples"] = payload["05_prompt_examples"].replace("可複用模板", "其他標題")
+    monkeypatch.setattr(
+        "corpus_ingest_core.workflow_derivation.create_provider",
+        lambda *_args, **_kwargs: _FakeProvider(payload, []),
+    )
+    with pytest.raises(WorkflowDerivationError, match="05_prompt_examples missing heading 可複用模板"):
+        run_workflow_derivation(
+            PODCAST,
+            EPISODE,
+            confirm=True,
+            api_cost_ack=SEMANTIC_API_COST_ACK,
+            workflow_context=context,
+        )
+
+
+def test_confirm_rejects_06_without_operator_application_label(tmp_data_dirs, monkeypatch):
+    _ready_lecture(tmp_data_dirs)
+    context = _context(tmp_data_dirs, ["Claude Code", "Codex"])
+    payload = _valid_payload()
+    payload["06_apply_to_my_workflow"] = payload["06_apply_to_my_workflow"].replace("運算元應用", "套用說明")
+    monkeypatch.setattr(
+        "corpus_ingest_core.workflow_derivation.create_provider",
+        lambda *_args, **_kwargs: _FakeProvider(payload, []),
+    )
+    with pytest.raises(WorkflowDerivationError, match="06_apply_to_my_workflow missing heading 運算元應用"):
+        run_workflow_derivation(
+            PODCAST,
+            EPISODE,
+            confirm=True,
+            api_cost_ack=SEMANTIC_API_COST_ACK,
+            workflow_context=context,
+        )
 
 
 def test_wrong_ack_never_constructs_provider(tmp_data_dirs, monkeypatch):

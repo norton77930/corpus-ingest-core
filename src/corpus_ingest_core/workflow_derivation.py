@@ -116,12 +116,7 @@ def run_workflow_derivation(
             warnings=[CACHE_STALE_WARNING] if planned_writes else [],
         )
 
-    if reuse_all:
-        bodies = {
-            PROMPT_EXAMPLES_KEY: paths.prompt_examples_path.read_text(encoding="utf-8"),
-            APPLY_KEY: paths.apply_path.read_text(encoding="utf-8"),
-        }
-    else:
+    if not reuse_all:
         require_exact_api_cost_ack(api_cost_ack)
         lecture_text = {
             "03": _read_capped(lecture.summary_path),
@@ -157,7 +152,7 @@ def run_workflow_derivation(
         report_json_path=report_paths.json_path,
         report_markdown_path=report_paths.markdown_path,
         reused=reuse_all,
-        warnings=[CACHE_STALE_WARNING],
+        warnings=[CACHE_STALE_WARNING] if planned_writes else [],
     )
     _write_run_report(result)
     return result
@@ -270,30 +265,6 @@ def _validate_generated(bodies: dict[str, str], allowed_tools: list[str]) -> Non
                 raise WorkflowDerivationError(f"{key} missing heading {heading}")
         if matched_investment_advice_guard(text) is not None:
             raise WorkflowDerivationError(f"{key} failed prohibited_advice")
-        # Inert, and deliberately left that way for now.
-        #
-        # This reads as a fourth validation -- every other check in this loop
-        # raises WorkflowDerivationError -- but its body has been `pass` since
-        # spec 042 introduced it (ced711a); it was never gutted, it was never
-        # finished. What it appears to look for is a derived document that
-        # mentions 逐字稿 (the transcript) *without* 不得 (the prohibition),
-        # i.e. the model inverting the profile's "不得閱讀或要求逐字稿"
-        # instruction into an invitation to read one. That would be an
-        # instruction-inversion detector.
-        #
-        # Not completed here, for two reasons. The heuristic is thin -- it
-        # turns on two Chinese words co-occurring, so it would fire on
-        # perfectly correct documents and miss any inversion phrased
-        # differently. And no spec asks for it: 042's checklist covers the
-        # *input* boundary (CHK004, transcript never reaches the provider),
-        # which the runner enforces by never reading one, and says nothing
-        # about this output-side check.
-        #
-        # The condition is kept rather than deleted so the intent is not lost.
-        # Completing it means writing the rule into the spec and giving it a
-        # test first, not turning this into a raise and hoping.
-        if "逐字稿" in text and "不得" not in text:
-            pass
         forbidden_tools = []
         for marker in (*WORKFLOW_MARKERS, "spec-kit"):
             if marker in text and marker not in allowed_tools:
@@ -303,42 +274,49 @@ def _validate_generated(bodies: dict[str, str], allowed_tools: list[str]) -> Non
 
 
 def _atomic_write_pair(paths: storage.WorkflowDerivationPaths, bodies: dict[str, str]) -> None:
+    """Publish 05/06 by swapping the whole lecture directory once.
+
+    The pair shares its directory with the Spec 038 lecture. Staging only
+    05/06 and copying them onto the live names can leave one new file when the
+    second copy fails. The staged tree keeps the lecture bytes unchanged and
+    becomes the live directory in one rename.
+    """
+
     dest = paths.bundle_dir
-    dest.mkdir(parents=True, exist_ok=True)
-    part = dest / ".derivation.part"
-    old = dest / ".derivation.old"
+    part = dest.with_name(dest.name + ".wfderive.part")
+    old = dest.with_name(dest.name + ".wfderive.old")
     mapping = {
         PROMPT_EXAMPLES_FILENAME: bodies[PROMPT_EXAMPLES_KEY],
         APPLY_FILENAME: bodies[APPLY_KEY],
     }
-    targets = {
-        PROMPT_EXAMPLES_FILENAME: paths.prompt_examples_path,
-        APPLY_FILENAME: paths.apply_path,
-    }
     try:
+        if not dest.exists() and old.exists():
+            old.rename(dest)
         if part.exists():
             shutil.rmtree(part)
-        if old.exists():
-            shutil.rmtree(old)
-        part.mkdir()
-        old.mkdir()
+        part.mkdir(parents=True)
+        if dest.is_dir():
+            for child in dest.iterdir():
+                if child.is_file():
+                    shutil.copy2(child, part / child.name)
         for name, content in mapping.items():
             (part / name).write_text(content, encoding="utf-8")
-            current = targets[name]
-            if current.is_file():
-                shutil.copy2(current, old / name)
-        for name in mapping:
-            shutil.copy2(part / name, targets[name])
-        shutil.rmtree(part)
-        shutil.rmtree(old)
-    except OSError as exc:
+        replaced = dest.exists()
+        if replaced:
+            if old.exists():
+                shutil.rmtree(old)
+            dest.rename(old)
+        try:
+            part.rename(dest)
+        except OSError:
+            if replaced and old.exists() and not dest.exists():
+                old.rename(dest)
+            raise
         if old.exists():
-            for name, target in targets.items():
-                backup = old / name
-                if backup.is_file():
-                    shutil.copy2(backup, target)
-        shutil.rmtree(part, ignore_errors=True)
-        shutil.rmtree(old, ignore_errors=True)
+            shutil.rmtree(old)
+    except OSError as exc:
+        if part.exists():
+            shutil.rmtree(part, ignore_errors=True)
         raise WorkflowDerivationError("failed to write derivation pair") from exc
 
 

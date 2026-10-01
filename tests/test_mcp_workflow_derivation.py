@@ -125,6 +125,50 @@ def test_confirm_writes_the_pair_and_returns_metadata_only(monkeypatch, tmp_data
         assert body not in blob, "the response must not carry derived body text"
 
 
+def test_confirm_passes_core_warnings_through(monkeypatch, tmp_data_dirs):
+    from corpus_ingest_core import mcp_server
+
+    _ready_lecture(tmp_data_dirs)
+    _default_context(monkeypatch, tmp_data_dirs)
+    monkeypatch.setattr(
+        "corpus_ingest_core.workflow_derivation.create_provider",
+        lambda *_args, **_kwargs: _FakeProvider(_valid_payload(), []),
+    )
+
+    result = mcp_server.derive_workflow_bundle(
+        PODCAST,
+        EPISODE,
+        confirm=True,
+        api_cost_ack=SEMANTIC_API_COST_ACK,
+    )
+
+    assert result["ok"] is True
+    assert result["warnings"] == result["data"]["warnings"]
+    assert result["warnings"] == [
+        "SQLite cache may be stale; rebuild cache manually. This workflow never rebuilds it automatically."
+    ]
+
+
+def test_confirm_reuse_needs_no_ack_and_passes_empty_warnings(monkeypatch, tmp_data_dirs):
+    from corpus_ingest_core import mcp_server, storage
+
+    _ready_lecture(tmp_data_dirs)
+    _default_context(monkeypatch, tmp_data_dirs)
+    stem = storage.semantic_summary_asset_path(PODCAST, EPISODE, "Alpha Talk").name.removesuffix(".semantic.md")
+    paths = storage.workflow_derivation_paths_from_stem(PODCAST, stem)
+    payload = _valid_payload()
+    paths.prompt_examples_path.write_text(payload["05_prompt_examples"], encoding="utf-8")
+    paths.apply_path.write_text(payload["06_apply_to_my_workflow"], encoding="utf-8")
+    _refuse_provider(monkeypatch)
+
+    result = mcp_server.derive_workflow_bundle(PODCAST, EPISODE, confirm=True, api_cost_ack="")
+
+    assert result["ok"] is True
+    assert result["data"]["reused"] is True
+    assert result["warnings"] == []
+    assert result["data"]["warnings"] == []
+
+
 def test_tool_takes_no_provider_endpoint_credential_or_context_path():
     from corpus_ingest_core import mcp_server
 

@@ -80,7 +80,7 @@ def derive_workflow_bundle(
         response["reads"] = result.planned_reads
         return response
 
-    return mcp_runtime._tool_call(
+    response = mcp_runtime._tool_call(
         lambda: workflow_derivation.run_workflow_derivation(
             podcast_id,
             episode_ref,
@@ -88,5 +88,7 @@ def derive_workflow_bundle(
             force=force,
             api_cost_ack=api_cost_ack,
         ),
-        warnings=[WORKFLOW_DERIVATION_CACHE_STALE_WARNING, NOT_INVESTMENT_ADVICE],
     )
+    if response.get("ok") and isinstance(response.get("data"), dict):
+        response["warnings"] = list(response["data"].get("warnings") or [])
+    return response
