@@ -187,6 +187,7 @@ def test_package_exports_required_core_functions():
             "compute_type",
             "force",
             "work_dir",
+            "progress_callback",
         ],
         "run_research_workflow": [
             "podcast_id",
@@ -247,6 +248,11 @@ def test_package_exports_required_core_functions():
     for name, parameters in expected.items():
         function = getattr(core, name)
         assert list(inspect.signature(function).parameters) == parameters
+
+    for name in ("run_youtube_video_ingest","run_x_video_ingest"):
+        callback=inspect.signature(getattr(core,name)).parameters["progress_callback"]
+        assert callback.default is None
+        assert callback.kind is inspect.Parameter.KEYWORD_ONLY
 
 
 def test_storage_paths_are_deterministic_and_under_data():

@@ -3,7 +3,7 @@
 specs/025-core-consolidation FR-005: the single ``FastMCP`` instance lives in
 ``mcp_runtime``; tool functions live in the ``mcp_tools_*`` group modules
 that register on import, so the group import order below IS the registration
-order (Tools 1-25). Tests and clients keep reaching every tool function,
+order (Tools 1-35). Tests and clients keep reaching every tool function,
 envelope, and dependency-module alias through this module — the re-exports
 below are contract surface. Next-tool playbook (as used for Tool 22, spec 035, Tool 23, spec 040, and
 Tool 25, spec 043): add a group module imported LAST so existing slots keep
@@ -29,8 +29,9 @@ from .mcp_runtime import (
 # Registration order: read (1-6) -> side-effect (7-12) -> corpus workflows
 # (13-16) -> verified-report queries (17-21) -> stock lens (22) ->
 # x-video ingest (23) -> youtube-video ingest (24) -> workflow derivation
-# (25). Do not reorder these imports; a new group is appended last so Tools
-# 1-24 keep their slots. Append here, not only to the re-export block below:
+# (25) -> study-guide bundle (26) -> learning next-step query (27) -> derivation lineage query (28) -> study-guide lineage query (29) -> recovery query (30) -> learning status overview (31) -> single learning action (32) -> source preparation (33/34) -> prepared source content (35).
+# Do not reorder these imports; a new group is appended last to preserve all slots. Append here, not only to
+# the re-export block below:
 # a re-export happens to register too, but then this list stops being the
 # order it claims to be, and the next group appended here would take the slot.
 #
@@ -52,6 +53,15 @@ from . import mcp_tools_stock_lens
 from . import mcp_tools_x_video
 from . import mcp_tools_youtube_video
 from . import mcp_tools_workflow_derivation
+from . import mcp_tools_study_guide
+from . import mcp_tools_learning_workflow
+from . import mcp_tools_workflow_lineage
+from . import mcp_tools_study_guide_lineage
+from . import mcp_tools_learning_recovery
+from . import mcp_tools_learning_status
+from . import mcp_tools_learning_advance
+from . import mcp_tools_source_preparation
+from . import mcp_tools_source_content
 
 from .mcp_tools_read import (
     get_episode,
@@ -108,6 +118,17 @@ from .mcp_tools_stock_lens import (
 from .mcp_tools_x_video import ingest_x_video
 from .mcp_tools_youtube_video import ingest_youtube_video
 from .mcp_tools_workflow_derivation import derive_workflow_bundle
+from .mcp_tools_study_guide import generate_study_guide_bundle
+from .mcp_tools_learning_workflow import suggest_learning_workflow_next_step
+from .mcp_tools_workflow_lineage import inspect_workflow_derivation_lineage
+from .mcp_tools_study_guide_lineage import inspect_study_guide_lineage
+from .mcp_tools_learning_recovery import inspect_learning_bundle_recovery
+from .mcp_tools_learning_status import inspect_learning_workflow_status
+from .mcp_tools_learning_advance import advance_learning_workflow
+from .mcp_tools_source_preparation import prepare_learning_source, inspect_source_preparation_job
+from . import source_preparation
+from .mcp_tools_source_content import query_source_content
+from . import source_content_query
 
 # Dependency-module aliases: tests monkeypatch through these shared module
 # objects (e.g. monkeypatch.setattr(mcp_server.feed_reader, ...)), and the
@@ -134,4 +155,5 @@ from . import validator
 from . import stock_lens
 from . import x_video_ingest
 from . import youtube_video_ingest
+from . import study_guide_bundle
 # isort: on

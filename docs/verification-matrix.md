@@ -1,5 +1,7 @@
 # Verification Matrix
 
+SPEC058 operator acceptance: [requirements/guide](../specs/058-learning-mcp-acceptance/quickstart.md). Run `python -m pytest -q tests/test_learning_mcp_acceptance.py tests/test_spec_058_learning_acceptance_docs.py` plus existing prepared-source/Skill/registry/docs guards, then standard full checks. `python scripts/verify_learning_mcp.py inventory` and an explicit selected-source `verify` produce metadata-only resource/delivery evidence; SDK success is not actual Hermes, new-source preparation or human replay acceptance.
+
 > The Hermes sidecar audit chain (specs 026-034) terminated at BLOCKED and was removed from `main` on 2026-08-29, together with its guard tests and offline verifier scripts. The complete evidence set is preserved under the git tag `archive/hermes-audit-chain`; nothing in the tables below runs it.
 
 本文件列出 repo 的 safety / contract guard tests 與各類變更應執行的驗證指令。新的 AI agent 或開發者在宣稱完成前，先跑對應的 targeted tests，再跑 full checks。變更分類定義與完成報告格式見 [`docs/ai-development-framework.md`](ai-development-framework.md)；邊界總覽見 [`docs/agent-handoff.md`](agent-handoff.md)；決策背景見 [ADR index](architecture-decision-records/README.md)。
@@ -20,7 +22,7 @@ pytest 已在 `pyproject.toml` 設定 repo-local basetemp（`--basetemp=.pytest-
 | --- | --- | --- |
 | Secret / private endpoint boundary | `tests/test_repository_secret_boundary.py` | committable 檔案不得含真實樣態 API key（`sk-…`）或內網 endpoint（10.x / 192.168.x / 172.16-31.x URL）；`.env` 永不被讀取 |
 | Gitignore / local-only policy | `tests/test_repository_gitignore_policy.py` | `.env`、`.env.*`、local LLM profiles、raw LLM debug output、pytest temp、data/ 生成 artifacts 永不入庫；`.specify/feature.json` 必須 gitignored 且 untracked；`.env.example` 保持 committable placeholder template |
-| MCP tool registry / docs 對齊 | `tests/test_mcp_tool_registry_contract.py` | Current MCP registry 恰好暴露 25 個 reviewed tools；Tool 25 `derive_workflow_bundle` 為 append-only workflow derivation（preview 零寫入且零網路,不建構 provider;confirm 需精確 `api_cost_ack`,由 Core 把關;工具不收 provider / model / endpoint / credential / `workflow_context`）；Tool 24 `ingest_youtube_video` 為 append-only YouTube ingest（preview 零寫入但讀公開 metadata）；Tool 23 `ingest_x_video` 為 append-only X ingest；Tool 22 `generate_stock_lens_report` 為 append-only dry-run-first side-effect（無 LLM / ack / network / live market API）；Tools 17–21（catalog、source revalidation、coverage、historical next-step、gap backlog）均 append-only read-query（無 `confirm` / ack）；Tools 1–24 contracts/order 在 Tool 24 加入後保持；JSON envelope shape；README 與 `docs/mcp-usage.md` 列出全部 tools |
+| MCP tool registry / docs 對齊 | `tests/test_mcp_tool_registry_contract.py` | Current MCP registry 恰好暴露 35 個 reviewed tools；Tool 26 `generate_study_guide_bundle` 為 append-only 講義操作（preview 零寫入且零網路；confirm 只委派一次講義 Core，生成才需精確 `api_cost_ack`，重用與補封面不需要，既有 05/06 阻擋重生）；Tool 25 `derive_workflow_bundle` 為 append-only workflow derivation（preview 零寫入且零網路,不建構 provider;generation 才需精確 `api_cost_ack` (complete-pair reuse needs no ack and still writes run reports),由 Core 把關;工具不收 provider / model / endpoint / credential / `workflow_context`）；Tool 24 `ingest_youtube_video` 為 append-only YouTube ingest（preview 零寫入但讀公開 metadata）；Tool 23 `ingest_x_video` 為 append-only X ingest；Tool 22 `generate_stock_lens_report` 為 append-only dry-run-first side-effect（無 LLM / ack / network / live market API）；Tools 17–21（catalog、source revalidation、coverage、historical next-step、gap backlog）均 append-only read-query（無 `confirm` / ack）；Tools 1–24 contracts/order 在 Tool 24 加入後保持；JSON envelope shape；README 與 `docs/mcp-usage.md` 列出全部 tools |
 | LLM ack guard 一致性 | `tests/test_llm_ack_guard_contracts.py` | CLI/MCP wrappers 在 confirmed LLM 執行前要求 exact `api_cost_ack`；ack 常數單一來源（定義於 `llm_provider`，經 `semantic_summarizer.SEMANTIC_API_COST_ACK` re-export）；core-level guard 已強制（audit F-03 resolved：`semantic_summarize_episode` 進入點與 `create_provider` 建 provider 前驗證） |
 | No raw transcript / no secret stdout | `tests/test_llm_cli_no_leak.py` | LLM-facing CLI 的 dry-run stdout/stderr 不含 transcript 原文、API key 值或 prompt 內容；semantic CLI stdout 為鎖定的 metadata-only JSON schema |
 | Cache 手動 rebuild | `tests/test_cache_rebuild_guard.py` | confirmed workflow 與 MCP side-effect tools 不自動 rebuild SQLite cache，只回 cache stale warning；`rebuild_cache` 引用僅限 reviewed modules（constitution 原則 VIII） |
@@ -77,3 +79,53 @@ python -m pytest tests/test_repository_secret_boundary.py tests/test_repository_
 | safety-boundary 變更 | full pytest + 上表全部相關列；需人類批准並評估 constitution 修訂 |
 
 任何類型的變更，完成前都要跑 Standard full checks 並引用實際輸出。
+
+
+## SPEC 045: Learning workflow Skills
+
+Use `study-guide-bundle` for a named episode with an existing learning-notes semantic summary; use `workflow-derivation-bundle` for an existing lecture and the configured default operator-workflow context. These are independent requests: preview, explain, wait for explicit approval, confirm once, report and stop. Neither Skill fills missing sources or starts the other operation automatically. Existing tool registry and Core behavior are unchanged.
+
+Generation requires the user's exact API-cost acknowledgement after preview. Lecture reuse/cover-only and complete derivation-pair reuse pass an empty acknowledgement, even if one exists in conversation history. Every successful confirm writes run reports, including reuse. A preview is not a digest pin; state is recomputed on confirm, and a no-cost plan that becomes generation must stop on refusal without retry.
+
+SPEC 046: Tool 25 refuses pre-existing recovery entries and unsafe local paths before preview/reuse/generation; force never overrides refusal. It preserves all regular non-pair file bytes and maps MCP failures to fixed safe messages. Distinct errors identify rollback failure, published cleanup/report failure and reused report failure. Only this attempt owns its rollback/cleanup; no automatic recovery of old entries or agent retry. Writers must be serialized; publication is not crash-durable, race-proof or one artifact/report transaction.
+
+Validation is offline: static instruction contracts, actual-backend characterization and synthetic conversation oracles. These do not prove live agent compliance. No CLI/terminal/filesystem fallback, automatic cache rebuild, installation or deployment is performed.
+
+Targeted coverage: `tests/test_study_guide_bundle_skill.py`, `tests/test_workflow_derivation_bundle_skill.py`, `tests/test_learning_workflow_skill_contracts.py`, plus existing Tool 25/26, registry, facade, setup, ack and docs guards. Conversation cases: `tests/fixtures/learning_workflow_skill_cases.json`.
+
+SPEC 046 targeted safety coverage: `tests/test_workflow_derivation_safety.py`, existing derivation Core/MCP/profile tests, Skill/oracle contracts, Tool 26 and shared registry/path/report/ack guards.
+
+SPEC 047 coverage: `tests/test_learning_workflow_next_step.py`, `tests/test_mcp_learning_workflow_next_step.py`, registry/facade/setup/console contracts and all 044-046/045 safety/Skill regressions. Check zero-write/provider/network/cache behavior, finite metadata-only results, first26 signature/order preservation and explicit not-evaluated freshness.
+
+| workflow derivation lineage048 | `tests/test_workflow_derivation_lineage.py`, `tests/test_mcp_workflow_derivation_lineage.py`, `tests/test_workflow_derivation_safety.py`, derivation Skill oracle, registry/facade/docs/setup and Tool26/27 regressions | Consumed inputs/staged bytes, strict bounded receipts, finite zero-write states, same-directory publication, reserved ownership and approval disclosure |
+
+Tool29 `inspect_study_guide_lineage(podcast_id, episode_ref)` adds an offline read-only comparison of lecture03/04/07 against its recorded semantic summary. Tool26 generation declares separate `metadata_writes` for `study_guide.lineage.json`; ship with the updated study-guide Skill. Cover-only/reuse preserve provenance or legacy absence. No summary-to-transcript freshness claim; Tool27/28 behavior stays unchanged. See SPEC049.
+
+SPEC049 targeted: `tests/test_study_guide_lineage.py`, `tests/test_mcp_study_guide_lineage.py`, `tests/test_study_guide_bundle_skill.py`; include unchanged lecture, derivation safety, Tool27/28, registry/facade/setup/secret guards before full checks.
+
+SPEC050 targeted: `tests/test_learning_bundle_recovery.py`, `tests/test_mcp_learning_bundle_recovery.py`, `tests/test_spec_050_learning_recovery_docs.py`; run unchanged Tools25-29/Skills, secure snapshot, registry/facade/setup/console/docs/privacy guards before full checks. Verify all five locations, original stem receipts, output caps, finite unknown/unsafe precedence and zero writes/network/provider/environment/cache/report calls.
+
+SPEC051 targeted: `tests/test_learning_workflow_status.py`, `tests/test_mcp_learning_workflow_status.py`, `tests/test_spec_051_learning_status_docs.py`; add unchanged25-30/Skills, registry/facade/setup/console/docs/privacy guards before full checks. Verify recovery-first short circuit, four-query cap, closed projections and attention distinctions without side effects.
+
+SPEC052 targeted:tests/test_learning_workflow_advance.py,test_mcp_learning_workflow_advance.py,test_spec_052_learning_advance_docs.py; include unchanged25-31/Skills,canonical paths,exact ack,publication failures,registry/facade/setup/console/docs/privacy guards. Verify metadata-plan drift stops,empty cover ack,one confirmed executor and zero preview effects with owned temporary fake-provider fixtures. Authorized038/044 documentation cleanup has completion-record evidence.
+
+
+## SPEC 053: Unified learning entry Skill
+
+Use `learning-workflow-advance` when asking for the next learning step of one explicit podcast/episode. It binds only Tool32 `advance_learning_workflow`: one zero-write/offline preview, disclose artifact/reuse/lineage/report plans and costs, wait for fresh cycle approval and exact cost text for generation, confirm once, report and stop. Cover sends empty acknowledgement; complete/blocked states never confirm. Returned action/plan_id are approval bindings, not content snapshots or locks. Missing tools, drift, malformed replies and failures stop without fallback, retries or automatic next action/cache rebuild.
+
+Example: request one learning step for a named podcast and episode; review the returned action/files/cost, then approve this cycle. Existing explicitly selected study-guide/derivation Skills remain independent. No full-chain/batch/repair/force operation is added. Portable Skill and response reference must be loaded by the agent host manually when needed; no installation or live client compliance guarantee. Evidence is offline instruction contracts, labelled dialogue oracles, temporary fake-provider backend checks and read-only synthetic pressure/review.
+
+SPEC053 targeted: tests/test_learning_workflow_advance_skill.py, tests/test_spec_053_learning_skill_docs.py; unchanged Tool32/Core/MCP and all045 Skill/oracle/regressions, registry/facade/setup/docs/privacy guards; full pytest and compileall before completion.
+
+
+| Source preparation / Skill | `tests/test_source_preparation.py`, `test_source_preparation_jobs.py`, `test_source_preparation_worker.py`, `test_mcp_source_preparation.py`, `test_source_preparation_skill.py` | Zero-write preview; approval binding; cross-process coalescing; actual owned worker/SDK disconnect; Windows stdio blocker and independent loopback HTTP; preserved partial artifacts; finite offline progress; portable consent oracles (not live agent execution) |
+
+SPEC055 targeted: `tests/test_preparation_transcription.py`, `tests/test_source_preparation_transcription.py`, the source-preparation/Core/MCP/worker/Skill tests above, and `tests/test_spec_055_transcription_settings_docs.py`. Include profile/transcriber defaults, registry/facade/setup, cache/path/secret/docs guards. Verify strict operator mappings, CUDA capability without model loading, every settings-drift boundary, v2 digest/actual metadata corruption, unchanged v1 SQLite/history, existing old-title transcript/audio bytes, both executor options and owned SDK configured/default completion. Fixtures and instruction pressure are distinct from live Hermes acceptance or transcript accuracy.
+
+| SPEC056 prepared-source query/QA | `tests/test_source_content_query.py`, `tests/test_mcp_source_content_query.py`, `tests/test_source_content_qa_skill.py`, `tests/test_spec_056_source_content_docs.py`, snapshot/registry/setup/facade guards | Offline identity, safety, pinned scope/offset pages, search/coverage, SDK Tool35 and labelled oracles; actual Hermes separate |
+
+
+## SPEC057 source learning entry
+
+Targeted: tests/test_source_learning_entry_skill.py, tests/test_spec_057_source_learning_docs.py, existing source-preparation/QA Skill and Core/MCP tests, registry/facade/setup/docs/privacy guards. Check ready context_digest, unreadable ready content, busy-other-source identity, status-only vs explicit continuation, fresh consent/confirm-once, lost context, host locality/billing, hostile evidence and partial/version-pinned coverage. Resource/backend/oracle checks and independent synthetic probes do not prove mounted Hermes behavior. Record actual Hermes acceptance as pending without a host trace; standard full pytest, compileall and diff checks remain required.

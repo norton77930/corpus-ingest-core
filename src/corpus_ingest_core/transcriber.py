@@ -17,6 +17,7 @@ from .errors import (
 from .models import AudioAsset, TranscriptAsset
 from .storage import transcript_asset_paths
 from .validator import validate_transcript
+from .artifact_preservation import preserve_partial_artifacts
 
 DEFAULT_TRANSCRIPTION_MODEL = "tiny"
 PROGRESS_WRITE_INTERVAL = 25
@@ -319,6 +320,8 @@ def _transcript_part_paths(paths) -> list[Path]:
 
 
 def _cleanup_paths(paths: list[Path]) -> None:
+    if preserve_partial_artifacts():
+        return
     for path in paths:
         try:
             path.unlink(missing_ok=True)

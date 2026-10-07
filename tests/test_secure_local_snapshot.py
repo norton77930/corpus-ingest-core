@@ -206,30 +206,16 @@ def test_directory_listing_rejects_names_absent_after_enumeration(
     directory.mkdir(parents=True)
     (directory / "safe.json").write_text("safe", encoding="utf-8")
 
-    # The stub answers unconditionally rather than matching on the argument,
-    # which lets this test drop a `monkeypatch.setattr(snapshots.os, "name",
-    # "nt")` it used to need.
-    #
-    # That patch existed so `_list_directory_while_open` would take the Windows
-    # branch and call os.listdir(directory) instead of os.listdir(descriptor),
-    # because the old stub only recognised a path argument. But `snapshots.os`
-    # *is* the os module, so the patch was global: on Python 3.11 pathlib then
-    # believed it was on Windows and every subsequent Path() raised
-    # NotImplementedError: cannot instantiate 'WindowsPath'. It aborted the
-    # whole session inside pytest's failure reporting, so no test name was ever
-    # printed. Python 3.12's rewritten pathlib does not consult os.name the
-    # same way, which is why only the 3.11 job went red.
-    #
-    # Neither branch is what this test is about -- the assertion is that
-    # post-validation rejects a name the enumerator reported but the directory
-    # does not contain. That holds on either platform.
-    def swapped_names(path: object) -> list[str]:
-        return ["HOSTILE-SWAP-RESTORE-SENTINEL.json"]
+    # Stub either platform's iterator without globally changing os.name.
+    from contextlib import contextmanager
+    @contextmanager
+    def swapped_names(path: object):
+        yield iter([SimpleNamespace(name="HOSTILE-SWAP-RESTORE-SENTINEL.json")])
 
     monkeypatch.setattr(snapshots, "_open_directory_descriptor", lambda path: 0)
     monkeypatch.setattr(snapshots.os, "fstat", lambda descriptor: directory.lstat())
     monkeypatch.setattr(snapshots, "_opened_handle_is_contained", lambda root, descriptor: True)
-    monkeypatch.setattr(snapshots.os, "listdir", swapped_names)
+    monkeypatch.setattr(snapshots.os, "scandir", swapped_names)
     monkeypatch.setattr(snapshots.os, "close", lambda descriptor: None)
 
     assert snapshots.secure_directory_names(root, directory, max_entries=10) is None
@@ -265,3 +251,23 @@ def test_lineage_sidecar_source_and_config_reads_only_use_secure_snapshot_bounda
     assert (corpus, sidecar) in calls
     assert (tmp_path / "transcripts", source) in calls
     assert (config.parent, config) in calls
+
+
+
+def test_secure_listing_stops_after_cap_plus_one_without_listdir(tmp_path, monkeypatch):
+    """An overflow witness bounds iteration even for arbitrarily large directories."""
+    from contextlib import contextmanager
+    import corpus_ingest_core.secure_local_snapshot as snapshots
+    directory=tmp_path/'root';directory.mkdir();visited=[]
+    @contextmanager
+    def scan(path):
+        def entries():
+            for index in range(10000):
+                visited.append(index)
+                yield SimpleNamespace(name=f'extra-{index}')
+        yield entries()
+    def unbounded(*args):raise AssertionError('unbounded listdir')
+    monkeypatch.setattr(snapshots.os,'scandir',scan)
+    monkeypatch.setattr(snapshots.os,'listdir',unbounded)
+    assert snapshots.secure_directory_names(directory,directory,max_entries=256) is None
+    assert len(visited)==257

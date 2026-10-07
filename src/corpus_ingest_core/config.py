@@ -11,6 +11,7 @@ from .local_env_names import CONFIG_ENV, read_env
 from .models import PodcastProfile
 from .summary_profiles import UNSET as _SUMMARY_PROFILE_UNSET
 from .summary_profiles import resolve_summary_profile
+from .preparation_transcription import parse as parse_preparation_transcription
 
 # Same shape as storage.DATA_DIR: an operator can point the profile registry
 # somewhere gitignored instead of editing the committed config. That matters
@@ -113,6 +114,7 @@ def _parse_profile(item: Any) -> PodcastProfile:
         ),
         source_type=source_type,
         summary_profile=summary_profile,
+        preparation_transcription=(parse_preparation_transcription(item["preparation_transcription"], language=_required_text(item, "language")) if "preparation_transcription" in item else None),
     )
 
 

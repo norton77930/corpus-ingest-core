@@ -657,7 +657,7 @@ python scripts/new_mcp_eval_report.py --name codex-session-001
 The server builds a single `FastMCP` instance. Local Codex and Claude clients
 use stdio; the reviewed sidecar serves Streamable HTTP bound to
 `127.0.0.1:8767/mcp` only, with no legacy SSE and no published port. Both
-transports expose the same registry of exactly 25 reviewed tools.
+transports expose the same registry of exactly 35 reviewed tools.
 
 Read and query tools:
 
@@ -672,10 +672,13 @@ Read and query tools:
 - `query_verified_research_report_coverage` (Tool 19; episode-centric offline coverage join)
 - `suggest_historical_verified_report_next_step` (Tool 20; historical next-step suggestion)
 - `list_verified_report_gap_backlog` (Tool 21; inventory gap backlog)
+- `suggest_learning_workflow_next_step` (Tool 27; offline read-query, no execution)
+- `inspect_workflow_derivation_lineage` (Tool 28; offline lineage query, no execution)
 - `generate_stock_lens_report` (Tool 22; deterministic stock lens, side-effect and dry-run first)
 - `ingest_x_video` (Tool 23; X video ingest, zero-write preview that reads public metadata)
 - `ingest_youtube_video` (Tool 24; YouTube video ingest, zero-write preview that reads public metadata)
 - `derive_workflow_bundle` (Tool 25; Spec 042 `05`/`06` workflow derivation, zero-write and zero-network preview; confirm calls an LLM and needs the exact `api_cost_ack`)
+- `generate_study_guide_bundle` (Tool 26; Spec 038 lecture, zero-write and zero-network preview; confirm delegates once, and only generation needs the exact `api_cost_ack`)
 
 Side-effect tools:
 
@@ -693,6 +696,11 @@ Side-effect tools:
 - `ingest_x_video`
 - `ingest_youtube_video`
 - `derive_workflow_bundle`
+- `generate_study_guide_bundle`
+- `advance_learning_workflow`
+- `prepare_learning_source`
+
+Tool 26, `generate_study_guide_bundle`, is append-only; Tools 1–25 keep their contracts and order. Preview lists reads, lecture writes, reuses, and the two run-report paths, and it does not call an LLM unless the plan would regenerate `03`/`04`/`07`. Confirm calls the lecture runner once. Generation needs the exact `api_cost_ack`. Reuse and cover-only do not, and they keep non-lecture bytes. Existing `05`/`06` block regeneration, including `force`. This tool does not derive, download, transcribe, or rebuild the cache. Ask for derivation separately.
 
 Tool 25, `derive_workflow_bundle`, is append-only; the contracts and order of
 Tools 1 through 24 are unchanged. Unlike Tools 23 and 24 its preview is also
@@ -738,3 +746,127 @@ investment advice.
 These documents use placeholder paths only. Do not commit a personal
 `.codex/config.toml`, any config containing personal absolute paths, `.env`,
 or an API key.
+
+
+### Learning workflow next-step query (Tool 27)
+
+`suggest_learning_workflow_next_step(podcast_id, episode_ref)` is an offline read-query with two required explicit identifiers. It accepts no confirm, force, api_cost_ack, file path, context or provider options. Tools 1-26 retain their order and contracts.
+
+The query evaluates the existing lecture preview first. It suggests `generate_lecture` or `complete_cover` and stops when lecture work remains. Only a reusable lecture permits the derivation preview, which can suggest `generate_derivation` or report `complete`. Expected prerequisite errors become `blocked` with the failing stage; detailed missing-source/context diagnoses are not guessed from error text. Unsafe/recovery/conflict states retain fixed reason codes. All results contain metadata only, with no raw source/context text, paths or exception messages.
+
+An available action includes `suggested_call` arguments with `confirm=false` and `force=false`, plus `requires_llm` and `requires_api_cost_ack` for a later confirmed operation. Generation requires both; cover completion requires neither. Complete/blocked have null action/cost fields. The query itself writes no reports, constructs no provider, contacts no network and never rebuilds cache or dispatches the suggested tool.
+
+`complete` means both existing previews reported reusable. It does not validate 05/06 content quality or source freshness (`source_currentness=not_evaluated`); empty/stale pair files can meet the existing presence-based reuse contract. Context errors can block despite both files existing. Sequential previews are not an atomic snapshot. Start the selected existing Skill/operation with its own preview and explicit approval; the query grants no execution permission and does not chain lecture and derivation.
+
+Example query arguments (no execution): `{"podcast_id":"x-raytar","episode_ref":"2071290493581840707"}`. No new CLI or execution Skill was added.
+
+### Workflow derivation lineage (Tool 28)
+
+`inspect_workflow_derivation_lineage(podcast_id, episode_ref)` is an offline read query with exactly two required explicit identifiers. It accepts no caller path, force, confirm or acknowledgement. Results under `data` include status, fixed reason, ordered changed_roles, scope=workflow_derivation_inputs_outputs, read_only=true and network_access=false. Outcomes: current, stale, untracked, not_generated, not_evaluated/custom_context, blocked. No bodies, digests, paths or arbitrary exception text are returned. It never generates, repairs or rebuilds caches.
+
+Tool25 adds `metadata_writes` separately from its unchanged two-output writes/reuses. Generation previews list workflow_derivation.lineage.json; reuse lists none and leaves existing records unchanged. Actual generation publishes05/06 plus this owned record in one directory swap, with hashes of consumed lecture03/04/07, effective configured tools, rendered request and staged output bytes. Generation refuses unrecognized reserved-name collisions before provider construction. Existing report-failure/recovery distinctions remain. Updated workflow-derivation-bundle Skill requires/discloses metadata_writes; older previews lacking it are incompatible.
+
+Legacy pairs are untracked; a recorded custom context is not_evaluated by the default-only query. Current means equality to recorded derivation inputs/outputs observed now, not lecture-to-transcript freshness or semantic quality. No automatic backfill/regeneration and no atomic observation claim. See specs/048-workflow-derivation-lineage/contracts/lineage.md.
+
+### Study-guide lineage (Tool 29)
+
+`inspect_study_guide_lineage` requires explicit podcast_id and episode_ref; no confirm/force/ack. Existing ok/data envelope returns status=current/stale/untracked/not_generated/blocked, fixed reason, ordered changed_roles, scope=study_guide_inputs_outputs, read_only=true, network_access=false, warnings=[study_guide_scope_only,non_atomic_observation]. No source bodies, paths, hashes or arbitrary exception text in query. Legacy03/04/07 is untracked; partial outputs/orphan receipt blocked. Current compares full consumed semantic summary, recipe/request and actual output bytes;00 is excluded. Generation publishes one strict bounded receipt with the lecture; Tool26 preview separates metadata_writes from writes/reuses/report_writes. Unsafe/recovery state refuses inspection or generation. No backfill, repair, enforcement or authenticity proof.
+
+Tool29 `inspect_study_guide_lineage(podcast_id, episode_ref)` adds an offline read-only comparison of lecture03/04/07 against its recorded semantic summary. Tool26 generation declares separate `metadata_writes` for `study_guide.lineage.json`; ship with the updated study-guide Skill. Cover-only/reuse preserve provenance or legacy absence. No summary-to-transcript freshness claim; Tool27/28 behavior stays unchanged. See SPEC049.
+
+### Learning-bundle recovery (Tool 30)
+
+`inspect_learning_bundle_recovery` accepts `podcast_id` and `episode_ref` as two required explicit identity strings. It inspects only the public bundle plus `.part`, `.old`, `.wfderive.part` and `.wfderive.old`, offline and read-only. Roles00/03/04/07 and05/06 are absent, partial or complete. Both owned lineage records are checked against the original public identity and local output bytes. Ordinary extra files are counted without opening or exposing their names.
+
+The response is the existing `{"ok": true, "data": ...}` envelope. Data includes `status`, `reason`, `manual_review_required`, five `locations`, `scope="learning_bundle_recovery"`, `read_only=true`, `network_access=false`, and fixed diagnostic warnings. States: `clear` (no observed recovery/anomaly), `recovery_present` (safe recovery directory exists), or `blocked` (identity, unsafe/unavailable inspection, partial groups or receipt/output anomalies). Unknown inspection is never absence. Record `valid`/output `match` checks recorded output consistency only; it does not establish source freshness, authenticity, publication outcome or a latest winner. Missing legacy records remain absent, without backfill.
+
+No confirm/force/ack/provider/path inputs, writes, network, generation, cleanup, repair commands or automatic cache rebuild. Failed/ambiguous publication requires human review. Tools1-29 and existing Skills retain their behavior. Directory entries are capped at256; records64KiB and output files64MiB. See [SPEC050](../specs/050-learning-bundle-recovery/spec.md) and [the closed response contract](../specs/050-learning-bundle-recovery/data-model.md). Restart an already running MCP server to expose Tool30.
+
+### Learning workflow status overview (Tool 31)
+
+`inspect_learning_workflow_status` takes two required explicit identity strings: `podcast_id` and `episode_ref`. It provides one offline, read-only overview of next-step progress (Tool27), study-guide lineage (Tool29), workflow derivation lineage (Tool28), and recovery (Tool30). Recovery is evaluated first; any blocked or recovery-present result skips all three other queries as `not_evaluated/recovery_gate`. Otherwise each public Core query runs once, sequentially.
+
+The existing `{"ok": true, "data": ...}` envelope contains compact `recovery`, `next_step`, `study_guide_lineage`, and `workflow_derivation_lineage` observations, `status`, `attention_required`, and ordered `attention_reasons`. Top `observed` means no diagnostic attention signal; it is not end-to-end readiness or a publication/freshness guarantee. `attention_required` distinguishes stale/untracked/custom-context provenance and conflicting observations; `blocked` indicates a refused or unavailable observation. A next-step `complete` can coexist with stale lineage and attention: completion retains existing preview reuse semantics. Pending `not_generated` alone is ordinary unfinished work.
+
+No child paths, bodies, fingerprints, arbitrary warnings or `suggested_call` are forwarded. No execution authorization, confirm/force/ack/provider/path/context inputs, writes, network/provider/environment/report/cache calls, retry, repair, cleanup or generation chain. Existing Tools1-30 and Skills retain their contracts; use Tool27 for separate preview guidance and Tool30 for detailed recovery. Fixed warnings include non-atomic observation, unevaluated summary-to-transcript freshness, no execution authorization and unproven publication outcome. Unexpected child failure becomes a finite blocked section; independent clear-gated diagnostics still run.
+
+See [SPEC051](../specs/051-learning-workflow-status/spec.md), [response model](../specs/051-learning-workflow-status/data-model.md) and [query contract](../specs/051-learning-workflow-status/contracts/status.md). Restart an existing MCP process manually to expose Tool31.
+
+### Single learning workflow action (Tool 32)
+
+`advance_learning_workflow` accepts required explicit `podcast_id`/`episode_ref`, default `confirm=false`, and optional `expected_action`, `expected_plan_id`, `api_cost_ack`. Preview uses Tool31 Core observations and one selected runner preview, then returns `{"ok":true,"dry_run":true,"data":...}` with action, cost requirements, fixed read-role descriptions, artifact writes/reuses, lineage metadata writes, report writes and metadata-only `plan_id`. Unknown/recovery/stale/untracked/custom/conflicting observations block with no execution. Both current bundles return scoped `complete`, not source-freshness proof.
+
+After explicit approval, confirm returns the preview action/id as `expected_action`/`expected_plan_id`; generation requires the existing exact cost acknowledgement. It recomputes the current plan; detected action/cost/path-plan drift stops before dispatch. Cover always passes empty ack, including when caller supplies an acknowledgement. Execute exactly one existing Core runner with `force=false`, default context/provider, then report and stop. No chained action, post-execution query, retry, repair, duplicate report or automatic cache rebuild. Successful execution returns owned outputs/child report paths and `follow_up=preview_again`; it does not claim the next action was inspected.
+
+Plan identity binds metadata only, not file content or persistent approval. Observations are non-atomic; callers serialize writers. Existing child publication/rollback/cleanup/report failures retain safe phase messages. Unexpected errors or results after dispatch warn local files may have changed; no retry/rollback guarantee. No force/provider/path/context input. Acknowledgement, raw content, arbitrary child warnings and exceptions are not returned. Tools1-31 retain exact signatures/order. See [SPEC052](../specs/052-learning-workflow-advance/spec.md) and [the contract](../specs/052-learning-workflow-advance/contracts/advance.md). Restart an existing MCP server manually to expose Tool32; no deployment is performed.
+
+Tool32 missing-cover qualification:Tool31 normally gates a partial lecture. If only00 is absent,Tool32 may separately inspect detailedTool30,require all recovery locations absent,complete safe03/04/07 with matching receipt,and both05/06 absent or complete with matching receipt. Tool27 must select complete_cover;Tool29 must be current,andTool28 current(if pair exists) or not_generated. Any stale/legacy/custom/unknown/refused observation stops. This does not changeTool30/31 or repair recovery entries;cover_absence_checked_separately discloses the extra qualification.
+
+
+### Source preparation jobs (Tools 33/34)
+
+Tool33 `prepare_learning_source`; Tool34 `inspect_source_preparation_job`.
+
+`prepare_learning_source(url, confirm=False, expected_plan_id="")` previews one
+configured YouTube/X video. Preview may fetch public metadata, but creates no
+job and downloads nothing. Review source identity, stage/file/reuse plans and
+local compute/storage costs; fresh approval then binds the exact plan_id.
+Confirmation returns a job_id promptly; acceptance is not transcript completion.
+
+`inspect_source_preparation_job(job_id)` reads recorded metadata offline. It
+never polls a source, repairs, retries, frees stale slots or rebuilds cache.
+Stages: queued, downloading, transcribing, validating; completion requires
+validated canonical transcripts. No LLM, Q&A, summary or learning documents are
+generated. Finance profiles can prepare transcripts but show incompatibility
+with downstream lecture generation. Partial artifacts and uncertain outcomes
+require operator inspection; force is false, history is preserved.
+
+Windows stdio submissions are blocked with worker_host_incompatible: nested
+process jobs cannot provide the required connection-independent lifetime.
+Use an already independently managed loopback HTTP MCP host; no host policy is
+changed and this feature does not deploy one. Existing ready transcripts and
+read-only progress remain available. Other hosts must permit independent child
+workers; offline SDK tests do not certify a specific Hermes mounting.
+
+Portable [source-preparation Skill](../.agents/skills/source-preparation/SKILL.md)
+obtains approval, submits once, reports and stops. A later explicit request
+queries one known job once. Cache rebuilding stays manual.
+
+SPEC055 adds optional source-profile transcription settings to these existing
+tools; the registry now has 35 tools and request parameters are unchanged.
+Operator YAML (local profile, not a tool argument):
+
+```yaml
+preparation_transcription:
+  model: medium
+  device: cuda
+  compute_type: float16
+```
+
+Omission retains tiny/cpu/int8 with VAD enabled. An explicit mapping requires
+all three fields. Models: tiny, tiny.en, base, base.en, small, small.en, medium,
+medium.en, large-v3, turbo; .en requires an English source. CPU accepts
+int8/float32, CUDA accepts int8/float16/float32. No arbitrary model paths,
+repositories or silent fallback. Preview observes configured CUDA capability
+without loading/downloading a model or guaranteeing VRAM. Confirmed work may
+download public model files to the runtime cache and consume local resources.
+
+`transcription` shows configured/approved settings; `actual_transcription`
+shows complete supported metadata recorded in a validated transcript. Unknown
+historical metadata is null. Existing transcripts stay ready without automatic
+regeneration, even when current settings differ. New job completion requires
+matching actual metadata. Settings changes invalidate approval. Historical job
+inspection preserves original records; SQLite schema remains unchanged.
+
+Copy the updated source-preparation Skill and its response-contract reference
+together when porting. SDK fixtures verify local transport/worker behavior;
+live Hermes mounting and transcript accuracy remain separate operator checks.
+See [SPEC055 quickstart](../specs/055-source-preparation-transcription-settings/quickstart.md).
+
+### Prepared source content query (Tool 35)
+
+Tool35 `query_source_content` supports inspect, read and literal search.
+
+`query_source_content(podcast_id, episode_ref, action="inspect", expected_source_version="", query="", start_seconds=None, end_seconds=None, cursor="", limit=40, max_chars=8000)` reads one already prepared RSS/YouTube/X transcript without SQLite. Inspect returns metadata/version only; read returns timed text; search is literal case-insensitive keyword matching. Read/search require the inspected version. Follow next_cursor with unchanged scope; coverage/chunk offsets distinguish complete delivery from truncation or final-page-only evidence. Changed/unsafe/ambiguous/partial/empty sources fail closed. No network, provider, writes, preparation or automatic cache rebuild. Returned evidence may be processed/billed by Hermes host model. Chat notes do not publish formal lectures; existing generation confirmation/api_cost_ack remain. This is not universal video-platform support.
+
+Use the portable [source-content-qa Skill](../.agents/skills/source-content-qa/SKILL.md) for timed answers and complete/partial learning notes. See [SPEC056 quickstart](../specs/056-source-content-query/quickstart.md). Synthetic/SDK acceptance is distinct from real Hermes mounting.

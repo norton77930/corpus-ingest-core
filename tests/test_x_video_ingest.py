@@ -149,6 +149,23 @@ _SAMPLE_INFO = {
 _SAMPLE_URL = "https://x.com/Raytar/status/2071290493581840707"
 
 
+def test_optional_preparation_progress_has_real_stages_and_identity(monkeypatch, tmp_data_dirs):
+    from corpus_ingest_core import x_video_ingest as module
+    from types import SimpleNamespace
+    _stub_acquisition(monkeypatch, module)
+    monkeypatch.setattr(module, "_registration_problem", lambda _: None)
+    monkeypatch.setattr(module, "_acquire_audio", lambda *_: None)
+    monkeypatch.setattr(module, "_write_seed", lambda *_: None)
+    monkeypatch.setattr(module, "transcribe_episode", lambda *a, **kw: SimpleNamespace(json_path=tmp_data_dirs / "fixture.json"))
+    monkeypatch.setattr(module, "_write_run_report", lambda _: None)
+    events = []
+    module.run_x_video_ingest(_SAMPLE_URL, progress_callback=lambda stage, identity: events.append((stage,identity)))
+    assert events == []
+    module.run_x_video_ingest(_SAMPLE_URL, confirm=True, progress_callback=lambda stage, identity: events.append((stage,identity)))
+    assert [stage for stage,_ in events] == ["downloading","transcribing","validating"]
+    assert all(identity["podcast_id"] == "x-raytar" and identity["episode_ref"] == "2071290493581840707" for _,identity in events)
+
+
 def _stub_acquisition(monkeypatch, module, *, info=None):
     """Keep every test off the network and off ffmpeg/PyAV."""
 

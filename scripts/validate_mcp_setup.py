@@ -227,7 +227,17 @@ def _check_completion_surface(checks: list[dict[str, Any]], mcp_server) -> None:
         _add_check(
             checks,
             "completion_tool_registry",
-            len(tool_names) == 25
+            len(tool_names) == 35
+            and "generate_study_guide_bundle" in tool_names
+            and "suggest_learning_workflow_next_step" in tool_names
+            and "inspect_workflow_derivation_lineage" in tool_names
+            and "inspect_study_guide_lineage" in tool_names
+            and "inspect_learning_bundle_recovery" in tool_names
+            and "inspect_learning_workflow_status" in tool_names
+            and "advance_learning_workflow" in tool_names
+            and "prepare_learning_source" in tool_names
+            and "inspect_source_preparation_job" in tool_names
+            and "query_source_content" in tool_names
             and "generate_stock_lens_report" in tool_names
             and "query_verified_research_report_catalog" in tool_names
             and "revalidate_verified_research_report_sources" in tool_names

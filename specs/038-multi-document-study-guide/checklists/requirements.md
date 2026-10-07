@@ -79,3 +79,5 @@ One box per FR in `spec.md`. Unchecked until the matching test is green.
 
 - Taxonomy, transcript-to-LLM refusal, one-family bundle, and no review-passed gate were locked with the operator before specify. Remaining plan-level seams (module names, exact path helper names) belong in `plan.md`, not here.
 - "No implementation details" is satisfied at the user-story layer. Clarifications name existing repo contracts (`learning-notes`, exact `api_cost_ack`, registry size 22) because those are safety boundaries, matching Specs 036 and 037.
+
+Completion markers reconciled2026-10-04 under authorized052 documentation cleanup. Historical22-tool and live-confirm statements describe038 closeout,not current registry or a new provider run. See completion-record.md (../completion-record.md from checklists).

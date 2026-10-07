@@ -1,0 +1,258 @@
+{
+  "evidence_kind": "offline acceptance oracle; not agent execution",
+  "cases": [
+    {
+      "defect": "missing",
+      "preview": {
+        "ok": true,
+        "dry_run": true,
+        "requires_confirmation": true,
+        "tool": "derive_workflow_bundle",
+        "inputs": {
+          "podcast_id": "demo",
+          "episode_ref": "EP_001",
+          "force": false
+        },
+        "writes": [
+          "data/demo/EP_001__Example/05_prompt_examples.md",
+          "data/demo/EP_001__Example/06_apply_to_my_workflow.md"
+        ],
+        "reuses": [],
+        "reads": [
+          "data/demo/source.md"
+        ],
+        "warnings": [],
+        "risks": [
+          "Confirmed generation calls an external LLM; reuse does not. Every successful confirm writes run reports."
+        ],
+        "run_mode": "preview",
+        "network_read": false,
+        "not_investment_advice": true
+      },
+      "expected_confirm_calls": 0,
+      "rule_ids": [
+        "P03"
+      ],
+      "expected_report": "Incompatible preview; stop before confirmation."
+    },
+    {
+      "defect": "wrong-type",
+      "preview": {
+        "ok": true,
+        "dry_run": true,
+        "requires_confirmation": true,
+        "tool": "derive_workflow_bundle",
+        "inputs": {
+          "podcast_id": "demo",
+          "episode_ref": "EP_001",
+          "force": false
+        },
+        "writes": [
+          "data/demo/EP_001__Example/05_prompt_examples.md",
+          "data/demo/EP_001__Example/06_apply_to_my_workflow.md"
+        ],
+        "reuses": [],
+        "reads": [
+          "data/demo/source.md"
+        ],
+        "warnings": [],
+        "risks": [
+          "Confirmed generation calls an external LLM; reuse does not. Every successful confirm writes run reports."
+        ],
+        "run_mode": "preview",
+        "network_read": false,
+        "not_investment_advice": true,
+        "metadata_writes": "wrong type"
+      },
+      "expected_confirm_calls": 0,
+      "rule_ids": [
+        "P03"
+      ],
+      "expected_report": "Incompatible preview; stop before confirmation."
+    },
+    {
+      "defect": "wrong-name",
+      "preview": {
+        "ok": true,
+        "dry_run": true,
+        "requires_confirmation": true,
+        "tool": "derive_workflow_bundle",
+        "inputs": {
+          "podcast_id": "demo",
+          "episode_ref": "EP_001",
+          "force": false
+        },
+        "writes": [
+          "data/demo/EP_001__Example/05_prompt_examples.md",
+          "data/demo/EP_001__Example/06_apply_to_my_workflow.md"
+        ],
+        "reuses": [],
+        "reads": [
+          "data/demo/source.md"
+        ],
+        "warnings": [],
+        "risks": [
+          "Confirmed generation calls an external LLM; reuse does not. Every successful confirm writes run reports."
+        ],
+        "run_mode": "preview",
+        "network_read": false,
+        "not_investment_advice": true,
+        "metadata_writes": [
+          "data/demo/EP_001__Example/foreign.json"
+        ]
+      },
+      "expected_confirm_calls": 0,
+      "rule_ids": [
+        "P03"
+      ],
+      "expected_report": "Incompatible preview; stop before confirmation."
+    },
+    {
+      "defect": "wrong-parent",
+      "preview": {
+        "ok": true,
+        "dry_run": true,
+        "requires_confirmation": true,
+        "tool": "derive_workflow_bundle",
+        "inputs": {
+          "podcast_id": "demo",
+          "episode_ref": "EP_001",
+          "force": false
+        },
+        "writes": [
+          "data/demo/EP_001__Example/05_prompt_examples.md",
+          "data/demo/EP_001__Example/06_apply_to_my_workflow.md"
+        ],
+        "reuses": [],
+        "reads": [
+          "data/demo/source.md"
+        ],
+        "warnings": [],
+        "risks": [
+          "Confirmed generation calls an external LLM; reuse does not. Every successful confirm writes run reports."
+        ],
+        "run_mode": "preview",
+        "network_read": false,
+        "not_investment_advice": true,
+        "metadata_writes": [
+          "other/workflow_derivation.lineage.json"
+        ]
+      },
+      "expected_confirm_calls": 0,
+      "rule_ids": [
+        "P03"
+      ],
+      "expected_report": "Incompatible preview; stop before confirmation."
+    },
+    {
+      "defect": "duplicate",
+      "preview": {
+        "ok": true,
+        "dry_run": true,
+        "requires_confirmation": true,
+        "tool": "derive_workflow_bundle",
+        "inputs": {
+          "podcast_id": "demo",
+          "episode_ref": "EP_001",
+          "force": false
+        },
+        "writes": [
+          "data/demo/EP_001__Example/05_prompt_examples.md",
+          "data/demo/EP_001__Example/06_apply_to_my_workflow.md"
+        ],
+        "reuses": [],
+        "reads": [
+          "data/demo/source.md"
+        ],
+        "warnings": [],
+        "risks": [
+          "Confirmed generation calls an external LLM; reuse does not. Every successful confirm writes run reports."
+        ],
+        "run_mode": "preview",
+        "network_read": false,
+        "not_investment_advice": true,
+        "metadata_writes": [
+          "data/demo/EP_001__Example/workflow_derivation.lineage.json",
+          "data/demo/EP_001__Example/workflow_derivation.lineage.json"
+        ]
+      },
+      "expected_confirm_calls": 0,
+      "rule_ids": [
+        "P03"
+      ],
+      "expected_report": "Incompatible preview; stop before confirmation."
+    },
+    {
+      "defect": "reuse-write",
+      "preview": {
+        "ok": true,
+        "dry_run": true,
+        "requires_confirmation": true,
+        "tool": "derive_workflow_bundle",
+        "inputs": {
+          "podcast_id": "demo",
+          "episode_ref": "EP_001",
+          "force": false
+        },
+        "writes": [],
+        "reuses": [
+          "data/demo/EP_001__Example/05_prompt_examples.md",
+          "data/demo/EP_001__Example/06_apply_to_my_workflow.md"
+        ],
+        "reads": [
+          "data/demo/source.md"
+        ],
+        "warnings": [],
+        "risks": [
+          "Confirmed generation calls an external LLM; reuse does not. Every successful confirm writes run reports."
+        ],
+        "run_mode": "preview",
+        "network_read": false,
+        "not_investment_advice": true,
+        "metadata_writes": [
+          "data/demo/EP_001__Example/workflow_derivation.lineage.json"
+        ]
+      },
+      "expected_confirm_calls": 0,
+      "rule_ids": [
+        "P03"
+      ],
+      "expected_report": "Incompatible preview; stop before confirmation."
+    },
+    {
+      "defect": "generate-empty",
+      "preview": {
+        "ok": true,
+        "dry_run": true,
+        "requires_confirmation": true,
+        "tool": "derive_workflow_bundle",
+        "inputs": {
+          "podcast_id": "demo",
+          "episode_ref": "EP_001",
+          "force": false
+        },
+        "writes": [
+          "data/demo/EP_001__Example/05_prompt_examples.md",
+          "data/demo/EP_001__Example/06_apply_to_my_workflow.md"
+        ],
+        "reuses": [],
+        "reads": [
+          "data/demo/source.md"
+        ],
+        "warnings": [],
+        "risks": [
+          "Confirmed generation calls an external LLM; reuse does not. Every successful confirm writes run reports."
+        ],
+        "run_mode": "preview",
+        "network_read": false,
+        "not_investment_advice": true,
+        "metadata_writes": []
+      },
+      "expected_confirm_calls": 0,
+      "rule_ids": [
+        "P03"
+      ],
+      "expected_report": "Incompatible preview; stop before confirmation."
+    }
+  ]
+}

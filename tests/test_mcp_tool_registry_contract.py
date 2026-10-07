@@ -49,6 +49,16 @@ STOCK_LENS_TOOL = "generate_stock_lens_report"
 X_VIDEO_INGEST_TOOL = "ingest_x_video"
 YOUTUBE_VIDEO_INGEST_TOOL = "ingest_youtube_video"
 WORKFLOW_DERIVATION_TOOL = "derive_workflow_bundle"
+STUDY_GUIDE_TOOL = "generate_study_guide_bundle"
+LEARNING_NEXT_STEP_TOOL = "suggest_learning_workflow_next_step"
+WORKFLOW_LINEAGE_TOOL = "inspect_workflow_derivation_lineage"
+STUDY_GUIDE_LINEAGE_TOOL = "inspect_study_guide_lineage"
+LEARNING_RECOVERY_TOOL = "inspect_learning_bundle_recovery"
+LEARNING_STATUS_TOOL = "inspect_learning_workflow_status"
+LEARNING_ADVANCE_TOOL = "advance_learning_workflow"
+SOURCE_PREPARATION_TOOL = "prepare_learning_source"
+SOURCE_PREPARATION_STATUS_TOOL = "inspect_source_preparation_job"
+SOURCE_CONTENT_TOOL = "query_source_content"
 LEGACY_TOOL_ORDER = [
     "list_episodes",
     "get_episode",
@@ -73,6 +83,9 @@ SIDE_EFFECT_TOOLS = LEGACY_SIDE_EFFECT_TOOLS | {
     X_VIDEO_INGEST_TOOL,
     YOUTUBE_VIDEO_INGEST_TOOL,
     WORKFLOW_DERIVATION_TOOL,
+    STUDY_GUIDE_TOOL,
+    LEARNING_ADVANCE_TOOL,
+    SOURCE_PREPARATION_TOOL,
 }
 EXPECTED_TOOLS = LEGACY_EXPECTED_TOOLS | {
     COMPLETION_WORKFLOW_TOOL,
@@ -88,6 +101,16 @@ EXPECTED_TOOLS = LEGACY_EXPECTED_TOOLS | {
     X_VIDEO_INGEST_TOOL,
     YOUTUBE_VIDEO_INGEST_TOOL,
     WORKFLOW_DERIVATION_TOOL,
+    STUDY_GUIDE_TOOL,
+    LEARNING_NEXT_STEP_TOOL,
+    WORKFLOW_LINEAGE_TOOL,
+    STUDY_GUIDE_LINEAGE_TOOL,
+    LEARNING_RECOVERY_TOOL,
+    LEARNING_STATUS_TOOL,
+    LEARNING_ADVANCE_TOOL,
+    SOURCE_PREPARATION_TOOL,
+    SOURCE_PREPARATION_STATUS_TOOL,
+    SOURCE_CONTENT_TOOL,
 }
 
 
@@ -100,7 +123,7 @@ def _registered_tool_names() -> set[str]:
 
 def test_mcp_registry_exposes_exactly_the_reviewed_tool_set():
     actual = _registered_tool_names()
-    assert len(actual) == 25
+    assert len(actual) == 35
     assert actual == EXPECTED_TOOLS
     assert LEGACY_EXPECTED_TOOLS <= actual
 
@@ -125,6 +148,16 @@ def test_workflow_tools_are_appended_after_the_preserved_twelve_tool_order():
         X_VIDEO_INGEST_TOOL,
         YOUTUBE_VIDEO_INGEST_TOOL,
         WORKFLOW_DERIVATION_TOOL,
+        STUDY_GUIDE_TOOL,
+        LEARNING_NEXT_STEP_TOOL,
+        WORKFLOW_LINEAGE_TOOL,
+    STUDY_GUIDE_LINEAGE_TOOL,
+    LEARNING_RECOVERY_TOOL,
+    LEARNING_STATUS_TOOL,
+    LEARNING_ADVANCE_TOOL,
+    SOURCE_PREPARATION_TOOL,
+    SOURCE_PREPARATION_STATUS_TOOL,
+    SOURCE_CONTENT_TOOL,
     ]
 
 
@@ -377,7 +410,8 @@ def test_readme_side_effect_list_matches_registry_side_effect_set():
 def test_each_client_setup_doc_locks_the_current_registry_contract():
     for filename in ("claude-mcp-setup.md", "codex-mcp-setup.md"):
         setup = (ROOT / "docs" / filename).read_text(encoding="utf-8")
-        assert "exactly 25 tools" in setup
+        assert "exactly 35 tools" in setup
+        assert "`generate_study_guide_bundle`" in setup
         assert "`generate_stock_lens_report`" in setup
         assert "`ingest_x_video`" in setup
         assert "`ingest_youtube_video`" in setup
@@ -389,7 +423,7 @@ def test_each_client_setup_doc_locks_the_current_registry_contract():
 
     framework = (ROOT / "docs" / "ai-development-framework.md").read_text(encoding="utf-8")
     assert "恰 14 個" not in framework
-    assert "恰 25 個" in framework
+    assert "恰 35 個" in framework
 
 
 def test_mcp_workflow_tool_exposes_deliberate_core_parameter_subset():

@@ -230,6 +230,7 @@ is per-tool:
 | Preview | Writes | Network |
 | --- | --- | --- |
 | `derive_workflow_bundle` | none | none — it returns before an LLM provider is built |
+| `generate_study_guide_bundle` | none | none — generation is the only branch that calls an LLM, and only after confirm |
 | corpus episode workflows | none | reads the configured RSS feed to resolve the episode |
 | `ingest_x_video`, `ingest_youtube_video` | none | reads public metadata from the video host |
 
@@ -295,3 +296,5 @@ These are boundaries, not a backlog:
 Summaries and extracted mentions can be incomplete or wrong, and LLM-generated
 content can be confidently mistaken. Verify anything that matters against the
 original audio and a primary source.
+
+Tool29 `inspect_study_guide_lineage(podcast_id, episode_ref)` adds an offline read-only comparison of lecture03/04/07 against its recorded semantic summary. Tool26 generation declares separate `metadata_writes` for `study_guide.lineage.json`; ship with the updated study-guide Skill. Cover-only/reuse preserve provenance or legacy absence. No summary-to-transcript freshness claim; Tool27/28 behavior stays unchanged. See SPEC049.

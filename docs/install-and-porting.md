@@ -100,7 +100,7 @@ podcasts:
 python scripts/validate_mcp_setup.py --podcast gooaye --query 台積電
 ```
 
-`validate_mcp_setup.py` 是本機 readiness 檢查，會確認 MCP server 能起、tool registry 完整（25 個）、搜尋路徑可用。**這是判斷安裝成功與否的依據。**
+`validate_mcp_setup.py` 是本機 readiness 檢查，會確認 MCP server 能起、tool registry 完整（35 個）、搜尋路徑可用。**這是判斷安裝成功與否的依據。**
 
 想跑測試的話直接跑就好：
 
@@ -187,3 +187,48 @@ python scripts/rebuild_cache.py --podcast gooaye
 
 - `docs/mcp-usage.md` — MCP tools 用法
 - `docs/claude-mcp-setup.md` / `docs/codex-mcp-setup.md` — 本機 stdio client 設定
+
+
+SPEC054 adds Tool33 `prepare_learning_source` and Tool34 `inspect_source_preparation_job`. For Windows background preparation, use an already independently managed loopback HTTP MCP host; stdio new submissions report `worker_host_incompatible`. See [source preparation](api.md#source-preparation-jobs-tools-3334). No host policy, service deployment or Skill installation is performed automatically.
+
+SPEC055 adds optional source-profile transcription settings to these existing
+tools; the registry now has 35 tools and request parameters are unchanged.
+Operator YAML (local profile, not a tool argument):
+
+```yaml
+preparation_transcription:
+  model: medium
+  device: cuda
+  compute_type: float16
+```
+
+Omission retains tiny/cpu/int8 with VAD enabled. An explicit mapping requires
+all three fields. Models: tiny, tiny.en, base, base.en, small, small.en, medium,
+medium.en, large-v3, turbo; .en requires an English source. CPU accepts
+int8/float32, CUDA accepts int8/float16/float32. No arbitrary model paths,
+repositories or silent fallback. Preview observes configured CUDA capability
+without loading/downloading a model or guaranteeing VRAM. Confirmed work may
+download public model files to the runtime cache and consume local resources.
+
+`transcription` shows configured/approved settings; `actual_transcription`
+shows complete supported metadata recorded in a validated transcript. Unknown
+historical metadata is null. Existing transcripts stay ready without automatic
+regeneration, even when current settings differ. New job completion requires
+matching actual metadata. Settings changes invalidate approval. Historical job
+inspection preserves original records; SQLite schema remains unchanged.
+
+Copy the updated source-preparation Skill and its response-contract reference
+together when porting. SDK fixtures verify local transport/worker behavior;
+live Hermes mounting and transcript accuracy remain separate operator checks.
+See [SPEC055 quickstart](../specs/055-source-preparation-transcription-settings/quickstart.md).
+
+SPEC056 adds read-only Tool35 `query_source_content` and source-content-qa Skill for prepared RSS/YouTube/X timed evidence/notes. No cache prerequisite, preparation, repository provider or publication. Host model privacy/billing applies. See [Tool35](api.md#prepared-source-content-query-tool-35); actual Hermes acceptance is separate.
+
+
+## SPEC058 operator acceptance and handoff
+
+Use `python scripts/verify_learning_mcp.py inventory` to check the three learning Skill folders/references and single notes template. Use `verify --data-dir <selected-root> --podcast <id> --episode <ref> --start <seconds> --end <seconds>` for an owned stdio SDK check, or replace `--data-dir` with `--mcp-url http://127.0.0.1:<port>/mcp` for an already managed server. No installation, mount changes, source copying or preparation. JSON stdout is metadata-only; `scope_complete` means selected-range delivery, not accuracy or Hermes inference. See [SPEC058 handoff](../specs/058-learning-mcp-acceptance/quickstart.md) and [human checks](../specs/058-learning-mcp-acceptance/content-acceptance.md). Live preparation needs fresh approved-plan consent; actual Hermes and SPEC057 T017/T018 remain pending.
+
+## SPEC057 source learning entry
+
+For source-learning-entry, copy/reload the complete entry, source-preparation and source-content-qa Skill folders with all references. Resolve Skills by their installed names; keep source-content-qa/references/learning-notes-template.md as the single editable default. Missing dependent resources or same-server tools stop; do not install, launch a service or alter host/model settings through the Skill. MCP registry remains 35 tools. Ensure the operator-selected data root contains the intended prepared source; the isolated development X pilot is not automatically copied into the default corpus. Windows stdio reads prepared content but cannot submit new background preparation; existing independently managed compatible HTTP hosting is required for those submissions. Host model privacy/billing remain separate from local transcription. [Actual Hermes acceptance](../specs/057-source-learning-entry-skill/quickstart.md) is pending until a real mounted-host trace/output is recorded.

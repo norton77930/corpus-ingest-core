@@ -6,9 +6,9 @@
 
 ## Project Summary
 
-Corpus Ingestion Core 是一個本機優先的通用 Podcast 擷取與研究核心：RSS episode listing、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive 摘要、opt-in 的 OpenAI-compatible LLM semantic summary、deterministic mention extraction、SQLite metadata cache / search、共用單一 FastMCP 的 stdio 與 loopback Streamable HTTP transport（目前恰好 25 個 reviewed tools），以及 deterministic research workflow（stock lens synthesis、external data boundary）。第一個 podcast profile 是 Gooaye 股癌，但核心程式不得寫死股癌；所有 podcast-specific 設定在 `config/podcasts.yaml`。本專案支援 evidence-based 研究整理，明確**不**提供投資建議。
+Corpus Ingestion Core 是一個本機優先的通用 Podcast 擷取與研究核心：RSS episode listing、音檔下載、本機 faster-whisper 轉錄、transcript validation、deterministic extractive 摘要、opt-in 的 OpenAI-compatible LLM semantic summary、deterministic mention extraction、SQLite metadata cache / search、共用單一 FastMCP 的 stdio 與 loopback Streamable HTTP transport（目前恰好 35 個 reviewed tools），以及 deterministic research workflow（stock lens synthesis、external data boundary）。第一個 podcast profile 是 Gooaye 股癌，但核心程式不得寫死股癌；所有 podcast-specific 設定在 `config/podcasts.yaml`。本專案支援 evidence-based 研究整理，明確**不**提供投資建議。
 Corpus packages 008–018 add local artifact indexing/planning, bounded intake/download/transcription/deterministic remediation, a one-stage fresh workflow, standalone `015-corpus-semantic-remediation-runner`, the human-controlled `016-corpus-episode-completion-workflow-runner`, `017-corpus-latest-episode-deterministic-workflow`, and `018-latest-episode-verified-research-report-workflow`. 016 previews in memory with strict zero-file behavior, 017 locks latest once and stops at `ready_for_semantic_summary`, and 018 validates a previewed exact episode reference plus exact acknowledgement before it pins, gates, researches, and atomically publishes a digest-versioned verified report bundle.
-The local stdio registry has exact 25 reviewed tools. Tool 25, `derive_workflow_bundle`, is append-only after unchanged Tools 1–24; its preview is zero-write and zero-network, and confirm calls an LLM and needs the exact `api_cost_ack`. Tool 24, `ingest_youtube_video`, is the YouTube ingest tool. Tool 23, `ingest_x_video`, remains the X ingest preview/confirm tool. Preview is zero-write but resolves public metadata over the network. Tool 22, `generate_stock_lens_report`, remains a dry-run-first side-effect stock lens (no LLM, no `api_cost_ack`, no network, no live market API, no investment advice). Tool 21, `list_verified_report_gap_backlog`, remains a read-query inventory gap backlog (no confirm/ack). Tool 20 remains historical next-step suggestion. Tool 19 remains coverage join. Tool 18 remains exact-locator source revalidation. Tool 17 retains its catalog contract.
+The local stdio registry has exact 35 reviewed tools. Tool 27, `suggest_learning_workflow_next_step`, is an offline read-query for one explicit episode: one lecture/derivation preview suggestion, reusable completion, or a blocker; no execution, source-freshness or content-quality claim. Tool 26, `generate_study_guide_bundle`, is append-only after unchanged Tools 1–25; preview is zero-write and zero-network, and confirm delegates once to the lecture runner (generation needs the exact `api_cost_ack`; reuse and cover-only do not; existing 05/06 block regeneration). Tool 25, `derive_workflow_bundle`, is append-only after unchanged Tools 1–24; its preview is zero-write and zero-network; generation calls an LLM and needs the exact `api_cost_ack`, while complete-pair reuse does not call an LLM and still writes run reports. Tool 24, `ingest_youtube_video`, is the YouTube ingest tool. Tool 23, `ingest_x_video`, remains the X ingest preview/confirm tool. Preview is zero-write but resolves public metadata over the network. Tool 22, `generate_stock_lens_report`, remains a dry-run-first side-effect stock lens (no LLM, no `api_cost_ack`, no network, no live market API, no investment advice). Tool 21, `list_verified_report_gap_backlog`, remains a read-query inventory gap backlog (no confirm/ack). Tool 20 remains historical next-step suggestion. Tool 19 remains coverage join. Tool 18 remains exact-locator source revalidation. Tool 17 retains its catalog contract.
 For historical context, 016 introduced 13 reviewed tools before 017 added the fourteenth tool; the registry therefore had exact 14 reviewed tools before 018 added the fifteenth; 019 added the sixteenth; 020 appends the seventeenth.
 
 ## First 10 Minutes（閱讀順序）
@@ -60,7 +60,7 @@ README.md 是 quick orientation 與 CLI 範例，不是 governance source。
 | No investment advice | 不得產生 buy/sell/hold、target price、guaranteed returns 或個人化投資建議；review gate 會拒絕 prohibited advice 輸出 | `tests/test_research_llm_smoke_review.py`、`tests/test_gooaye_lens.py` |
 | No automatic cache rebuild | Side-effect tools 完成後不得自動 `rebuild_cache`，只回 cache stale warning；rebuild 是手動操作 | `tests/test_cache_rebuild_guard.py` |
 | Thin CLI / thick core | Runtime 行為住在 `src/corpus_ingest_core`；`scripts/` 與 MCP tools 只解析輸入、呼叫 core、格式化輸出 | `tests/test_contracts.py` |
-| MCP JSON envelope | MCP responses 維持既有 envelope：`{"ok": true, "data": ...}`、`{"ok": false, ...}`、dry-run 含 `"dry_run": true`；目前恰好 25 個 reviewed tools | `tests/test_mcp_tool_registry_contract.py`、`tests/test_mcp_server.py` |
+| MCP JSON envelope | MCP responses 維持既有 envelope：`{"ok": true, "data": ...}`、`{"ok": false, ...}`、dry-run 含 `"dry_run": true`；目前恰好 35 個 reviewed tools | `tests/test_mcp_tool_registry_contract.py`、`tests/test_mcp_server.py` |
 | 019 explicit-episode verified report / Skill | Preview is strict zero-write for a named `episode_ref` (reject latest/next). Confirm assembles/publishes only when local artifacts and lineage already pass; no `api_cost_ack`, no LLM/RSS/download, no 015–017 chaining. Blocked lists missing/stale roles. historically MCP Tool 16 + portable Skill | `tests/test_episode_verified_research_report_workflow_runner.py`、`tests/test_episode_verified_research_report_skill.py`、`tests/test_mcp_tool_registry_contract.py` |
 | 025 path-safety 結構單一來源 | 路徑安全結構 regex 只得定義於 `path_safety.py`；四個 runner 的 `_is_safe_local_path` 是薄包裝、真值表凍結（含刻意保留的變體差異） | `tests/test_path_safety_boundary.py`、`tests/test_path_safety_characterization.py` |
 | 025 run-report 寫入協定單一來源 | `_write_run_report` 一律委派 `run_report_io` 弱協定或 `audit_report_pair` 強協定，禁止內嵌 `.part` staging；弱→強升級為後續獨立 spec | `tests/test_run_report_io_boundary.py` |
@@ -124,7 +124,7 @@ git diff --check
 - **`deploy/hermes/README.md:3` 說「exact 21-tool registry」**（resolved, 2026-08-29）：該檔案隨 Hermes
   稽核鏈一併從 main 移除，過期敘述與 `docs/install-and-porting.md` 裡對應的 digest 那一列都不再存在，
   因此不必再重算。歷史內容見 tag `archive/hermes-audit-chain`。
-- **31 個被 spec manifest 雜湊的檔案沒有換行符釘選**（resolved, 2026-08-29）：原本的風險是 Windows 與
+- **32 個被 spec manifest 雜湊的檔案沒有換行符釘選**（resolved, 2026-08-29）：原本的風險是 Windows 與
   Linux checkout 給同一份檔案不同位元組、digest 就分歧。雜湊它們的 spec manifest 已隨 Hermes 稽核鏈
   移除，`.gitattributes` 也改成單一的 `* text=auto`，倉庫內已無任何東西會雜湊自己的原始檔，因此
   逐檔釘選 `-text` 不再是必要的。
@@ -417,3 +417,38 @@ A–E, 040, 041, and 042 are on `main`. Spec 042 is the separate
 Both of the options this line used to name are now done: Tool 24's live
 YouTube confirm is recorded in spec 039's Live Confirm Record, and spec 043
 exposed 042 as Tool 25. What is left is in Known Risks above.
+
+
+## SPEC 045: Learning workflow Skills
+
+Use `study-guide-bundle` for a named episode with an existing learning-notes semantic summary; use `workflow-derivation-bundle` for an existing lecture and the configured default operator-workflow context. These are independent requests: preview, explain, wait for explicit approval, confirm once, report and stop. Neither Skill fills missing sources or starts the other operation automatically. Existing tool registry and Core behavior are unchanged.
+
+Generation requires the user's exact API-cost acknowledgement after preview. Lecture reuse/cover-only and complete derivation-pair reuse pass an empty acknowledgement, even if one exists in conversation history. Every successful confirm writes run reports, including reuse. A preview is not a digest pin; state is recomputed on confirm, and a no-cost plan that becomes generation must stop on refusal without retry.
+
+SPEC 046: Tool 25 refuses pre-existing recovery entries and unsafe local paths before preview/reuse/generation; force never overrides refusal. It preserves all regular non-pair file bytes and maps MCP failures to fixed safe messages. Distinct errors identify rollback failure, published cleanup/report failure and reused report failure. Only this attempt owns its rollback/cleanup; no automatic recovery of old entries or agent retry. Writers must be serialized; publication is not crash-durable, race-proof or one artifact/report transaction.
+
+Validation is offline: static instruction contracts, actual-backend characterization and synthetic conversation oracles. These do not prove live agent compliance. No CLI/terminal/filesystem fallback, automatic cache rebuild, installation or deployment is performed.
+
+Tool28 `inspect_workflow_derivation_lineage` appends an offline explicit-episode lineage query. Tool25 now declares separate metadata_writes for its owned generation receipt; ship with the updated derivation Skill. Tool27 still reports presence/reuse only. Legacy untracked/custom not_evaluated results do not authorize regeneration. See SPEC048 contract.
+
+Tool29 `inspect_study_guide_lineage(podcast_id, episode_ref)` adds an offline read-only comparison of lecture03/04/07 against its recorded semantic summary. Tool26 generation declares separate `metadata_writes` for `study_guide.lineage.json`; ship with the updated study-guide Skill. Cover-only/reuse preserve provenance or legacy absence. No summary-to-transcript freshness claim; Tool27/28 behavior stays unchanged. See SPEC049.
+
+Tool30 `inspect_learning_bundle_recovery(podcast_id, episode_ref)` provides offline, read-only recovery diagnosis for five fixed bundle locations and both lineage records. Recovery entries and uncertain publication require manual review; no cleanup, repair, latest-winner or source-freshness claim. Tools1-29 and Skills retain their behavior. See SPEC050 and docs/api.md.
+
+Tool31 `inspect_learning_workflow_status(podcast_id, episode_ref)` provides a single offline read-only overview of Tools27-30:progress, both lineage scopes and recovery. Recovery gates further diagnostics; legacy/custom/stale observations retain distinct attention reasons. No executable suggested_call, action authorization or end-to-end freshness claim. Existing30 tool contracts/Skills remain unchanged. See SPEC051 and docs/api.md.
+
+Tool32 `advance_learning_workflow` previews and confirms one explicit-episode learning action with metadata action/plan binding; no automatic chain or repair. See docs/api.md and SPEC052. Existing Tools1-31 retain their contracts.
+
+
+## SPEC 053: Unified learning entry Skill
+
+Use `learning-workflow-advance` when asking for the next learning step of one explicit podcast/episode. It binds only Tool32 `advance_learning_workflow`: one zero-write/offline preview, disclose artifact/reuse/lineage/report plans and costs, wait for fresh cycle approval and exact cost text for generation, confirm once, report and stop. Cover sends empty acknowledgement; complete/blocked states never confirm. Returned action/plan_id are approval bindings, not content snapshots or locks. Missing tools, drift, malformed replies and failures stop without fallback, retries or automatic next action/cache rebuild.
+
+Example: request one learning step for a named podcast and episode; review the returned action/files/cost, then approve this cycle. Existing explicitly selected study-guide/derivation Skills remain independent. No full-chain/batch/repair/force operation is added. Portable Skill and response reference must be loaded by the agent host manually when needed; no installation or live client compliance guarantee. Evidence is offline instruction contracts, labelled dialogue oracles, temporary fake-provider backend checks and read-only synthetic pressure/review.
+
+
+SPEC054 adds Tool33 `prepare_learning_source` and Tool34 `inspect_source_preparation_job`. For Windows background preparation, use an already independently managed loopback HTTP MCP host; stdio new submissions report `worker_host_incompatible`. See [source preparation](api.md#source-preparation-jobs-tools-3334). No host policy, service deployment or Skill installation is performed automatically.
+
+SPEC055 adds optional per-source preparation_transcription model/device/compute_type. Preview and recorded status distinguish configured/approved transcription from recorded actual_transcription; missing historical evidence stays null. Settings bind approval and worker execution; GPU refusal cannot trigger fallback. Existing completed transcripts are never regenerated automatically. Ship the updated source-preparation Skill and response reference together. See [local configuration and validation](../specs/055-source-preparation-transcription-settings/quickstart.md).
+
+SPEC056 adds read-only Tool35 `query_source_content` and source-content-qa Skill for prepared RSS/YouTube/X timed evidence/notes. No cache prerequisite, preparation, repository provider or publication. Host model privacy/billing applies. See [Tool35](api.md#prepared-source-content-query-tool-35); actual Hermes acceptance is separate.

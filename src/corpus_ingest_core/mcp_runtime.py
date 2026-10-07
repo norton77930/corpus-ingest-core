@@ -25,6 +25,7 @@ MAX_CONTEXT_SEGMENTS = 5
 SEMANTIC_API_COST_ACK = semantic_summarizer.SEMANTIC_API_COST_ACK
 
 mcp = FastMCP("corpus-ingest-core")
+ACTIVE_TRANSPORT: str | None = None
 
 
 DEFAULT_STREAMABLE_HTTP_PORT = 8767
@@ -120,7 +121,12 @@ def tool_action_plan(
 def run() -> None:
     """以 FastMCP 預設 stdio transport 啟動 server。"""
 
-    mcp.run()
+    global ACTIVE_TRANSPORT
+    ACTIVE_TRANSPORT="stdio"
+    try:
+        mcp.run()
+    finally:
+        ACTIVE_TRANSPORT=None
 
 
 def run_streamable_http(config: StreamableHttpConfig | None = None) -> None:
@@ -130,7 +136,12 @@ def run_streamable_http(config: StreamableHttpConfig | None = None) -> None:
     mcp.settings.host = resolved.host
     mcp.settings.port = resolved.port
     mcp.settings.streamable_http_path = resolved.path
-    mcp.run(transport="streamable-http")
+    global ACTIVE_TRANSPORT
+    ACTIVE_TRANSPORT="streamable-http"
+    try:
+        mcp.run(transport="streamable-http")
+    finally:
+        ACTIVE_TRANSPORT=None
 
 
 def _tool_call(operation: Callable[[], Any], warnings: list[str] | None = None) -> dict[str, Any]:

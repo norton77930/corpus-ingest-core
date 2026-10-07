@@ -1,0 +1,5 @@
+# Repository research
+Decision: Tool32 only, actual052 closed envelope. Rationale: common entry already owns eligibility/lineage/cost binding;045 has a different preview schema and cannot be copied blindly. Alternative: client routing25-31 duplicates decisions and expands calls.
+Decision: concise main Skill plus portable relative response reference. Rationale: approval flow stays readable while conditional23-field/path/error checks are maintained once. Alternative: duplicated large standalone instructions.
+Decision: fresh cycle consent/ack. Core only validates exact phrase, not prior-operation provenance. Baseline read-only synthetic probe proposed forwarding earlier episode acknowledgement; the new approved Skill protocol teaches fresh-cycle consent. This is an instruction improvement,not a Core defect. No live call occurred.
+Decision: offline static contracts + labelled dialogue oracles + actual temporary Core/MCP fake providers + independent read-only pressure/review. None guarantees live Claude/Codex/Grok compliance. No unknown dependency or new runtime.

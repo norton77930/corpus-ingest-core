@@ -5,6 +5,7 @@ from __future__ import annotations
 import os
 import stat
 import sys
+from itertools import islice
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -30,21 +31,21 @@ class _Root:
     inode: int
 
 
-def secure_read_bytes(root: Path, path: Path, *, max_bytes: int) -> bytes | None:
+def secure_read_bytes(root: Path, path: Path, *, max_bytes: int, require_single_link: bool = False) -> bytes | None:
     """Read one Core-derived expected file or fail closed without following links.
 
     ``path`` must be lexically below the Core-derived ``root``.  Neither caller
     may supply a persisted path as the authority for either argument.
     """
 
-    snapshot = secure_snapshot(root, path, max_bytes=max_bytes)
+    snapshot = secure_snapshot(root, path, max_bytes=max_bytes, require_single_link=require_single_link)
     return snapshot.raw if snapshot is not None else None
 
 
-def secure_snapshot(root: Path, path: Path, *, max_bytes: int) -> SecureLocalSnapshot | None:
+def secure_snapshot(root: Path, path: Path, *, max_bytes: int, require_single_link: bool = False) -> SecureLocalSnapshot | None:
     """Prove stable, regular, in-root bytes across pathname and handle races."""
 
-    if isinstance(max_bytes, bool) or not isinstance(max_bytes, int) or max_bytes < 0:
+    if type(require_single_link) is not bool or isinstance(max_bytes, bool) or not isinstance(max_bytes, int) or max_bytes < 0:
         return None
     checked_root = _checked_root(root)
     if checked_root is None:
@@ -56,7 +57,8 @@ def secure_snapshot(root: Path, path: Path, *, max_bytes: int) -> SecureLocalSna
         before = candidate.lstat()
     except OSError:
         return None
-    if _is_reparse(before) or not stat.S_ISREG(before.st_mode) or before.st_size > max_bytes:
+    if (_is_reparse(before) or not stat.S_ISREG(before.st_mode) or before.st_size > max_bytes
+        or (require_single_link and before.st_nlink != 1)):
         return None
     identity = _identity(before)
     descriptor: int | None = None
@@ -68,9 +70,22 @@ def secure_snapshot(root: Path, path: Path, *, max_bytes: int) -> SecureLocalSna
             or _is_reparse(opened)
             or _identity(opened) != identity
             or opened.st_size > max_bytes
+            or (require_single_link and (opened.st_nlink != 1 or _content_stamp(opened) != _content_stamp(before)))
             or not _opened_handle_is_contained(checked_root.resolved_path, descriptor)
+            or (require_single_link and not _safe_parent_chain(checked_root, candidate))
         ):
             return None
+        if require_single_link:
+            before_read = candidate.lstat()
+            if (
+                _is_reparse(before_read)
+                or not stat.S_ISREG(before_read.st_mode)
+                or _identity(before_read) != identity
+                or before_read.st_nlink != 1
+                or _content_stamp(before_read) != _content_stamp(before)
+                or before_read.st_ctime_ns != before.st_ctime_ns
+            ):
+                return None
         raw = _read_descriptor_once(descriptor, opened.st_size)
         after_handle = os.fstat(descriptor)
         if (
@@ -78,6 +93,7 @@ def secure_snapshot(root: Path, path: Path, *, max_bytes: int) -> SecureLocalSna
             or after_handle.st_size != opened.st_size
             or len(raw) != opened.st_size
             or len(raw) > max_bytes
+            or (require_single_link and (after_handle.st_nlink != 1 or _content_stamp(after_handle) != _content_stamp(opened) or after_handle.st_ctime_ns != opened.st_ctime_ns))
         ):
             return None
     except OSError:
@@ -96,11 +112,20 @@ def secure_snapshot(root: Path, path: Path, *, max_bytes: int) -> SecureLocalSna
         _is_reparse(after_path)
         or not stat.S_ISREG(after_path.st_mode)
         or _identity(after_path) != identity
+        or (require_single_link and (after_path.st_nlink != 1 or _content_stamp(after_path) != _content_stamp(before) or after_path.st_ctime_ns != before.st_ctime_ns))
         or not _root_is_stable(checked_root)
         or not _safe_parent_chain(checked_root, candidate)
     ):
         return None
     return SecureLocalSnapshot(raw, identity[0], identity[1], len(raw))
+
+
+def _content_stamp(value) -> tuple[int, int]:
+    """Opt-in evidence readers reject same-inode content changes too."""
+    # Windows/Python 3.11 pathname ctime is creation time while fstat ctime
+    # can be change time. Compare mtime across these APIs, ctime only within
+    # each API below; otherwise every newly written safe file can be refused.
+    return value.st_size, value.st_mtime_ns
 
 
 def secure_directory_names(root: Path, directory: Path, *, max_entries: int) -> tuple[str, ...] | None:
@@ -141,7 +166,7 @@ def secure_directory_names(root: Path, directory: Path, *, max_entries: int) -> 
             or not _opened_handle_is_contained(checked_root.resolved_path, descriptor)
         ):
             return None
-        names = _list_directory_while_open(descriptor, candidate)
+        names = _list_directory_while_open(descriptor, candidate, max_entries)
         if (
             len(names) > max_entries
             or any(not _safe_child_name(name) for name in names)
@@ -339,11 +364,12 @@ def _windows_open_directory_descriptor(directory: Path) -> int:
         raise
 
 
-def _list_directory_while_open(descriptor: int, directory: Path) -> list[str]:
-    # On POSIX, listdir(fd) binds enumeration to the opened directory.  Windows
-    # CPython does not accept directory fds; CreateFileW above denied delete
-    # sharing, so this path cannot be replaced while its verified handle lives.
-    return os.listdir(directory if os.name == "nt" else descriptor)
+def _list_directory_while_open(descriptor: int, directory: Path, max_entries: int) -> list[str]:
+    # POSIX scandir(fd) stays bound to the verified handle. Windows uses the
+    # pathname while its handle denies delete sharing. One overflow witness
+    # permits refusal without materializing an arbitrarily large directory.
+    with os.scandir(directory if os.name == "nt" else descriptor) as entries:
+        return [entry.name for entry in islice(entries, max_entries + 1)]
 
 
 def _directory_names_are_current(directory: Path, names: list[str]) -> bool:
