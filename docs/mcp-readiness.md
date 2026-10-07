@@ -94,7 +94,7 @@ index, plan, or SQLite cache automatically.
 
 ## 020 Read-Only Verified Report Catalog Tool
 
-The current registry has exactly 25 reviewed tools. Tool 25, `derive_workflow_bundle`, is append-only after unchanged Tools 1–24; its preview is zero-write and zero-network, and confirm calls an LLM and needs the exact `api_cost_ack`. Tool 24, `ingest_youtube_video`, is the YouTube ingest tool. Tool 23, `ingest_x_video`, remains the X ingest tool. Preview is zero-write but reads public metadata over the network. Tool 22, `generate_stock_lens_report`, remains a dry-run-first side-effect stock lens (no LLM, no `api_cost_ack`, no network, no live market API, no investment advice). Tool 21, `list_verified_report_gap_backlog`, remains a read-query inventory gap backlog (no confirm/ack). Tool 20 remains historical next-step suggestion. Tool 19 remains coverage join. Tool 18 remains exact-locator offline revalidation. Tool 17 retains its offline manifest-first `list`, safe-metadata `search`, and exact-bundle `inspect` contract; inspect always reports `source_currentness_status=not_evaluated`.
+The current registry has exactly 35 reviewed tools. Tool 27, `suggest_learning_workflow_next_step`, is an offline read-query for one explicit episode, returning one preview suggestion, reusable completion or a blocker without execution or freshness/quality validation. Tool 26, `generate_study_guide_bundle`, is append-only after unchanged Tools 1–25; preview is zero-write and zero-network, and confirm delegates once to the lecture runner (generation needs the exact `api_cost_ack`; reuse and cover-only do not; existing 05/06 block regeneration). Tool 25, `derive_workflow_bundle`, is append-only after unchanged Tools 1–24; its preview is zero-write and zero-network, and confirm calls an LLM and needs the exact `api_cost_ack`. Tool 24, `ingest_youtube_video`, is the YouTube ingest tool. Tool 23, `ingest_x_video`, remains the X ingest tool. Preview is zero-write but reads public metadata over the network. Tool 22, `generate_stock_lens_report`, remains a dry-run-first side-effect stock lens (no LLM, no `api_cost_ack`, no network, no live market API, no investment advice). Tool 21, `list_verified_report_gap_backlog`, remains a read-query inventory gap backlog (no confirm/ack). Tool 20 remains historical next-step suggestion. Tool 19 remains coverage join. Tool 18 remains exact-locator offline revalidation. Tool 17 retains its offline manifest-first `list`, safe-metadata `search`, and exact-bundle `inspect` contract; inspect always reports `source_currentness_status=not_evaluated`.
 
 ## 對 MCP 友善的設計
 
@@ -130,3 +130,10 @@ python scripts/validate_mcp_setup.py --podcast gooaye --query 台積電
 ```
 
 不要把包含個人絕對路徑的 `.codex/config.toml`、`.env` 或 API key commit 進專案。
+
+Tool28 `inspect_workflow_derivation_lineage` appends an offline explicit-episode lineage query. Tool25 now declares separate metadata_writes for its owned generation receipt; ship with the updated derivation Skill. Tool27 still reports presence/reuse only. Legacy untracked/custom not_evaluated results do not authorize regeneration. See SPEC048 contract.
+
+Tool29 `inspect_study_guide_lineage(podcast_id, episode_ref)` adds an offline read-only comparison of lecture03/04/07 against its recorded semantic summary. Tool26 generation declares separate `metadata_writes` for `study_guide.lineage.json`; ship with the updated study-guide Skill. Cover-only/reuse preserve provenance or legacy absence. No summary-to-transcript freshness claim; Tool27/28 behavior stays unchanged. See SPEC049.
+
+
+SPEC054 adds Tool33 `prepare_learning_source` and Tool34 `inspect_source_preparation_job`. For Windows background preparation, use an already independently managed loopback HTTP MCP host; stdio new submissions report `worker_host_incompatible`. See [source preparation](api.md#source-preparation-jobs-tools-3334). No host policy, service deployment or Skill installation is performed automatically.

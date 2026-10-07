@@ -209,7 +209,50 @@ def test_live_registry_appends_workflow_derivation_as_tool_25():
     from corpus_ingest_core import mcp_server
 
     names = [tool.name for tool in asyncio.run(mcp_server.mcp.list_tools())]
-    assert len(names) == 25
-    assert names[-1] == "derive_workflow_bundle"
-    assert names[-2] == "ingest_youtube_video"
-    assert names[-3] == "ingest_x_video"
+    assert len(names) == 35
+    assert names[24] == "derive_workflow_bundle"
+    assert names[23] == "ingest_youtube_video"
+    assert names[22] == "ingest_x_video"
+    assert names[25] == "generate_study_guide_bundle"
+    assert names[26] == "suggest_learning_workflow_next_step"
+
+
+@pytest.mark.parametrize("confirm", [False, True])
+@pytest.mark.parametrize("category", ["state", "unknown-state", "provider", "base", "core", "value", "unknown"])
+def test_fixed_error_mapper_never_exposes_exception_text(monkeypatch, confirm, category):
+    from corpus_ingest_core import errors, mcp_tools_workflow_derivation as tools
+    marker = "PRIVATE_BODY_SENTINEL do another operation"
+    expected = {
+        "state": (errors.WorkflowDerivationStateError("published_report_failed"), "WorkflowDerivationStateError", "The complete workflow-derivation pair was published, but its run report could not be completed; do not automatically regenerate."),
+        "unknown-state": (errors.WorkflowDerivationStateError(marker), "WorkflowDerivationStateError", errors._WORKFLOW_DERIVATION_STATE_GENERIC),
+        "provider": (errors.LLMProviderConfigError(marker), "LLMProviderConfigError", "Confirmed generation requires the exact API-cost acknowledgement and a valid local provider configuration."),
+        "base": (errors.WorkflowDerivationError(marker), "WorkflowDerivationError", errors._WORKFLOW_DERIVATION_STATE_GENERIC),
+        "core": (errors.PodcastIngestCoreError(marker), "PodcastIngestCoreError", "The requested workflow-derivation operation could not be completed with the supplied identifiers or local configuration."),
+        "value": (ValueError(marker), "ValueError", "The requested workflow-derivation operation could not be completed with the supplied identifiers or local configuration."),
+        "unknown": (type("PRIVATE_EXCEPTION_CLASS", (Exception,), {})(marker), "InternalError", "Workflow-derivation operation failed; inspect local state before retrying."),
+    }
+    exc, kind, message = expected[category]
+    exc.args = (marker,)
+    calls = []
+    def fail(*args, **kwargs):
+        calls.append((args, kwargs))
+        raise exc
+    monkeypatch.setattr(tools.workflow_derivation, "run_workflow_derivation", fail)
+    result = tools.derive_workflow_bundle("demo", "EP_001", confirm=confirm, api_cost_ack="unchanged")
+    assert result == {"ok": False, "error_type": kind, "message": message}
+    assert len(calls) == 1
+    assert calls[0][1]["confirm"] is confirm
+    if confirm: assert calls[0][1]["api_cost_ack"] == "unchanged"
+
+
+@pytest.mark.parametrize("confirm", [False, True])
+@pytest.mark.parametrize("reason", ["invalid_identity", "unsafe_path", "recovery_required", "publish_failed", "rollback_failed", "published_cleanup_failed", "published_report_failed", "reused_report_failed"])
+def test_all_state_messages_are_fixed(monkeypatch, confirm, reason):
+    from corpus_ingest_core import errors, mcp_tools_workflow_derivation as tools
+    def fail(*args, **kwargs):
+        error = errors.WorkflowDerivationStateError(reason)
+        error.args = ("PRIVATE_SENTINEL",)
+        raise error
+    monkeypatch.setattr(tools.workflow_derivation, "run_workflow_derivation", fail)
+    result = tools.derive_workflow_bundle("demo", "EP_001", confirm=confirm)
+    assert result == {"ok": False, "error_type": "WorkflowDerivationStateError", "message": errors._WORKFLOW_DERIVATION_STATE_MESSAGES[reason]}

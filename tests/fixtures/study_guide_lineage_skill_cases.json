@@ -1,0 +1,307 @@
+{
+  "evidence_kind": "offline acceptance oracle; not agent execution",
+  "cases": [
+    {
+      "defect": "missing",
+      "preview": {
+        "ok": true,
+        "dry_run": true,
+        "requires_confirmation": true,
+        "tool": "generate_study_guide_bundle",
+        "inputs": {
+          "podcast_id": "demo",
+          "episode_ref": "EP_001",
+          "force": false
+        },
+        "writes": [
+          "data/demo/EP_001__Example/00_video_info.md",
+          "data/demo/EP_001__Example/03_full_summary.md",
+          "data/demo/EP_001__Example/04_learning_notes.md",
+          "data/demo/EP_001__Example/07_final_study_guide.md"
+        ],
+        "reuses": [],
+        "reads": [
+          "data/demo/source.md"
+        ],
+        "warnings": [],
+        "risks": [
+          "Confirmed generation calls an external LLM; reuse does not. Every successful confirm writes run reports."
+        ],
+        "run_mode": "dry-run",
+        "network_read": false,
+        "not_investment_advice": true,
+        "requires_llm": true,
+        "report_writes": [
+          "reports/run.json",
+          "reports/run.md"
+        ]
+      },
+      "expected_confirm_calls": 0,
+      "rule_ids": [
+        "P03"
+      ],
+      "expected_report": "Incompatible preview; stop before confirmation."
+    },
+    {
+      "defect": "wrong-type",
+      "preview": {
+        "ok": true,
+        "dry_run": true,
+        "requires_confirmation": true,
+        "tool": "generate_study_guide_bundle",
+        "inputs": {
+          "podcast_id": "demo",
+          "episode_ref": "EP_001",
+          "force": false
+        },
+        "writes": [
+          "data/demo/EP_001__Example/00_video_info.md",
+          "data/demo/EP_001__Example/03_full_summary.md",
+          "data/demo/EP_001__Example/04_learning_notes.md",
+          "data/demo/EP_001__Example/07_final_study_guide.md"
+        ],
+        "reuses": [],
+        "reads": [
+          "data/demo/source.md"
+        ],
+        "warnings": [],
+        "risks": [
+          "Confirmed generation calls an external LLM; reuse does not. Every successful confirm writes run reports."
+        ],
+        "run_mode": "dry-run",
+        "network_read": false,
+        "not_investment_advice": true,
+        "metadata_writes": "wrong type",
+        "requires_llm": true,
+        "report_writes": [
+          "reports/run.json",
+          "reports/run.md"
+        ]
+      },
+      "expected_confirm_calls": 0,
+      "rule_ids": [
+        "P03"
+      ],
+      "expected_report": "Incompatible preview; stop before confirmation."
+    },
+    {
+      "defect": "wrong-name",
+      "preview": {
+        "ok": true,
+        "dry_run": true,
+        "requires_confirmation": true,
+        "tool": "generate_study_guide_bundle",
+        "inputs": {
+          "podcast_id": "demo",
+          "episode_ref": "EP_001",
+          "force": false
+        },
+        "writes": [
+          "data/demo/EP_001__Example/00_video_info.md",
+          "data/demo/EP_001__Example/03_full_summary.md",
+          "data/demo/EP_001__Example/04_learning_notes.md",
+          "data/demo/EP_001__Example/07_final_study_guide.md"
+        ],
+        "reuses": [],
+        "reads": [
+          "data/demo/source.md"
+        ],
+        "warnings": [],
+        "risks": [
+          "Confirmed generation calls an external LLM; reuse does not. Every successful confirm writes run reports."
+        ],
+        "run_mode": "dry-run",
+        "network_read": false,
+        "not_investment_advice": true,
+        "metadata_writes": [
+          "data/demo/EP_001__Example/foreign.json"
+        ],
+        "requires_llm": true,
+        "report_writes": [
+          "reports/run.json",
+          "reports/run.md"
+        ]
+      },
+      "expected_confirm_calls": 0,
+      "rule_ids": [
+        "P03"
+      ],
+      "expected_report": "Incompatible preview; stop before confirmation."
+    },
+    {
+      "defect": "wrong-parent",
+      "preview": {
+        "ok": true,
+        "dry_run": true,
+        "requires_confirmation": true,
+        "tool": "generate_study_guide_bundle",
+        "inputs": {
+          "podcast_id": "demo",
+          "episode_ref": "EP_001",
+          "force": false
+        },
+        "writes": [
+          "data/demo/EP_001__Example/00_video_info.md",
+          "data/demo/EP_001__Example/03_full_summary.md",
+          "data/demo/EP_001__Example/04_learning_notes.md",
+          "data/demo/EP_001__Example/07_final_study_guide.md"
+        ],
+        "reuses": [],
+        "reads": [
+          "data/demo/source.md"
+        ],
+        "warnings": [],
+        "risks": [
+          "Confirmed generation calls an external LLM; reuse does not. Every successful confirm writes run reports."
+        ],
+        "run_mode": "dry-run",
+        "network_read": false,
+        "not_investment_advice": true,
+        "metadata_writes": [
+          "other/study_guide.lineage.json"
+        ],
+        "requires_llm": true,
+        "report_writes": [
+          "reports/run.json",
+          "reports/run.md"
+        ]
+      },
+      "expected_confirm_calls": 0,
+      "rule_ids": [
+        "P03"
+      ],
+      "expected_report": "Incompatible preview; stop before confirmation."
+    },
+    {
+      "defect": "duplicate",
+      "preview": {
+        "ok": true,
+        "dry_run": true,
+        "requires_confirmation": true,
+        "tool": "generate_study_guide_bundle",
+        "inputs": {
+          "podcast_id": "demo",
+          "episode_ref": "EP_001",
+          "force": false
+        },
+        "writes": [
+          "data/demo/EP_001__Example/00_video_info.md",
+          "data/demo/EP_001__Example/03_full_summary.md",
+          "data/demo/EP_001__Example/04_learning_notes.md",
+          "data/demo/EP_001__Example/07_final_study_guide.md"
+        ],
+        "reuses": [],
+        "reads": [
+          "data/demo/source.md"
+        ],
+        "warnings": [],
+        "risks": [
+          "Confirmed generation calls an external LLM; reuse does not. Every successful confirm writes run reports."
+        ],
+        "run_mode": "dry-run",
+        "network_read": false,
+        "not_investment_advice": true,
+        "metadata_writes": [
+          "data/demo/EP_001__Example/study_guide.lineage.json",
+          "data/demo/EP_001__Example/study_guide.lineage.json"
+        ],
+        "requires_llm": true,
+        "report_writes": [
+          "reports/run.json",
+          "reports/run.md"
+        ]
+      },
+      "expected_confirm_calls": 0,
+      "rule_ids": [
+        "P03"
+      ],
+      "expected_report": "Incompatible preview; stop before confirmation."
+    },
+    {
+      "defect": "reuse-write",
+      "preview": {
+        "ok": true,
+        "dry_run": true,
+        "requires_confirmation": true,
+        "tool": "generate_study_guide_bundle",
+        "inputs": {
+          "podcast_id": "demo",
+          "episode_ref": "EP_001",
+          "force": false
+        },
+        "writes": [],
+        "reuses": [
+          "data/demo/EP_001__Example/00_video_info.md",
+          "data/demo/EP_001__Example/03_full_summary.md",
+          "data/demo/EP_001__Example/04_learning_notes.md",
+          "data/demo/EP_001__Example/07_final_study_guide.md"
+        ],
+        "reads": [
+          "data/demo/source.md"
+        ],
+        "warnings": [],
+        "risks": [
+          "Confirmed generation calls an external LLM; reuse does not. Every successful confirm writes run reports."
+        ],
+        "run_mode": "dry-run",
+        "network_read": false,
+        "not_investment_advice": true,
+        "metadata_writes": [
+          "data/demo/EP_001__Example/study_guide.lineage.json"
+        ],
+        "requires_llm": false,
+        "report_writes": [
+          "reports/run.json",
+          "reports/run.md"
+        ]
+      },
+      "expected_confirm_calls": 0,
+      "rule_ids": [
+        "P03"
+      ],
+      "expected_report": "Incompatible preview; stop before confirmation."
+    },
+    {
+      "defect": "generate-empty",
+      "preview": {
+        "ok": true,
+        "dry_run": true,
+        "requires_confirmation": true,
+        "tool": "generate_study_guide_bundle",
+        "inputs": {
+          "podcast_id": "demo",
+          "episode_ref": "EP_001",
+          "force": false
+        },
+        "writes": [
+          "data/demo/EP_001__Example/00_video_info.md",
+          "data/demo/EP_001__Example/03_full_summary.md",
+          "data/demo/EP_001__Example/04_learning_notes.md",
+          "data/demo/EP_001__Example/07_final_study_guide.md"
+        ],
+        "reuses": [],
+        "reads": [
+          "data/demo/source.md"
+        ],
+        "warnings": [],
+        "risks": [
+          "Confirmed generation calls an external LLM; reuse does not. Every successful confirm writes run reports."
+        ],
+        "run_mode": "dry-run",
+        "network_read": false,
+        "not_investment_advice": true,
+        "metadata_writes": [],
+        "requires_llm": true,
+        "report_writes": [
+          "reports/run.json",
+          "reports/run.md"
+        ]
+      },
+      "expected_confirm_calls": 0,
+      "rule_ids": [
+        "P03"
+      ],
+      "expected_report": "Incompatible preview; stop before confirmation."
+    }
+  ]
+}

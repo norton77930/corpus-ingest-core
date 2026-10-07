@@ -207,7 +207,8 @@
 - `040-x-video-ingest-mcp` is **Implemented**: append-only MCP Tool 23 `ingest_x_video` over Spec 036 `run_x_video_ingest`. Preview is zero-write but resolves public metadata (`run_mode=preview`, `network_read=true`); confirm persists a metadata-only run report. Tools 1–22 unchanged; the registry was exactly 23 tools at the time.
 - `041-youtube-video-ingest-mcp` is **Implemented**: append-only MCP Tool 24 `ingest_youtube_video` over Spec 039 `run_youtube_video_ingest`, with the same preview envelope as 040. Tools 1–23 unchanged; the registry was exactly 24 tools at the time.
 - `042-workflow-derivation-bundle` is **Implemented**: a separate `workflow_derivation` family producing prototype `05_prompt_examples.md` and `06_apply_to_my_workflow.md` from an available Spec 038 lecture plus `config/operator_workflow.yaml`. No transcript text reaches the LLM. Not on `ARTIFACT_LADDER`; no MCP tool, and the registry was exactly 24 tools at the time.
-- `043-workflow-derivation-mcp` is **Implemented**: append-only MCP Tool 25 `derive_workflow_bundle` over Spec 042 `run_workflow_derivation`, so the `05`/`06` derivation is no longer terminal-only. Unlike Tools 23/24 its preview is zero-write **and** zero-network — it returns before constructing a provider, so preview needs no `api_cost_ack`; confirm calls an LLM and forwards the exact ack to Core's `require_exact_api_cost_ack` unchanged. The MCP surface deliberately omits `provider`, `model`, `base_url`, `api_key_env`, `reasoning_effort`, `read_timeout_seconds`, and `workflow_context`. Tools 1–24 unchanged; the live registry has exactly 25 tools.
+- `043-workflow-derivation-mcp` is **Implemented**: append-only MCP Tool 25 `derive_workflow_bundle` over Spec 042 `run_workflow_derivation`, so the `05`/`06` derivation is no longer terminal-only. Unlike Tools 23/24 its preview is zero-write **and** zero-network — it returns before constructing a provider, so preview needs no `api_cost_ack`; confirm calls an LLM and forwards the exact ack to Core's `require_exact_api_cost_ack` unchanged. The MCP surface deliberately omits `provider`, `model`, `base_url`, `api_key_env`, `reasoning_effort`, `read_timeout_seconds`, and `workflow_context`. Tools 1–24 unchanged; the registry was exactly 25 tools at the time.
+- `044-study-guide-mcp` is **Implemented**: append-only MCP Tool 26 `generate_study_guide_bundle` over the Spec 038 lecture runner. Preview is zero-write and zero-network. Confirm delegates once; generation needs the exact `api_cost_ack`, while reuse and cover-only do not. Existing `05`/`06` block lecture regeneration. Derivation stays a separate request. Tools 1–25 unchanged; at SPEC044 closeout the registry had exactly 26 tools.
 - Local epic closeout note (no remote yet): [`docs/epic-corpus-semantic-completion-closeout.md`](epic-corpus-semantic-completion-closeout.md) records the 015–024 operator loop, tool count, hygiene, and future PR skeleton.
 - 其後為 audit-remediation 硬化（**非編號功能階段，不進 Phase 序列**），對應目前 HEAD：
   - **Batch 2**：安全/契約守衛測試（secret boundary、gitignore policy、MCP tool registry、LLM ack 契約、LLM CLI no-leak、manual cache rebuild）。
@@ -229,3 +230,34 @@
 ### 編號註記
 
 - Phase 編號 **6P、6S 未使用**（跳號，非遺漏）。
+
+## Learning workflow status after SPEC 046 (2026-10-03)
+
+SPEC045 added two separate portable learning Skills; SPEC046 hardened Tool25 publication/path/error handling. Both are implemented and offline-verified in the current working tree; at SPEC046 closeout the registry had exactly 26 tools. See their implementation logs in specs/045-study-guide-workflow-skills and specs/046-workflow-derivation-hardening.
+
+The prior completed learning phase was [SPEC047: Learning Workflow Next Step](../specs/047-learning-workflow-next-step/spec.md), with [current capability inventory and priorities](../specs/047-learning-workflow-next-step/capability-map.md). It provides a read-only named-episode decision composed from the existing previews, exposing appended Tool27. It does not execute or chain generation. Runtime implementation and offline verification are complete; the live registry now has exactly 35 tools. Full verification and closeout are recorded in the package implementation log.
+
+SPEC048 workflow derivation lineage is implemented and offline-verified: same-directory generation receipt plus read-only Tool28. Existing Tool27 retains presence/reuse semantics; no automatic backfill or regeneration.
+
+SPEC048 closeout:2085 passed/26 native-symlink skips, first27 tool signatures/order unchanged,22 tasks completed and convergence added0 tasks. See [implementation evidence](../specs/048-workflow-derivation-lineage/implementation-log.md).
+
+Tool29 `inspect_study_guide_lineage(podcast_id, episode_ref)` adds an offline read-only comparison of lecture03/04/07 against its recorded semantic summary. Tool26 generation declares separate `metadata_writes` for `study_guide.lineage.json`; ship with the updated study-guide Skill. Cover-only/reuse preserve provenance or legacy absence. No summary-to-transcript freshness claim; Tool27/28 behavior stays unchanged. See SPEC049.
+
+SPEC050 learning-bundle recovery diagnosis is implemented and offline-verified: appended read-only Tool30, five fixed locations and strict receipt/local-output observations. No recovery executor, cleanup, winner selection or source-freshness enforcement. Existing generation tools and Skills retain their boundaries.
+
+SPEC051 learning workflow status overview is implemented:append-only read-query Tool31 consolidates progress, lineage and recovery metadata for one explicit episode; recovery-first gate, no execution or freshness enforcement.
+
+SPEC052 single-episode learning advance is implemented:append-only Tool32 previews and confirms one action over existing runners,metadata plan binding and strict attention gate;038/044 completion records reconciled.
+
+SPEC053 unified learning entry Skill is implemented (offline verified): portable single-step Tool32 protocol and offline dialogue/backend acceptance. Runtime and32tools unchanged.
+
+SPEC054 source preparation jobs is implemented (offline verified): preview/approve one YouTube/X source, local download/transcription/validation, durable one-source worker and metadata-only progress. Tool33/34 appended; current35 tools. Windows stdio new submissions block; existing independent loopback HTTP supports background processing. SPEC055 adds source-profile transcription settings and truthful configured/recorded disclosure. SPEC056 implements prepared-source content query/QA; actual Hermes acceptance remains separate.
+
+
+## SPEC057 source learning entry
+
+source-learning-entry coordinates the existing preparation/job/content-query tools for one user learning request. Implementation is present; developer verification passed. Ready URL can reach QA; new preparation still requires fresh approval and stops after submission; later explicit learning continuation checks the retained source/job. Current registry remains 35 tools. Actual Hermes acceptance remains a pending operational gate. No persistent request queue, autonomous polling, new platform, formal-generation chain or host installation is added.
+
+## SPEC058 local acceptance and Hermes handoff
+
+[SPEC058](../specs/058-learning-mcp-acceptance/spec.md) adds a reusable metadata-only learning MCP verifier, transitive Skill resource inventory and staged operator handoff. No new tool: current registry remains35. Developer implementation/local verification are complete; human replay/answer quality, freshly approved live preparation and actual Hermes traces remain pending. See [usage](../specs/058-learning-mcp-acceptance/quickstart.md) and [acceptance sheet](../specs/058-learning-mcp-acceptance/content-acceptance.md). SPEC057 T017/T018 are unchanged pending live-host gates.

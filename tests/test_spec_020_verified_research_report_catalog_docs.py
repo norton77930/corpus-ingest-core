@@ -116,8 +116,8 @@ def test_spec_020_implemented_docs_and_handoff_keep_current_contracts() -> None:
     # archived at the `archive/hermes-audit-chain` tag and removed from main on
     # 2026-08-29. What survives is the loopback Streamable HTTP transport itself;
     # the pinned count claim is unchanged.
-    assert "共用單一 FastMCP 的 stdio 與 loopback Streamable HTTP transport（目前恰好 25 個 reviewed tools）" in handoff
-    assert "The local stdio registry has exact 25 reviewed tools." in handoff
+    assert "共用單一 FastMCP 的 stdio 與 loopback Streamable HTTP transport（目前恰好 35 個 reviewed tools）" in handoff
+    assert "The local stdio registry has exact 35 reviewed tools." in handoff
     assert "`generate_stock_lens_report`" in handoff
     assert "stdio-only MCP server" not in handoff
     assert "恰好 18 個 reviewed tools" not in handoff

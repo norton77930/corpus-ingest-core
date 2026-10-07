@@ -31,6 +31,15 @@ GROUP_MODULES = (
     "mcp_tools_x_video.py",
     "mcp_tools_youtube_video.py",
     "mcp_tools_workflow_derivation.py",
+    "mcp_tools_study_guide.py",
+    "mcp_tools_learning_workflow.py",
+    "mcp_tools_workflow_lineage.py",
+    "mcp_tools_study_guide_lineage.py",
+    "mcp_tools_learning_recovery.py",
+    "mcp_tools_learning_status.py",
+    "mcp_tools_learning_advance.py",
+    "mcp_tools_source_preparation.py",
+    "mcp_tools_source_content.py",
 )
 
 FACADE_EXPORTS = (
@@ -59,6 +68,19 @@ FACADE_EXPORTS = (
     "stock_lens",
     "x_video_ingest",
     "youtube_video_ingest",
+    "study_guide_bundle",
+    "generate_study_guide_bundle",
+    "suggest_learning_workflow_next_step",
+    "inspect_workflow_derivation_lineage",
+    "inspect_study_guide_lineage",
+    "inspect_learning_bundle_recovery",
+    "inspect_learning_workflow_status",
+    "advance_learning_workflow",
+    "prepare_learning_source",
+    "inspect_source_preparation_job",
+    "source_preparation",
+    "source_content_query",
+    "query_source_content",
     "verified_research_report_workflow_runner",
     "mcp_episode_verified_research_report",
     "mcp_verified_research_report_catalog",
@@ -177,3 +199,18 @@ def test_completion_rejection_messages_have_one_defining_module():
     assert not any(f'"{message}"' in cli_text for message in REJECTION_MESSAGES), (
         "the CLI must import the canonical message constants, not re-type them"
     )
+
+
+
+def test_learning_groups_are_explicitly_imported_in_registry_order():
+    tree = ast.parse((SRC_DIR / "mcp_server.py").read_text(encoding="utf-8"))
+    groups = [alias.name for node in tree.body if isinstance(node, ast.ImportFrom)
+              and node.module is None for alias in node.names if alias.name.startswith("mcp_tools_")]
+    assert groups[-10:] == [
+        "mcp_tools_workflow_derivation", "mcp_tools_study_guide", "mcp_tools_learning_workflow", "mcp_tools_workflow_lineage", "mcp_tools_study_guide_lineage", "mcp_tools_learning_recovery", "mcp_tools_learning_status", "mcp_tools_learning_advance", "mcp_tools_source_preparation", "mcp_tools_source_content",
+    ]
+
+
+def test_study_guide_lineage_group_is_reexported():
+    from corpus_ingest_core import mcp_server,mcp_tools_study_guide_lineage
+    assert mcp_server.inspect_study_guide_lineage is mcp_tools_study_guide_lineage.inspect_study_guide_lineage

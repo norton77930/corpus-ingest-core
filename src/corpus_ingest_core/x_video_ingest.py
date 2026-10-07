@@ -6,11 +6,14 @@
 
 from __future__ import annotations
 
+from .artifact_preservation import preserve_partial_artifacts
+
 import json
 import re
 import shutil
 import tempfile
 from dataclasses import asdict, dataclass
+from collections.abc import Callable
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -148,6 +151,7 @@ def run_x_video_ingest(
     compute_type: str = "int8",
     force: bool = False,
     work_dir: str | Path | None = None,
+    progress_callback: Callable[[str, dict[str, str]], None] | None = None,
 ) -> XVideoIngestResult:
     """把一支 X 影片取得成 corpus 資產；預設是 preview。
 
@@ -219,11 +223,17 @@ def run_x_video_ingest(
     if registration_problem is not None:
         raise XVideoIngestFailedError(registration_problem)
 
+    progress_identity = {"podcast_id": identity.podcast_id, "episode_ref": identity.episode_ref,
+                         "canonical_url": identity.canonical_url}
+    if progress_callback is not None:
+        progress_callback("transcribing" if audio_exists else "downloading", progress_identity)
     if not audio_exists:
         _acquire_audio(identity.canonical_url, audio_target, work_dir)
 
     _write_seed(seed_target, seed)
 
+    if progress_callback is not None and not audio_exists:
+        progress_callback("transcribing", progress_identity)
     transcript = transcribe_episode(
         identity.podcast_id,
         identity.episode_ref,
@@ -235,6 +245,8 @@ def run_x_video_ingest(
         audio_path=audio_target,
         title=seed.title,
     )
+    if progress_callback is not None:
+        progress_callback("validating", progress_identity)
 
     result = XVideoIngestResult(
         podcast_id=identity.podcast_id,
@@ -301,11 +313,13 @@ def _write_seed(seed_target: Path, seed: CorpusEpisodeSeed) -> None:
     seed_target.parent.mkdir(parents=True, exist_ok=True)
     part_path = seed_target.with_name(f"{seed_target.name}.part")
     try:
-        part_path.unlink(missing_ok=True)
+        if not preserve_partial_artifacts():
+            part_path.unlink(missing_ok=True)
         part_path.write_text(json.dumps(asdict(seed), ensure_ascii=False, indent=2), encoding="utf-8")
         part_path.replace(seed_target)
     except OSError:
-        part_path.unlink(missing_ok=True)
+        if not preserve_partial_artifacts():
+            part_path.unlink(missing_ok=True)
         raise
 
 
@@ -318,7 +332,8 @@ def _acquire_audio(url: str, audio_target: Path, work_dir: str | Path | None) ->
     try:
         video_path = _download_video(url, resolved_work_dir)
         audio_target.parent.mkdir(parents=True, exist_ok=True)
-        part_path.unlink(missing_ok=True)
+        if not preserve_partial_artifacts():
+            part_path.unlink(missing_ok=True)
         _extract_audio(video_path, part_path)
         part_path.replace(audio_target)
     except PodcastIngestCoreError:
@@ -333,7 +348,8 @@ def _acquire_audio(url: str, audio_target: Path, work_dir: str | Path | None) ->
         # 成功時 replace 已經把 .part 移走，這裡是 no-op；失敗時無論哪種例外
         # 都不會有殘留檔案留在 data/audio/。
         try:
-            part_path.unlink(missing_ok=True)
+            if not preserve_partial_artifacts():
+                part_path.unlink(missing_ok=True)
         except OSError:
             pass
         if owns_work_dir:

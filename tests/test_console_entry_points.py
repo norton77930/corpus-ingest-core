@@ -28,7 +28,7 @@ from pathlib import Path
 import pytest
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-EXPECTED_TOOL_COUNT = 25
+EXPECTED_TOOL_COUNT = 35
 
 
 def _declared_entry_points() -> dict[str, str]:

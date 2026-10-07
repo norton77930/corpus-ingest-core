@@ -26,6 +26,23 @@ _SAMPLE_INFO = {
 _WATCH_URL = f"https://www.youtube.com/watch?v={_VIDEO_ID}"
 
 
+def test_optional_preparation_progress_has_real_stages_and_identity(monkeypatch, tmp_data_dirs):
+    from corpus_ingest_core import youtube_video_ingest as module
+    from types import SimpleNamespace
+    _stub_acquisition(monkeypatch, module)
+    monkeypatch.setattr(module, "_registration_problem", lambda _: None)
+    monkeypatch.setattr(module, "_acquire_audio", lambda *_: None)
+    monkeypatch.setattr(module, "_write_seed", lambda *_: None)
+    monkeypatch.setattr(module, "transcribe_episode", lambda *a, **kw: SimpleNamespace(json_path=tmp_data_dirs / "fixture.json"))
+    monkeypatch.setattr(module, "_write_run_report", lambda _: None)
+    events = []
+    module.run_youtube_video_ingest(_WATCH_URL, progress_callback=lambda stage, identity: events.append((stage,identity)))
+    assert events == []
+    module.run_youtube_video_ingest(_WATCH_URL, confirm=True, progress_callback=lambda stage, identity: events.append((stage,identity)))
+    assert [stage for stage,_ in events] == ["downloading","transcribing","validating"]
+    assert all(identity["podcast_id"] == "yt-raytar" and identity["episode_ref"] == _VIDEO_ID for _,identity in events)
+
+
 def test_parse_youtube_video_id_accepts_common_url_forms() -> None:
     urls = (
         f"https://www.youtube.com/watch?v={_VIDEO_ID}",

@@ -29,7 +29,7 @@ dependencies = [
     "feedparser>=6.0",
     "faster-whisper>=1.1.0",
     # The ceiling is held by hand. Every agent-facing contract in this
-    # project sits on mcp: one FastMCP instance, a 25-tool registry whose
+    # project sits on mcp: one FastMCP instance, a 35-tool registry whose
     # order is part of the compatibility promise, and both transports.
     # Raising it means running the suite against the new major and reading
     # tests/test_mcp_tool_registry_contract.py, not widening a range.
@@ -73,7 +73,7 @@ Changelog = "https://github.com/norton77930/corpus-ingest-core/blob/main/CHANGEL
 # nothing about tools. Targeting mcp_runtime:run here produced a server that
 # started cleanly and advertised zero tools.
 # tests/test_console_entry_points.py runs each command in a fresh process and
-# fails if the registry is not the full 25.
+# fails if the registry is not the full 35.
 [project.scripts]
 corpus-ingest-mcp = "corpus_ingest_core.mcp_server:run"
 corpus-ingest-mcp-http = "corpus_ingest_core.mcp_server:run_streamable_http"

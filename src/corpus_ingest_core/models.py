@@ -3,6 +3,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from .preparation_transcription import TranscriptionSettings
+
 
 @dataclass(frozen=True)
 class PodcastProfile:
@@ -20,6 +22,7 @@ class PodcastProfile:
     # summary_profile 回答「內容是什麼」。X 上的財經帳號與 YouTube 上的 AI
     # 教學都存在，把兩者綁在一起遲早要拆。
     summary_profile: str = "finance"
+    preparation_transcription: TranscriptionSettings | None = None
 
 
 @dataclass(frozen=True)
@@ -1442,6 +1445,7 @@ class WorkflowDerivationResult:
     warnings: list[str]
     not_investment_advice: bool
 
+    metadata_writes: list[str] = field(default_factory=list)
 
 @dataclass(frozen=True)
 class StudyGuideBundleResult:
@@ -1462,6 +1466,7 @@ class StudyGuideBundleResult:
     reused: bool
     warnings: list[str]
     not_investment_advice: bool
+    metadata_writes: list[str] = field(default_factory=list)
 
 
 VIDEO_SEED_SOURCES = frozenset({"x-video", "yt-video"})

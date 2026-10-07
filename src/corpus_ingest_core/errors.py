@@ -46,8 +46,105 @@ class StudyGuideBundleError(PodcastIngestCoreError):
     """Study-guide bundle selection, generation, or write failed."""
 
 
+_STUDY_GUIDE_STATE_MESSAGES = {
+    "invalid_identity": (
+        "An explicit configured podcast and canonical episode reference are required; "
+        "latest/next are unsupported."
+    ),
+    "unsafe_path": (
+        "A study-guide source or destination path is unsafe or unreadable; publication is refused."
+    ),
+    "recovery_required": (
+        "Existing study-guide or derivation staging/backup entries require operator review; "
+        "no automatic recovery was attempted."
+    ),
+    "derivation_conflict": (
+        "Existing workflow derivations prevent regenerating their lecture; "
+        "force does not override this protection."
+    ),
+    "publish_failed": (
+        "Study-guide publication failed before commit; the previous public bundle is unchanged or restored."
+    ),
+    "rollback_failed": (
+        "Publication and rollback failed; preserved backup/staging requires operator recovery."
+    ),
+    "published_cleanup_failed": (
+        "The complete study-guide bundle was published, but cleanup failed; "
+        "review retained recovery entries before another operation."
+    ),
+    "published_report_failed": (
+        "The complete study-guide bundle was published, but its run report could not be completed; "
+        "do not automatically regenerate."
+    ),
+    "reused_report_failed": (
+        "The existing bundle was reused, but its run report could not be completed; "
+        "do not automatically regenerate."
+    ),
+}
+_STUDY_GUIDE_STATE_GENERIC = (
+    "Study-guide prerequisites, generated content or local publication could not be validated; "
+    "check the configured source and bundle state."
+)
+
+
+class StudyGuideBundleStateError(StudyGuideBundleError):
+    """Finite study-guide refusal. ``reason_code`` selects a fixed safe message."""
+
+    def __init__(self, reason_code: str) -> None:
+        self.reason_code = reason_code
+        super().__init__(_STUDY_GUIDE_STATE_MESSAGES.get(reason_code, _STUDY_GUIDE_STATE_GENERIC))
+
+
 class WorkflowDerivationError(PodcastIngestCoreError):
     """Workflow derivation selection, generation, or write failed."""
+
+
+_WORKFLOW_DERIVATION_STATE_MESSAGES = {
+    "invalid_identity": (
+        "An explicit configured podcast and canonical episode reference are required; latest/next "
+        "are unsupported."
+    ),
+    "unsafe_path": (
+        "A workflow-derivation source or destination path is unsafe or unreadable; publication is "
+        "refused."
+    ),
+    "recovery_required": (
+        "Existing study-guide or derivation staging/backup entries require operator review; no "
+        "automatic recovery was attempted."
+    ),
+    "publish_failed": (
+        "Workflow-derivation publication failed before commit; the previous public bundle is "
+        "unchanged or restored."
+    ),
+    "rollback_failed": (
+        "Workflow-derivation publication and rollback failed; preserved backup/staging requires "
+        "operator recovery."
+    ),
+    "published_cleanup_failed": (
+        "The complete workflow-derivation pair was published, but cleanup failed; review retained "
+        "recovery entries before another operation."
+    ),
+    "published_report_failed": (
+        "The complete workflow-derivation pair was published, but its run report could not be "
+        "completed; do not automatically regenerate."
+    ),
+    "reused_report_failed": (
+        "The existing workflow-derivation pair was reused, but its run report could not be "
+        "completed; do not automatically regenerate."
+    ),
+}
+_WORKFLOW_DERIVATION_STATE_GENERIC = (
+    "Workflow-derivation prerequisites, generated content or local publication could not be validated; "
+    "check the configured source and bundle state."
+)
+
+
+class WorkflowDerivationStateError(WorkflowDerivationError):
+    """Finite derivation state with a fixed safe diagnostic."""
+
+    def __init__(self, reason_code: str) -> None:
+        self.reason_code = reason_code
+        super().__init__(_WORKFLOW_DERIVATION_STATE_MESSAGES.get(reason_code, _WORKFLOW_DERIVATION_STATE_GENERIC))
 
 
 class CorpusIndexFailedError(PodcastIngestCoreError):

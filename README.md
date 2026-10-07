@@ -204,6 +204,8 @@ does not claim to be.
 
 ### Agent interface
 
+The registry has 35 reviewed tools. Learning workflows generate lectures and05/06 examples, suggest the next step, and provide a separate read-only lineage query via `inspect_workflow_derivation_lineage` (Tool28). New derivations record their consumed inputs/output bytes; legacy pairs remain untracked. See [the tool contract](docs/api.md#workflow-derivation-lineage-tool-28).
+
 The MCP server exposes the same core functions to AI agents over a single
 `FastMCP` instance: stdio for local clients, and Streamable HTTP bound to
 `127.0.0.1:8767/mcp` only. Same registry, same guards, two transports.
@@ -301,3 +303,13 @@ original audio and a primary source.
 MIT — see [LICENSE](LICENSE). No third-party source is vendored on `main`; an
 archived tag still carries one MIT-licensed snapshot, noted in
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).
+
+Tool29 `inspect_study_guide_lineage(podcast_id, episode_ref)` adds an offline read-only comparison of lecture03/04/07 against its recorded semantic summary. Tool26 generation declares separate `metadata_writes` for `study_guide.lineage.json`; ship with the updated study-guide Skill. Cover-only/reuse preserve provenance or legacy absence. No summary-to-transcript freshness claim; Tool27/28 behavior stays unchanged. See SPEC049.
+
+Tool30 `inspect_learning_bundle_recovery(podcast_id, episode_ref)` provides offline, read-only recovery diagnosis for five fixed bundle locations and both lineage records. Recovery entries and uncertain publication require manual review; no cleanup, repair, latest-winner or source-freshness claim. Tools1-29 and Skills retain their behavior. See SPEC050 and docs/api.md.
+
+Tool31 `inspect_learning_workflow_status(podcast_id, episode_ref)` provides a single offline read-only overview of Tools27-30:progress, both lineage scopes and recovery. Recovery gates further diagnostics; legacy/custom/stale observations retain distinct attention reasons. No executable suggested_call, action authorization or end-to-end freshness claim. Existing30 tool contracts/Skills remain unchanged. See SPEC051 and docs/api.md.
+
+Tool32 `advance_learning_workflow` previews and confirms one explicit-episode learning action with metadata action/plan binding; no automatic chain or repair. See docs/api.md and SPEC052. Existing Tools1-31 retain their contracts.
+
+Tool35 `query_source_content` reads one prepared RSS/YouTube/X transcript without SQLite. Pair with [source-content-qa Skill](.agents/skills/source-content-qa/SKILL.md) for timed evidence answers and complete/partial notes; host AI privacy/billing applies. [Quickstart](specs/056-source-content-query/quickstart.md).

@@ -188,6 +188,8 @@ Mention 抽取遵循同樣的原則:它用 deterministic rules 掃描公司、ti
 
 ### Agent 介面
 
+目前 MCP 有 32 個工具。Tool28 `inspect_workflow_derivation_lineage` 可唯讀比對 05/06 與生成時的來源紀錄；舊檔案標為 untracked，不自動重生。詳見 [工具契約](docs/api.md#workflow-derivation-lineage-tool-28)。
+
 MCP server 用單一 `FastMCP` instance 把同一組 core functions 提供給 AI agent:
 本機 client 走 stdio,另一條是只綁定 `127.0.0.1:8767/mcp` 的 Streamable HTTP。
 同一份 registry、同一組守衛,兩種 transport。
@@ -263,3 +265,13 @@ mention 可能不完整或有誤,LLM 產生的內容也可能在錯誤的同時�
 MIT — 見 [LICENSE](LICENSE)。`main` 上沒有 vendored 任何第三方原始碼;有一份
 MIT 授權的快照仍保留在封存 tag 中,說明見
 [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)。
+
+Tool29 `inspect_study_guide_lineage(podcast_id, episode_ref)` adds an offline read-only comparison of lecture03/04/07 against its recorded semantic summary. Tool26 generation declares separate `metadata_writes` for `study_guide.lineage.json`; ship with the updated study-guide Skill. Cover-only/reuse preserve provenance or legacy absence. No summary-to-transcript freshness claim; Tool27/28 behavior stays unchanged. See SPEC049.
+
+Tool30 `inspect_learning_bundle_recovery(podcast_id, episode_ref)` provides offline, read-only recovery diagnosis for five fixed bundle locations and both lineage records. Recovery entries and uncertain publication require manual review; no cleanup, repair, latest-winner or source-freshness claim. Tools1-29 and Skills retain their behavior. See SPEC050 and docs/api.md.
+
+Tool31 `inspect_learning_workflow_status(podcast_id, episode_ref)` provides a single offline read-only overview of Tools27-30:progress, both lineage scopes and recovery. Recovery gates further diagnostics; legacy/custom/stale observations retain distinct attention reasons. No executable suggested_call, action authorization or end-to-end freshness claim. Existing30 tool contracts/Skills remain unchanged. See SPEC051 and docs/api.md.
+
+Tool32 `advance_learning_workflow` previews and confirms one explicit-episode learning action with metadata action/plan binding; no automatic chain or repair. See docs/api.md and SPEC052. Existing Tools1-31 retain their contracts.
+
+Tool35 `query_source_content` reads one prepared RSS/YouTube/X transcript without SQLite. Pair with [source-content-qa Skill](.agents/skills/source-content-qa/SKILL.md) for timed evidence answers and complete/partial notes; host AI privacy/billing applies. [Quickstart](specs/056-source-content-query/quickstart.md).

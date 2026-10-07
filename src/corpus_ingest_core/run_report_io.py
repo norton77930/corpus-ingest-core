@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 from pathlib import Path
+from .artifact_preservation import preserve_partial_artifacts
 
 
 def write_part_staged_report_pair(
@@ -40,6 +41,8 @@ def write_part_staged_report_pair(
         json_part_path.replace(json_path)
         markdown_part_path.replace(markdown_path)
     except OSError:
+        if preserve_partial_artifacts():
+            raise
         for part_path in (json_part_path, markdown_part_path):
             try:
                 part_path.unlink(missing_ok=True)

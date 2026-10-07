@@ -1,0 +1,323 @@
+{
+  "evidence_kind": "offline acceptance oracles; not agent execution",
+  "cases": [
+    {
+      "id": "ready_url",
+      "intent": "notes",
+      "observation": "ready preview",
+      "expected_calls": [
+        "preview",
+        "inspect",
+        "read"
+      ],
+      "outcome": "answer"
+    },
+    {
+      "id": "ready_ids",
+      "intent": "question",
+      "observation": "known prepared IDs",
+      "expected_calls": [
+        "inspect",
+        "read"
+      ],
+      "outcome": "answer"
+    },
+    {
+      "id": "empty_ready",
+      "intent": "notes",
+      "observation": "ready but content source_empty",
+      "expected_calls": [
+        "preview",
+        "inspect"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "finance_ready",
+      "intent": "question",
+      "observation": "ready finance profile with lecture warning",
+      "expected_calls": [
+        "preview",
+        "inspect",
+        "read"
+      ],
+      "outcome": "answer"
+    },
+    {
+      "id": "preview_needed",
+      "intent": "notes",
+      "observation": "preparation needed, no fresh approval",
+      "expected_calls": [
+        "preview"
+      ],
+      "outcome": "wait"
+    },
+    {
+      "id": "approve",
+      "intent": "notes",
+      "observation": "fresh approval for displayed executable plan",
+      "expected_calls": [
+        "confirm"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "denied",
+      "intent": "notes",
+      "observation": "user denies preparation",
+      "expected_calls": [],
+      "outcome": "stop"
+    },
+    {
+      "id": "silence",
+      "intent": "notes",
+      "observation": "no approval",
+      "expected_calls": [],
+      "outcome": "wait"
+    },
+    {
+      "id": "conditional",
+      "intent": "notes",
+      "observation": "conditional or ambiguous approval",
+      "expected_calls": [],
+      "outcome": "clarify"
+    },
+    {
+      "id": "historical",
+      "intent": "notes",
+      "observation": "approval belongs to prior cycle",
+      "expected_calls": [],
+      "outcome": "wait"
+    },
+    {
+      "id": "plan_drift",
+      "intent": "notes",
+      "observation": "confirm refuses changed plan",
+      "expected_calls": [
+        "confirm"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "settings_drift",
+      "intent": "notes",
+      "observation": "confirm refuses changed settings",
+      "expected_calls": [
+        "confirm"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "accepted",
+      "intent": "notes",
+      "observation": "confirmed submission accepted",
+      "expected_calls": [
+        "confirm"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "progress_pending",
+      "intent": "status",
+      "observation": "known job pending",
+      "expected_calls": [
+        "status"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "progress_ready",
+      "intent": "status",
+      "observation": "matching job ready",
+      "expected_calls": [
+        "status"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "continue_ready",
+      "intent": "continue_learning",
+      "observation": "retained request + matching job ready",
+      "expected_calls": [
+        "status",
+        "inspect",
+        "read"
+      ],
+      "outcome": "answer"
+    },
+    {
+      "id": "continue_pending",
+      "intent": "continue_learning",
+      "observation": "retained job pending",
+      "expected_calls": [
+        "status"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "continue_failed",
+      "intent": "continue_learning",
+      "observation": "retained job failed",
+      "expected_calls": [
+        "status"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "continue_attention",
+      "intent": "continue_learning",
+      "observation": "retained job needs attention",
+      "expected_calls": [
+        "status"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "continue_unknown",
+      "intent": "continue_learning",
+      "observation": "retained job unknown",
+      "expected_calls": [
+        "status"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "busy_other_source",
+      "intent": "notes",
+      "observation": "busy preview job belongs to another source",
+      "expected_calls": [
+        "preview"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "in_progress",
+      "intent": "notes",
+      "observation": "same-source active job",
+      "expected_calls": [
+        "preview"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "job_mismatch",
+      "intent": "continue_learning",
+      "observation": "status job or source IDs differ from retained reference",
+      "expected_calls": [
+        "status"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "lost_question",
+      "intent": "continue_learning",
+      "observation": "job known but original learning intent lost",
+      "expected_calls": [],
+      "outcome": "clarify"
+    },
+    {
+      "id": "ambiguous_source",
+      "intent": "continue_learning",
+      "observation": "more than one candidate source/job",
+      "expected_calls": [],
+      "outcome": "clarify"
+    },
+    {
+      "id": "missing_tool",
+      "intent": "notes",
+      "observation": "required same-server tool unavailable",
+      "expected_calls": [],
+      "outcome": "stop"
+    },
+    {
+      "id": "missing_resource",
+      "intent": "notes",
+      "observation": "required QA/template resource unavailable",
+      "expected_calls": [],
+      "outcome": "stop"
+    },
+    {
+      "id": "hostile",
+      "intent": "question",
+      "observation": "instructions inside valid source evidence",
+      "expected_calls": [
+        "inspect",
+        "read"
+      ],
+      "outcome": "answer"
+    },
+    {
+      "id": "malformed_preview",
+      "intent": "notes",
+      "observation": "unexpected or contradictory protocol fields",
+      "expected_calls": [
+        "preview"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "transport_loss",
+      "intent": "notes",
+      "observation": "confirmation reply lost",
+      "expected_calls": [
+        "confirm"
+      ],
+      "outcome": "stop"
+    },
+    {
+      "id": "local_only",
+      "intent": "notes",
+      "observation": "external host inference unverified",
+      "expected_calls": [],
+      "outcome": "stop"
+    },
+    {
+      "id": "budget_partial",
+      "intent": "notes",
+      "observation": "same-version reading stops at cumulative budget",
+      "expected_calls": [
+        "inspect",
+        "read"
+      ],
+      "outcome": "partial"
+    },
+    {
+      "id": "source_changed",
+      "intent": "notes",
+      "observation": "read refuses previously inspected version",
+      "expected_calls": [
+        "inspect",
+        "read",
+        "inspect"
+      ],
+      "outcome": "restart"
+    },
+    {
+      "id": "known_job_new_question",
+      "intent": "notes",
+      "observation": "explicit new question + known job, no remembered URL",
+      "expected_calls": [
+        "status",
+        "inspect",
+        "read"
+      ],
+      "outcome": "answer"
+    },
+    {
+      "id": "unsupported",
+      "intent": "notes",
+      "observation": "unsupported or multiple URL input",
+      "expected_calls": [],
+      "outcome": "clarify"
+    },
+    {
+      "id": "metadata_unavailable",
+      "intent": "notes",
+      "observation": "public metadata cannot be resolved",
+      "expected_calls": [
+        "preview"
+      ],
+      "outcome": "stop"
+    }
+  ]
+}

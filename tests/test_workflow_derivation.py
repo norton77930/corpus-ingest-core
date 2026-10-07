@@ -3,13 +3,12 @@
 from __future__ import annotations
 
 import json
-import shutil
 from pathlib import Path
 
 import pytest
 import yaml
 
-from corpus_ingest_core.errors import LLMProviderConfigError, WorkflowDerivationError
+from corpus_ingest_core.errors import LLMProviderConfigError, WorkflowDerivationError, WorkflowDerivationStateError
 from corpus_ingest_core.llm_provider import SEMANTIC_API_COST_ACK
 from corpus_ingest_core.workflow_derivation import (
     result_to_dict,
@@ -291,14 +290,6 @@ def test_failed_publish_leaves_neither_derivation_file(tmp_data_dirs, monkeypatc
     before = _tree(tmp_data_dirs)
     live_06 = bundle / "06_apply_to_my_workflow.md"
 
-    real_copy2 = shutil.copy2
-
-    def copy2(src, dst, *args, **kwargs):
-        if Path(dst).resolve() == live_06.resolve():
-            raise OSError("boom")
-        return real_copy2(src, dst, *args, **kwargs)
-
-    monkeypatch.setattr(shutil, "copy2", copy2)
     publishes = {"count": 0}
     real_rename = Path.rename
 
@@ -321,7 +312,7 @@ def test_failed_publish_leaves_neither_derivation_file(tmp_data_dirs, monkeypatc
         lambda *_args, **_kwargs: _FakeProvider(_valid_payload(), []),
     )
 
-    with pytest.raises(WorkflowDerivationError, match="failed to write derivation pair"):
+    with pytest.raises(WorkflowDerivationStateError) as caught:
         run_workflow_derivation(
             PODCAST,
             EPISODE,
@@ -330,6 +321,7 @@ def test_failed_publish_leaves_neither_derivation_file(tmp_data_dirs, monkeypatc
             workflow_context=context,
         )
 
+    assert caught.value.reason_code == "publish_failed"
     assert _tree(tmp_data_dirs) == before
     for name, body in lecture_before.items():
         assert (bundle / name).read_bytes() == body

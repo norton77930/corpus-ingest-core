@@ -22,16 +22,19 @@ constitution -> specify -> clarify -> plan -> checklist -> tasks -> analyze -> i
 
 <!-- SPECKIT START -->
 This repository contains multiple as-built Spec Kit packages and does not pin
-a single active feature. Before running official Spec Kit scripts or skills,
-set `SPECIFY_FEATURE_DIRECTORY` to the selected package and follow the
-selection guidance in [`specs/README.md`](specs/README.md). A historical
-reference such as
+one active feature. Before running official scripts or skills, set
+`SPECIFY_FEATURE_DIRECTORY` explicitly following [specs/README.md](specs/README.md).
+A historical reference such as
 [`specs/019-episode-verified-research-report-workflow/plan.md`](specs/019-episode-verified-research-report-workflow/plan.md)
 describes completed work only; it is not an active-feature selector.
-The current in-progress package plan is
-[`specs/042-workflow-derivation-bundle/plan.md`](specs/042-workflow-derivation-bundle/plan.md);
-select it explicitly with `SPECIFY_FEATURE_DIRECTORY` — do not treat that
-path as a repository-wide active-feature pin.
+Current user-authorized work is [SPEC058](specs/058-learning-mcp-acceptance/plan.md):
+local learning MCP acceptance and complete Hermes handoff; live host gates remain separate.
+Select this package explicitly; SPEC057 implementation and earlier packages describe historical work.
+Historical source learning entry: [SPEC057 plan](specs/057-source-learning-entry-skill/plan.md).
+Historical prepared-source QA: [SPEC056 plan](specs/056-source-content-query/plan.md).
+Historical source preparation: [SPEC054 plan](specs/054-source-preparation-jobs/plan.md);
+source settings: [SPEC055 plan](specs/055-source-preparation-transcription-settings/plan.md).
+These historical references do not select an active feature.
 <!-- SPECKIT END -->
 
 ## Engineering Rules

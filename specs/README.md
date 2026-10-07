@@ -63,6 +63,16 @@ commit a fixed selector that makes one package appear uniquely active.
 
 ## Capability Packages
 
+- `048-workflow-derivation-lineage`: **Implemented; offline-verified.** Tool28 inspects derivation input/output lineage, with additive Tool25 metadata disclosure and unchanged Tools1-27 signatures/slots. No automatic backfill. See [spec](048-workflow-derivation-lineage/spec.md), [plan](048-workflow-derivation-lineage/plan.md), [tasks](048-workflow-derivation-lineage/tasks.md), [capability map](048-workflow-derivation-lineage/capability-map.md) and [handoff](048-workflow-derivation-lineage/handoff.md) and [implementation evidence](048-workflow-derivation-lineage/implementation-log.md).
+
+- `047-learning-workflow-next-step`: **Implemented; offline-verified.** Offline read-query Tool 27 `suggest_learning_workflow_next_step` composes lecture/derivation previews for one explicit episode; Tools 1-26 stay unchanged. See [capability map](047-learning-workflow-next-step/capability-map.md), [spec](047-learning-workflow-next-step/spec.md), [plan](047-learning-workflow-next-step/plan.md), [tasks](047-learning-workflow-next-step/tasks.md) and [implementation log](047-learning-workflow-next-step/implementation-log.md).
+
+- `046-workflow-derivation-hardening`: **Implemented; offline-verified.** Harden existing Tool 25 recovery/path refusal, byte-preserving 05/06 publication and fixed public errors while retaining 26 tools and success contracts. See [spec](046-workflow-derivation-hardening/spec.md), [plan](046-workflow-derivation-hardening/plan.md), [tasks](046-workflow-derivation-hardening/tasks.md) and [handoff](046-workflow-derivation-hardening/handoff.md). See [implementation evidence](046-workflow-derivation-hardening/implementation-log.md). Tool-count statements in this entry describe its historical closeout.
+
+- `045-study-guide-workflow-skills`: **Implemented; offline-verified.** Two independent portable Skills for existing Tool 26 lecture generation/reuse and Tool 25 derivation generation/reuse. One preview, explicit approval, one confirm, then stop; conditional exact ack, no automatic chain or recovery. No runtime or registry change; live tools remain 26. See [spec](045-study-guide-workflow-skills/spec.md), [plan](045-study-guide-workflow-skills/plan.md), [tasks](045-study-guide-workflow-skills/tasks.md), and [implementation evidence](045-study-guide-workflow-skills/implementation-log.md). Select this package explicitly; no global active-feature pin. Tool-count statements in this entry describe its historical closeout.
+
+- `044-study-guide-mcp`: **Implemented.** See [specification](044-study-guide-mcp/spec.md), [plan](044-study-guide-mcp/plan.md), [tasks](044-study-guide-mcp/tasks.md), and [handoff](044-study-guide-mcp/handoff.md). Append-only Tool 26 `generate_study_guide_bundle` previews and confirms one existing learning-notes lecture. Preview is zero-write and zero-network. Confirm delegates once; generation needs the exact `api_cost_ack`, while reuse and cover-only do not. Existing `05`/`06` block regeneration, and non-lecture bytes stay. Derivation remains a separate request. The live registry has exactly 26 tools. Select this package explicitly with `SPECIFY_FEATURE_DIRECTORY`; it is not a global active-feature pin. Tool-count statements in this entry describe its historical closeout.
+
 - `001-gooaye-research-system`: umbrella product spec.
 - `002-ingestion-transcript-core`: deterministic local ingestion and transcript artifacts.
 - `003-metadata-search-mcp-core`: deterministic metadata, search, MCP exposed tools, and eval/review only docs.
@@ -259,3 +269,28 @@ commit a fixed selector that makes one package appear uniquely active.
 - `001-gooaye-research-system` 是 umbrella product spec；`002`–`007` 是 backfilled as-built capability packages，記錄既有能力，不驅動新開發。
 - 小型 docs / spec / governance / test 修正若由 user 提供 concrete plan，可直接處理而不開新 package，但必須遵守 constitution，且 docs-only phase 必須有 docs tests 鎖定指引（constitution 原則 IX）。決策細節見 `docs/architecture-decision-records/ADR-0006-spec-kit-governance.md`。
 - 對某個 package 執行 official scripts / skills 前，先依上方「Official Spec Kit Layout and Active Feature Selection」設定 `SPECIFY_FEATURE_DIRECTORY`。
+
+- `049-study-guide-lineage` ? Implemented: authorized lecture-to-semantic-summary provenance and append-only Tool29 after unchanged28; no migration or automatic freshness enforcement.
+
+- `050-learning-bundle-recovery` - Implemented: authorized read-only recovery diagnosis, appended Tool30 after unchanged29; no repair or cleanup commands.
+
+- `051-learning-workflow-status` - Implemented: read-only overview of Tools27-30, append-only Tool31 after unchanged30; no execution or repair.
+
+- `052-learning-workflow-advance`: **Implemented.** One explicit-episode preview/confirm entry, appended Tool32 after unchanged31; single action, metadata binding, no automatic repair.
+
+- `053-learning-workflow-advance-skill`: **Implemented.** Portable single-step Skill for existing Tool32; fresh consent, fixed safe outcomes and offline dialogue/Core checks. Registry remains32.
+
+- 054-source-preparation-jobs: **Implemented; offline-verified.** Single-source YouTube/X preparation, setup diagnosis, one background worker and read-only progress. Tool33 prepare_learning_source and Tool34 inspect_source_preparation_job are appended; at SPEC054 closeout the registry had34 tools. Windows stdio new submissions block; already independent loopback HTTP supports background processing. LLM/Q&A/learning generation stays outside054. See implementation-log.md; actual Hermes-host acceptance is separate.
+
+- `055-source-preparation-transcription-settings`: **Implemented; offline/owned SDK verified.** Source-owned model/device/precision, explicit preview/persisted settings, truthful recorded metadata and historical job compatibility. At SPEC055 closeout the registry had34; no automatic fallback/regeneration or downstream generation. See [spec](055-source-preparation-transcription-settings/spec.md) and [plan](055-source-preparation-transcription-settings/plan.md).
+
+- `056-source-content-query`: **Implemented; offline/full-suite and owned SDK verified.** Offline prepared RSS/YouTube/X single-source inspect/read/literal search, pinned paging and timed QA Skill; appended Tool35; current live registry35. See [spec](056-source-content-query/spec.md) and [plan](056-source-content-query/plan.md). Real Hermes acceptance remains separate.
+
+
+## SPEC058 learning MCP acceptance and Hermes handoff
+
+[058-learning-mcp-acceptance](058-learning-mcp-acceptance/spec.md) adds a metadata-only operator verifier and complete learning Skill resource inventory. See [quickstart](058-learning-mcp-acceptance/quickstart.md), [human content checks](058-learning-mcp-acceptance/content-acceptance.md) and [tasks](058-learning-mcp-acceptance/tasks.md). Developer implementation and local verification are complete; human replay, live preparation and real Hermes acceptance remain pending. Existing registry remains 35 tools. SPEC057 T017/T018 stay pending until actual host evidence.
+
+## SPEC057 source learning entry
+
+[057-source-learning-entry-skill](057-source-learning-entry-skill/spec.md): user-authorized implementation present; developer verification passed. Independent source-learning-entry Skill coordinates existing Tools33/34/35; URL ready -> QA, fresh preparation approval -> one submission and stop, later status-only stops or explicit learning continuation validates retained source/job. Current registry remains 35 tools. Actual Hermes acceptance remains pending separately. See [plan](057-source-learning-entry-skill/plan.md), [tasks](057-source-learning-entry-skill/tasks.md) and [evidence](057-source-learning-entry-skill/implementation-log.md).
