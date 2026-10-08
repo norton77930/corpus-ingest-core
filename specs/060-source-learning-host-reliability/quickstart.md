@@ -57,4 +57,6 @@ verify_learning_mcp inventory returned ok=true with all seven learning resources
 
 The generic skill-creator quick validator accepts13 portable Skills. It rejects the10 Spec Kit Skills' existing compatibility metadata key; that key and every other non-description metadata value are preserved. All23 Skills independently pass the parsed YAML/60-character/purpose guards. No source data, settings or session/operation traces are added.
 
-Convergence found no additional unbuilt code/Skill work against the20 requirements and four stories. Existing T026/T027 remain pending; no duplicate convergence tasks were appended. No branch, commit/push, installation or deployment was performed.
+Convergence found no additional unbuilt code/Skill work against the20 requirements and four stories. Existing T026/T027 remain pending; no duplicate convergence tasks were appended. Implementation verification preceded Git publication; commit/push requires separate explicit user authorization. No feature branch, host installation or deployment was performed.
+
+Publication checks: the two new SPEC060 test files pass Ruff lint/format checks and focused pytest after preserving the imported fixture explicitly and binding the mutation callback value. Repository-wide lint retains the782 pre-existing diagnostics observed on SPEC059; GitHub CI stops at Lint before pytest. Local test results and actual Hermes acceptance remain separate from this CI baseline.
