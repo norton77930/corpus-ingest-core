@@ -27,9 +27,10 @@ one active feature. Before running official scripts or skills, set
 A historical reference such as
 [`specs/019-episode-verified-research-report-workflow/plan.md`](specs/019-episode-verified-research-report-workflow/plan.md)
 describes completed work only; it is not an active-feature selector.
-Current user-authorized work is [SPEC058](specs/058-learning-mcp-acceptance/plan.md):
-local learning MCP acceptance and complete Hermes handoff; live host gates remain separate.
-Select this package explicitly; SPEC057 implementation and earlier packages describe historical work.
+Current user-authorized work is [SPEC059](specs/059-source-learning-reliability/plan.md):
+source learning reliability and note quality; real-host acceptance remains separate.
+Select this package explicitly; [SPEC058](specs/058-learning-mcp-acceptance/plan.md)
+and earlier packages describe historical work.
 Historical source learning entry: [SPEC057 plan](specs/057-source-learning-entry-skill/plan.md).
 Historical prepared-source QA: [SPEC056 plan](specs/056-source-content-query/plan.md).
 Historical source preparation: [SPEC054 plan](specs/054-source-preparation-jobs/plan.md);

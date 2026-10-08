@@ -15,3 +15,7 @@ Known Tool35 reasons are finite; malformed values become protocol_error. No titl
 Owned stdio: existing runner/safe explicit directory/child-only override. Both adapters suppress raw SDK diagnostics using temporary owned filters restored afterward. Existing HTTP: numeric loopback only, no credentials/query/fragment/redirect/proxy. Request hooks block SDK reconnection GET and RPC replay before repeat network dispatch; bounded teardown may terminate the test MCP session. No service/mount changes.
 
 Inventory accepts bounded inline and reference-definition Markdown links to .md files within each Skill. Non-Markdown/hidden/unsafe resources fail before reading, including .env. Resource readiness also checks installed-name frontmatter; host loading remains not evaluated.
+
+## Current default after SPEC059
+
+The60000 default above is historical SPEC058 behavior. [SPEC059](../../059-source-learning-reliability/quickstart.md) raises --max-total-chars to120000 in Core and CLI. --max-calls20, --timeout60 and per-page bounds remain unchanged. Long sources may require explicit bounded options or selected ranges. Verifier no-retry/fallback remains unchanged; Skill parameter recovery is separate.

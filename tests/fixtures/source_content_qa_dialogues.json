@@ -69,9 +69,9 @@
     },
     {
       "id": "changed_version",
-      "expected_action": "restart pinned retrieval",
-      "coverage_claim": "partial until restarted",
-      "report_rule": "discard mixed-version synthesis",
+      "expected_action": "stop without automatic restart",
+      "coverage_claim": "partial",
+      "report_rule": "do not synthesize mixed-version evidence",
       "forbidden_calls": [
         "prepare_learning_source",
         "rebuild_cache",

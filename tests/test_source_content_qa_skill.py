@@ -45,7 +45,7 @@ def test_offline_dialogue_oracles_are_labelled_and_bounded():
     assert cases['partial_notes']['coverage_claim']=='partial'
     assert cases['language_mismatch']['coverage_claim']=='literal search only'
     assert cases['url_only']['expected_action']=='clarify known identity'
-    assert cases['changed_version']['expected_action']=='restart pinned retrieval'
+    assert cases['changed_version']['expected_action']=='stop without automatic restart'
 
 
 def test_oracles_match_real_search_and_last_page_coverage(prepared):

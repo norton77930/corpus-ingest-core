@@ -22,13 +22,14 @@ _MAX_SEGMENTS = 100_000
 class SourceContentError(ValueError):
     """Finite public diagnosis; never contains artifact bytes or paths."""
 
-    def __init__(self, reason: str):
+    def __init__(self, reason: str, diagnosis: str | None = None):
         self.reason = reason
+        self.diagnosis = diagnosis
         super().__init__(reason)
 
 
-def _fail(reason: str) -> None:
-    raise SourceContentError(reason)
+def _fail(reason: str, diagnosis: str | None = None) -> None:
+    raise SourceContentError(reason, diagnosis)
 
 
 def _number(value: Any) -> bool:
@@ -43,6 +44,9 @@ def _bounded_int(value: Any, maximum: int) -> bool:
 
 
 def _request(podcast_id, episode_ref, action, version, query, start, end, cursor, limit, max_chars):
+    if action == 'inspect' and (version or query or cursor or start is not None or end is not None
+                               or limit != 40 or max_chars != 8000):
+        _fail('invalid_request', 'inspect_arguments')
     if (type(podcast_id) is not str or not re.fullmatch(r'[a-z0-9][a-z0-9-]{0,127}', podcast_id)
         or type(episode_ref) is not str or not re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', episode_ref)
         or episode_ref.casefold() in {'latest', 'next', 'all', 'batch'}
@@ -53,11 +57,8 @@ def _request(podcast_id, episode_ref, action, version, query, start, end, cursor
         or (start is not None and not _number(start)) or (end is not None and not _number(end))
         or (end is not None and end <= (start or 0))):
         _fail('invalid_request')
-    if action == 'inspect':
-        if version or query or cursor or start is not None or end is not None or limit != 40 or max_chars != 8000:
-            _fail('invalid_request')
-    elif not re.fullmatch(r'[a-f0-9]{64}', version):
-        _fail('invalid_request')
+    if action != 'inspect' and not re.fullmatch(r'[a-f0-9]{64}', version):
+        _fail('invalid_request', 'version_format')
     if (action == 'search' and not query.strip()) or (action != 'search' and query):
         _fail('invalid_request')
 
@@ -182,15 +183,18 @@ def _decode(cursor, binding, selected):
         return 0, 0
     try:
         if not re.fullmatch(r'[A-Za-z0-9_-]+', cursor):
-            _fail('invalid_cursor')
+            _fail('invalid_cursor', 'cursor_format')
         values = json.loads(base64.b64decode(cursor + '=' * (-len(cursor) % 4), altchars=b'-_', validate=True))
-        if (not isinstance(values, list) or len(values) != 3 or values[0] != binding
-            or type(values[1]) is not int or type(values[2]) is not int
-            or not 0 <= values[1] < len(selected) or not 0 <= values[2] < len(selected[values[1]]['text'])):
-            _fail('invalid_cursor')
-        return values[1], values[2]
     except (ValueError, TypeError, UnicodeDecodeError, RecursionError):
-        _fail('invalid_cursor')
+        _fail('invalid_cursor', 'cursor_format')
+    if (not isinstance(values, list) or len(values) != 3
+        or type(values[0]) is not str or not re.fullmatch(r'[a-f0-9]{64}', values[0])
+        or type(values[1]) is not int or type(values[2]) is not int):
+        _fail('invalid_cursor', 'cursor_format')
+    if (values[0] != binding or not 0 <= values[1] < len(selected)
+        or not 0 <= values[2] < len(selected[values[1]]['text'])):
+        _fail('invalid_cursor', 'cursor_binding')
+    return values[1], values[2]
 
 
 def query_source_content(

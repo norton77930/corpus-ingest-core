@@ -9,6 +9,7 @@ import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'src'))
 
+from corpus_ingest_core import learning_mcp_acceptance
 from corpus_ingest_core.learning_mcp_acceptance import inventory_learning_skills, verify_learning_connection
 
 
@@ -25,7 +26,7 @@ def parse_args(argv=None):
     verify.add_argument('--start', type=float, required=True)
     verify.add_argument('--end', type=float, required=True)
     verify.add_argument('--max-calls', type=int, default=20)
-    verify.add_argument('--max-total-chars', type=int, default=60000)
+    verify.add_argument('--max-total-chars', type=int, default=learning_mcp_acceptance.DEFAULT_MAX_TOTAL_CHARS)
     verify.add_argument('--timeout', type=float, default=60)
     return parser.parse_args(argv)
 

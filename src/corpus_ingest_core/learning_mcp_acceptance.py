@@ -19,6 +19,7 @@ from .secure_local_snapshot import secure_read_bytes
 
 REQUIRED_TOOLS = ('prepare_learning_source', 'inspect_source_preparation_job', 'query_source_content')
 SKILLS = ('source-learning-entry', 'source-preparation', 'source-content-qa')
+DEFAULT_MAX_TOTAL_CHARS = 120000
 SOURCE_REASONS = frozenset({'invalid_request', 'source_missing', 'source_ambiguous', 'unsafe_source',
     'source_invalid', 'source_incomplete', 'source_empty', 'source_changed', 'invalid_cursor', 'internal_error'})
 META_KEYS = frozenset({'podcast_id', 'episode_ref', 'title', 'language', 'source_version', 'segment_count',
@@ -45,7 +46,7 @@ def _integer(value, lower, upper):
     return type(value) is int and lower <= value <= upper
 
 
-def _request(podcast_id, episode_ref, start_seconds, end_seconds, max_calls=20, max_total_chars=60000):
+def _request(podcast_id, episode_ref, start_seconds, end_seconds, max_calls=20, max_total_chars=DEFAULT_MAX_TOTAL_CHARS):
     _require(type(podcast_id) is str and re.fullmatch(r'[a-z0-9][a-z0-9-]{0,127}', podcast_id), 'invalid_request')
     _require(type(episode_ref) is str and re.fullmatch(r'[A-Za-z0-9][A-Za-z0-9_-]{0,127}', episode_ref)
         and episode_ref.casefold() not in {'latest', 'next', 'all', 'batch'}, 'invalid_request')
@@ -105,7 +106,7 @@ def _metadata(data, identity, *, page=False, pinned=None):
 
 
 async def verify_learning_session(session, *, podcast_id, episode_ref, start_seconds, end_seconds,
-                                  max_calls=20, max_total_chars=60000):
+                                  max_calls=20, max_total_chars=DEFAULT_MAX_TOTAL_CHARS):
     """Verify one initialized session, retaining counts only, never source text."""
     result = _report()
     try:

@@ -13,9 +13,16 @@ _MESSAGES = {
     'source_invalid': 'The transcript identity or content structure is invalid.',
     'source_incomplete': 'The transcript is incomplete or has recovery markers; no cleanup was performed.',
     'source_empty': 'The transcript contains no usable segments.',
-    'source_changed': 'The transcript changed; inspect again and restart retrieval against one version.',
+    'source_changed': 'The source changed during inspection or does not match the pinned version. Stop this request; do not mix versions or automatically restart.',
     'invalid_cursor': 'The continuation is invalid for this source version and query scope.',
     'internal_error': 'Source content inspection failed; no content was returned.',
+}
+
+_DIAGNOSES = {
+    ('invalid_request', 'inspect_arguments'): 'inspect 只接受 podcast_id、episode_ref；請省略其他查詢與分頁參數。',
+    ('invalid_request', 'version_format'): 'expected_source_version must be exactly 64 lowercase hexadecimal characters copied unchanged from inspection; this is a parameter format error.',
+    ('invalid_cursor', 'cursor_format'): 'Invalid cursor format; copy next_cursor unchanged from the last successful response, without constructing or editing it.',
+    ('invalid_cursor', 'cursor_binding'): 'The cursor does not match this source version, query scope or continuation position; keep the original identity, action, query and time window.',
 }
 
 
@@ -36,6 +43,8 @@ def query_source_content(
         reason = getattr(error, 'reason', None) if isinstance(error, source_content_query.SourceContentError) else None
         if type(reason) is not str or reason not in _MESSAGES:
             reason = 'internal_error'
-        result = tool_error(_MESSAGES[reason], 'SourceContentError' if isinstance(error, source_content_query.SourceContentError) else 'InternalError')
+        diagnosis = getattr(error, 'diagnosis', None) if isinstance(error, source_content_query.SourceContentError) else None
+        message = _DIAGNOSES.get((reason, diagnosis), _MESSAGES[reason]) if type(diagnosis) is str else _MESSAGES[reason]
+        result = tool_error(message, 'SourceContentError' if isinstance(error, source_content_query.SourceContentError) else 'InternalError')
         result['reason'] = reason
         return result

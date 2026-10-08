@@ -42,3 +42,7 @@ The inventory checks transitive Markdown references and rejects secret/non-Markd
 - Limited budget/source drift: partial/stop, never whole-source claim.
 
 No implicit consent from this spec to download/transcribe a new URL or invoke a host provider. Live preparation needs accessible compatible hosting and fresh displayed-plan approval. Actual Hermes needs its accessible already configured host. Keep SPEC057 T017/T018 pending until genuine traces are supplied. Use [content-acceptance.md](content-acceptance.md); repository developer logs store metadata only, not raw transcript/settings.
+
+## Current long-source budget (SPEC059)
+
+Default --max-total-chars is now120000 rather than the original60000. Call/timeout bounds still apply; choose explicit bounded budgets/ranges for longer sources and retain partial reporting when exhausted. The verifier does not retry. See [SPEC059](../059-source-learning-reliability/quickstart.md) for Skill recovery/discovery/note-quality validation.

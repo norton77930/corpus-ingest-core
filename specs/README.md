@@ -294,3 +294,7 @@ commit a fixed selector that makes one package appear uniquely active.
 ## SPEC057 source learning entry
 
 [057-source-learning-entry-skill](057-source-learning-entry-skill/spec.md): user-authorized implementation present; developer verification passed. Independent source-learning-entry Skill coordinates existing Tools33/34/35; URL ready -> QA, fresh preparation approval -> one submission and stop, later status-only stops or explicit learning continuation validates retained source/job. Current registry remains 35 tools. Actual Hermes acceptance remains pending separately. See [plan](057-source-learning-entry-skill/plan.md), [tasks](057-source-learning-entry-skill/tasks.md) and [evidence](057-source-learning-entry-skill/implementation-log.md).
+
+## SPEC059 source learning reliability and note quality
+
+[059-source-learning-reliability](059-source-learning-reliability/spec.md) strengthens existing source-learning-entry/source-content-qa with one narrowly bounded, same-version parameter recovery; safe Tool35 diagnoses; local-first discovery and concrete, neutral, requested-scope notes. Verifier default120000 and portable lecture fixture; existing registry remains 35 tools. See [plan](059-source-learning-reliability/plan.md), [tasks](059-source-learning-reliability/tasks.md), and [validation](059-source-learning-reliability/quickstart.md). Actual Hermes discovery/compliance remains separate. Select SPECIFY_FEATURE_DIRECTORY explicitly; no durable sessions, source artifacts or host configuration added.

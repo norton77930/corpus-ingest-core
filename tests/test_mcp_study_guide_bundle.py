@@ -75,14 +75,15 @@ def test_tool_exposes_only_the_five_contract_parameters():
     ]
 
 
-def test_preview_delegates_once_and_hides_ack(monkeypatch):
+def test_preview_delegates_once_and_hides_ack(monkeypatch, tmp_path):
     from corpus_ingest_core import mcp_server
 
     calls = []
+    bundle_dir = tmp_path / 'lectures' / 'stem'
 
     def run(*args, **kwargs):
         calls.append((args, kwargs))
-        return _result(bundle_dir=r"D:\lectures\stem", planned_writes=[r"D:\lectures\stem\03_full_summary.md"])
+        return _result(bundle_dir=str(bundle_dir), planned_writes=[str(bundle_dir / '03_full_summary.md')])
 
     monkeypatch.setattr(mcp_server.study_guide_bundle, "run_study_guide_bundle", run)
     response = mcp_server.generate_study_guide_bundle(
