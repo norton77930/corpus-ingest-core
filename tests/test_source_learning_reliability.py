@@ -124,6 +124,7 @@ def scripted_host(faults, *, max_calls=30, before_reinspect=None):
     pinned = baseline['source_version']
     request = dict(**ids, action='read', expected_source_version=pinned, limit=1, max_chars=10)
     used = False
+    last_successful_response = None
     attempt = 0
     while len(calls) < max_calls:
         sent = deepcopy(request)
@@ -149,9 +150,14 @@ def scripted_host(faults, *, max_calls=30, before_reinspect=None):
                 _metadata(fresh['data'], ids, pinned=baseline)
             except (ValueError, KeyError, TypeError):
                 break
-            # The next iteration resends the saved validated request, not the corrupt one.
+            # Freshly copy from the successful reply, never from the failed outgoing arguments.
+            request['cursor'] = last_successful_response['next_cursor'] if last_successful_response else ''
+            request['expected_source_version'] = (last_successful_response['source_version']
+                                                  if last_successful_response else pinned)
             continue
         page = reply['data']
+        _metadata(page, ids, page=True, pinned=baseline)
+        last_successful_response = deepcopy(page)
         evidence.extend(page['segments'])
         if page['next_cursor'] is None:
             return dict(status='complete', calls=calls, evidence=evidence, recoveries=int(used))
@@ -244,9 +250,13 @@ def test_preparation_no_retry_written_contract_remains(prepared):
 
 def test_entry_discovery_covers_learning_intents_and_local_first_choice():
     skill = (ENTRY / 'SKILL.md').read_text(encoding='utf-8')
-    description = skill.split('description:', 1)[1].split('\n---', 1)[0].lower()
-    for intent in ('understanding', 'summary', 'questions', 'learning notes', 'youtube', 'x'):
+    import yaml
+    description = yaml.safe_load(skill.split('---', 2)[1])['description']
+    assert len(description) <= 60
+    for intent in ('YouTube', 'X', '學習', '本機', 'MCP'):
         assert intent in description, intent
+    for intent in ('understanding', 'summary', 'questions', 'learning notes'):
+        assert intent in skill, intent
     assert 'local MCP before' in skill and 'third-party transcripts' in skill
     assert 'ask the user to decide' in skill
 

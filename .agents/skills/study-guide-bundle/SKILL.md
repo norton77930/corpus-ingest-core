@@ -1,6 +1,6 @@
 ---
 name: study-guide-bundle
-description: Preview and, after explicit approval, generate or reuse one episode study guide through its MCP tool.
+description: "Use to preview/generate/reuse one episode study guide."
 ---
 
 # Study Guide Bundle

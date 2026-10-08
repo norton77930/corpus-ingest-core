@@ -41,7 +41,8 @@ def rule_sections(text: str) -> dict[str, str]:
 
 def assert_portable(name: str, description: str) -> None:
     text = skill_text(name)
-    assert text.splitlines()[:4] == ["---", f"name: {name}", f"description: {description}", "---"]
+    assert len(description) <= 60
+    assert text.splitlines()[:4] == ["---", f"name: {name}", f'description: "{description}"', "---"]
     assert list(rule_sections(text)) == [f"P{i:02d}" for i in range(1, 11)]
     assert SKILLS[name] in text
     assert all(tool not in text for skill, tool in SKILLS.items() if skill != name)

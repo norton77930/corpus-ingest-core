@@ -1,6 +1,6 @@
 ---
 name: x-video-ingest
-description: Safely preview and ingest one X post video into the corpus with one explicit human approval.
+description: "Use to preview/ingest one X post video after approval."
 ---
 
 # X Video Ingest

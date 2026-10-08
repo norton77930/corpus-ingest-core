@@ -1,9 +1,11 @@
 ---
 name: source-preparation
-description: Preview and, after fresh approval, submit one configured YouTube or X video for background transcript preparation, or inspect one known preparation job.
+description: "YouTube/X 下載轉錄：先預覽，批准後提交；也可查進度。"
 ---
 
 # Source preparation
+
+Run preview/confirm/status calls directly in the main conversation, sequentially; do not delegate_task or use background AI for preparation decisions or source reading. Existing server-managed download/transcription jobs retain their approved asynchronous contract. Say「已提交」with the returned job/state; do not claim learning notes are「整理中／已在處理」when no reading tool is active. Accepted preparation is not completed notes, and does not start AI learning automatically.
 
 Use for one YouTube/X video needing download and local transcription before learning requests. Only routes: `prepare_learning_source` and `inspect_source_preparation_job` from the same mounted MCP server. A missing tool means setup trouble: stop; no shell/filesystem fallback, installation, profile editing or replacement server. Clarify multiple URLs, latest/RSS/batch requests or ambiguous references before calls.
 

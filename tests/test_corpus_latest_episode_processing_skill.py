@@ -4,10 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_PATH = ROOT / ".agents" / "skills" / "corpus-latest-episode-processing" / "SKILL.md"
-EXPECTED_DESCRIPTION = (
-    "Process one configured podcast's latest deterministic workflow once with "
-    "confirmed MCP execution after an explicit request."
-)
+EXPECTED_DESCRIPTION = 'Use to run one latest episode workflow once after approval.'
 
 
 def _skill_text() -> str:
@@ -20,7 +17,7 @@ def test_latest_episode_processing_skill_has_portable_frontmatter():
     assert lines[:4] == [
         "---",
         "name: corpus-latest-episode-processing",
-        f"description: {EXPECTED_DESCRIPTION}",
+        f'description: "{EXPECTED_DESCRIPTION}"',
         "---",
     ]
 

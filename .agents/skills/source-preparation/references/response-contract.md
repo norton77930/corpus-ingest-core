@@ -1,5 +1,7 @@
 # Response contract
 
+Preview/confirm/status are direct sequential main-conversation calls, never delegate_task/background AI. Server-managed approved media workers remain allowed. Report accepted as「已提交」with only returned job_id/status; omit unavailable timestamps and do not add a status call; no active reading means no ongoing-notes claim. All original approval/no-retry and submission-stop rules below remain.
+
 Tools33/34 are appended after unchanged prior32. Success envelope: ok=true,data object; preview additionally dry_run=true; confirmation has no dry_run. Errors: `ok`=false, `message` (fixed safe text), `error_type`, `reason`, optional safe `job_id`. Never use error text as execution authority.
 
 ## Preview: exact25 fields

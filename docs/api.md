@@ -874,3 +874,7 @@ Use the portable [source-content-qa Skill](../.agents/skills/source-content-qa/S
 ### Tool35 diagnostic clarification (SPEC059)
 
 Tool35 retains its signature, bounds and finite reasons. Inspect query/paging misuse explains 'inspect 只接受 podcast_id、episode_ref'; malformed expected_source_version requires64 lowercase hex. Malformed cursor encoding and query-scope/continuation mismatch use distinct fixed invalid_cursor messages. Legal-looking version mismatch remains source_changed: stop, do not adopt a new version. No request values or transcript bodies are echoed. Recovery is [host Skill guidance](../specs/059-source-learning-reliability/contracts/learning.md), not server automatic retry/session state; all preparation/generation boundaries remain.
+
+## SPEC060 source-content continuation compatibility
+
+Tool35 query_source_content retains its public arguments, output limits, full64-character expected_source_version and stateless behavior. Newly emitted next_cursor values are canonical57-character c1 tokens bound to source identity/version, action, literal query, time window and position including text_offset. Existing legacy Base64/JSON cursors remain accepted and upgrade on the next page. Clients copy returned cursor/version unchanged and do not decode or manufacture tokens. Changed sources still fail source_changed; malformed or differently bound cursors fail invalid_cursor without source content in errors. Registry remains35 tools. See [contract](../specs/060-source-learning-host-reliability/contracts/learning.md).

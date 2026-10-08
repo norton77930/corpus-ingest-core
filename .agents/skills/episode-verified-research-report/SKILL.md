@@ -1,6 +1,6 @@
 ---
 name: episode-verified-research-report
-description: Preview and, after explicit episode_ref approval, publish one verified research report for a named episode through one MCP call (assemble/publish only; no api_cost_ack).
+description: "Use to preview/publish a named episode's verified report."
 ---
 
 # Episode Verified Research Report

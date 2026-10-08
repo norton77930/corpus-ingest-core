@@ -1,6 +1,6 @@
 ---
 name: youtube-video-ingest
-description: Safely preview and ingest one YouTube video into the corpus with one explicit human approval.
+description: "Use to preview/ingest one YouTube video after approval."
 ---
 
 # YouTube Video Ingest

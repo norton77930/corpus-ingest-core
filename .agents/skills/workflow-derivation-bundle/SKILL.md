@@ -1,6 +1,6 @@
 ---
 name: workflow-derivation-bundle
-description: Preview and, after explicit approval, generate or reuse one episode workflow derivation through its MCP tool.
+description: "Use to preview/generate/reuse one workflow derivation."
 ---
 
 # Workflow Derivation Bundle

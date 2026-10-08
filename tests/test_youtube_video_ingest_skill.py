@@ -4,7 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_PATH = ROOT / ".agents" / "skills" / "youtube-video-ingest" / "SKILL.md"
-EXPECTED_DESCRIPTION = "Safely preview and ingest one YouTube video into the corpus with one explicit human approval."
+EXPECTED_DESCRIPTION = 'Use to preview/ingest one YouTube video after approval.'
 
 
 def _skill_text() -> str:
@@ -17,7 +17,7 @@ def test_youtube_video_skill_has_only_portable_required_frontmatter():
     assert lines[:4] == [
         "---",
         "name: youtube-video-ingest",
-        f"description: {EXPECTED_DESCRIPTION}",
+        f'description: "{EXPECTED_DESCRIPTION}"',
         "---",
     ]
 

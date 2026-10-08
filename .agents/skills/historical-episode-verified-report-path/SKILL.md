@@ -1,6 +1,6 @@
 ---
 name: historical-episode-verified-report-path
-description: Human-controlled path for one named historical episode toward a verified research report—suggest next step, preview, one approved MCP confirm, then stop.
+description: "Use to plan a historical episode's verified report."
 ---
 
 # Historical Episode Verified Report Path

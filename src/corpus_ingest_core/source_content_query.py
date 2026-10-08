@@ -9,6 +9,7 @@ import hashlib
 import json
 import math
 import re
+import struct
 from typing import Any
 
 from . import storage
@@ -173,14 +174,35 @@ def _binding(metadata, action, query, start, end):
     return hashlib.sha256(json.dumps(fields, ensure_ascii=False, separators=(',', ':')).encode()).hexdigest()
 
 
+def _cursor_digest(binding, positions):
+    return hashlib.sha256(b'source-content-cursor-c1\0' + bytes.fromhex(binding) + positions).digest()
+
+
 def _encode(binding, index, offset):
-    raw = json.dumps([binding, index, offset], separators=(',', ':')).encode()
-    return base64.urlsafe_b64encode(raw).decode().rstrip('=')
+    positions = struct.pack('>II', index, offset)
+    raw = _cursor_digest(binding, positions) + positions
+    return 'c1.' + base64.urlsafe_b64encode(raw).decode().rstrip('=')
 
 
 def _decode(cursor, binding, selected):
     if not cursor:
         return 0, 0
+    if cursor.startswith('c1.'):
+        try:
+            if len(cursor) != 57 or not re.fullmatch(r'[A-Za-z0-9_-]{54}', cursor[3:]):
+                _fail('invalid_cursor', 'cursor_format')
+            raw = base64.b64decode(cursor[3:] + '==', altchars=b'-_', validate=True)
+            if len(raw) != 40 or 'c1.' + base64.urlsafe_b64encode(raw).decode().rstrip('=') != cursor:
+                _fail('invalid_cursor', 'cursor_format')
+        except (ValueError, TypeError):
+            _fail('invalid_cursor', 'cursor_format')
+        if raw[:32] != _cursor_digest(binding, raw[32:]):
+            _fail('invalid_cursor', 'cursor_binding')
+        index, offset = struct.unpack('>II', raw[32:])
+        if not (0 <= index < len(selected) and 0 <= offset < len(selected[index]['text'])):
+            _fail('invalid_cursor', 'cursor_binding')
+        return index, offset
+    # Legacy Base64/JSON inputs retain their original checks; every new emission is c1.
     try:
         if not re.fullmatch(r'[A-Za-z0-9_-]+', cursor):
             _fail('invalid_cursor', 'cursor_format')

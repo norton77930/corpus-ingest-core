@@ -1,6 +1,6 @@
 ---
 name: "speckit-converge"
-description: "Assess the current codebase against the feature's spec, plan, and tasks, then append any remaining unbuilt work as new tasks to tasks.md so implement can complete it."
+description: "Use to find unbuilt work against Spec Kit artifacts."
 compatibility: "Requires spec-kit project structure with .specify/ directory"
 metadata:
   author: "github-spec-kit"

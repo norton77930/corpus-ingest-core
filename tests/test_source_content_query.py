@@ -260,9 +260,9 @@ def test_snapshot_parent_redirect_rejected_before_read(prepared,monkeypatch):
 @pytest.mark.parametrize('index,offset',[(True,0),(-1,0),(999,0),(0,True),(0,-1),(0,999)])
 def test_tampered_cursor_positions_refused(prepared,index,offset):
     import base64
-    prepared[1]();version=inspect()['source_version'];page=read(version,limit=1)
-    value=json.loads(base64.urlsafe_b64decode(page['next_cursor']+'='*(-len(page['next_cursor'])%4)))
-    value[1:]=[index,offset]
+    prepared[1]();metadata=inspect();version=metadata['source_version']
+    # Characterize legacy input independently of the current emitted format.
+    value=[core()._binding(metadata,'read','',None,None),index,offset]
     cursor=base64.urlsafe_b64encode(json.dumps(value).encode()).decode().rstrip('=')
     reason('invalid_cursor',lambda:read(version,cursor=cursor))
 

@@ -1,6 +1,6 @@
 ---
 name: learning-workflow-advance
-description: Preview and, after explicit approval, advance one named episode's learning workflow by one MCP-managed action.
+description: "Use to preview/advance one named episode's learning step."
 ---
 
 # Learning Workflow Advance

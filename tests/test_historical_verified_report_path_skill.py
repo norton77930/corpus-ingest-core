@@ -6,10 +6,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL = ROOT / ".agents" / "skills" / "historical-episode-verified-report-path" / "SKILL.md"
-EXPECTED_DESCRIPTION = (
-    "Human-controlled path for one named historical episode toward a verified "
-    "research report—suggest next step, preview, one approved MCP confirm, then stop."
-)
+EXPECTED_DESCRIPTION = "Use to plan a historical episode's verified report."
 
 
 def _text() -> str:
@@ -21,7 +18,7 @@ def test_skill_frontmatter_is_portable() -> None:
     assert lines[:4] == [
         "---",
         "name: historical-episode-verified-report-path",
-        f"description: {EXPECTED_DESCRIPTION}",
+        f'description: "{EXPECTED_DESCRIPTION}"',
         "---",
     ]
 

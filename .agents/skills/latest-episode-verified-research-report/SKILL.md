@@ -1,6 +1,6 @@
 ---
 name: latest-episode-verified-research-report
-description: Preview and, after explicit episode-scoped approval plus exact acknowledgement, complete one latest verified research report workflow through one MCP call.
+description: "Use to preview/complete the latest verified episode report."
 ---
 
 # Latest Episode Verified Research Report

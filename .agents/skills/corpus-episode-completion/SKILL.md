@@ -1,6 +1,6 @@
 ---
 name: corpus-episode-completion
-description: Safely preview and advance one podcast episode by one explicit MCP-managed action with human approval.
+description: "Use for one approved podcast episode completion step."
 ---
 
 # Corpus Episode Completion

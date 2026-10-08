@@ -4,9 +4,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILL_PATH = ROOT / ".agents" / "skills" / "corpus-episode-completion" / "SKILL.md"
-EXPECTED_DESCRIPTION = (
-    "Safely preview and advance one podcast episode by one explicit MCP-managed action with human approval."
-)
+EXPECTED_DESCRIPTION = 'Use for one approved podcast episode completion step.'
 
 
 def _skill_text() -> str:
@@ -19,7 +17,7 @@ def test_completion_skill_has_only_portable_required_frontmatter():
     assert lines[:4] == [
         "---",
         "name: corpus-episode-completion",
-        f"description: {EXPECTED_DESCRIPTION}",
+        f'description: "{EXPECTED_DESCRIPTION}"',
         "---",
     ]
 

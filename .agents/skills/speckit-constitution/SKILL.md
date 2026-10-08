@@ -1,6 +1,6 @@
 ---
 name: "speckit-constitution"
-description: "Create or update the project constitution from interactive or provided principle inputs, ensuring all dependent templates stay in sync."
+description: "Use to establish/update Spec Kit project principles."
 compatibility: "Requires spec-kit project structure with .specify/ directory"
 metadata:
   author: "github-spec-kit"

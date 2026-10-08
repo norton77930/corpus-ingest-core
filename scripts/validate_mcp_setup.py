@@ -392,8 +392,10 @@ def _has_completion_skill_metadata(skill_text: str) -> bool:
         len(lines) >= 4
         and lines[0] == "---"
         and lines[1] == "name: corpus-episode-completion"
-        and lines[2]
-        == "description: Safely preview and advance one podcast episode by one explicit MCP-managed action with human approval."
+        and lines[2] in {
+            "description: Safely preview and advance one podcast episode by one explicit MCP-managed action with human approval.",
+            'description: "Use for one approved podcast episode completion step."',
+        }
         and lines[3] == "---"
     )
 
@@ -404,8 +406,10 @@ def _has_latest_deterministic_skill_metadata(skill_text: str) -> bool:
         len(lines) >= 4
         and lines[0] == "---"
         and lines[1] == "name: corpus-latest-episode-processing"
-        and lines[2]
-        == "description: Process one configured podcast's latest deterministic workflow once with confirmed MCP execution after an explicit request."
+        and lines[2] in {
+            "description: Process one configured podcast's latest deterministic workflow once with confirmed MCP execution after an explicit request.",
+            'description: "Use to run one latest episode workflow once after approval."',
+        }
         and lines[3] == "---"
     )
 
@@ -416,8 +420,10 @@ def _has_verified_research_report_skill_metadata(skill_text: str) -> bool:
         len(lines) >= 4
         and lines[0] == "---"
         and lines[1] == "name: latest-episode-verified-research-report"
-        and lines[2]
-        == "description: Preview and, after explicit episode-scoped approval plus exact acknowledgement, complete one latest verified research report workflow through one MCP call."
+        and lines[2] in {
+            "description: Preview and, after explicit episode-scoped approval plus exact acknowledgement, complete one latest verified research report workflow through one MCP call.",
+            'description: "Use to preview/complete the latest verified episode report."',
+        }
         and lines[3] == "---"
     )
 
@@ -428,8 +434,10 @@ def _has_episode_verified_research_report_skill_metadata(skill_text: str) -> boo
         len(lines) >= 4
         and lines[0] == "---"
         and lines[1] == "name: episode-verified-research-report"
-        and lines[2]
-        == "description: Preview and, after explicit episode_ref approval, publish one verified research report for a named episode through one MCP call (assemble/publish only; no api_cost_ack)."
+        and lines[2] in {
+            "description: Preview and, after explicit episode_ref approval, publish one verified research report for a named episode through one MCP call (assemble/publish only; no api_cost_ack).",
+            'description: "Use to preview/publish a named episode\'s verified report."',
+        }
         and lines[3] == "---"
     )
 

@@ -5,7 +5,7 @@ NAME = "study-guide-bundle"
 
 
 def test_lecture_skill_is_portable_and_orders_all_ten_rules():
-    assert_portable(NAME, "Preview and, after explicit approval, generate or reuse one episode study guide through its MCP tool.")
+    assert_portable(NAME, "Use to preview/generate/reuse one episode study guide.")
 
 
 def test_lecture_preview_consent_and_role_contract():

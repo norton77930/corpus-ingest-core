@@ -5,7 +5,7 @@ NAME = "workflow-derivation-bundle"
 
 
 def test_derivation_skill_is_portable_and_orders_all_ten_rules():
-    assert_portable(NAME, "Preview and, after explicit approval, generate or reuse one episode workflow derivation through its MCP tool.")
+    assert_portable(NAME, "Use to preview/generate/reuse one workflow derivation.")
 
 
 def test_derivation_cost_context_and_consent_contract():

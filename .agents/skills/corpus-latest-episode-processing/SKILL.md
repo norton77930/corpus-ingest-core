@@ -1,6 +1,6 @@
 ---
 name: corpus-latest-episode-processing
-description: Process one configured podcast's latest deterministic workflow once with confirmed MCP execution after an explicit request.
+description: "Use to run one latest episode workflow once after approval."
 ---
 
 # Latest Episode Deterministic Processing
